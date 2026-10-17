@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Берёста для Java — Maven-проект обёртки над Си-интерфейсом через
+    Project Panama (Foreign Function & Memory API, Java 22+). JNI не нужен.
+
+    Нативная библиотека попадает в src/main/resources/natives/<os>-<arch>/
+    при сборке ядра с флагом Java:
+        make JAVA=1
+        или CMake с опцией -DBERESTA_BUILD_JAVA=ON (затем обычная сборка build)
+    После этого:  mvn -f bindings/java/pom.xml package
+    Чтобы получить один jar для всех платформ, соберите ядро на каждой ОС
+    (или в CI-матрице) — каждая сборка добавит свою папку natives/<os>-<arch>.
+
+    При запуске приложения разрешите нативный доступ ключом JVM
+    enable-native-access=ALL-UNNAMED (без него Java 22+ печатает
+    предупреждение; в README.md показана точная команда).
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.beresta</groupId>
+    <artifactId>beresta</artifactId>
+    <version>2.1.0</version>
+    <packaging>jar</packaging>
+
+    <name>Beresta</name>
+    <description>Берёста — DOM-библиотека XML на C++17: DOM, XPath 1.0, XML Schema, DTD (обёртка Project Panama)</description>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <properties>
+        <maven.compiler.release>22</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
+
+    <!-- Зависимостей нет: только JDK 22+ и собственная нативная библиотека -->
+
+    <build>
+        <!-- Ресурсы по умолчанию (natives/) и текст лицензии из корня
+             репозитория в META-INF/LICENSE: MIT требует, чтобы уведомление
+             распространялось вместе с копиями программы -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/../..</directory>
+                <includes>
+                    <include>LICENSE</include>
+                </includes>
+                <targetPath>META-INF</targetPath>
+            </resource>
+        </resources>
+        <plugins>
+            <!-- Двоичные файлы в ресурсах нельзя фильтровать как текст -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <configuration>
+                    <nonFilteredFileExtensions>
+                        <nonFilteredFileExtension>dll</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>so</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>dylib</nonFilteredFileExtension>
+                    </nonFilteredFileExtensions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+            </plugin>
+            <!-- Самопроверка — обычная программа (без JUnit), запускается
+                 через make java-test или ctest; surefire её не ищет -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.2</version>
+                <configuration>
+                    <skipTests>true</skipTests>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.2</version>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Automatic-Module-Name>org.beresta</Automatic-Module-Name>
+                            <Enable-Native-Access>ALL-UNNAMED</Enable-Native-Access>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

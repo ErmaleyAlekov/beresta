@@ -1,0 +1,26 @@
+# Пакет Python-обёртки «Берёсты».
+# Сборка колеса после копирования бинарника (make PYTHON=1 или
+# cmake -DBERESTA_BUILD_PYTHON=ON):   python -m pip wheel . -w dist
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "beresta"
+version = "2.1.0"
+description = "Берёста — DOM-библиотека XML на C++17: DOM, XPath 1.0, XML Schema, DTD (обёртка ctypes)"
+readme = "README.md"
+requires-python = ">=3.8"
+# SPDX-выражение лицензии; текст лицензии кладётся в колесо (dist-info/licenses).
+# LICENSE здесь — копия файла из корня репозитория: setuptools не берёт
+# файлы за пределами каталога пакета
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = []
+
+[tool.setuptools]
+packages = ["beresta"]
+
+# Нативные библиотеки всех собранных платформ входят в пакет
+[tool.setuptools.package-data]
+beresta = ["_native/*/*"]

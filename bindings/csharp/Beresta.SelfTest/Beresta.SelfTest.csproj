@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+      Самопроверка C#-обёртки — обычная консольная программа (без xUnit/NUnit).
+      Запуск: make CSHARP=1 csharp-test  или  ctest (BERESTA_BUILD_CSHARP=ON).
+      Код возврата 0 — все проверки прошли.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <!-- Самая новая среда, которую поддерживает установленный SDK (net9.0 для
+         SDK 9, net10.0 для SDK 10): её runtime всегда установлен вместе с SDK,
+         поэтому самопроверка запускается на любой машине без доустановки -->
+    <TargetFramework>net$(NETCoreAppMaximumVersion)</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Beresta\Beresta.csproj" />
+  </ItemGroup>
+
+</Project>

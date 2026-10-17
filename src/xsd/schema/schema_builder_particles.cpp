@@ -1,0 +1,103 @@
+#include "xsd/internal/schema_builder.hpp"
+#include "utils/xml_tokens.hpp"
+
+namespace beresta::xsd::detail
+{
+    /*
+    ** Частица модели: элемент, xs:any, ссылка на группу или вложенная
+    ** группа sequence / choice / all. Глубина вложенности ограничена.
+    */
+    content::Particle SchemaBuilder::buildParticle(const Element& definition, const SchemaSource& source,
+        ComplexType& owner, std::size_t depth)
+    {
+        std::string_view kind = definition.getLocalName();
+        content::Particle group;
+
+        if (depth > 64)
+            fail(definition, "слишком глубокая вложенность модели содержимого");
+        if (kind == "element")
+            return buildElementParticle(definition, source, owner);
+        if (kind == "any")
+            return buildWildcard(definition, source, owner);
+        if (kind == "group")
+            return buildGroupReference(definition, owner, depth);
+        if (kind != "sequence" && kind != "choice" && kind != "all")
+            fail(definition, "неожиданный xs:" + std::string(kind) + " в модели содержимого");
+        if (kind == "choice")
+            group.kind = content::ParticleKind::CHOICE;
+        if (kind == "all")
+            group.kind = content::ParticleKind::ALL;
+        for (const Element* child : schemaChildren(definition))
+            group.children.push_back(buildParticle(*child, source, owner, depth + 1));
+        readOccurs(definition, group);
+        return group;
+    }
+
+    // <xs:group ref="g"/>: модель именованной группы с повторениями из места ссылки
+    content::Particle SchemaBuilder::buildGroupReference(const Element& reference, ComplexType& owner,
+        std::size_t depth)
+    {
+        std::string name = attributeOr(reference, "ref", "");
+        const Definition* named = findDefinition("group", resolveQName(reference, name));
+        std::vector<const Element*> model;
+
+        if (named != nullptr)
+            model = schemaChildren(*named->element);
+        if (model.empty())
+            fail(reference, "группа \"" + name + "\" не найдена или пуста");
+        content::Particle group = buildParticle(*model.front(), *named->source, owner, depth + 1);
+        readOccurs(reference, group);
+        return group;
+    }
+
+    // Элемент модели: локальное объявление или ссылка ref на глобальное
+    content::Particle SchemaBuilder::buildElementParticle(const Element& definition,
+        const SchemaSource& source, ComplexType& owner)
+    {
+        const ElementDecl* declaration = nullptr;
+        std::optional<std::string> reference = definition.getAttribute("ref");
+        content::Particle particle;
+
+        if (reference.has_value())
+            declaration = globalElement(resolveQName(definition, reference.value()));
+        else
+            declaration = buildElement(definition, source, false);
+        particle.kind = content::ParticleKind::ELEMENT;
+        particle.name = declaration->name;
+        particle.namespaceUri = declaration->namespaceUri;
+        readOccurs(definition, particle);
+        owner.elements.push_back(declaration);
+        return particle;
+    }
+
+    /*
+    ** xs:any: ограничение пространств имён (##any, ##other, ##local,
+    ** ##targetNamespace или список URI) и режим processContents.
+    */
+    content::Particle SchemaBuilder::buildWildcard(const Element& definition, const SchemaSource& source,
+        ComplexType& owner)
+    {
+        content::Particle particle;
+        std::string namespaces = attributeOr(definition, "namespace", "##any");
+
+        particle.kind = content::ParticleKind::WILDCARD;
+        particle.namespaceUri = source.targetNamespace;
+        if (namespaces == "##other")
+            particle.wildcardMode = content::WildcardMode::OTHER_NAMESPACE;
+        else if (namespaces != "##any")
+            particle.wildcardMode = content::WildcardMode::NAMESPACE_LIST;
+        for (std::string_view token : utils::splitTokens(namespaces))
+        {
+            std::string uri(token);
+            if (token == "##targetNamespace")
+                uri = source.targetNamespace;
+            if (token == "##local")
+                uri.clear();
+            particle.wildcardNamespaces.push_back(uri);
+        }
+        owner.hasElementWildcard = true;
+        owner.elementWildcard = parseProcessContents(definition);
+        readOccurs(definition, particle);
+        return particle;
+    }
+}

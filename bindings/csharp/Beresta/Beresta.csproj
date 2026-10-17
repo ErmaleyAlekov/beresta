@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+      Берёста для .NET — обёртка над Си-интерфейсом через P/Invoke.
+
+      Нативная библиотека попадает в runtimes/<rid>/native/ при сборке ядра:
+          make CSHARP=1   или   cmake -DBERESTA_BUILD_CSHARP=ON
+      Это стандартная раскладка NuGet: в пакете (dotnet pack) .NET сам
+      выберет бинарник нужной платформы. При ссылке на проект файлы
+      копируются в выходной каталог, а NativeResolver находит их там.
+
+      netstandard2.1 — для любых сред (.NET Core 3+, Mono, Unity);
+      net9.0 — дополнительно собственный поиск бинарника (NativeLibrary).
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.1;net9.0</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Beresta</RootNamespace>
+    <!-- Не "Beresta": на Windows Beresta.dll и нативная beresta.dll — один и
+         тот же файл (регистр не различается), а при публикации приложения
+         .NET кладёт нативные библиотеки в тот же каталог, что и сборки -->
+    <AssemblyName>Beresta.NET</AssemblyName>
+    <Version>2.1.0</Version>
+    <PackageId>Beresta</PackageId>
+    <Description>Берёста — DOM-библиотека XML на C++17: DOM, XPath 1.0, XML Schema, DTD (обёртка P/Invoke)</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <!-- Нативные библиотеки всех собранных платформ: в пакет и в выходной каталог -->
+  <ItemGroup>
+    <None Include="runtimes\**\*" Pack="true" PackagePath="runtimes" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+    <!-- Текст лицензии из корня репозитория — в корень пакета -->
+    <None Include="..\..\..\LICENSE" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

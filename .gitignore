@@ -1,0 +1,89 @@
+# ============================================================================
+#  Берёста (beresta) — исключения для Git
+# ============================================================================
+
+# ---- Любые каталоги, имя которых начинается с точки (на любом уровне) -------
+# .vscode/, .idea/, .vs/, .cache/ и т.п. вместе со всем содержимым.
+# Сам файл .gitignore — это файл, а не каталог, поэтому под правило не попадает.
+.*/
+
+# ---- Результаты сборки Makefile ---------------------------------------------
+/obj/
+/dep/
+/bin/
+
+# ---- Результаты сборки CMake ------------------------------------------------
+/build/
+/build-*/
+/cmake-build-*/
+/out/
+CMakeCache.txt
+CMakeFiles/
+CMakeUserPresets.json
+cmake_install.cmake
+CTestTestfile.cmake
+Testing/
+install_manifest.txt
+compile_commands.json
+
+# ---- Копии нативной библиотеки в обёртках (кладёт сборка) -------------------
+/bindings/java/src/main/resources/natives/
+/bindings/csharp/Beresta/runtimes/
+/bindings/python/beresta/_native/
+
+# ---- Результаты сборки обёрток ----------------------------------------------
+# Java (Maven и самопроверка)
+/bindings/java/target/
+# .NET
+/bindings/csharp/**/bin/
+/bindings/csharp/**/obj/
+*.nupkg
+*.snupkg
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+/bindings/python/build/
+/bindings/python/dist/
+
+# ---- Объектные файлы, зависимости и бинарники (на случай сборки вне bin/) ---
+*.o
+*.obj
+*.d
+*.a
+*.lib
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+*.out
+*.app
+*.pdb
+*.ilk
+*.exp
+*.gch
+*.pch
+*.class
+*.jar
+
+# ---- Спецификации и рабочие документы ---------------------------------------
+dom_library_spec.txt
+new_spec.txt
+*_spec.txt
+*_spec.md
+
+# ---- Файлы IDE и редакторов -------------------------------------------------
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.suo
+*.user
+*.swp
+*~
+
+# ---- Системный мусор ОС -----------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini

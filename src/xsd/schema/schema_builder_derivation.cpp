@@ -1,0 +1,80 @@
+#include "xsd/internal/schema_builder.hpp"
+
+#include <utility>
+
+namespace beresta::xsd::detail
+{
+    /*
+    ** xs:simpleContent: текст простого типа + атрибуты. Расширение берёт
+    ** тип текста как есть; ограничение создаёт производный простой тип
+    ** с фасетами из xs:restriction. Атрибуты базового типа наследуются.
+    */
+    void SchemaBuilder::buildSimpleContent(ComplexType& type, const Element& simpleContent,
+        const SchemaSource& source)
+    {
+        bool extension = false;
+        const Element& derivation = derivationOf(simpleContent, extension);
+        TypeRef base;
+        const ComplexType* complexBase = completeBase(derivation, base);
+
+        type.content = ContentType::SIMPLE_CONTENT;
+        type.simpleContent = base.simple;
+        if (complexBase != nullptr)
+        {
+            type.simpleContent = complexBase->simpleContent;
+            type.attributes = complexBase->attributes;
+            type.anyAttribute = complexBase->anyAttribute;
+        }
+        if (type.simpleContent == nullptr)
+            type.simpleContent = builtinType("anySimpleType");
+        if (!extension)
+        {
+            _schema._simpleTypes.push_back(*type.simpleContent);
+            applyFacets(_schema._simpleTypes.back(), derivation);
+            type.simpleContent = &_schema._simpleTypes.back();
+        }
+        buildAttributes(derivation, source, type, 0);
+    }
+
+    /*
+    ** xs:complexContent: расширение дописывает собственную модель ПОСЛЕ
+    ** модели базового типа и добавляет атрибуты; ограничение задаёт
+    ** модель заново, сохраняя базовые атрибуты (если их не переопределили).
+    */
+    void SchemaBuilder::buildComplexContent(ComplexType& type, const Element& complexContent,
+        const SchemaSource& source, bool mixed)
+    {
+        bool extension = false;
+        const Element& derivation = derivationOf(complexContent, extension);
+        TypeRef base;
+        const ComplexType* complexBase = completeBase(derivation, base);
+        std::optional<std::string> ownMixed = complexContent.getAttribute("mixed");
+
+        if (ownMixed.has_value())
+            mixed = ownMixed.value() == "true";
+        if (complexBase != nullptr)
+        {
+            type.attributes = complexBase->attributes;
+            type.anyAttribute = complexBase->anyAttribute;
+            if (extension)
+                type.elements = complexBase->elements;
+        }
+        buildTypeBody(type, derivation, source, mixed);
+        if (extension && complexBase != nullptr && complexBase->hasParticle)
+            prependBaseParticle(type, *complexBase);
+    }
+
+    // Модель расширения = последовательность (модель базового типа, собственная модель)
+    void SchemaBuilder::prependBaseParticle(ComplexType& type, const ComplexType& base)
+    {
+        content::Particle combined;
+
+        combined.children.push_back(base.particle);
+        if (type.hasParticle)
+            combined.children.push_back(std::move(type.particle));
+        type.particle = std::move(combined);
+        type.hasParticle = true;
+        if (type.content == ContentType::EMPTY_CONTENT)
+            type.content = base.content;
+    }
+}
