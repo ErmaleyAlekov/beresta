@@ -3,8 +3,40 @@
 #include "exception/dom_exception.hpp"
 #include "utils/qualified_name.hpp"
 
+#include <unordered_map>
+#include <utility>
 namespace beresta::detail
 {
+    /*
+    ** Повтор расширенного имени (URI + локальное имя) у тега с множеством
+    ** атрибутов: хеш-таблица вместо перебора пар, чтобы не было O(n²).
+    ** Ключ — URI и имя через символ \0: в тексте XML его быть не может,
+    ** поэтому разные пары не склеятся в один ключ.
+    **
+    ** A repeated expanded name (URI + local name) in a tag with many
+    ** attributes: a hash table instead of trying pairs, so that there is no O(n²).
+    ** The key is the URI and the name joined by the \0 character: it cannot occur in XML text,
+    ** so different pairs do not merge into one key.
+    */
+    static void checkManyExpandedNames(const std::vector<SaxAttribute>& attributes)
+    {
+        std::unordered_map<std::string, std::size_t, utils::SeededHash> seen;
+
+        for (std::size_t index = 0; index < attributes.size(); ++index)
+        {
+            const SaxAttribute& attribute = attributes[index];
+            if (attribute.namespaceUri.empty())
+                continue;
+            std::string key(attribute.namespaceUri);
+            key += '\0';
+            key.append(attribute.localName);
+            auto inserted = seen.emplace(std::move(key), index);
+            if (!inserted.second)
+                throw DomException(DomErrorCode::NAMESPACE_ERROR, i18n::format(i18n::Message::ATTRIBUTES_SAME_NAME,
+                    {attributes[inserted.first->second].name, attribute.name}));
+        }
+    }
+
     /*
     ** Сначала все объявления xmlns этого тега (они действуют на сам тег
     ** и его атрибуты), затем — разрешение префикса элемента и атрибутов.
@@ -75,6 +107,11 @@ namespace beresta::detail
     // Two attributes with different prefixes but the same URI and local name are an error
     void ParseSession::checkExpandedNames() const
     {
+        if (_saxAttributes.size() > utils::LINEAR_SEARCH_LIMIT)
+        {
+            checkManyExpandedNames(_saxAttributes);
+            return;
+        }
         for (std::size_t first = 0; first < _saxAttributes.size(); ++first)
         {
             const SaxAttribute& left = _saxAttributes[first];

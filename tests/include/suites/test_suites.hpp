@@ -24,6 +24,7 @@ namespace suites
     void registerContentTests(test::TestRunner& runner);
     void registerErrorTests(test::TestRunner& runner);
     void registerLimitTests(test::TestRunner& runner);
+    void registerFloodTests(test::TestRunner& runner);
     void registerSaxTests(test::TestRunner& runner);
     void registerSaxDtdTests(test::TestRunner& runner);
     void registerEncodingTests(test::TestRunner& runner);

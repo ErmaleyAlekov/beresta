@@ -1,0 +1,242 @@
+# ============================================================================
+#  Релиз «Берёсты» по тегу vX.Y.Z
+#
+#  1. natives — на каждой платформе собирается ядро и аддон Node.js, бинарники
+#     раскладываются по папкам обёрток (natives/, runtimes/, _native/, native/),
+#     а для C и C++ собирается архив SDK: include/ + библиотеки + LICENSE.
+#  2. wasm — модуль WebAssembly и пакет beresta-wasm.
+#  3. packages — бинарники всех платформ сводятся в ОДНО дерево, и из него
+#     собираются пакеты, которые работают сразу на любой ОС:
+#       npm install beresta / beresta-wasm, pip install beresta,
+#       dotnet add package Beresta, jar для Maven.
+#     Пользователю ничего не нужно компилировать.
+#  4. Публикация: GitHub Release всегда; npm, PyPI и NuGet — только если
+#     в настройках репозитория заданы секреты NPM_TOKEN, PYPI_API_TOKEN,
+#     NUGET_API_KEY (без них шаг пропускается, а пакеты лежат в релизе).
+#
+#  Linux собирается на Ubuntu 22.04: бинарники работают с glibc 2.35+
+#  (Ubuntu 22.04+, Debian 12+, RHEL/Astra/РЕД ОС с glibc того же уровня).
+# ============================================================================
+#  The Beresta release by the vX.Y.Z tag
+#
+#  1. natives — on every platform the core and the Node.js addon are built, the binaries
+#     are laid out into the wrapper folders (natives/, runtimes/, _native/, native/),
+#     and an SDK archive is built for C and C++: include/ + libraries + LICENSE.
+#  2. wasm — the WebAssembly module and the beresta-wasm package.
+#  3. packages — the binaries of all platforms are merged into ONE tree, and from it
+#     the packages are built that work right away on any OS:
+#       npm install beresta / beresta-wasm, pip install beresta,
+#       dotnet add package Beresta, a jar for Maven.
+#     The user does not need to compile anything.
+#  4. Publishing: a GitHub Release always; npm, PyPI and NuGet only if
+#     the repository settings define the secrets NPM_TOKEN, PYPI_API_TOKEN,
+#     NUGET_API_KEY (without them the step is skipped, and the packages lie in the release).
+#
+#  Linux is built on Ubuntu 22.04: the binaries work with glibc 2.35+
+#  (Ubuntu 22.04+, Debian 12+, RHEL/Astra/RED OS with a glibc of the same level).
+# ============================================================================
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # ---- Версия тега обязана совпадать с версией проекта ----------------------------
+  # ---- The tag version must match the project version ----------------------------
+  version:
+    name: Проверка версии / Version check
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.read.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: read
+        name: Версия из CMakeLists.txt / The version from CMakeLists.txt
+        run: |
+          version=$(sed -n 's/^project(beresta VERSION \([0-9.]*\).*/\1/p' CMakeLists.txt)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          for file in bindings/node/package.json bindings/wasm/package.json; do
+            grep -q "\"version\": \"$version\"" "$file" || { echo "$file: версия не $version / version is not $version"; exit 1; }
+          done
+          grep -q "^version = \"$version\"" bindings/python/pyproject.toml || { echo "pyproject.toml: не $version"; exit 1; }
+          if [ "${GITHUB_REF_TYPE}" = "tag" ] && [ "${GITHUB_REF_NAME}" != "v$version" ]; then
+            echo "Тег ${GITHUB_REF_NAME} не совпадает с версией $version / The tag does not match the version"; exit 1
+          fi
+
+  # ---- Нативные бинарники каждой платформы -----------------------------------------
+  # ---- The native binaries of every platform -----------------------------------------
+  natives:
+    name: Natives ${{ matrix.platform }}
+    needs: version
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - platform: linux-x86_64
+            runner: ubuntu-22.04
+            build: make
+          - platform: linux-aarch64
+            runner: ubuntu-22.04-arm
+            build: make
+          - platform: windows-x86_64
+            runner: windows-2025
+            build: msvc
+            arch: x64
+          - platform: windows-aarch64
+            runner: windows-11-arm
+            build: msvc
+            arch: ARM64
+          - platform: macos-universal
+            runner: macos-14
+            build: universal
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Linux (make)
+        if: matrix.build == 'make'
+        run: |
+          make -j"$(nproc)" JAVA=1 CSHARP=1 PYTHON=1 NODE=1 all bin/libberesta.a
+          make test
+          cd bindings/node && node --test
+      - name: macOS universal (lipo)
+        if: matrix.build == 'universal'
+        run: |
+          make -j"$(sysctl -n hw.ncpu)" universal
+          cd bindings/node && node --test
+      - name: Windows (MSVC)
+        if: matrix.build == 'msvc'
+        run: |
+          cmake -S . -B build -A ${{ matrix.arch }} -DBERESTA_BUILD_STATIC=ON -DBERESTA_BUILD_TESTS=ON -DBERESTA_BUILD_JAVA=ON -DBERESTA_BUILD_CSHARP=ON -DBERESTA_BUILD_PYTHON=ON -DBERESTA_BUILD_NODE=ON
+          cmake --build build --config Release --parallel
+          ctest --test-dir build -C Release -R beresta_tests --output-on-failure
+      - name: SDK для C и C++ / The C and C++ SDK
+        shell: bash
+        run: |
+          sdk="beresta-${{ needs.version.outputs.version }}-${{ matrix.platform }}"
+          mkdir -p "sdk/$sdk/lib"
+          cp -R include "sdk/$sdk/"
+          cp LICENSE README.md "sdk/$sdk/"
+          for file in bin/libberesta.a bin/libberesta.so bin/libberesta.dylib \
+                      build/Release/beresta.dll build/Release/beresta.lib build/Release/beresta_static.lib; do
+            if [ -f "$file" ]; then cp "$file" "sdk/$sdk/lib/"; fi
+          done
+          cd sdk
+          if command -v zip > /dev/null; then zip -qr "$sdk.zip" "$sdk"; else 7z a -tzip "$sdk.zip" "$sdk" > /dev/null; fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: natives-${{ matrix.platform }}
+          if-no-files-found: error
+          path: |
+            bindings/java/src/main/resources/natives/
+            bindings/csharp/Beresta/runtimes/
+            bindings/python/beresta/_native/
+            bindings/node/native/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdk-${{ matrix.platform }}
+          path: sdk/*.zip
+
+  # ---- WebAssembly --------------------------------------------------------------
+  wasm:
+    name: WebAssembly
+    needs: version
+    runs-on: ubuntu-24.04
+    container: emscripten/emsdk:3.1.69
+    steps:
+      - uses: actions/checkout@v4
+      - run: make -j"$(nproc)" wasm-test
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wasm
+          path: bindings/wasm/dist/
+
+  # ---- Пакеты со всеми платформами и публикация --------------------------------------
+  # ---- Packages with all platforms and publishing --------------------------------------
+  packages:
+    name: Packages
+    needs: [version, natives, wasm]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      id-token: write
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      # Каждый артефакт хранит пути от bindings/, поэтому они сливаются в одно дерево
+      # Every artifact keeps the paths from bindings/, so they merge into one tree
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: natives-*
+          path: bindings
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: wasm
+          path: bindings/wasm/dist
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: sdk-*
+          path: dist
+          merge-multiple: true
+      - name: Сборка пакетов / Building the packages
+        run: |
+          find bindings -path '*native*' -type f | sort
+          cp LICENSE bindings/node/ && cp LICENSE bindings/wasm/
+          (cd bindings/node && npm pack --pack-destination ../../dist)
+          (cd bindings/wasm && npm pack --pack-destination ../../dist)
+          python -m pip wheel bindings/python --no-deps -w dist
+          dotnet pack bindings/csharp/Beresta/Beresta.csproj -c Release -o dist
+          mvn -B -q -f bindings/java/pom.xml package && cp bindings/java/target/beresta-*.jar dist/
+          ls -la dist
+      - name: Пакеты работают на чистой машине / The packages work on a clean machine
+        run: |
+          python -m venv /tmp/venv && /tmp/venv/bin/pip install dist/beresta-*.whl
+          /tmp/venv/bin/python -c "import beresta; print(beresta.parse('<a>ok</a>').root.text)"
+          mkdir /tmp/npm && cd /tmp/npm && npm init -y > /dev/null && npm install "$GITHUB_WORKSPACE"/dist/beresta-${VERSION}.tgz
+          node -e "console.log(require('beresta').parse('<a>ok</a>').root.text)"
+      - name: GitHub Release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${GITHUB_REF_NAME}" dist/* --title "Берёста ${VERSION}" --generate-notes
+      - name: npm publish
+        if: github.ref_type == 'tag' && env.NPM_TOKEN != ''
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm publish dist/beresta-${VERSION}.tgz --provenance --access public
+          npm publish dist/beresta-wasm-${VERSION}.tgz --provenance --access public
+      - name: PyPI
+        if: github.ref_type == 'tag' && env.PYPI_API_TOKEN != ''
+        run: |
+          python -m pip install twine
+          python -m twine upload -u __token__ -p "$PYPI_API_TOKEN" dist/*.whl
+      - name: NuGet
+        if: github.ref_type == 'tag' && env.NUGET_API_KEY != ''
+        run: dotnet nuget push "dist/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json

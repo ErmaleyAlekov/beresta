@@ -1,0 +1,114 @@
+<!doctype html>
+<!--
+  Берёста в браузере: разбор, XPath 1.0 и XML Schema без сервера.
+  Запуск: соберите make wasm, затем отдайте каталог bindings/wasm любым
+  статическим сервером (python -m http.server) и откройте
+  http://localhost:8000/examples/browser.html
+
+  Beresta in a browser: parsing, XPath 1.0 and XML Schema without a server.
+  Run: build make wasm, then serve the bindings/wasm directory with any
+  static server (python -m http.server) and open
+  http://localhost:8000/examples/browser.html
+-->
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Берёста в браузере</title>
+    <style>
+        :root { --ink: #1d1d1b; --paper: #faf8f3; --line: #d8d2c4; --accent: #8a5a2b; --bad: #a33; --good: #2f6b3a; }
+        @media (prefers-color-scheme: dark) {
+            :root { --ink: #ece8df; --paper: #1b1a18; --line: #3b3834; --accent: #d9a46b; --bad: #e07a7a; --good: #7bc48a; }
+        }
+        body { margin: 0; padding: 16px; background: var(--paper); color: var(--ink); font: 15px/1.5 system-ui, sans-serif; }
+        main { max-width: 960px; margin: 0 auto; display: grid; gap: 12px; }
+        h1 { font-size: 22px; margin: 0; }
+        label { font-weight: 600; display: block; margin-bottom: 4px; }
+        textarea, input { width: 100%; box-sizing: border-box; font: 13px/1.4 ui-monospace, monospace; color: var(--ink);
+            background: transparent; border: 1px solid var(--line); border-radius: 6px; padding: 8px; }
+        textarea { min-height: 130px; resize: vertical; }
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        @media (max-width: 700px) { .row { grid-template-columns: 1fr; } }
+        button { justify-self: start; padding: 8px 16px; border: 0; border-radius: 6px; background: var(--accent); color: var(--paper); font-weight: 600; cursor: pointer; }
+        pre { margin: 0; padding: 10px; border: 1px solid var(--line); border-radius: 6px; white-space: pre-wrap; overflow-wrap: anywhere; }
+        .bad { color: var(--bad); } .good { color: var(--good); }
+    </style>
+</head>
+<body>
+<main>
+    <h1>Берёста в браузере <small id="version"></small></h1>
+    <div class="row">
+        <div><label for="xml">XML</label><textarea id="xml"><order xmlns:p="urn:pay">
+  <item id="a" price="120">Чай</item>
+  <item id="b" price="80">Кофе</item>
+  <item id="a" price="-5">Какао</item>
+  <p:total>195</p:total>
+</order></textarea></div>
+        <div><label for="xsd">XML Schema</label><textarea id="xsd"><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="order"><xs:complexType><xs:sequence>
+    <xs:element name="item" maxOccurs="unbounded"><xs:complexType><xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="id" type="xs:string" use="required"/>
+        <xs:attribute name="price" type="xs:nonNegativeInteger"/>
+      </xs:extension></xs:simpleContent></xs:complexType></xs:element>
+    <xs:any namespace="##other" processContents="skip"/>
+  </xs:sequence></xs:complexType>
+  <xs:key name="itemId"><xs:selector xpath="item"/><xs:field xpath="@id"/></xs:key>
+  </xs:element>
+</xs:schema></textarea></div>
+    </div>
+    <div><label for="query">XPath</label><input id="query" value="sum(//item[@price > 0]/@price)"></div>
+    <button id="run" type="button">Проверить</button>
+    <pre id="output">Загрузка WebAssembly…</pre>
+</main>
+<script type="module">
+    import init from '../dist/beresta.mjs';
+
+    const beresta = await init();
+    const output = document.getElementById('output');
+
+    // Запрос и проверка над готовым документом / A query and validation over a ready document
+    function check(xml, lines)
+    {
+        const query = new beresta.XPath(document.getElementById('query').value);
+        const schema = beresta.Schema.fromString(document.getElementById('xsd').value);
+
+        try
+        {
+            lines.push('XPath: ' + query.string(xml));
+            for (const problem of schema.validate(xml))
+                lines.push('XSD ✗ ' + problem.message);
+        }
+        finally
+        {
+            query.close();
+            schema.close();
+        }
+    }
+
+    // Один прогон: разбор, запрос XPath, проверка по схеме / One run: parsing, an XPath query, schema validation
+    function run()
+    {
+        const lines = [];
+
+        output.className = 'bad';
+        try
+        {
+            const xml = beresta.parse(document.getElementById('xml').value);
+            try { check(xml, lines); } finally { xml.close(); }
+            if (lines.length === 1)
+                output.className = 'good';
+        }
+        catch (error)
+        {
+            lines.push(error.code + ': ' + error.message);
+        }
+        output.textContent = lines.join('\n');
+    }
+
+    document.getElementById('version').textContent = beresta.version() + ' · ' + beresta.platformName();
+    document.getElementById('run').addEventListener('click', run);
+    run();
+</script>
+</body>
+</html>

@@ -15,7 +15,7 @@ namespace
         suites::registerElementTests, suites::registerSerializeTests,
         suites::registerNavigationTests, suites::registerNamespaceTests, suites::registerDeepTreeTests,
         suites::registerFormatTests, suites::registerContentTests,
-        suites::registerErrorTests, suites::registerLimitTests,
+        suites::registerErrorTests, suites::registerLimitTests, suites::registerFloodTests,
         suites::registerSaxTests, suites::registerSaxDtdTests, suites::registerEncodingTests,
         suites::registerDtdEntityTests, suites::registerDtdValidationTests,
         suites::registerExternalResourceTests,

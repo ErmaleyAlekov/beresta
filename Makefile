@@ -43,6 +43,9 @@
 #    make fclean        — clean + the binaries (bin/) and the binary copies in the bindings
 #    make re            — a full rebuild
 #    make platform      — show the detected OS, architecture and paths
+#    make universal     — macOS: one fat binary for x86_64 + arm64 (lipo)
+#    make wasm          — WebAssembly for browsers / Workers (Emscripten em++)
+#    make wasm-test     — WebAssembly self-test in Node.js
 #
 #  Bindings are enabled with variables (several at once are allowed):
 #    make JAVA=1        — binary -> bindings/java/src/main/resources/natives/<os>-<arch>/
@@ -179,6 +182,27 @@ RID_OS      := $(patsubst macos,osx,$(RID_OS))
 RID_ARCH    := $(patsubst x86_64,x64,$(patsubst aarch64,arm64,$(PLATFORM_ARCH)))
 DOTNET_RID  := $(RID_OS)-$(RID_ARCH)
 
+# ---- Целевая архитектура и минимальная macOS ----------------------------------
+# TARGET_FLAGS добавляются к компиляции и компоновке: make universal передаёт
+# сюда «-arch x86_64» или «-arch arm64». На macOS код собирается для версии
+# не ниже MACOS_MIN — 11.0 первая с Apple Silicon.
+# ---- The target architecture and the minimum macOS ----------------------------------
+# TARGET_FLAGS are added to compilation and linking: make universal passes
+# "-arch x86_64" or "-arch arm64" here. On macOS the code is built for a version
+# not lower than MACOS_MIN — 11.0 is the first one with Apple Silicon.
+# MACOS_FLAGS — отдельная переменная: TARGET_FLAGS из командной строки
+# перекрыл бы добавление через +=.
+# MACOS_FLAGS is a separate variable: TARGET_FLAGS from the command line
+# would override an addition through +=.
+TARGET_FLAGS ?=
+MACOS_MIN    ?= 11.0
+MACOS_FLAGS  :=
+ifeq ($(PLATFORM_OS),macos)
+    MACOS_FLAGS := -mmacosx-version-min=$(MACOS_MIN)
+endif
+CXXFLAGS    += $(TARGET_FLAGS) $(MACOS_FLAGS)
+CFLAGS      += $(TARGET_FLAGS) $(MACOS_FLAGS)
+
 # ---- Платформенные особенности -------------------------------------------------
 # SHARED_NAME — каноническое имя бинарника, его же ищут загрузчики обёрток.
 # SHARED_LDFLAGS встраивают C++ runtime в библиотеку: jar / NuGet / пакет
@@ -298,6 +322,32 @@ PYTHON_NATIVE := $(PYTHON_DIR)/beresta/_native/$(PLATFORM)
 NODE_NATIVE := $(NODE_DIR)/native/$(PLATFORM)
 NODE_COPY   := $(NODE_NATIVE)/beresta.node
 
+# ---- WebAssembly (Emscripten) --------------------------------------------------
+# Ядро компилируется em++ в obj/wasm и компонуется в модуль ES beresta_core.mjs +
+# beresta_core.wasm; затем tools/bundle.mjs собирает поверх него общий JS-слой.
+#   -fwasm-exceptions   исключения C++ средствами самого Wasm (быстро, без JS)
+#   MODULARIZE/EXPORT_ES6  фабрика createBerestaCore() вместо глобального Module
+#   ENVIRONMENT         браузер, Web Worker (в том числе Cloudflare Workers) и Node.js
+#   WASM_BIGINT         int64 Си-интерфейса передаётся как BigInt, без разрезания
+#   FILESYSTEM=0        файловой системы нет: разбор строк и байтов, вывод в строку
+# ---- WebAssembly (Emscripten) --------------------------------------------------
+# The core is compiled by em++ into obj/wasm and linked into the ES module beresta_core.mjs +
+# beresta_core.wasm; then tools/bundle.mjs builds the common JS layer on top of it.
+#   -fwasm-exceptions   C++ exceptions by means of Wasm itself (fast, without JS)
+#   MODULARIZE/EXPORT_ES6  the createBerestaCore() factory instead of a global Module
+#   ENVIRONMENT         a browser, a Web Worker (Cloudflare Workers included) and Node.js
+#   WASM_BIGINT         the int64 of the C interface is passed as a BigInt, without splitting
+#   FILESYSTEM=0        there is no file system: parsing strings and bytes, output to a string
+EMXX         ?= em++
+WASM_DIR     := $(BIND_DIR)/wasm
+WASM_DIST    := $(WASM_DIR)/dist
+WASM_CORE    := $(WASM_DIST)/beresta_core.mjs
+WASM_FLAGS   := -fwasm-exceptions
+WASM_LDFLAGS := -fwasm-exceptions -sMODULARIZE=1 -sEXPORT_ES6=1 -sEXPORT_NAME=createBerestaCore \
+                -sENVIRONMENT=web,worker,node -sALLOW_MEMORY_GROWTH=1 -sWASM_BIGINT=1 -sFILESYSTEM=0 \
+                -sSTACK_SIZE=1048576 -sEXPORTED_FUNCTIONS=@$(WASM_DIR)/exports.json \
+                -sEXPORTED_RUNTIME_METHODS=UTF8ToString,stringToUTF8,lengthBytesUTF8,getValue,HEAPU8
+
 ALL_COPIES     := $(JAVA_NATIVE)/$(SHARED_NAME) $(CSHARP_NATIVE)/$(SHARED_NAME) $(PYTHON_NATIVE)/$(SHARED_NAME)
 BINDING_COPIES :=
 BINDING_TESTS  :=
@@ -318,7 +368,7 @@ ifeq ($(NODE),1)
     BINDING_TESTS  += node-test
 endif
 
-ALL_DIRS    := $(sort $(call dir_of,$(ALL_OBJ) $(ALL_DEP) $(ALL_COPIES) $(NODE_COPY)) $(BIN_DIR))
+ALL_DIRS    := $(sort $(call dir_of,$(ALL_OBJ) $(ALL_DEP) $(ALL_COPIES) $(NODE_COPY)) $(BIN_DIR) $(WASM_DIST))
 
 # ---- Флаги автоматической генерации зависимостей ----------------------------
 # -MMD : записать зависимости от пользовательских заголовков в .d-файл
@@ -333,7 +383,7 @@ DEPFLAGS     = -MMD -MP -MF $(call dep_of,$@) -MT $@
 # ---- Основные цели ----------------------------------------------------------
 # ---- Main targets ----------------------------------------------------------
 .PHONY: all test bindings-test java-test csharp-test python-test node-test \
-        java-package csharp-package node-package platform clean fclean re
+        java-package csharp-package node-package platform universal wasm wasm-test clean fclean re
 
 all: $(LIB_BIN) $(SHARED_BIN) $(DEMO_BIN) $(CAPI_BIN) $(BINDING_COPIES)
 
@@ -431,6 +481,56 @@ $(ERRORS_STAMP): | $(OBJ_DIR)/i18n
 $(ALL_DIRS):
 	@$(call MKDIR,$@)
 
+# ---- Универсальный бинарник macOS (Intel + Apple Silicon) ----------------------
+# Каждая архитектура собирается отдельным запуском make в свои obj/<arch>,
+# dep/<arch> и bin/<arch>, затем lipo -create склеивает статическую и
+# динамическую библиотеки и аддон Node.js в fat-файлы в bin/. Один и тот же
+# файл кладётся в папки обеих архитектур каждой обёртки: загрузчики ищут
+# бинарник по паре «ОС — архитектура» и находят его на любом Mac.
+# ---- The universal macOS binary (Intel + Apple Silicon) ----------------------
+# Each architecture is built by a separate make run into its own obj/<arch>,
+# dep/<arch> and bin/<arch>, then lipo -create glues the static and
+# shared libraries and the Node.js addon into fat files in bin/. One and the same
+# file goes into the folders of both architectures of every wrapper: the loaders look for
+# the binary by the "OS — architecture" pair and find it on any Mac.
+UNIVERSAL_ARCHS     := x86_64 arm64
+UNIVERSAL_PLATFORMS := macos-x86_64 macos-aarch64
+UNIVERSAL_RIDS      := osx-x64 osx-arm64
+UNIVERSAL_FILES     := $(NAME) $(SHARED_NAME) beresta.node
+arch_part            = $(BIN_DIR)/$(1)/$(2)
+
+universal:
+ifneq ($(PLATFORM_OS),macos)
+	$(error make universal работает только на macOS / make universal works only on macOS)
+endif
+	$(foreach arch,$(UNIVERSAL_ARCHS),$(MAKE) --no-print-directory TARGET_FLAGS="-arch $(arch)" \
+		OBJ_DIR=$(OBJ_DIR)/$(arch) DEP_DIR=$(DEP_DIR)/$(arch) BIN_DIR=$(BIN_DIR)/$(arch) \
+		$(foreach file,$(UNIVERSAL_FILES),$(call arch_part,$(arch),$(file))) &&) true
+	$(foreach file,$(UNIVERSAL_FILES),lipo -create $(foreach arch,$(UNIVERSAL_ARCHS),$(call arch_part,$(arch),$(file))) \
+		-output $(BIN_DIR)/$(file) && lipo -info $(BIN_DIR)/$(file) &&) true
+	$(foreach platform,$(UNIVERSAL_PLATFORMS),$(call MKDIR,$(JAVA_DIR)/src/main/resources/natives/$(platform)) && \
+		$(call MKDIR,$(PYTHON_DIR)/beresta/_native/$(platform)) && $(call MKDIR,$(NODE_DIR)/native/$(platform)) && \
+		$(call COPY,$(SHARED_BIN),$(JAVA_DIR)/src/main/resources/natives/$(platform)/$(SHARED_NAME)) && \
+		$(call COPY,$(SHARED_BIN),$(PYTHON_DIR)/beresta/_native/$(platform)/$(SHARED_NAME)) && \
+		$(call COPY,$(ADDON_BIN),$(NODE_DIR)/native/$(platform)/beresta.node) &&) true
+	$(foreach rid,$(UNIVERSAL_RIDS),$(call MKDIR,$(CSHARP_DIR)/Beresta/runtimes/$(rid)/native) && \
+		$(call COPY,$(SHARED_BIN),$(CSHARP_DIR)/Beresta/runtimes/$(rid)/native/$(SHARED_NAME)) &&) true
+
+# ---- Сборка WebAssembly ----------------------------------------------------------
+# Отдельный запуск make с CXX=em++: объекты Wasm не смешиваются с обычными.
+# ---- The WebAssembly build ----------------------------------------------------------
+# A separate make run with CXX=em++: the Wasm objects do not mix with the regular ones.
+wasm:
+	$(MAKE) --no-print-directory CXX=$(EMXX) PIC_FLAGS= TARGET_FLAGS="$(WASM_FLAGS)" \
+		OBJ_DIR=$(OBJ_DIR)/wasm DEP_DIR=$(DEP_DIR)/wasm BIN_DIR=$(BIN_DIR)/wasm $(WASM_CORE)
+	$(NODE_EXE) $(call native,$(WASM_DIR)/tools/bundle.mjs)
+
+$(WASM_CORE): $(LIB_OBJ) $(WASM_DIR)/exports.json | $(WASM_DIST)
+	$(CXX) $(CXXFLAGS) $(LIB_OBJ) $(WASM_LDFLAGS) -o $@
+
+wasm-test: wasm
+	$(call RUN_IN,$(WASM_DIR),$(NODE_EXE) --test)
+
 # ---- Самопроверки обёрток ----------------------------------------------------
 # Java проверяется без Maven: javac + java из JDK 22+. Ресурсы с бинарником
 # копируются в каталог классов, поэтому classpath состоит из одного пути.
@@ -496,6 +596,7 @@ fclean: clean
 	@$(call RMDIR,$(CSHARP_NATIVE))
 	@$(call RMDIR,$(PYTHON_NATIVE))
 	@$(call RMDIR,$(NODE_NATIVE))
+	@$(call RMDIR,$(WASM_DIST))
 
 re: fclean
 	@$(MAKE) --no-print-directory all

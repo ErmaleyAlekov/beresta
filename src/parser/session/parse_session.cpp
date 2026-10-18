@@ -10,6 +10,7 @@ namespace beresta::detail
         ContentHandler& handler)
         : _inputs(text), _options(options), _handler(handler), _budget(options),
           _namespaces(), _dtd(), _validator(), _openElements(), _saxAttributes(), _attributeBuffer(),
+          _attributeNames(),
           _pendingText(), _pendingSignificant(false), _textMainOffset(0), _tokenStart(0),
           _eventMainOffset(0), _rootSeen(false), _doctypeSeen(false), _standalone(false)
     {

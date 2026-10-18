@@ -11,13 +11,13 @@
 #include "parser/parser_options.hpp"
 #include "sax/content_handler.hpp"
 #include "sax/locator.hpp"
-
+#include "utils/seeded_hash.hpp"
 #include <cstddef>
 #include <memory>
 #include <string>
 #include <string_view>
+#include <unordered_set>
 #include <vector>
-
 namespace beresta::detail
 {
     /*
@@ -109,7 +109,7 @@ namespace beresta::detail
         void parseStartTag();
         void parseAttributes(std::vector<Attribute>& attributes);
         void parseAttribute(std::vector<Attribute>& attributes);
-
+        bool isNewAttributeName(const std::vector<Attribute>& attributes, const std::string& name);
         // ---- События элементов (parse_element_events.cpp) ----
         // ---- Element events (parse_element_events.cpp) ----
         void emitStartElement(std::string name, std::vector<Attribute>& attributes, bool isEmpty);
@@ -148,6 +148,9 @@ namespace beresta::detail
         // Буфер атрибутов тега: переиспользуется, чтобы не выделять память на каждый тег
         // The tag attribute buffer: reused so as not to allocate memory for every tag
         std::vector<Attribute> _attributeBuffer;
+        // Имена атрибутов тега, когда их больше LINEAR_SEARCH_LIMIT (поиск повторов за O(1))
+        // The attribute names of a tag when there are more than LINEAR_SEARCH_LIMIT (finding repetitions in O(1))
+        std::unordered_set<std::string, utils::SeededHash> _attributeNames;
         std::string _pendingText;
         bool _pendingSignificant;
         std::size_t _textMainOffset;

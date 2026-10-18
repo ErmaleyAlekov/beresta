@@ -23,6 +23,12 @@
 #    cmake -S . -B build -DBERESTA_BUILD_JAVA=ON -DBERESTA_BUILD_TESTS=ON
 #    cmake --build build --config Release
 #    ctest --test-dir build -C Release --output-on-failure
+#
+#    # macOS: один универсальный бинарник для Intel и Apple Silicon
+#    cmake -S . -B build -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+#
+#    # WebAssembly (браузер, Workers): см. cmake/BerestaWasm.cmake
+#    emcmake cmake -S . -B build-wasm
 # ============================================================================
 # Beresta — cross-platform CMake build
 # Compilers: MSVC, MinGW, GCC, Clang. OS: Windows, Linux, macOS.
@@ -37,13 +43,33 @@
 #   -DBERESTA_BUILD_PYTHON=ON    binary -> the Python package (ctypes)
 #   -DBERESTA_BUILD_NODE=ON      the beresta.node addon -> the Node.js package (Node-API)
 #   -DBERESTA_ERRORS_LANG=en     the error message language (default ru)
-# Examples: see above.
+# Examples: see above. On macOS -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" builds one
+# universal binary for Intel and Apple Silicon.
+# WebAssembly: emcmake cmake -S . -B build-wasm (see cmake/BerestaWasm.cmake).
 # ============================================================================
 cmake_minimum_required(VERSION 3.16)
+
+# Минимальная версия macOS — 11.0, первая с Apple Silicon. Задаётся до project():
+# так её подхватывают все цели. На других ОС переменная ни на что не влияет.
+# The minimum macOS version is 11.0, the first one with Apple Silicon. It is set before project():
+# this way all targets pick it up. On other OSes the variable has no effect.
+set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Минимальная версия macOS / The minimum macOS version")
 
 # Версия совпадает с BERESTA_VERSION_STRING в include/capi/beresta_c.h
 # The version matches BERESTA_VERSION_STRING in include/capi/beresta_c.h
 project(beresta VERSION 2.1.0 LANGUAGES CXX)
+
+# ---- Тип сборки по умолчанию — Release ---------------------------------------
+# Без него однотипные генераторы (Make, Ninja) собирают без оптимизаций: ядро
+# в разы медленнее, а модуль WebAssembly — в 13 раз медленнее и в 10 раз
+# больше. Многоконфигурационные (Visual Studio, Xcode) выбирают тип сами.
+# ---- The default build type is Release ---------------------------------------
+# Without it single-config generators (Make, Ninja) build without optimizations: the core
+# is several times slower, and the WebAssembly module is 13 times slower and 10 times
+# larger. Multi-config generators (Visual Studio, Xcode) choose the type themselves.
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Тип сборки / The build type" FORCE)
+endif()
 
 # ---- Стандарт языка: строго C++17 без расширений компилятора ---------------
 # ---- Language standard: strictly C++17 without compiler extensions ---------------
@@ -160,6 +186,17 @@ set_target_properties(beresta_objects PROPERTIES
     CXX_VISIBILITY_PRESET hidden
     VISIBILITY_INLINES_HIDDEN ON)
 beresta_apply_compile_options(beresta_objects)
+
+# ---- WebAssembly: под Emscripten собирается только модуль Wasm -----------------
+# ---- WebAssembly: under Emscripten only the Wasm module is built -----------------
+if(EMSCRIPTEN)
+    if(BERESTA_BUILD_TESTS)
+        enable_testing()
+    endif()
+    include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/BerestaWasm.cmake")
+    beresta_setup_wasm()
+    return()
+endif()
 
 # ---- Динамическая библиотека (цель по умолчанию) ------------------------------
 # Имя файла одинаково для всех компиляторов одной ОС: beresta.dll (без
