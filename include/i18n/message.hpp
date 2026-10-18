@@ -345,6 +345,7 @@ namespace beresta::i18n
         XSD_SIMPLE_WITH_CHILDREN,
         XSD_SIMPLE_WITH_ATTRIBUTE,
         XSD_ELEMENT_FIXED,
+        IDENTITY_NOT_STREAMABLE,
 
         // ---- Обёртки для других языков / Bindings for other languages ----
         BINDING_DOCUMENT_CLOSED,

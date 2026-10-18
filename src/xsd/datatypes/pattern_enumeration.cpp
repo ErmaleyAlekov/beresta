@@ -25,9 +25,11 @@ namespace beresta::xsd::detail
         }
         if (type.facets.enumeration.empty())
             return std::nullopt;
+        // Совпадение строк — уже равенство значений: частый случай без нормализации
+        // A string match is already value equality: the common case without normalization
         for (const std::string& allowed : type.facets.enumeration)
         {
-            if (valuesEqual(type, value, allowed))
+            if (allowed == value || valuesEqual(type, value, allowed))
                 return std::nullopt;
         }
         return i18n::format(i18n::Message::NOT_IN_ENUMERATION, {value, type.name});

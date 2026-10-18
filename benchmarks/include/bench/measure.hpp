@@ -12,11 +12,11 @@ namespace bench
     // Замеряемая операция / A measured operation
     enum class Operation
     {
-        PARSE, TRAVERSE, SERIALIZE, XPATH, VALIDATE
+        PARSE, TRAVERSE, SERIALIZE, XPATH, VALIDATE, STREAM_VALIDATE
     };
 
     // Число операций (для таблиц) / The number of operations (for tables)
-    constexpr std::size_t OPERATION_COUNT = 5;
+    constexpr std::size_t OPERATION_COUNT = 6;
 
     /*
     ** Итог одной операции: медиана времени по нескольким повторам (медиана

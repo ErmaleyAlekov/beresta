@@ -60,15 +60,15 @@ namespace beresta::xsd::detail
         }
     }
 
-    // QName: корректное имя, а префикс (если есть) объявлен в элементе-контексте
-    // QName: a valid name, and the prefix (if any) is declared in the context element
-    bool isResolvableQName(std::string_view value, const Element* context)
+    // QName: корректное имя, а префикс (если есть) объявлен там, где стоит значение
+    // QName: a valid name, and the prefix (if any) is declared where the value is
+    bool isResolvableQName(std::string_view value, const PrefixResolver& prefixes)
     {
         if (!utils::isValidQualifiedName(value))
             return false;
         std::string_view prefix = utils::splitQualifiedName(value).prefix;
         if (prefix.empty())
             return true;
-        return context != nullptr && context->lookupNamespaceURI(prefix).has_value();
+        return prefixes.isBound(prefix);
     }
 }

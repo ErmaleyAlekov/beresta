@@ -338,6 +338,7 @@ namespace beresta::i18n
         {Message::XSD_SIMPLE_WITH_CHILDREN, "an element of the simple type {0} cannot contain elements"},
         {Message::XSD_SIMPLE_WITH_ATTRIBUTE, "the attribute \"{0}\" is not allowed on an element of a simple type"},
         {Message::XSD_ELEMENT_FIXED, "the value must be equal to the fixed value \"{0}\""},
+        {Message::IDENTITY_NOT_STREAMABLE, "the constraint \"{0}\" is not checked: streaming validation without a tree requires xs:selector and xs:field to fit the XSD path grammar (the child and attribute axes, \".//\" and \"|\")"},
 
         // ---- Обёртки для других языков / Bindings for other languages ----
         {Message::BINDING_DOCUMENT_CLOSED, "the document is already closed, its nodes are no longer valid"},

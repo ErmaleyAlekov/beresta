@@ -32,6 +32,10 @@ namespace bench
                 if (workload.xsd.empty())
                     return std::nullopt;
                 return engine.parseValidated(workload.xml, workload.xsd);
+            case Operation::STREAM_VALIDATE:
+                if (workload.xsd.empty())
+                    return std::nullopt;
+                return engine.streamValidated(workload.xml, workload.xsd);
         }
         return std::nullopt;
     }

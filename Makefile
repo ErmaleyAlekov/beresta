@@ -239,6 +239,7 @@ ifeq ($(PLATFORM_OS),windows)
     RUN_IN          = cd /D "$(call native,$(1))" && $(2)
     TOUCH           = type nul > "$(call native,$(1))"
     REMOVE_STAMPS   = if exist "$(call native,$(1))" del /Q "$(call native,$(1))\errors_lang_*.stamp" 2>NUL
+    RMFILE          = if exist "$(call native,$(1))" del /Q "$(call native,$(1))"
 else ifeq ($(PLATFORM_OS),macos)
     EXE            :=
     SHARED_NAME    := libberesta.dylib
@@ -264,6 +265,7 @@ ifneq ($(PLATFORM_OS),windows)
     RUN_IN          = cd "$(1)" && $(2)
     TOUCH           = touch "$(1)"
     REMOVE_STAMPS   = rm -f "$(1)"/errors_lang_*.stamp
+    RMFILE          = rm -f "$(1)"
 endif
 
 # ---- Вспомогательные функции ------------------------------------------------
@@ -392,7 +394,12 @@ test: $(TEST_BIN)
 
 # Статическая библиотека из всех объектов src/ (для программ на C++)
 # The static library from all objects of src/ (for C++ programs)
+# Архив собирается заново: ar rcs только добавляет и заменяет члены, и объект
+# удалённого или переименованного исходника остался бы в архиве (двойные определения)
+# The archive is rebuilt from scratch: ar rcs only adds and replaces members, and the object
+# of a removed or renamed source would stay in the archive (duplicate definitions)
 $(LIB_BIN): $(LIB_OBJ) | $(BIN_DIR)
+	@$(call RMFILE,$@)
 	$(AR) $(ARFLAGS) $@ $(LIB_OBJ)
 
 # Динамическая библиотека: наружу экспортируется только Си-интерфейс

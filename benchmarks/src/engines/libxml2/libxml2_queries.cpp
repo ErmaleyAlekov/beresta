@@ -29,33 +29,23 @@ namespace bench
         return count;
     }
 
-    // Счётчик ошибок валидации (обработчик libxml2) / The validation error counter (a libxml2 handler)
-    static void countError(void* data, const xmlError* error)
-    {
-        (void)error;
-        ++*static_cast<std::size_t*>(data);
-    }
-
     /*
-    ** Схема компилируется один раз; документ разбирается и проверяется
-    ** xmlSchemaValidateDoc — обе стадии входят в замер, как у «Берёсты».
+    ** Схема компилируется один раз; документ разбирается в дерево и
+    ** проверяется xmlSchemaValidateDoc вторым проходом — обе стадии входят
+    ** в замер, как у «Берёсты» с ParserOptions::schema.
     **
-    ** The schema is compiled once; the document is parsed and checked with
-    ** xmlSchemaValidateDoc — both stages go into the measurement, as for Beresta.
+    ** The schema is compiled once; the document is parsed into a tree and
+    ** checked by xmlSchemaValidateDoc in a second pass — both stages go into
+    ** the measurement, as for Beresta with ParserOptions::schema.
     */
     std::optional<std::size_t> Libxml2Engine::parseValidated(const std::string& xml, const std::string& xsd)
     {
         std::size_t errors = 0;
 
-        if (_schema == nullptr)
-        {
-            xmlSchemaParserCtxtPtr parser = xmlSchemaNewMemParserCtxt(xsd.data(), static_cast<int>(xsd.size()));
-            _schema = xmlSchemaParse(parser);
-            xmlSchemaFreeParserCtxt(parser);
-        }
+        xmlSchemaPtr schema = schemaFor(xsd);
         xmlDocPtr document = xmlReadMemory(xml.data(), static_cast<int>(xml.size()), nullptr, nullptr, XML_PARSE_NONET);
-        xmlSchemaValidCtxtPtr validator = xmlSchemaNewValidCtxt(_schema);
-        xmlSchemaSetValidStructuredErrors(validator, countError, &errors);
+        xmlSchemaValidCtxtPtr validator = xmlSchemaNewValidCtxt(schema);
+        xmlSchemaSetValidStructuredErrors(validator, countLibxml2Error, &errors);
         xmlSchemaValidateDoc(validator, document);
         xmlSchemaFreeValidCtxt(validator);
         xmlFreeDoc(document);

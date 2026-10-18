@@ -1,5 +1,6 @@
 #include "xsd/schema_validator.hpp"
-#include "xsd/internal/validation_run.hpp"
+#include "xsd/internal/tree_event_source.hpp"
+#include "xsd/validating_handler.hpp"
 
 #include <utility>
 
@@ -12,11 +13,28 @@ namespace beresta::xsd
     {
     }
 
-    // Каждый вызов — новый независимый проход (потокобезопасно)
-    // Each call is a new independent pass (thread-safe)
+    /*
+    ** Каждый вызов — новый независимый проход (потокобезопасно). Дерево
+    ** превращается в поток событий и проверяется тем же потоковым
+    ** валидатором, что и документ при разборе; пространства имён валидатор
+    ** разрешает сам по объявлениям xmlns, а ключи проверяет по дереву.
+    **
+    ** Each call is a new independent pass (thread-safe). The tree
+    ** is turned into an event stream and validated by the same streaming
+    ** validator as a document during parsing; the validator resolves namespaces
+    ** itself by the xmlns declarations, and checks the keys over the tree.
+    */
     std::vector<Diagnostic> SchemaValidator::validate(const Document& document) const
     {
-        return detail::ValidationRun(*_schema).run(document);
+        ValidationSettings settings;
+        detail::TreeEventSource source;
+
+        settings.resolveNamespaces = true;
+        settings.identity = IdentityEvaluation::ON_TREE;
+        ValidatingHandler validator(_schema, nullptr, settings);
+        source.run(document, validator);
+        validator.checkIdentity(document);
+        return validator.takeDiagnostics();
     }
 
     // Документ корректен, если ошибок нет

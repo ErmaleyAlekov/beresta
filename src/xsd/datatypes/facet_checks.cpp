@@ -6,7 +6,7 @@ namespace beresta::xsd::detail
 {
     // Подходит ли значение под лексическое пространство примитива и встроенной формы
     // Whether the value fits the lexical space of the primitive and the built-in form
-    static bool lexicalAccepted(const SimpleType& type, std::string_view value, const Element* context)
+    static bool lexicalAccepted(const SimpleType& type, std::string_view value, const PrefixResolver& prefixes)
     {
         DateTimeValue moment;
 
@@ -25,7 +25,7 @@ namespace beresta::xsd::detail
             case Primitive::BASE64_BINARY:
                 return base64BinaryLength(value).has_value();
             case Primitive::QNAME: case Primitive::NOTATION_TYPE:
-                return isResolvableQName(value, context);
+                return isResolvableQName(value, prefixes);
             case Primitive::STRING: case Primitive::ANY_URI: case Primitive::ANY_SIMPLE:
                 return matchesLexicalForm(type.form, value);
             default:
@@ -36,9 +36,9 @@ namespace beresta::xsd::detail
     // Лексическая проверка с понятным сообщением
     // A lexical check with a clear message
     std::optional<std::string> checkLexical(const SimpleType& type, std::string_view value,
-        const Element* context)
+        const PrefixResolver& prefixes)
     {
-        if (lexicalAccepted(type, value, context))
+        if (lexicalAccepted(type, value, prefixes))
             return std::nullopt;
         return i18n::format(i18n::Message::VALUE_NOT_OF_TYPE, {value, type.name});
     }

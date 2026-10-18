@@ -24,7 +24,9 @@ namespace
         suites::registerFuzzRegressionTests,
         suites::registerSerializerTests, suites::registerTraversalTests, suites::registerXPathPathTests, suites::registerXPathFunctionTests, suites::registerXPathNamespaceTests,
         suites::registerXPathNameTests,
-        suites::registerXsdDatatypeTests, suites::registerXsdSchemaTests, suites::registerXsdAdvancedTests, suites::registerXsdIdentityTests, suites::registerXsdIdentityScopeTests, suites::registerXsdPathTests, suites::registerXIncludeTests,
+        suites::registerXsdDatatypeTests, suites::registerXsdSchemaTests, suites::registerXsdAdvancedTests, suites::registerXsdIdentityTests, suites::registerXsdIdentityScopeTests, suites::registerXsdPathTests,
+        suites::registerXsdStreamTests, suites::registerXsdStreamIdentityTests,
+        suites::registerContentCursorTests, suites::registerContentPlanTests, suites::registerXIncludeTests,
         suites::registerCapiTests, suites::registerCapiMoveTests, suites::registerI18nTests
     };
 }

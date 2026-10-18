@@ -37,4 +37,27 @@ namespace bench
         beresta::Document document = beresta::XmlParser(options).parse(xml);
         return handler.getDiagnostics().size();
     }
+
+    /*
+    ** Потоковая проверка: SaxParser со схемой, дерево не строится — память
+    ** проверки O(глубины документа). Обработчик событий пустой: замеряется
+    ** разбор плюс проверка, как у libxml2 с xmlSchemaValidateStream.
+    **
+    ** Streaming validation: SaxParser with a schema, no tree is built — the validation
+    ** memory is O(document depth). The event handler is empty: what is measured is
+    ** parsing plus validation, as for libxml2 with xmlSchemaValidateStream.
+    */
+    std::optional<std::size_t> BerestaEngine::streamValidated(const std::string& xml, const std::string& xsd)
+    {
+        beresta::ParserOptions options;
+        beresta::CollectingErrorHandler handler;
+        beresta::ContentHandler ignore;
+
+        if (_schema == nullptr)
+            _schema = beresta::xsd::Schema::fromString(xsd);
+        options.schema = _schema;
+        options.errorHandler = &handler;
+        beresta::SaxParser(options).parse(xml, ignore);
+        return handler.getDiagnostics().size();
+    }
 }

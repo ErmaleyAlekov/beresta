@@ -40,11 +40,13 @@ namespace bench
     }
 
     /*
-    ** Таблица по набору данных. Разбор и проверка по схеме — в МБ/с от
+    ** Таблица по набору данных. Разбор и проверка по схеме (по дереву и
+    ** потоком SAX) — в МБ/с от
     ** размера входа (больше — лучше), обход и XPath — в миллисекундах на всё
     ** дерево (меньше — лучше), сериализация — в МБ/с от размера вывода.
     **
-    ** A table for a data set. Parsing and schema validation are in MB/s of the
+    ** A table for a data set. Parsing and schema validation (over a tree and
+    ** by a SAX stream) are in MB/s of the
     ** input size (more is better), the walk and XPath are in milliseconds for the
     ** whole tree (less is better), serialization is in MB/s of the output size.
     */
@@ -54,14 +56,15 @@ namespace bench
 
         output << "\n### " << workload.name << " (" << static_cast<long>(input / 1e6) << " MB)\n\n"
                << "| Библиотека / Library | Разбор / Parse, MB/s | Обход / Walk, ms | Вывод / Serialize, MB/s"
-               << " | XPath, ms | Разбор + XSD / Parse + XSD, MB/s | Память DOM / DOM memory, MB |\n"
-               << "|---|---|---|---|---|---|---|\n";
+               << " | XPath, ms | Разбор + XSD / Parse + XSD, MB/s | SAX + XSD, MB/s | Память DOM / DOM memory, MB |\n"
+               << "|---|---|---|---|---|---|---|---|\n";
         for (const EngineResult& result : results)
         {
             const Measurement* m = result.operations;
             output << "| " << result.engine << " | " << throughput(m[0], input) << " | " << milliseconds(m[1])
                    << " | " << throughput(m[2], static_cast<double>(m[2].result)) << " | " << milliseconds(m[3])
-                   << " | " << throughput(m[4], input) << " | " << memory(result.memoryBytes, input) << " |\n";
+                   << " | " << throughput(m[4], input) << " | " << throughput(m[5], input)
+                   << " | " << memory(result.memoryBytes, input) << " |\n";
         }
     }
 }
