@@ -138,8 +138,14 @@ jobs:
     container: emscripten/emsdk:3.1.69
     steps:
       - uses: actions/checkout@v4
+      # В образе emsdk в PATH есть каталог /emsdk с подкаталогом node: bash его
+      # пропускает, а GNU make пытается запустить каталог и падает с «Permission
+      # denied». Поэтому make получает абсолютный путь к node
+      # In the emsdk image PATH contains the /emsdk directory with a node subdirectory: bash
+      # skips it, but GNU make tries to run the directory and fails with "Permission
+      # denied". That is why make gets the absolute path to node
       - name: make wasm-test
-        run: make -j"$(nproc)" wasm-test
+        run: make -j"$(nproc)" NODE_EXE="$(command -v node)" wasm-test
       - name: CMake (emcmake) + ctest
         run: |
           emcmake cmake -S . -B build-wasm -DBERESTA_BUILD_TESTS=ON
