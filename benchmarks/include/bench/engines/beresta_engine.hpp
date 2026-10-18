@@ -27,6 +27,7 @@ namespace bench
         std::optional<std::size_t> serialize() const override;
         std::optional<std::size_t> xpathCount(const std::string& query) const override;
         std::optional<std::size_t> parseValidated(const std::string& xml, const std::string& xsd) override;
+        std::optional<std::size_t> streamValidated(const std::string& xml, const std::string& xsd) override;
 
     private:
         std::unique_ptr<beresta::Document> _document;

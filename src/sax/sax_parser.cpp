@@ -18,7 +18,7 @@ namespace beresta
     // Parsing from memory
     void SaxParser::parse(std::string_view input, ContentHandler& handler) const
     {
-        detail::runParse(input, _options, handler);
+        detail::runSaxParse(input, _options, handler);
     }
 
     // Разбор файла с базовым URI по пути к нему
@@ -27,7 +27,7 @@ namespace beresta
     {
         std::string bytes = io::readFile(path);
 
-        detail::runParse(bytes, detail::optionsForFile(_options, path), handler);
+        detail::runSaxParse(bytes, detail::optionsForFile(_options, path), handler);
     }
 
     // Разбор потока
@@ -36,7 +36,7 @@ namespace beresta
     {
         std::string bytes = io::readStream(stream);
 
-        detail::runParse(bytes, _options, handler);
+        detail::runSaxParse(bytes, _options, handler);
     }
 
     // Текущие настройки

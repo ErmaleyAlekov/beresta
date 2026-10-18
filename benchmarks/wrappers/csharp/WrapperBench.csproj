@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Замер обёртки .NET против System.Xml (XmlDocument) и LINQ to XML (XDocument).
+    Целевая среда — самая новая из установленного SDK, как у самопроверки обёртки.
+    A measurement of the .NET wrapper against System.Xml (XmlDocument) and LINQ to XML (XDocument).
+    The target framework is the newest one of the installed SDK, as in the wrapper self-test.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net$(NETCoreAppMaximumVersion)</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Optimize>true</Optimize>
+    <TieredPGO>true</TieredPGO>
+    <ServerGarbageCollector>false</ServerGarbageCollector>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\bindings\csharp\Beresta\Beresta.csproj" />
+  </ItemGroup>
+
+</Project>

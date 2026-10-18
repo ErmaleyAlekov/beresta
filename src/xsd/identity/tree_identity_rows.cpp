@@ -1,41 +1,10 @@
-#include "xsd/internal/validation_run.hpp"
+#include "xsd/internal/tree_identity.hpp"
 #include "i18n/i18n.hpp"
+
+#include <utility>
 
 namespace beresta::xsd::detail
 {
-    /*
-    ** Ограничения идентичности проверяются после основного прохода: к этому
-    ** моменту известны типы всех элементов и атрибутов (значения ключей
-    ** сравниваются по значению типа, а не по строке). Сначала строятся
-    ** таблицы xs:key / xs:unique во всех областях, затем проверяются
-    ** xs:keyref — ссылка может указывать на ключ из области-потомка.
-    **
-    ** Identity constraints are checked after the main pass: by that
-    ** moment the types of all elements and attributes are known (key values
-    ** are compared by the type value, not by the string). First the
-    ** xs:key / xs:unique tables are built in all scopes, then the
-    ** xs:keyref are checked — a reference may point to a key from a descendant scope.
-    */
-    void ValidationRun::checkIdentityConstraints()
-    {
-        for (const IdentityScope& scope : _scopes)
-        {
-            for (const IdentityConstraint* constraint : scope.declaration->identityConstraints)
-            {
-                if (constraint->kind != IdentityKind::KEYREF)
-                    buildKeyTable(scope, *constraint);
-            }
-        }
-        for (const IdentityScope& scope : _scopes)
-        {
-            for (const IdentityConstraint* constraint : scope.declaration->identityConstraints)
-            {
-                if (constraint->kind == IdentityKind::KEYREF)
-                    checkKeyReferences(scope, *constraint);
-            }
-        }
-    }
-
     /*
     ** Целевые элементы области и значения их полей. Строка попадает в
     ** результат, только если есть все поля; у xs:key отсутствие поля —
@@ -45,14 +14,14 @@ namespace beresta::xsd::detail
     ** the result only if all fields are present; for xs:key a missing field is
     ** an error (the key is mandatory), for xs:unique and xs:keyref it is just skipped.
     */
-    std::vector<KeyRow> ValidationRun::selectRows(const IdentityScope& scope, const IdentityConstraint& constraint)
+    std::vector<KeyRow> TreeIdentityCheck::selectRows(const IdentityScope& scope, const IdentityConstraint& constraint)
     {
         std::vector<KeyRow> rows;
         xpath::XPathValue selected = constraint.selector.evaluate(*scope.element, constraint.context);
 
         if (selected.getType() != xpath::ValueType::NODE_SET)
         {
-            report(*scope.element, scope.path, i18n::format(i18n::Message::IDENTITY_SELECTOR_NOT_NODESET, {constraint.name}));
+            reportScope(scope, i18n::format(i18n::Message::IDENTITY_SELECTOR_NOT_NODESET, {constraint.name}));
             return rows;
         }
         for (const xpath::XPathItem& item : selected.getNodes())
@@ -80,7 +49,7 @@ namespace beresta::xsd::detail
     ** this node is an attribute or an element of a simple type. The value is converted to
     ** the canonical form of its type: "1.0" and "1" for decimal are one key.
     */
-    bool ValidationRun::fieldValue(const Element& target, const xpath::XPathExpression& field,
+    bool TreeIdentityCheck::fieldValue(const Element& target, const xpath::XPathExpression& field,
         const IdentityConstraint& constraint, KeyRow& row)
     {
         xpath::XPathValue value = field.evaluate(target, constraint.context);
@@ -107,35 +76,29 @@ namespace beresta::xsd::detail
         return true;
     }
 
-    // Таблица ключей области: повтор значения — нарушение уникальности
-    // The key table of a scope: a repeated value is a uniqueness violation
-    void ValidationRun::buildKeyTable(const IdentityScope& scope, const IdentityConstraint& constraint)
+    /*
+    ** Тип узла, выбранного полем, — из сведений, записанных при проверке
+    ** (аналог PSVI): тип атрибута или простой тип / простое содержимое
+    ** элемента. nullptr — тип неизвестен (например, содержимое xs:any с
+    ** processContents="skip"), тогда значение сравнивается как строка.
+    **
+    ** The type of the node selected by a field — from the information recorded during validation
+    ** (an analog of the PSVI): the attribute type or the simple type / simple content of
+    ** an element. nullptr — the type is unknown (for example, xs:any content with
+    ** processContents="skip"), then the value is compared as a string.
+    */
+    const SimpleType* TreeIdentityCheck::typeOfItem(const xpath::XPathItem& item) const
     {
-        KeyTable table{scope.element, &constraint, {}};
-        std::string label = "xs:unique";
-
-        if (constraint.kind == IdentityKind::KEY)
-            label = "xs:key";
-        for (KeyRow& row : selectRows(scope, constraint))
+        if (item.attribute != nullptr)
         {
-            if (!table.keys.insert(row.canonical).second)
-                reportElement(*row.target, i18n::format(i18n::Message::KEY_DUPLICATE, {joinKeyValues(row.shown), label, constraint.name}));
+            auto found = _attributeTypes.find(item.attribute);
+            if (found != _attributeTypes.end())
+                return found->second;
+            return nullptr;
         }
-        _tables.push_back(std::move(table));
-    }
-
-    // Значения полей для сообщения: "A1, 2026"
-    // The field values for a message: "A1, 2026"
-    std::string joinKeyValues(const std::vector<std::string>& values)
-    {
-        std::string result;
-
-        for (const std::string& value : values)
-        {
-            if (!result.empty())
-                result += ", ";
-            result += value;
-        }
-        return result;
+        auto found = _elementTypes.find(static_cast<const Element*>(item.node));
+        if (found != _elementTypes.end())
+            return found->second;
+        return nullptr;
     }
 }

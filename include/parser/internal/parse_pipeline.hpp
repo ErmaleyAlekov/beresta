@@ -20,6 +20,17 @@ namespace beresta::detail
     */
     void runParse(std::string_view bytes, const ParserOptions& options, ContentHandler& handler);
 
+    /*
+    ** Разбор SAX с проверкой по схеме (если она задана): события проходят
+    ** через валидатор к обработчику, дерево не строится. Ошибки схемы
+    ** сообщаются после endDocument — в errorHandler или исключением.
+    **
+    ** SAX parsing with schema validation (if a schema is set): the events pass
+    ** through the validator to the handler, no tree is built. Schema errors
+    ** are reported after endDocument — into errorHandler or as an exception.
+    */
+    void runSaxParse(std::string_view bytes, const ParserOptions& options, ContentHandler& handler);
+
     // Настройки для разбора файла: базовый URI по умолчанию — путь к файлу
     // Settings for parsing a file: the default base URI is the file path
     ParserOptions optionsForFile(const ParserOptions& options, const std::filesystem::path& path);

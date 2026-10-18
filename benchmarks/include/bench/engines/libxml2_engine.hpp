@@ -17,6 +17,10 @@ namespace bench
     ** PHP, Python lxml, Node libxmljs. Parsing with xmlReadMemory and
     ** XML_PARSE_NONET (no network — like Beresta by default).
     */
+    // Счётчик ошибок валидации для xmlSchemaSetValidStructuredErrors (libxml2_stream.cpp)
+    // The validation error counter for xmlSchemaSetValidStructuredErrors (libxml2_stream.cpp)
+    void countLibxml2Error(void* data, const xmlError* error);
+
     class Libxml2Engine : public XmlEngine
     {
     public:
@@ -29,8 +33,13 @@ namespace bench
         std::optional<std::size_t> serialize() const override;
         std::optional<std::size_t> xpathCount(const std::string& query) const override;
         std::optional<std::size_t> parseValidated(const std::string& xml, const std::string& xsd) override;
+        std::optional<std::size_t> streamValidated(const std::string& xml, const std::string& xsd) override;
 
     private:
+        // Схема компилируется один раз и переиспользуется (libxml2_stream.cpp)
+        // The schema is compiled once and reused (libxml2_stream.cpp)
+        xmlSchemaPtr schemaFor(const std::string& xsd);
+
         xmlDocPtr _document;
         xmlSchemaPtr _schema;
     };

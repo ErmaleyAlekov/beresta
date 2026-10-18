@@ -63,6 +63,10 @@ namespace suites
     void registerXsdIdentityTests(test::TestRunner& runner);
     void registerXsdIdentityScopeTests(test::TestRunner& runner);
     void registerXsdPathTests(test::TestRunner& runner);
+    void registerXsdStreamTests(test::TestRunner& runner);
+    void registerXsdStreamIdentityTests(test::TestRunner& runner);
+    void registerContentCursorTests(test::TestRunner& runner);
+    void registerContentPlanTests(test::TestRunner& runner);
     void registerXIncludeTests(test::TestRunner& runner);
 
     // ---- Си-интерфейс для других языков ----

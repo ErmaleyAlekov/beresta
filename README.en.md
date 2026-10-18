@@ -22,41 +22,40 @@ std::cout << doc.toString();                                      // <greeting l
 ## Contents
 
 1. [Advantages](#advantages)
-2. [Comparison with Xerces-C++](#comparison-with-xerces-c)
-3. [Comparison with other libraries](#comparison-with-other-libraries)
-4. [Where to use it](#where-to-use-it)
-5. [Performance](#performance)
-6. [Building and linking](#building-and-linking)
-7. [Ready packages and releases](#ready-packages-and-releases)
-8. [Quick start](#quick-start)
-9. [Data model and memory](#data-model-and-memory)
-10. [Working with the tree](#working-with-the-tree)
-11. [Copying and moving nodes](#copying-and-moving-nodes)
-12. [Parsing: DOM](#parsing-dom)
-13. [Parsing: SAX](#parsing-sax)
-14. [Namespaces](#namespaces)
-15. [Encodings, files and streams](#encodings-files-and-streams)
-16. [Serialization](#serialization)
-17. [DTD and entities](#dtd-and-entities)
-18. [XML Schema](#xml-schema)
-19. [XPath 1.0](#xpath-10)
-20. [Tree traversal: TreeWalker and NodeIterator](#tree-traversal-treewalker-and-nodeiterator)
-21. [XInclude](#xinclude)
-22. [External resources and security](#external-resources-and-security)
-23. [Error handling](#error-handling)
-24. [Message languages](#message-languages)
-25. [Guarantees and thread safety](#guarantees-and-thread-safety)
-26. [Other languages: the C interface](#other-languages-the-c-interface)
-27. [Java (Project Panama)](#java-project-panama)
-28. [C# (P/Invoke)](#c-pinvoke)
-29. [Python (ctypes)](#python-ctypes)
-30. [Node.js (Node-API)](#nodejs-node-api)
-31. [WebAssembly (browsers and Workers)](#webassembly-browsers-and-workers)
-32. [Limitations](#limitations)
-33. [Project structure](#project-structure)
-34. [Tests](#tests)
-35. [Extending the library](#extending-the-library)
-36. [License](#license)
+2. [Comparison with other libraries](#comparison-with-other-libraries)
+3. [Where to use it](#where-to-use-it)
+4. [Performance](#performance)
+5. [Building and linking](#building-and-linking)
+6. [Ready packages and releases](#ready-packages-and-releases)
+7. [Quick start](#quick-start)
+8. [Data model and memory](#data-model-and-memory)
+9. [Working with the tree](#working-with-the-tree)
+10. [Copying and moving nodes](#copying-and-moving-nodes)
+11. [Parsing: DOM](#parsing-dom)
+12. [Parsing: SAX](#parsing-sax)
+13. [Namespaces](#namespaces)
+14. [Encodings, files and streams](#encodings-files-and-streams)
+15. [Serialization](#serialization)
+16. [DTD and entities](#dtd-and-entities)
+17. [XML Schema](#xml-schema)
+18. [XPath 1.0](#xpath-10)
+19. [Tree traversal: TreeWalker and NodeIterator](#tree-traversal-treewalker-and-nodeiterator)
+20. [XInclude](#xinclude)
+21. [External resources and security](#external-resources-and-security)
+22. [Error handling](#error-handling)
+23. [Message languages](#message-languages)
+24. [Guarantees and thread safety](#guarantees-and-thread-safety)
+25. [Other languages: the C interface](#other-languages-the-c-interface)
+26. [Java (Project Panama)](#java-project-panama)
+27. [C# (P/Invoke)](#c-pinvoke)
+28. [Python (ctypes)](#python-ctypes)
+29. [Node.js (Node-API)](#nodejs-node-api)
+30. [WebAssembly (browsers and Workers)](#webassembly-browsers-and-workers)
+31. [Limitations](#limitations)
+32. [Project structure](#project-structure)
+33. [Tests](#tests)
+34. [Extending the library](#extending-the-library)
+35. [License](#license)
 
 ---
 
@@ -65,17 +64,17 @@ std::cout << doc.toString();                                      // <greeting l
 ### In short
 1. **The full set of standards without dependencies.** XML 1.0, namespaces, eight encodings, DTD, XML Schema 1.0 with keys, all of XPath 1.0, XInclude, SAX, DOM Traversal — and not a single third-party library, not even iconv or ICU.
 2. **The most compact tree among full-featured libraries.** A 26 MB catalog takes 172 MB in memory — against 248 MB for libxml2 and 348 MB for Xerces-C++ (see [Performance](#performance)).
-3. **The speed of a full-featured library.** Parsing on par with libxml2 (faster on text), twice as fast as Xerces-C++. XPath is faster than libxml2, XSD validation is 1.5 times faster than Xerces-C++.
+3. **The speed of a full-featured library.** Parsing is twice as fast as Xerces-C++, and almost on par with libxml2 on text. XPath is faster than libxml2, XSD validation is 1.8 times faster than Xerces-C++ — right during parsing or as a stream without a tree.
 4. **Standalone nodes.** A node is created without a document, moved between documents without `importNode`/`adoptNode` and outlives the document it was taken from. Almost no C++ library has this (see the [comparison](#comparison-with-other-libraries)).
 5. **Secure by default.** Entity bombs are always limited, external resources are not loaded without explicit permission, XSD regular expressions run in linear time, and hash tables keyed by document data are protected with a secret key against collision attacks (hash flooding).
 6. **No recursion at all.** Parsing, copying, comparison, output, XSD validation and the destructor walk the tree with an explicit stack — a deep document will not crash the process.
-7. **Well tested.** 127 unit tests, 100 % of the applicable cases of the W3C XML Conformance Test Suite, the ASan/UBSan/LSan sanitizers, libFuzzer fuzzing.
+7. **Well tested.** 136 unit tests, 100 % of the applicable cases of the W3C XML Conformance Test Suite, the ASan/UBSan/LSan sanitizers, libFuzzer fuzzing.
 8. **Six languages from one binary, plus WebAssembly.** C++, C, Java (Panama), C# (P/Invoke), Python (ctypes) and Node.js (Node-API) — all included, without JNI, node-gyp or packages from the network. The same API for browsers and Cloudflare Workers is the `beresta-wasm` package.
 9. **Ready packages for all platforms.** `npm install beresta`, `pip install beresta`, `dotnet add package Beresta`: the binaries for Windows and Linux (x64, arm64) and a universal one for macOS (Intel and Apple Silicon) are already inside — nothing needs to be compiled.
 10. **Messages in Russian and English.** The language is chosen at build time and changed at run time; a new language is added with one file.
 11. **Readable code.** Short functions, small files, bilingual comments everywhere — the library can be read, audited and improved on your own.
 
-### Modern C++ instead of the Xerces legacy
+### Modern C++
 - **Only `std::string` in UTF-8.** No `XMLCh`, `XMLString::transcode()` or manual `release()`. Values from the tree fit any C++ code right away.
 - **RAII everywhere.** A parent owns its children through `std::unique_ptr`, so `delete`, `release()` and `XMLPlatformUtils::Initialize/Terminate` are not needed, and leaks are impossible by construction.
 - **Nodes are standalone.** There is no global document manager. A node is created with a plain constructor, lives anywhere and is moved into any tree without `importNode`/`adoptNode`. The namespace of a node is computed from its current place in the tree, so after a move it is always correct for the new document.
@@ -105,7 +104,7 @@ std::cout << doc.toString();                                      // <greeting l
 - **Protection from "billion laughs".** Limits on the number, size and nesting of entity expansions are always on, not a separate setting.
 - **No XXE or SSRF by default.** Without an explicit `ResourceResolver` nothing external is loaded. `FileResourceResolver` does not leave its root directory and rejects network URIs.
 - **Protection from hash flooding.** Hash tables whose keys come from the document (ID values, element and attribute names) use SipHash-1-3 with a random per-process key: strings with the same hash cannot be prepared in advance.
-- **No quadratic checks on hostile input.** Repeated attributes are searched by a loop only in tags with a few attributes, beyond that — by a hash table. A tag with 100,000 attributes (1.3 MB) is parsed in 0.07 s; it used to take 49 s.
+- **No quadratic checks on hostile input.** Repeated attributes are searched by a loop only in tags with a few attributes, beyond that — by a hash table. A tag with 100,000 attributes (1.3 MB) is parsed in 0.07 s.
 - **Our own XSD regular expressions on a Thompson NFA.** The check time is linear, "catastrophic backtracking" is impossible in principle.
 - **Exact facet arithmetic.** Decimal numbers are compared as digit strings of any length, without the precision loss of `double`.
 - **Checked by sanitizers:** all tests pass under AddressSanitizer, LeakSanitizer, UBSan and `_GLIBCXX_ASSERTIONS` — without memory leaks, undefined behavior or out-of-bounds container access.
@@ -136,39 +135,13 @@ std::cout << doc.toString();                                      // <greeting l
 
 ---
 
-## Comparison with Xerces-C++
-
-| Feature | Xerces-C++ | Beresta |
-|---|---|---|
-| Strings | `XMLCh*` (UTF-16), `transcode`/`release` | `std::string` (UTF-8) |
-| Initialization | `XMLPlatformUtils::Initialize()` | not needed |
-| Creating a node | only `DOMDocument::createElement` | `std::make_unique<beresta::Element>("a")` |
-| A node outside a document | bound to the owner document | fully standalone |
-| Moving between documents | `importNode` / `adoptNode` | `removeChild` + `appendChild` |
-| Freeing memory | `release()` / deleting the document | RAII (`unique_ptr`) |
-| Settings | string parameters of `DOMConfiguration` | the `ParserOptions` structure |
-| DOM, SAX | yes | yes (`XmlParser`, `SaxParser`) |
-| Namespaces | yes | yes, DOM URIs are computed "live" |
-| Encodings | through transcoders, ICU or iconv | 8 encodings, own tables |
-| DTD validation | yes | yes |
-| XML Schema | yes (complete) | XSD 1.0 with `xs:key`/`xs:keyref`/`xs:unique`; without `xs:redefine` and substitution groups (see [Limitations](#limitations)) |
-| XPath | only for XSD identity constraints | full XPath 1.0 |
-| XInclude | yes | yes |
-| TreeWalker / NodeIterator | yes | yes |
-| Protection from entity bombs | `SecurityManager` as a separate setting | always on |
-| External resources | loaded by default | only through an explicit `ResourceResolver` |
-| Formatted output | `format-pretty-print` | `SerializerOptions::prettyPrint` |
-| Other languages | only C++ (wrappers are third-party projects) | C, Java 22+, C#, Python, Node.js, WebAssembly included |
-| Dependencies | the library + transcoders | none |
-
----
-
 ## Comparison with other libraries
 
 What popular XML libraries for C and C++ can do "out of the box" (versions as in the [measurements](#performance)):
 
 | Feature | Beresta | libxml2 | Xerces-C++ | pugixml | tinyxml2 | RapidXML |
 |---|---|---|---|---|---|---|
+| Strings in the API | `std::string` (UTF-8) | `xmlChar*` (UTF-8), manual `xmlFree` | `XMLCh*` (UTF-16), `transcode`/`release` | `char*` or `wchar_t*` | `const char*` | `char*` |
 | Namespaces | yes, "live" URIs | yes | yes | no (the prefix is part of the name) | no | no |
 | DTD validation | yes | yes | yes | no | no | no |
 | XML Schema | 1.0, with keys | 1.0, partial | 1.0, the most complete | no | no | no |
@@ -207,7 +180,7 @@ There XML is the main format of legally significant exchange, and it is almost a
 - **Reporting to government agencies.** Electronic reports to the Federal Tax Service (FNS), the Social Fund (SFR) and other agencies are transmitted in XML formats published together with their XSD schemas. A file can be validated against the schema before it is sent: every error comes with the path to the element (`/Файл/Документ/СвНП[1]`), a position and a clear text in Russian or English.
 - **Interagency exchange (SMEV 3).** SOAP envelopes and data types are described by XSD with namespaces. Keys and references between records (`xs:key`, `xs:keyref`, `xs:unique`) are checked by the schema itself, without application code.
 - **Electronic document flow.** Universal transfer documents (UPD), invoices and acts in FNS formats, documents with marking codes, exchange with EGAIS are XML with strict schemas and Cyrillic text. Eight encodings, including windows-1251, KOI8-R and IBM866, work without iconv or ICU.
-- **Procurement and open data.** Exports of the Unified Procurement Information System (EIS) and open data portals are large XML files. For them there is streaming SAX and the most compact tree among full-featured libraries: 1.4 times less memory than libxml2 and half of what Xerces-C++ needs.
+- **Procurement and open data.** Exports of the Unified Procurement Information System (EIS) and open data portals are large XML files. For them there is streaming SAX — including XSD validation without building a tree — and the most compact tree among full-featured libraries: 1.4 times less memory than libxml2 and half of what Xerces-C++ needs.
 - **Banks and finance.** ISO 20022 payment messages and the electronic formats of the Bank of Russia are XML with schemas. Security by default (no XXE, entity bombs or hash collision attacks) closes a whole class of vulnerabilities before an audit finds them.
 - **Accounting systems and trade.** Exchange with 1C (EnterpriseData, CommerceML), marketplaces and online shops goes in XML. The same schema can be checked in a Java or .NET service, a Python script, a Node.js server and right in the browser — with the same result.
 - **Isolated environments and import substitution.** There are no third-party dependencies, the license is MIT, the sources are open and readable (short functions, bilingual comments): the code can be audited, built from source without internet access and included into your own product. The core is portable C++17 without assembly or system-specific extensions, so it should build with a regular GCC or Clang on domestic Linux distributions. Builds on Astra Linux, RED OS, ALT and Elbrus processors have not been checked in this repository yet.
@@ -227,38 +200,31 @@ When another library is a better choice is said in [Comparison with other librar
 
 The measurements are made by the [`benchmarks/`](benchmarks/) program on the same data for all libraries: a product catalog (26 MB: 100,000 elements with attributes, entities and Cyrillic) and an article (14 MB: a long Russian text with mixed content). The median of 5 runs, AMD Ryzen 5 5600X, Ubuntu 26.04, GCC 15 `-O2`, the libraries from the distribution packages. The walk checksums, the output size and the XPath node count match for all libraries — so they built the same tree.
 
-**Catalog, 26 MB** (parsing and validation — MB/s, more is better; walk and XPath — ms, less is better):
+**Catalog, 26 MB** (parsing and validation — MB/s, more is better; walk and XPath — ms, less is better; "Parse + XSD" — a tree and validation, "SAX + XSD" — streaming validation without a tree):
 
-| Library | Parse | Walk | Output | XPath | Parse + XSD | DOM memory |
-|---|---|---|---|---|---|---|
-| **Beresta 2.1** | **94** | 47 | **470** | **103** | **54** | **172 MB (×6.5)** |
-| libxml2 2.15 | 113 | 27 | 515 | 128 | 73 | 248 MB (×9.3) |
-| Xerces-C++ 3.2 | 47 | 63 | 154 | — | 35 | 348 MB (×13.0) |
-| pugixml 1.14 | 1276 | 39 | 1333 | 15 | — | 107 MB (×4.0) |
-| tinyxml2 11 | 181 | 15 | 409 | — | — | 176 MB (×6.6) |
-| RapidXML 1.13 | 1214 | 27 | 594 | — | — | 145 MB (×5.4) |
+| Library | Parse | Walk | Output | XPath | Parse + XSD | SAX + XSD | DOM memory |
+|---|---|---|---|---|---|---|---|
+| **Beresta 2.1** | 86 | 47 | 421 | **108** | 62 | 93 | **172 MB (×6.5)** |
+| libxml2 2.15 | 120 | 27 | 523 | 127 | 75 | 112 | 248 MB (×9.3) |
+| Xerces-C++ 3.2 | 46 | 65 | 156 | — | 35 | — | 348 MB (×13.0) |
+| pugixml 1.14 | 1563 | 39 | 1333 | 17 | — | — | 107 MB (×4.0) |
+| tinyxml2 11 | 185 | 15 | 416 | — | — | — | 176 MB (×6.6) |
+| RapidXML 1.13 | 1166 | 26 | 593 | — | — | — | 145 MB (×5.4) |
 
 **Article, 14 MB:**
 
 | Library | Parse | Walk | Output | XPath | DOM memory |
 |---|---|---|---|---|---|
-| **Beresta 2.1** | **217** | 12 | 548 | 35 | **39 MB (×2.8)** |
-| libxml2 2.15 | 199 | 5 | 1044 | 12 | 57 MB (×4.0) |
-| Xerces-C++ 3.2 | 8 | 10 | 238 | — | 64 MB (×4.6) |
-| pugixml 1.14 | 2277 | 4 | 2050 | 3 | 28 MB (×2.0) |
+| **Beresta 2.1** | 186 | 11 | 438 | 35 | **39 MB (×2.8)** |
+| libxml2 2.15 | 202 | 6 | 1020 | 11 | 57 MB (×4.0) |
+| Xerces-C++ 3.2 | 8 | 9 | 238 | — | 64 MB (×4.5) |
+| pugixml 1.14 | 2309 | 4 | 2067 | 3 | 28 MB (×2.0) |
 
 How to read these numbers:
-- **Among full-featured libraries** (DOM + namespaces + DTD + XSD + encoding checks) Beresta parses on par with libxml2 (faster on text), twice as fast as Xerces-C++, and runs XPath on the catalog faster than libxml2. It needs less memory for the tree than both.
+- **Among full-featured libraries** (DOM + namespaces + DTD + XSD + encoding checks) Beresta parses twice as fast as Xerces-C++, text almost on par with libxml2 (the catalog 1.4 times slower), and runs XPath on the catalog faster than libxml2. It needs less memory for the tree than both.
 - **pugixml and RapidXML** are 10–15 times faster, but they are a different class: in-place parsing without checks — no namespaces, DTD, XSD, character or encoding checks, and RapidXML also modifies the input buffer. If you need only fast parsing of trusted XML, they are the right choice.
-- **Parsing with XSD validation** is 1.5 times faster than with Xerces-C++ and 1.35 times slower than with libxml2. libxml2 validates the document right while parsing, while Beresta does it in a second pass over the ready tree: this way validation also works for a tree built or changed in code.
-
-How the current numbers were obtained. Profiling (callgrind) found quadratic complexity in XSD validation: the path to each child searched its siblings anew, and matching the `item*` model copied a set of n+1 positions at every step. Both were rewritten into linear algorithms, and validating the catalog takes fractions of a second instead of tens of seconds. In addition: an ASCII fast path in name checks, an own delimiter search instead of `find_first_of`, skipping a needless sort in XPath, reusing buffers. The result relative to the first version: catalog parsing 61 → 94 MB/s, article 132 → 217 MB/s, XPath 293 → 103 ms, output 390 → 470 MB/s.
-
-The second round made XSD validation itself 3.2 times faster (parsing with validation: 30 → 54 MB/s). The profile showed that the time went not into the checks but into memory allocation:
-- a path like `/catalog/item[5]/name` was built as a string for every element in advance, although it is needed only in an error message. Now an element has a path step number, and the string is assembled only on an error;
-- values were copied for whitespace normalization even when it changed nothing. Now an already normal value is checked in place, without a copy;
-- for a content model that is a sequence of elements with different names (the most common case), one greedy pass replaces the general algorithm on position sets. The general algorithm stays for the other models and for the exact error location;
-- ID/IDREF accounting and node types for `xs:key` are enabled only when needed; required attributes are checked by a bit mask instead of a repeated search; the namespace lookup in the core no longer builds the `xmlns:prefix` string or copies values.
+- **Parsing with XSD validation** is 1.8 times faster than with Xerces-C++ and 1.2 times slower than with libxml2. Beresta validates the document right while parsing, in one pass; libxml2 in this measurement builds a tree and validates it in a second pass (`xmlSchemaValidateDoc`). The gap to libxml2 is mostly the difference in the speed of parsing itself (86 against 120 MB/s): validation costs Beresta no more.
+- **Streaming validation without a tree** (`SaxParser` with a schema) — 93 MB/s, 1.5 times faster than with building a tree; libxml2 (`xmlSchemaValidateStream`) — 112 MB/s. The validation needs O(document depth) memory — for multi-gigabyte exports that do not fit into a tree.
 
 Repeating the measurement (Linux; the libraries for comparison are needed only by the benchmark program):
 
@@ -292,7 +258,28 @@ cd benchmarks && make run
 
 WebAssembly parses about a third slower than native code (the usual price of Wasm), while its XPath is even faster: the result is assembled inside the module, without crossing the Node-API boundary at every node.
 
-**Resistance to complexity attacks.** A tag with 100,000 attributes (1.3 MB): it took 48.8 s, now 0.074 s — repeated attributes are searched by a hash table with a secret key, not by trying all pairs.
+**Wrappers against the native XML libraries of their languages** (a 13 MB catalog, 50,000 products; parsing and validation — MB/s, walk and XPath — ms; memory — the growth of the process memory after parsing; all libraries agree on the element count, the XPath node count and the schema error count):
+
+| Language | Library | Parse | Walk | XPath | Parse + XSD | Memory |
+|---|---|---|---|---|---|---|
+| Java 25 | **Beresta (Panama)** | 103 | 438 | **69** | 63 | **88 MB (×6.6)** |
+| | JDK DOM (`javax.xml`, Xerces-J) | **146** | **4** | 97 | **68** | 123 MB (×9.3) |
+| .NET 10 | **Beresta (P/Invoke)** | 105 | 228 | 88 | **65** | 86 MB (×6.5) |
+| | `XmlDocument` | 70 | 30 | **23** | 28 | 72 MB (×5.5) |
+| | `XDocument` (LINQ to XML) | **116** | **4** | 28 | 42 | **54 MB (×4.1)** |
+| Python 3.14 | **Beresta (ctypes)** | 103 | 2420 | 103 | 66 | 86 MB (×6.5) |
+| | lxml 6.1 (libxml2 2.14) | **126** | 25 | **57** | **78** | 119 MB (×8.9) |
+| | `xml.etree.ElementTree` | 61 | **6** | — | — | **82 MB (×6.2)** |
+
+Where the wrappers make sense:
+- **The core is the same everywhere**, so parsing and schema validation run at C++ speed (63–105 MB/s) in any language. Walking the tree from a wrapper is slow: every step (`firstChild`, `nextSibling`) is a call across the language boundary and a wrapper object. The fewer tree steps on the language side, the better the wrapper pays off: XPath, `selectValues`, schema validation and output run entirely inside the core.
+- **Node.js and the browser** are the clearest win: among libraries with a real DOM, XPath and XSD Beresta is the fastest (see the table above), and a browser has no built-in XSD validation at all.
+- **.NET** — XSD validation is 1.5–2.3 times faster than in `System.Xml`, parsing is on par with `XDocument`. If no schema is needed, `XDocument` is faster and leaner.
+- **Java** — XPath is 1.4 times faster, the tree is 30 % more compact; parsing is slower than in the built-in Xerces-J, XSD validation is on par. Another difference is security by default: the standard `DocumentBuilder` loads external entities until it is explicitly configured not to.
+- **Python** — lxml is faster in everything except memory: the ctypes overhead is large. Here the wrapper is justified if the same behavior as in the other languages, no dependencies or memory matter.
+- Common reasons to choose the wrapper: the same error messages, paths and rules in all languages, security by default, the windows-1251/KOI8-R/IBM866 encodings without external libraries.
+
+To repeat: `node benchmarks/wrappers/make_data.js`, then the programs in `benchmarks/wrappers/` (see [`benchmarks/README.md`](benchmarks/README.md)).
 
 ---
 
@@ -693,7 +680,7 @@ The input is **bytes** in any supported encoding: it is detected by the BOM and 
 | `baseUri` | `""` | the base for relative references |
 | `resolver` | `nullptr` | the loader of external resources |
 | `errorHandler` | `nullptr` | the receiver of errors and warnings |
-| `schema` | `nullptr` | an XML Schema to validate against after parsing |
+| `schema` | `nullptr` | an XML Schema to validate against during parsing (DOM and SAX) |
 
 `resolver` and `errorHandler` are **non-owning** pointers: the objects must live while parsing goes on.
 
@@ -747,6 +734,8 @@ beresta::SaxParser(options).parseFile("big.xml", counter);
 | `dtdProcessingInstruction(target, data)` | PIs from the internal and external DTD, before `documentType`; by default it calls `processingInstruction` (section 2.6: PIs are passed to the application). `DomBuilder` skips them |
 
 All `string_view`s in events are valid **only during the call**. `DomBuilder` is a public handler that builds the DOM; it can be inherited.
+
+With `options.schema` the document is validated against an XML Schema along the parse by the streaming validator, and your handler gets the same events; no tree is built (see [XML Schema](#xml-schema)).
 
 ---
 
@@ -880,14 +869,34 @@ beresta::xsd::SchemaValidator validator(schema);
 std::vector<beresta::Diagnostic> errors = validator.validate(doc);
 bool ok = validator.isValid(doc);
 
-// Option 2: validation right while parsing
+// Option 2: validation right while parsing into a DOM — one pass, without a second tree walk
 beresta::ParserOptions options;
 options.schema = schema;
 options.errorHandler = &handler;          // without it — an exception on the first error
 beresta::XmlParser(options).parseFile("catalog.xml");
+
+// Option 3: streaming validation without a tree — for multi-gigabyte exports
+MyHandler events;                         // any ContentHandler (or an empty one)
+beresta::SaxParser(options).parseFile("export.xml", events);
 ```
 
-Every error contains the path to the element and a position: `line 12, column 5: /catalog/book[2]/price: the value "-5" is less than the minimum 0`. When a schema validates while parsing, positions are recorded automatically.
+Every error contains the path to the element and a position: `line 12, column 5: /catalog/book[2]/price: the value "-5" is less than the minimum 0`. Error positions are always there: the validator takes them from the parser, and they are recorded into the tree nodes only if `trackLocations` is on.
+
+**Validation during parsing.** The validator is a decorator over the SAX event stream (`xsd::ValidatingHandler`): the events pass through it and go further — into `DomBuilder`, into your handler or nowhere. The content model is matched step by step, one child at a time (a greedy pass for sequences of different elements, an automaton over particle configurations for the other models), simple values — when the element is closed, by the accumulated text. All three options are the same validation logic: `SchemaValidator::validate` turns a ready tree into an event stream by a walk without recursion. So the errors, their order, paths and positions are the same in all three options.
+
+- **DOM with a schema** (`XmlParser`): the document is validated in the same pass that builds it; the `xs:key`/`xs:unique`/`xs:keyref` keys — over the ready tree, with the same XPath engine. With `processXInclude` the document is validated after the inclusions are substituted, over the tree.
+- **SAX with a schema** (`SaxParser`): no tree is built, the validation memory is O(document depth) plus the ID values and the key tables. Keys are evaluated in a stream (see below). The errors arrive in `errorHandler` after `endDocument`: the numbers in paths like `item[5]` are known only when all the siblings have been read.
+- **Your own pipeline:** `ValidatingHandler` can be put before any handler by hand.
+
+```cpp
+beresta::DomBuilder builder(options);
+beresta::xsd::ValidatingHandler validator(schema, &builder,
+    beresta::xsd::validationSettingsFor(options, beresta::xsd::IdentityEvaluation::ON_TREE));
+beresta::SaxParser(parserOptionsWithoutSchema).parse(text, validator);
+beresta::Document doc = builder.takeDocument();
+validator.checkIdentity(doc);                                // the keys — over the built tree
+std::vector<beresta::Diagnostic> errors = validator.takeDiagnostics();
+```
 
 | Loading | Description |
 |---|---|
@@ -948,6 +957,7 @@ Relational checks inside a document are done by the schema itself, without appli
 - **Schema errors are caught at load time:** an undeclared `refer`, a `keyref` referring to another `keyref`, different numbers of fields in a `keyref` and its key, a repeated constraint name, a syntax error in `xpath`.
 - Prefixes in `xpath` are resolved by the `xmlns` declarations of the schema document. A name without a prefix is, as XSD 1.0 requires, outside any namespace.
 - Selectors and fields are compiled once at schema load time by the same XPath 1.0 engine. It also accepts expressions beyond the XSD grammar, which real schemas follow anyway.
+- **In a stream (SAX without a tree)** keys are checked as in Xerces: selectors and fields from the XSD grammar (the `child` and `attribute` axes, a leading `.//`, `|`, `*`, `p:*`) are matched against the stack of names of the open elements, a key row is collected by the closing of the target element, tables and references — by the closing of the scope. The messages are the same as with the check over a tree. A constraint with an expression outside this grammar (for example, `a//b` or with a predicate) cannot be checked without a tree — one message per constraint reports it.
 
 Simple types are available without a schema too:
 
@@ -1490,11 +1500,11 @@ Deliberate limitations (KISS / YAGNI):
 - **An external entity with `version="1.1"`** in the text declaration is rejected. The 5th edition of XML 1.0 does not require this directly; it is done this way after the W3C case `rmt-e2e-38` (an erratum of the 2nd edition: an XML 1.0 document cannot include an XML 1.1 entity).
 - **Processing instructions inside the DTD** are passed to the SAX handler (`dtdProcessingInstruction`, by default a plain `processingInstruction`), but do not become DOM nodes: `DocumentType` has no children. PIs of the internal subset are kept in the `getInternalSubset()` text and in serialization.
 - **Extreme depth.** There is no recursion anywhere, so the stack will not overflow. But some results themselves grow faster than the depth: the total indentation of pretty output and the document order keys in XPath are proportional to the depth for every node (so is the path in an XSD validator message, but it is built only on an error). On trees tens of thousands of levels deep these operations are noticeably slower. By default the parser limits the depth to `maxDepth` = 1024.
-- **The C interface and the wrappers** cover DOM, XPath and XML Schema. SAX, `TreeWalker`, a custom `ResourceResolver` and the fine settings of `ParserOptions` (limits, a forced encoding) are available only from C++. DTD validation and XInclude are enabled with parse flags in other languages. Nodes in the wrappers live inside their document, but they can be both copied (`copyTo` / `CopyTo` / `copy_to`) and moved without copying (`moveTo` / `MoveTo` / `move_to`), including between documents. Creating a node without a document, as in C++, is not possible from other languages, and the root element of a document is not moved — only copied.
+- **The C interface and the wrappers** cover DOM, XPath and XML Schema. SAX, `TreeWalker`, a custom `ResourceResolver` and the fine settings of `ParserOptions` (limits, a forced encoding) are available only from C++. DTD validation and XInclude are enabled with parse flags in other languages. Nodes in the wrappers live inside their document, but they can be both copied (`copyTo` / `CopyTo` / `copy_to`) and moved without copying (`moveTo` / `MoveTo` / `move_to`), including between documents. Creating a node without a document, as in C++, is not possible from other languages, and the root element of a document is not moved — only copied. Walking the tree step by step from the wrappers is tens to hundreds of times slower than from C++: every step is a call across the language boundary; for bulk processing use XPath (`selectValues`) or SAX in C++.
 - **A node after removal.** After `remove()` the wrapper of the removed node and the wrappers of its descendants are invalid and must not be used. A document checks only its own closing.
 - **32-bit platforms** are supported by the core, but the wrappers were checked on 64-bit ones.
 - **WebAssembly:** there is no file system, so `parseFile`, `save`, `Schema.fromFile` and loading external DTDs, entities and XInclude from files are unavailable — parse strings and bytes, output to a string.
-- **XSD validation is a second pass.** A schema validates the ready tree, not the stream of parse events. This way validation also works for a tree built or changed in code, but the document is walked twice; streaming validation during parsing (as in libxml2) is not done yet.
+- **Streaming XSD validation** (`SaxParser` with a schema) checks the `xs:key`/`xs:unique`/`xs:keyref` keys only with selectors and fields from the XSD grammar; expressions beyond it (the check over a tree accepts them) are not evaluated in a stream, and a message reports that. Schema errors are reported after the end of the document (the sibling numbers in paths are known only then), and the SAX parser, like the DOM one, reads the input into memory entirely — without a tree, but not as a byte stream.
 
 ---
 
@@ -1514,8 +1524,8 @@ beresta/
 │   ├── sax/                      SaxParser, ContentHandler, Locator
 │   ├── encoding/                 Charset, tables, encoding detection
 │   ├── dtd/                      the model, reading, parsing and validating DTD
-│   ├── content/                  the content model (common for DTD and XSD)
-│   ├── xsd/                      Schema, SchemaValidator, data types; regex/ — the pattern engine
+│   ├── content/                  the content model (common for DTD and XSD), the step-by-step cursor
+│   ├── xsd/                      Schema, SchemaValidator, ValidatingHandler, data types; regex/ — the pattern engine
 │   ├── xpath/                    XPathExpression, XPathValue; internal/ — the lexer, parser, AST
 │   ├── traversal/                TreeWalker, NodeIterator, NodeFilter
 │   ├── serializer/               XmlSerializer
@@ -1540,15 +1550,15 @@ beresta/
     └── fuzz/                     libFuzzer targets, a dictionary, a corpus builder
 ```
 
-The core and the C interface are about **17.3 thousand lines of code** without comments and blank lines (263 implementation files, 83 headers; together with the bilingual comments — about 28 thousand lines). The wrappers are about 6.8 thousand more lines of code in Java, C#, Python, JavaScript and C++ (the Node.js addon).
+The core and the C interface are about **19.8 thousand lines of code** without comments and blank lines (300 implementation files, 97 headers; together with the bilingual comments — about 32 thousand lines). The wrappers are about 6.8 thousand more lines of code in Java, C#, Python, JavaScript and C++ (the Node.js addon).
 
 ### Parser design
 
 ```
-bytes ──► encoding::decodeDocument ──► UTF-8 ──► ParseSession ──► ContentHandler
-              (BOM, declaration,               (an iterative loop,   ├── DomBuilder ──► Document ──► XInclude ──► XSD
-               character checks)                the entity stack,    └── your SAX handler
-                                                namespaces,
+bytes ──► encoding::decodeDocument ──► UTF-8 ──► ParseSession ──► [ValidatingHandler] ──► ContentHandler
+              (BOM, declaration,               (an iterative loop,  (XSD along the      ├── DomBuilder ──► Document ──► XInclude
+               character checks)                the entity stack,     parse, if a         └── your SAX handler
+                                                namespaces,           schema is set)
                                                 DTD + validator)
 ```
 
@@ -1574,11 +1584,11 @@ A node wrapper is a native handle plus a reference to the owner document: while 
 make test
 ```
 
-**127 C++ tests in 39 suites:**
+**136 C++ tests in 43 suites:**
 - the core: copying, hierarchy, elements, navigation, namespaces, serialization, trees 100,000 levels deep;
 - the parser: formats, content, errors, limits, SAX (including PIs from the DTD), encodings, protection from complexity attacks (repeated attributes beyond the loop threshold, the keyed hash);
 - DTD: entities, validity checking, external resources;
-- the serializer, tree traversal, XPath (paths, axes, functions, the `namespace` axis, names), XSD (types, schemas, advanced features, `xs:key`/`xs:unique`/`xs:keyref`, paths in error messages, whitespace rules), XInclude;
+- the serializer, tree traversal, XPath (paths, axes, functions, the `namespace` axis, names), XSD (types, schemas, advanced features, `xs:key`/`xs:unique`/`xs:keyref`, paths in error messages, whitespace rules; streaming validation: SAX, DOM and a ready tree give the same errors, streaming keys, a deep document), the content model (the step-by-step cursor against the general algorithm on thousands of random models), XInclude;
 - the C interface: error codes, building and changing the tree, moving nodes between documents (with freeing the source document and rolling back a rejected move), XPath, XML Schema;
 - message languages: catalog completeness (every message has a translation with the same `{N}` markers), changing the language at run time, argument substitution;
 - regressions: differences from the W3C suite (syntax, entities, validity, encodings) and fuzzing findings.

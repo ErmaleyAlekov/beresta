@@ -40,4 +40,30 @@ function makeCatalog(items)
 // Запрос для библиотек с XPath / The query for libraries with XPath
 const QUERY = "//item[@category = 'tea' and @price > 250]/name";
 
-module.exports = { makeCatalog, QUERY };
+/*
+ * Схема каталога — та же, что catalogSchema() в программе замеров на C++:
+ * последовательность, перечисление, ID, decimal и nonNegativeInteger.
+ *
+ * The catalog schema — the same as catalogSchema() in the C++ benchmark:
+ * a sequence, an enumeration, ID, decimal and nonNegativeInteger.
+ */
+const CATALOG_XSD = '<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">'
+    + '<xs:element name="catalog"><xs:complexType><xs:sequence>'
+    + '<xs:element name="item" type="Item" maxOccurs="unbounded"/>'
+    + '</xs:sequence></xs:complexType></xs:element>'
+    + '<xs:simpleType name="Category"><xs:restriction base="xs:string">'
+    + '<xs:enumeration value="tea"/><xs:enumeration value="coffee"/>'
+    + '<xs:enumeration value="cocoa"/><xs:enumeration value="herbs"/>'
+    + '</xs:restriction></xs:simpleType>'
+    + '<xs:complexType name="Item"><xs:sequence>'
+    + '<xs:element name="name" type="xs:string"/><xs:element name="description" type="xs:string"/>'
+    + '<xs:element name="tags"><xs:complexType><xs:sequence>'
+    + '<xs:element name="tag" type="xs:NCName" maxOccurs="unbounded"/>'
+    + '</xs:sequence></xs:complexType></xs:element></xs:sequence>'
+    + '<xs:attribute name="id" type="xs:ID" use="required"/>'
+    + '<xs:attribute name="category" type="Category" use="required"/>'
+    + '<xs:attribute name="price" type="xs:decimal" use="required"/>'
+    + '<xs:attribute name="stock" type="xs:nonNegativeInteger" use="required"/>'
+    + '</xs:complexType></xs:schema>';
+
+module.exports = { makeCatalog, QUERY, CATALOG_XSD };

@@ -58,6 +58,8 @@
 #include "xsd/simple_type.hpp"
 #include "xsd/schema.hpp"
 #include "xsd/schema_validator.hpp"
+#include "xsd/prefix_resolver.hpp"
+#include "xsd/validating_handler.hpp"
 
 #include "xinclude/xinclude.hpp"
 

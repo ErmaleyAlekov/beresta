@@ -15,11 +15,19 @@ namespace beresta
     ** Дерево не строится: обработчик получает события по мере чтения,
     ** поэтому расход памяти не зависит от размера документа.
     ** Все проверки корректности, пространств имён и DTD — те же, что в DOM.
+    ** Со схемой (ParserOptions::schema) события проходят через потоковый
+    ** валидатор (xsd::ValidatingHandler) к вашему обработчику: проверка без
+    ** дерева, память — O(глубины документа). Ошибки схемы приходят в
+    ** errorHandler после endDocument (без него — исключение с первой ошибкой).
     **
     ** SaxParser — a streaming parser (the analog of SAX2XMLReader in Xerces).
     ** No tree is built: the handler receives events as the input is read,
     ** so the memory use does not depend on the document size.
     ** All well-formedness, namespace and DTD checks are the same as in DOM.
+    ** With a schema (ParserOptions::schema) the events pass through the streaming
+    ** validator (xsd::ValidatingHandler) to your handler: validation without a
+    ** tree, the memory is O(document depth). Schema errors arrive in
+    ** errorHandler after endDocument (without it — an exception with the first error).
     */
     class SaxParser
     {

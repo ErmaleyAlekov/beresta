@@ -13,6 +13,8 @@
 
 namespace beresta::xsd
 {
+    class PrefixResolver;
+
     // Пространство имён XML Schema
     // The XML Schema namespace
     inline constexpr std::string_view XSD_NAMESPACE_URI = "http://www.w3.org/2001/XMLSchema";
@@ -109,6 +111,11 @@ namespace beresta::xsd
     */
     std::optional<std::string> validateSimpleValue(const SimpleType& type, std::string_view value,
         const Element* context);
+
+    // То же, но префиксы QName берутся из prefixes (например, из стека объявлений потока SAX)
+    // The same, but QName prefixes are taken from prefixes (for example, from the declaration stack of a SAX stream)
+    std::optional<std::string> validateSimpleValue(const SimpleType& type, std::string_view value,
+        const PrefixResolver& prefixes);
 
     // Значение после обработки пробелов по правилу whiteSpace
     // The value after whitespace processing by the whiteSpace rule

@@ -7,3 +7,9 @@
 # Отчёт зависит от машины и в репозиторий не кладётся
 # The report depends on the machine and is not put into the repository
 /benchmark_report.md
+
+# Данные и сборки замеров обёрток / The data and builds of the wrapper measurements
+/wrappers/data/
+/wrappers/csharp/bin/
+/wrappers/csharp/obj/
+__pycache__/

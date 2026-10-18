@@ -3,12 +3,6 @@
 
 namespace beresta
 {
-    // Виртуальный деструктор интерфейса Locator
-    // The virtual destructor of the Locator interface
-    Locator::~Locator()
-    {
-    }
-
     // Пробельное форматирование — по умолчанию игнорируется
     // Whitespace formatting — ignored by default
     void ContentHandler::ignorableWhitespace(std::string_view text)

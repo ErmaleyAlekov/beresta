@@ -12,13 +12,17 @@ namespace beresta::xsd
 {
     /*
     ** SchemaValidator — проверка готового DOM по XML Schema.
-    ** Собирает ВСЕ ошибки за один обход. Каждая ошибка содержит путь
+    ** Дерево обходится без рекурсии и превращается в поток событий для того
+    ** же потокового валидатора, что проверяет документ при разборе, — логика
+    ** проверки одна. Собирает ВСЕ ошибки за один обход. Каждая ошибка содержит путь
     ** к элементу (/catalog/book[2]/price) и, если документ разобран с
     ** trackLocations, строку и столбец в исходном файле.
     ** Валидатор неизменяем и потокобезопасен.
     **
     ** SchemaValidator — validates a ready DOM against an XML Schema.
-    ** Collects ALL errors in one traversal. Each error contains the path
+    ** The tree is traversed without recursion and turned into an event stream for the same
+    ** streaming validator that validates a document during parsing — the validation
+    ** logic is one. Collects ALL errors in one traversal. Each error contains the path
     ** to the element (/catalog/book[2]/price) and, if the document was parsed with
     ** trackLocations, the line and column in the source file.
     ** The validator is immutable and thread-safe.

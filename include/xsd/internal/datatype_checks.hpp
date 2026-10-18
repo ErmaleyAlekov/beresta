@@ -1,6 +1,7 @@
 #ifndef XSD_DATATYPE_CHECKS_HPP
 #define XSD_DATATYPE_CHECKS_HPP
 
+#include "xsd/prefix_resolver.hpp"
 #include "xsd/simple_type.hpp"
 
 #include <optional>
@@ -48,7 +49,7 @@ namespace beresta::xsd::detail
     bool matchesLexicalForm(LexicalForm form, std::string_view value) noexcept;
     bool isLanguageLexical(std::string_view value) noexcept;
     bool isDurationLexical(std::string_view value) noexcept;
-    bool isResolvableQName(std::string_view value, const Element* context);
+    bool isResolvableQName(std::string_view value, const PrefixResolver& prefixes);
 
     // ---- Даты (lexical_dates.cpp, lexical_date_parts.cpp) ----
     // ---- Dates (lexical_dates.cpp, lexical_date_parts.cpp) ----
@@ -104,7 +105,7 @@ namespace beresta::xsd::detail
     // ---- Проверка лексики и фасетов атомарного значения (facet_checks.cpp) ----
     // ---- Checking the lexis and facets of an atomic value (facet_checks.cpp) ----
     std::optional<std::string> checkLexical(const SimpleType& type, std::string_view value,
-        const Element* context);
+        const PrefixResolver& prefixes);
     std::optional<std::string> checkLengthFacets(const SimpleType& type, std::string_view value);
     std::optional<std::string> checkRangeFacets(const SimpleType& type, std::string_view value);
     std::optional<std::string> checkDigitFacets(const SimpleType& type, std::string_view value);

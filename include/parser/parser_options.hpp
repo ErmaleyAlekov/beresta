@@ -115,8 +115,10 @@ namespace beresta
         // The receiver of errors and warnings; nullptr — validity errors are thrown at once
         ErrorHandler* errorHandler = nullptr;
 
-        // XML Schema для проверки после разбора (nullptr — без проверки)
-        // An XML Schema for validation after parsing (nullptr — no validation)
+        // XML Schema для проверки прямо во время разбора — и DOM, и SAX (nullptr — без проверки).
+        // С processXInclude документ проверяется уже после подстановки включений
+        // An XML Schema for validation right during parsing — both DOM and SAX (nullptr — no validation).
+        // With processXInclude the document is validated after the inclusions are substituted
         std::shared_ptr<const xsd::Schema> schema;
     };
 }

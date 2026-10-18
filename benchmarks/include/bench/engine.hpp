@@ -39,7 +39,8 @@ namespace bench
     **                    библиотеками: так видно, что все построили одно дерево);
     **   serialize      — дерево -> текст без отступов; результат — число байтов;
     **   xpathCount     — число узлов результата выражения XPath 1.0;
-    **   parseValidated — разбор с проверкой по XML Schema; результат — число ошибок.
+    **   parseValidated — разбор с проверкой по XML Schema; результат — число ошибок;
+    **   streamValidated — потоковая проверка по схеме без дерева (SAX); результат — число ошибок.
     ** Необязательные операции возвращают nullopt, если библиотека их не умеет.
     **
     ** XmlEngine — one compared library (the Strategy pattern). All libraries
@@ -50,7 +51,8 @@ namespace bench
     **                    libraries: this shows that all of them built the same tree);
     **   serialize      — tree -> text without indentation; the result is the byte count;
     **   xpathCount     — the number of nodes in the result of an XPath 1.0 expression;
-    **   parseValidated — parsing with XML Schema validation; the result is the error count.
+    **   parseValidated — parsing with XML Schema validation; the result is the error count;
+    **   streamValidated — streaming schema validation without a tree (SAX); the result is the error count.
     ** Optional operations return nullopt if the library cannot do them.
     */
     class XmlEngine
@@ -78,6 +80,9 @@ namespace bench
 
         // Разбор с проверкой по схеме; число ошибок валидности / Parsing with schema validation; the validity error count
         virtual std::optional<std::size_t> parseValidated(const std::string& xml, const std::string& xsd);
+
+        // Проверка по схеме потоком событий, без дерева; число ошибок / Validation by an event stream, without a tree; the error count
+        virtual std::optional<std::size_t> streamValidated(const std::string& xml, const std::string& xsd);
     };
 
     // Все библиотеки, с которыми собрана программа (registry.cpp) / All libraries the program is built with

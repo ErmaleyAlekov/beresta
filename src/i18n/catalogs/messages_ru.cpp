@@ -337,6 +337,7 @@ namespace beresta::i18n
         {Message::XSD_SIMPLE_WITH_CHILDREN, "элемент простого типа {0} не может содержать элементы"},
         {Message::XSD_SIMPLE_WITH_ATTRIBUTE, "атрибут \"{0}\" недопустим у элемента простого типа"},
         {Message::XSD_ELEMENT_FIXED, "значение должно быть равно фиксированному \"{0}\""},
+        {Message::IDENTITY_NOT_STREAMABLE, "ограничение \"{0}\" не проверено: при потоковой проверке без дерева xs:selector и xs:field должны укладываться в грамматику путей XSD (оси child и attribute, \".//\" и \"|\")"},
 
         // ---- Обёртки для других языков / Bindings for other languages ----
         {Message::BINDING_DOCUMENT_CLOSED, "документ уже закрыт, его узлы недействительны"},

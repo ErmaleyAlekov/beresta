@@ -6,8 +6,8 @@
 
 /*
 ** Цель фаззинга: загрузка XML Schema (Schema::fromString) и проверка
-** документа по ней — и отдельным SchemaValidator, и встроенной в
-** парсер проверкой (ParserOptions::schema).
+** документа по ней — отдельным SchemaValidator, встроенной в парсер
+** проверкой (ParserOptions::schema) и потоковой проверкой SaxParser.
 **
 ** Формат входа: [байт флагов][схема] 0xF5 0xF5 [документ] 0xF5 0xF5 [ресурс].
 ** Ресурс отдаётся резолвером на xs:include / xs:import, поэтому фаззер
@@ -15,8 +15,8 @@
 ** для документа (схема всегда читается с пространствами имён).
 **
 ** The fuzzing target: loading an XML Schema (Schema::fromString) and validating
-** a document against it — both with a separate SchemaValidator and with the
-** validation built into the parser (ParserOptions::schema).
+** a document against it — with a separate SchemaValidator, with the validation
+** built into the parser (ParserOptions::schema) and with streaming SaxParser validation.
 ** The input format: [flag byte][schema] 0xF5 0xF5 [document] 0xF5 0xF5 [resource].
 ** The resolver returns the resource for xs:include / xs:import, so the fuzzer
 ** mutates the included schemas too. The 0x01 flag enables namespaceAware=false
@@ -80,6 +80,34 @@ namespace
         {
         }
     }
+
+    /*
+    ** Потоковая проверка без дерева: SaxParser со схемой (ключи — потоковым
+    ** вычислителем). Флаг пространств имён тот же, что у отдельной проверки:
+    ** без них пары «URI + имя» вычисляет сам валидатор.
+    **
+    ** Streaming validation without a tree: SaxParser with a schema (keys — by the streaming
+    ** evaluator). The namespace flag is the same as for the separate check:
+    ** without them the validator computes the "URI + name" pairs itself.
+    */
+    void validateWithSax(const std::shared_ptr<const beresta::xsd::Schema>& schema,
+        std::string_view documentText, bool namespaceAware)
+    {
+        beresta::CollectingErrorHandler collector;
+        beresta::ContentHandler ignore;
+        beresta::ParserOptions options;
+
+        options.schema = schema;
+        options.errorHandler = &collector;
+        options.namespaceAware = namespaceAware;
+        try
+        {
+            beresta::SaxParser(options).parse(documentText, ignore);
+        }
+        catch (const beresta::DomException&)
+        {
+        }
+    }
 }
 
 // Точка входа libFuzzer
@@ -100,5 +128,6 @@ extern "C" int LLVMFuzzerTestOneInput(const std::uint8_t* data, std::size_t size
         return 0;
     validateSeparately(schema, parts[1], (data[0] & 0x01) == 0);
     validateWhileParsing(schema, parts[1]);
+    validateWithSax(schema, parts[1], (data[0] & 0x01) == 0);
     return 0;
 }

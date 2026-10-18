@@ -5,18 +5,11 @@
 
 namespace beresta::detail
 {
-    /*
-    ** Ошибки схемы — ошибки валидности: с ErrorHandler они собираются,
-    ** без него первая же ошибка прерывает разбор исключением.
-    **
-    ** Schema errors are validity errors: with an ErrorHandler they are collected,
-    ** without it the very first error stops parsing with an exception.
-    */
-    static void validateWithSchema(const Document& document, const ParserOptions& options)
+    // Каждая ошибка — исключение ParseException с кодом VALIDATION_ERROR
+    // Every error is a ParseException with the VALIDATION_ERROR code
+    void reportSchemaDiagnostics(const std::vector<Diagnostic>& diagnostics, const ParserOptions& options)
     {
-        xsd::SchemaValidator validator(options.schema);
-
-        for (const Diagnostic& diagnostic : validator.validate(document))
+        for (const Diagnostic& diagnostic : diagnostics)
         {
             ParseException problem(diagnostic.message, diagnostic.position, DomErrorCode::VALIDATION_ERROR);
             if (options.errorHandler == nullptr)
@@ -25,13 +18,21 @@ namespace beresta::detail
         }
     }
 
+    // XInclude меняет дерево после разбора, поэтому с ним схема проверяет готовое дерево
+    // XInclude changes the tree after parsing, so with it the schema validates the ready tree
+    bool validatesWhileParsing(const ParserOptions& options) noexcept
+    {
+        return options.schema != nullptr && !options.processXInclude;
+    }
+
     // Порядок важен: схема проверяет документ уже после подстановки включений
     // The order matters: the schema validates the document after the inclusions are substituted
     void postProcessDocument(Document& document, const ParserOptions& options)
     {
-        if (options.processXInclude)
-            xinclude::processXIncludes(document, options);
+        if (!options.processXInclude)
+            return;
+        xinclude::processXIncludes(document, options);
         if (options.schema)
-            validateWithSchema(document, options);
+            reportSchemaDiagnostics(xsd::SchemaValidator(options.schema).validate(document), options);
     }
 }

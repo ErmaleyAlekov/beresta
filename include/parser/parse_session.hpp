@@ -60,6 +60,8 @@ namespace beresta::detail
         void run();
 
         SourceLocation getLocation() const override;
+        std::size_t getMark() const override;
+        SourceLocation locate(std::size_t mark) const override;
         void reportValidity(const std::string& message) override;
 
     private:
