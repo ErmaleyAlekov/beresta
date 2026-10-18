@@ -6,6 +6,7 @@
 namespace
 {
     // Строит строку из depth вложенных элементов <n><n>...</n></n>
+    // Builds a string of depth nested elements <n><n>...</n></n>
     std::string buildNested(std::size_t depth)
     {
         std::string xml;
@@ -18,6 +19,7 @@ namespace
     }
 
     // Глубина в пределах лимита разбирается, сверх лимита — понятная ошибка
+    // A depth within the limit is parsed, beyond the limit — a clear error
     void testMaxDepth()
     {
         beresta::ParserOptions options;
@@ -29,6 +31,7 @@ namespace
     }
 
     // parseElement возвращает автономный корень без родителя
+    // parseElement returns a standalone root without a parent
     void testParseElementFragment()
     {
         std::unique_ptr<beresta::Element> element =
@@ -39,6 +42,7 @@ namespace
     }
 
     // Пробелы внутри тегов допустимы в любых местах, где их разрешает XML
+    // Spaces inside tags are allowed in all places where XML allows them
     void testWhitespaceInsideTags()
     {
         const char* input = "<a\n\tx\n=\n'1'\t\ty = \"2\"\n><b\n/></a\n>";
@@ -50,6 +54,7 @@ namespace
 namespace suites
 {
     // Регистрация тестов ограничений и граничных случаев
+    // Registers the limit and edge case tests
     void registerLimitTests(test::TestRunner& runner)
     {
         runner.add("границы: максимальная глубина", testMaxDepth);

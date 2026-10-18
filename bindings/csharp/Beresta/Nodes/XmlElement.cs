@@ -4,7 +4,8 @@ using Beresta.Native;
 
 namespace Beresta
 {
-    /// <summary>Элемент: узел с именем, атрибутами и пространством имён.</summary>
+    /// <summary>Элемент: узел с именем, атрибутами и пространством имён.
+    /// An element: a node with a name, attributes and a namespace.</summary>
     public sealed partial class XmlElement : XmlNode
     {
         internal XmlElement(IntPtr pointer, XmlDocument owner)
@@ -12,19 +13,22 @@ namespace Beresta
         {
         }
 
-        /// <summary>Имя без префикса: у &lt;s:item&gt; — "item".</summary>
+        /// <summary>Имя без префикса: у &lt;s:item&gt; — "item".
+        /// The name without a prefix: "item" for &lt;s:item&gt;.</summary>
         public string LocalName
         {
             get { return NativeCalls.TakeRequiredString(NativeMethods.beresta_element_local_name(Handle)); }
         }
 
-        /// <summary>URI пространства имён или null, если элемент вне пространств.</summary>
+        /// <summary>URI пространства имён или null, если элемент вне пространств.
+        /// The namespace URI or null if the element is in no namespace.</summary>
         public string? NamespaceUri
         {
             get { return NativeCalls.TakeString(NativeMethods.beresta_element_namespace_uri(Handle)); }
         }
 
-        /// <summary>Снимок атрибутов {имя: значение} в порядке документа.</summary>
+        /// <summary>Снимок атрибутов {имя: значение} в порядке документа.
+        /// A snapshot of attributes {name: value} in document order.</summary>
         public IReadOnlyList<KeyValuePair<string, string>> Attributes
         {
             get

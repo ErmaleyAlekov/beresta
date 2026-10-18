@@ -3,6 +3,9 @@
 /*
 ** Документ-владелец. У самого документа владелец — он сам: так обёрткам
 ** не нужно отдельно различать «узел» и «документ» при поиске корня.
+**
+** The owner document. The owner of the document itself is the document: so the wrappers
+** do not need to distinguish "node" and "document" when looking for the root.
 */
 extern "C" BERESTA_API beresta_document beresta_node_owner_document(beresta_node node)
 {
@@ -17,6 +20,7 @@ extern "C" BERESTA_API beresta_document beresta_node_owner_document(beresta_node
 }
 
 // Число детей; у листовых узлов 0, при ошибке -1
+// The number of children; 0 for leaf nodes, -1 on error
 extern "C" BERESTA_API int64_t beresta_node_child_count(beresta_node node)
 {
     BERESTA_CAPI_TRY
@@ -30,6 +34,7 @@ extern "C" BERESTA_API int64_t beresta_node_child_count(beresta_node node)
 }
 
 // Ребёнок по индексу: индекс проверяется до обращения к ядру
+// A child by index: the index is checked before accessing the core
 extern "C" BERESTA_API beresta_node beresta_node_child(beresta_node node, int64_t index)
 {
     BERESTA_CAPI_TRY

@@ -4,6 +4,7 @@
 namespace beresta::utils
 {
     // Деление по первому двоеточию; без двоеточия всё имя считается локальным
+    // Splits at the first colon; without a colon the whole name counts as local
     QualifiedNameParts splitQualifiedName(std::string_view name) noexcept
     {
         std::size_t colon = name.find(':');
@@ -16,33 +17,30 @@ namespace beresta::utils
     /*
     ** QName = NCName (':' NCName)? — двоеточие не может стоять в начале,
     ** в конце или встречаться дважды.
+    **
+    ** QName = NCName (':' NCName)? — a colon cannot stand at the start,
+    ** at the end or occur twice.
     */
     bool isValidQualifiedName(std::string_view name) noexcept
     {
+        return isValidName(name) && hasQualifiedNameShape(name);
+    }
+
+    /*
+    ** Правила двоеточий QName без повторной проверки символов: сканер уже
+    ** прочитал имя по правилам Name, и второй проход по символам не нужен.
+    **
+    ** The QName colon rules without re-checking the characters: the scanner
+    ** has already read the name by the Name rules, and a second pass is not needed.
+    */
+    bool hasQualifiedNameShape(std::string_view name) noexcept
+    {
         std::size_t colon = name.find(':');
 
-        if (!isValidName(name))
-            return false;
         if (colon == std::string_view::npos)
             return true;
         if (colon == 0 || colon + 1 == name.size())
             return false;
         return name.find(':', colon + 1) == std::string_view::npos;
-    }
-
-    // xmlns="..." объявляет пространство по умолчанию, xmlns:p="..." — префикс p
-    bool isNamespaceDeclaration(std::string_view attributeName) noexcept
-    {
-        if (attributeName == "xmlns")
-            return true;
-        return attributeName.substr(0, 6) == "xmlns:";
-    }
-
-    // Для "xmlns:soap" возвращает "soap", для "xmlns" — пустое представление
-    std::string_view declaredPrefix(std::string_view attributeName) noexcept
-    {
-        if (attributeName.size() <= 6)
-            return std::string_view();
-        return attributeName.substr(6);
     }
 }

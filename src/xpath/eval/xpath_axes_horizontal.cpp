@@ -4,6 +4,7 @@
 namespace beresta::xpath::detail
 {
     // Правые соседи (у атрибутов соседей-узлов нет)
+    // The right siblings (attributes have no sibling nodes)
     void followingSiblingAxis(const XPathItem& item, std::vector<XPathItem>& output)
     {
         if (item.attribute != nullptr || item.node == nullptr)
@@ -14,6 +15,7 @@ namespace beresta::xpath::detail
     }
 
     // Левые соседи от ближайшего (обратная ось)
+    // The left siblings from the nearest (a reverse axis)
     void precedingSiblingAxis(const XPathItem& item, std::vector<XPathItem>& output)
     {
         if (item.attribute != nullptr || item.node == nullptr)
@@ -26,6 +28,9 @@ namespace beresta::xpath::detail
     /*
     ** Всё, что после узла в порядке документа, кроме потомков. У атрибута
     ** «после» начинается сразу с детей его элемента.
+    **
+    ** Everything after the node in document order, except the descendants. For an attribute
+    ** "after" starts right with the children of its element.
     */
     void followingAxis(const XPathItem& item, std::vector<XPathItem>& output)
     {
@@ -48,6 +53,7 @@ namespace beresta::xpath::detail
     }
 
     // Поддерево в обратном порядке документа: сначала глубокие последние, корень — в конце
+    // A subtree in reverse document order: the deep last ones first, the root at the end
     static void appendSubtreeReversed(const Node* node, std::vector<XPathItem>& output)
     {
         std::vector<XPathItem> forward;
@@ -61,6 +67,9 @@ namespace beresta::xpath::detail
     /*
     ** Всё, что до узла в порядке документа, кроме предков, — от ближайшего
     ** к дальнему (обратная ось). Для атрибута — то же, что для его элемента.
+    **
+    ** Everything before the node in document order, except the ancestors — from the nearest
+    ** to the farthest (a reverse axis). For an attribute — the same as for its element.
     */
     void precedingAxis(const XPathItem& item, std::vector<XPathItem>& output)
     {

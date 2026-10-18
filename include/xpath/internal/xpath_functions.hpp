@@ -14,6 +14,10 @@ namespace beresta::xpath::detail
     ** Вызов функции: аргументы (ещё не вычисленные) и контекст.
     ** Каждая функция библиотеки — обычная функция с этой сигнатурой;
     ** таблица «имя -> функция» связывает их с именами (паттерн Command).
+    **
+    ** A function call: the arguments (not evaluated yet) and the context.
+    ** Each library function is an ordinary function with this signature;
+    ** the "name -> function" table binds them to the names (the Command pattern).
     */
     struct FunctionCall
     {
@@ -24,19 +28,23 @@ namespace beresta::xpath::detail
     using FunctionImpl = XPathValue (*)(const FunctionCall& call);
 
     // ---- Помощники аргументов (xpath_function_args.cpp) ----
+    // ---- Argument helpers (xpath_function_args.cpp) ----
     XPathValue argument(const FunctionCall& call, std::size_t index);
     std::string stringArgument(const FunctionCall& call, std::size_t index);
     double numberArgument(const FunctionCall& call, std::size_t index);
 
     // Узел-аргумент функции: первый узел множества или контекстный узел, если аргумента нет
+    // The node argument of a function: the first node of the set or the context node if there is no argument
     bool nodeArgument(const FunctionCall& call, XPathItem& item);
 
     // Кодовые точки строки и обратно (для substring, string-length, translate)
+    // The code points of a string and back (for substring, string-length, translate)
     std::vector<std::uint32_t> toCodePoints(const std::string& text);
     std::string fromCodePoints(const std::vector<std::uint32_t>& codes, std::size_t begin,
         std::size_t end);
 
     // ---- Функции над узлами (xpath_functions_nodes.cpp, xpath_functions_names.cpp) ----
+    // ---- Node functions (xpath_functions_nodes.cpp, xpath_functions_names.cpp) ----
     XPathValue functionLast(const FunctionCall& call);
     XPathValue functionPosition(const FunctionCall& call);
     XPathValue functionCount(const FunctionCall& call);
@@ -47,6 +55,7 @@ namespace beresta::xpath::detail
     XPathValue functionName(const FunctionCall& call);
 
     // ---- Строковые функции (xpath_functions_strings*.cpp) ----
+    // ---- String functions (xpath_functions_strings*.cpp) ----
     XPathValue functionString(const FunctionCall& call);
     XPathValue functionConcat(const FunctionCall& call);
     XPathValue functionStartsWith(const FunctionCall& call);
@@ -59,6 +68,7 @@ namespace beresta::xpath::detail
     XPathValue functionTranslate(const FunctionCall& call);
 
     // ---- Логические и числовые функции (xpath_functions_logic.cpp, _numbers.cpp) ----
+    // ---- Boolean and number functions (xpath_functions_logic.cpp, _numbers.cpp) ----
     XPathValue functionBoolean(const FunctionCall& call);
     XPathValue functionNot(const FunctionCall& call);
     XPathValue functionTrue(const FunctionCall& call);

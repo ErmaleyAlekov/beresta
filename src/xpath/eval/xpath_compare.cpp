@@ -3,6 +3,7 @@
 namespace beresta::xpath::detail
 {
     // Сравнение чисел (NaN ни с чем не равен — так ведёт себя IEEE 754)
+    // Comparing numbers (NaN equals nothing — this is how IEEE 754 behaves)
     static bool compareNumbers(BinaryOperator op, double left, double right) noexcept
     {
         switch (op)
@@ -26,6 +27,10 @@ namespace beresta::xpath::detail
     ** Сравнение двух не-множеств (раздел 3.4): для = и != — как логические,
     ** если одно из них логическое; иначе как числа, если одно из них число;
     ** иначе как строки. Для < <= > >= — всегда как числа.
+    **
+    ** Comparing two non-sets (section 3.4): for = and != — as booleans
+    ** if one of them is a boolean; otherwise as numbers if one of them is a number;
+    ** otherwise as strings. For < <= > >= — always as numbers.
     */
     static bool compareAtoms(BinaryOperator op, const XPathValue& left, const XPathValue& right)
     {
@@ -46,6 +51,7 @@ namespace beresta::xpath::detail
     }
 
     // Атом из строкового значения узла: число, если сравниваем с числом, иначе строка
+    // An atom from the string value of a node: a number if compared with a number, otherwise a string
     static XPathValue atomFor(const XPathItem& item, const XPathValue& other)
     {
         if (other.getType() == ValueType::NUMBER)
@@ -57,6 +63,10 @@ namespace beresta::xpath::detail
     ** Множество против не-множества: с логическим значением сравнивается
     ** boolean(множества), иначе условие истинно, если оно истинно хотя бы
     ** для одного узла. setOnLeft сохраняет исходный порядок операндов.
+    **
+    ** A set against a non-set: with a boolean the boolean(set) is compared,
+    ** otherwise the condition is true if it is true for at least
+    ** one node. setOnLeft keeps the original order of the operands.
     */
     static bool compareSetWith(BinaryOperator op, const XPathValue& set, const XPathValue& other,
         bool setOnLeft)
@@ -80,6 +90,7 @@ namespace beresta::xpath::detail
     }
 
     // Два множества: истинно, если условие выполняется хотя бы для одной пары узлов
+    // Two sets: true if the condition holds for at least one pair of nodes
     bool compareValues(BinaryOperator op, const XPathValue& left, const XPathValue& right)
     {
         bool leftSet = left.getType() == ValueType::NODE_SET;

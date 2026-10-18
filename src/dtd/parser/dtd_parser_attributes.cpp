@@ -1,4 +1,5 @@
 #include "dtd/dtd_parser.hpp"
+#include "i18n/i18n.hpp"
 #include "dtd/attribute_defaults.hpp"
 
 #include <utility>
@@ -6,6 +7,7 @@
 namespace beresta::dtd
 {
     // <!ATTLIST элемент (атрибут тип умолчание)*>
+    // <!ATTLIST element (attribute type default)*>
     void DtdParser::parseAttlistDeclaration()
     {
         _reader.advance(9);
@@ -20,17 +22,19 @@ namespace beresta::dtd
                 return;
             }
             if (spaces == 0)
-                _reader.fail("ожидался пробел перед определением атрибута");
+                _reader.fail(i18n::format(i18n::Message::DTD_SPACE_BEFORE_ATTRIBUTE));
             parseAttributeDefinition(element);
         }
     }
 
     // Одно определение: имя, тип, значение по умолчанию
+    // One definition: the name, the type, the default value
     void DtdParser::parseAttributeDefinition(const std::string& element)
     {
         AttributeDeclaration declaration;
 
         declaration.name = _reader.readName();
+        declaration.externallyDeclared = _reader.inExternalText();
         _reader.requireSpace(referencesInMarkup());
         parseAttributeType(declaration);
         _reader.requireSpace(referencesInMarkup());
@@ -39,6 +43,7 @@ namespace beresta::dtd
     }
 
     // Ключевое слово типа атрибута и соответствующий тип
+    // An attribute type keyword and the matching type
     struct TypeKeyword
     {
         const char* text;
@@ -48,6 +53,9 @@ namespace beresta::dtd
     /*
     ** Ключевые слова упорядочены от длинных к коротким: IDREFS раньше
     ** IDREF раньше ID, иначе "IDREFS" распознался бы как "ID".
+    **
+    ** The keywords are ordered from long to short: IDREFS before
+    ** IDREF before ID, otherwise "IDREFS" would be recognized as "ID".
     */
     static const TypeKeyword TYPE_KEYWORDS[] = {
         {"CDATA", AttributeType::CDATA}, {"IDREFS", AttributeType::IDREFS},
@@ -58,6 +66,7 @@ namespace beresta::dtd
     };
 
     // Тип атрибута: ключевое слово, NOTATION (имена) или перечисление (a | b)
+    // The attribute type: a keyword, NOTATION (names) or an enumeration (a | b)
     void DtdParser::parseAttributeType(AttributeDeclaration& declaration)
     {
         for (const TypeKeyword& keyword : TYPE_KEYWORDS)
@@ -78,6 +87,7 @@ namespace beresta::dtd
     }
 
     // (a | b | c) — имена нотаций либо Nmtoken-значения
+    // (a | b | c) — notation names or Nmtoken values
     void DtdParser::parseEnumeration(AttributeDeclaration& declaration, bool names)
     {
         _reader.expect("(");
@@ -100,6 +110,10 @@ namespace beresta::dtd
     ** #REQUIRED | #IMPLIED | [#FIXED] "значение". Значение по умолчанию
     ** сразу нормализуется так же, как значение в документе, чтобы
     ** подставлять его без повторной обработки.
+    **
+    ** #REQUIRED | #IMPLIED | [#FIXED] "value". The default value is
+    ** normalized at once the same way as a value in the document, so that
+    ** it is substituted without repeated processing.
     */
     void DtdParser::parseDefaultDeclaration(AttributeDeclaration& declaration)
     {

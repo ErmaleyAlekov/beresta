@@ -10,6 +10,9 @@ namespace
     /*
     ** Коды ошибок и сообщения: синтаксическая ошибка, NULL вместо узла,
     ** узел не того типа; успешный вызов сбрасывает последнюю ошибку.
+    **
+    ** Error codes and messages: a syntax error, NULL instead of a node,
+    ** a node of the wrong type; a successful call resets the last error.
     */
     void testErrors()
     {
@@ -31,6 +34,7 @@ namespace
     }
 
     // Построение, навигация, атрибуты, копирование между документами, удаление
+    // Building, navigation, attributes, copying between documents, removal
     void testTreeEditing()
     {
         beresta_document document = nullptr;
@@ -57,6 +61,7 @@ namespace
     }
 
     // XPath: префиксы, переменные, строка/число/логическое, набор с атрибутами
+    // XPath: prefixes, variables, string/number/boolean, a set with attributes
     void testXPath()
     {
         beresta_document document = support::parseCapi("<s:shop xmlns:s=\"urn:s\"><s:item code=\"A\">5</s:item>"
@@ -84,6 +89,7 @@ namespace
     }
 
     // Схема: проверка с перечнем нарушений и проверка прямо при разборе
+    // A schema: validation with a list of violations and validation right during parsing
     void testSchema()
     {
         const char* xsd = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">"
@@ -109,6 +115,7 @@ namespace
 namespace suites
 {
     // Регистрация тестов плоского Си-интерфейса
+    // Registers the tests of the flat C interface
     void registerCapiTests(test::TestRunner& runner)
     {
         runner.add("Си-интерфейс: коды ошибок", testErrors);

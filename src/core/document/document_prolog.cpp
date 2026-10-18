@@ -5,12 +5,14 @@
 namespace beresta
 {
     // Текущая декларация
+    // The current declaration
     const std::optional<XmlDeclaration>& Document::getDeclaration() const noexcept
     {
         return _declaration;
     }
 
     // Новая декларация проходит проверку формата; nullopt удаляет декларацию
+    // A new declaration passes the format check; nullopt removes the declaration
     void Document::setDeclaration(std::optional<XmlDeclaration> declaration)
     {
         if (declaration.has_value())
@@ -19,6 +21,7 @@ namespace beresta
     }
 
     // Изменяемая версия переиспользует константную (DRY)
+    // The mutable version reuses the const one (DRY)
     DocumentType* Document::getDocumentType()
     {
         const Document& self = *this;
@@ -27,6 +30,7 @@ namespace beresta
     }
 
     // DOCTYPE — единственный ребёнок типа DOCUMENT_TYPE
+    // The DOCTYPE is the only child of type DOCUMENT_TYPE
     const DocumentType* Document::getDocumentType() const
     {
         std::size_t index = findFirstOfType(NodeType::DOCUMENT_TYPE);

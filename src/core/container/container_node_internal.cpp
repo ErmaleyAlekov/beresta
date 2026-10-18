@@ -1,44 +1,11 @@
 #include "core/container_node.hpp"
-#include "core/character_node.hpp"
+#include "i18n/i18n.hpp"
 #include "exception/dom_exception.hpp"
 
 namespace beresta
 {
-    // Детей сериализуем подряд: никаких отступов и переводов строк между ними
-    void ContainerNode::serializeChildren(std::string& output) const
-    {
-        for (const std::unique_ptr<Node>& child : _children)
-            child->serialize(output);
-    }
-
-    // Каждый ребёнок клонируется через виртуальный clone() — сохраняется реальный тип
-    ContainerNode::ChildList ContainerNode::cloneChildren(const ChildList& source)
-    {
-        ChildList copies;
-
-        copies.reserve(source.size());
-        for (const std::unique_ptr<Node>& child : source)
-            copies.push_back(child->clone());
-        return copies;
-    }
-
-    /*
-    ** Сбор текста: TEXT и CDATA дают свои значения, вложенные контейнеры
-    ** обходятся рекурсивно, а комментарии и PI пропускаются (как в W3C DOM).
-    */
-    void ContainerNode::collectText(const ContainerNode& container, std::string& output)
-    {
-        for (const std::unique_ptr<Node>& child : container._children)
-        {
-            NodeType type = child->getType();
-            if (type == NodeType::TEXT || type == NodeType::CDATA_SECTION)
-                output += static_cast<const CharacterNode&>(*child).getValue();
-            else if (type == NodeType::ELEMENT || type == NodeType::DOCUMENT)
-                collectText(static_cast<const ContainerNode&>(*child), output);
-        }
-    }
-
     // Делаем this родителем каждого ребёнка (нужно после копирования и перемещения)
+    // Makes this the parent of every child (needed after copying and moving)
     void ContainerNode::adoptChildren() noexcept
     {
         for (std::unique_ptr<Node>& child : _children)
@@ -50,19 +17,31 @@ namespace beresta
     ** Общие правила вставки (часть Template Method):
     ** 1) узел должен существовать;
     ** 2) узел не должен уже принадлежать другому родителю;
-    ** 3) нельзя вставить себя или своего предка — получится цикл;
+    ** 3) нельзя вставить себя или своего предка — получится цикл
+    **    (узел без детей не может быть предком: подъём по предкам за
+    **    O(глубина) нужен только для непустого контейнера);
     ** 4) наследник проверяет допустимость типа через validateChild().
+    **
+    ** The common insertion rules (a part of the Template Method):
+    ** 1) the node must exist;
+    ** 2) the node must not already belong to another parent;
+    ** 3) one cannot insert oneself or one's ancestor — that would be a cycle
+    **    (a node without children cannot be an ancestor: climbing the ancestors in
+    **    O(depth) is needed only for a non-empty container);
+    ** 4) the subclass checks that the type is allowed through validateChild().
     */
     void ContainerNode::checkInsertion(const Node* child, std::size_t index) const
     {
         if (child == nullptr)
-            throw DomException(DomErrorCode::NULL_NODE, "попытка вставить пустой узел");
+            throw DomException(DomErrorCode::NULL_NODE, i18n::format(i18n::Message::INSERT_NULL_NODE));
         if (child->getParent() != nullptr)
             throw DomException(DomErrorCode::HIERARCHY_VIOLATION,
-                "узел уже принадлежит другому родителю; сначала вызовите removeChild()");
-        if (child == this || isDescendantOf(*child))
+                i18n::format(i18n::Message::NODE_HAS_PARENT));
+        const ContainerNode* container = asContainer(*child);
+        bool mayContainThis = container != nullptr && !container->_children.empty();
+        if (child == this || (mayContainThis && isDescendantOf(*child)))
             throw DomException(DomErrorCode::HIERARCHY_VIOLATION,
-                "нельзя вставить узел внутрь самого себя или своего потомка");
+                i18n::format(i18n::Message::INSERT_INTO_SELF));
         validateChild(*child, index);
     }
 }

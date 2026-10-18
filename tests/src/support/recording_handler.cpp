@@ -3,24 +3,28 @@
 namespace support
 {
     // Начало документа
+    // The start of the document
     void RecordingHandler::startDocument()
     {
         record("begin");
     }
 
     // Конец документа
+    // The end of the document
     void RecordingHandler::endDocument()
     {
         record("finish");
     }
 
     // Версия из декларации
+    // The version from the declaration
     void RecordingHandler::xmlDeclaration(const beresta::XmlDeclaration& declaration)
     {
         record("decl:" + declaration.version);
     }
 
     // Элемент с атрибутами; запоминаются пространства имён для отдельных проверок
+    // An element with attributes; the namespaces are remembered for separate checks
     void RecordingHandler::startElement(const beresta::SaxElement& element)
     {
         std::string entry = "start:" + std::string(element.name) + "[";
@@ -36,6 +40,7 @@ namespace support
     }
 
     // Добавление записи через разделитель
+    // Appends a record with a separator
     void RecordingHandler::record(const std::string& entry)
     {
         if (!_log.empty())

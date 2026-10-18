@@ -6,6 +6,10 @@ namespace beresta::utils
     ** Правило Char из XML 1.0:
     ** #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF].
     ** Суррогаты (#xD800-#xDFFF) и большинство управляющих символов запрещены.
+    **
+    ** The Char rule of XML 1.0:
+    ** #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF].
+    ** Surrogates (#xD800-#xDFFF) and most control characters are forbidden.
     */
     bool isValidXmlCodePoint(std::uint32_t codePoint) noexcept
     {
@@ -22,6 +26,10 @@ namespace beresta::utils
     ** Классическое кодирование UTF-8:
     ** до 0x7F — 1 байт, до 0x7FF — 2 байта, до 0xFFFF — 3, иначе 4.
     ** Старшие биты первого байта задают длину, остальные байты имеют вид 10xxxxxx.
+    **
+    ** Classic UTF-8 encoding:
+    ** up to 0x7F — 1 byte, up to 0x7FF — 2 bytes, up to 0xFFFF — 3, otherwise 4.
+    ** The high bits of the first byte give the length, the other bytes have the form 10xxxxxx.
     */
     void appendUtf8(std::string& output, std::uint32_t codePoint)
     {

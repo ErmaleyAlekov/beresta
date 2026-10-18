@@ -6,6 +6,7 @@
 namespace beresta
 {
     // Текущие настройки
+    // The current settings
     const ParserOptions& XmlParser::getOptions() const noexcept
     {
         return _options;
@@ -16,6 +17,11 @@ namespace beresta
     ** и проверка по XML Schema (если они включены в настройках).
     ** При проверке схемой позиции узлов записываются всегда — иначе
     ** ошибки валидности нельзя было бы привязать к строкам файла.
+    **
+    ** Parsing into a DOM and subsequent tree processing: XInclude substitution
+    ** and XML Schema validation (if they are enabled in the settings).
+    ** With schema validation node positions are always recorded — otherwise
+    ** validity errors could not be tied to the lines of the file.
     */
     Document XmlParser::parseWithOptions(std::string_view bytes, const ParserOptions& options) const
     {

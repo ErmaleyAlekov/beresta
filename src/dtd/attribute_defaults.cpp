@@ -4,6 +4,7 @@
 namespace beresta::dtd
 {
     // Один проход: пробел пишется только между непробельными фрагментами
+    // One pass: a space is written only between non-space fragments
     std::string collapseWhitespace(std::string_view value)
     {
         std::string result;
@@ -25,6 +26,7 @@ namespace beresta::dtd
     }
 
     // Раскрытие сущностей тем же декодером, что и для атрибутов документа
+    // Entity expansion with the same decoder as for the document attributes
     std::string normalizeDefaultValue(DtdContext& context, const std::string& raw,
         AttributeType type)
     {
@@ -36,6 +38,7 @@ namespace beresta::dtd
     }
 
     // Есть ли атрибут с именем name среди уже указанных
+    // Whether there is an attribute named name among those already specified
     static Attribute* findPresent(std::vector<Attribute>& attributes, std::string_view name)
     {
         for (Attribute& attribute : attributes)
@@ -47,6 +50,7 @@ namespace beresta::dtd
     }
 
     // Нормализация указанных атрибутов и подстановка значений по умолчанию
+    // Normalizes the specified attributes and substitutes default values
     void applyAttributeDeclarations(const DtdModel& model, std::string_view element,
         std::vector<Attribute>& attributes, bool addDefaults)
     {

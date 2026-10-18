@@ -13,6 +13,12 @@ namespace beresta::detail
     ** в гигабайты. Каждое раскрытие «оплачивается» из бюджета; превышение
     ** любого лимита — DomException(LIMIT_EXCEEDED). Аналог SecurityManager
     ** в Xerces, но включён всегда, а не по отдельной настройке.
+    **
+    ** ExpansionBudget — protection against entity attacks ("billion laughs"):
+    ** a kilobyte document can declare entities that expand into gigabytes.
+    ** Every expansion is "paid" from the budget; exceeding any limit is
+    ** DomException(LIMIT_EXCEEDED). The analog of SecurityManager
+    ** in Xerces, but always enabled rather than by a separate setting.
     */
     class ExpansionBudget
     {
@@ -20,6 +26,7 @@ namespace beresta::detail
         explicit ExpansionBudget(const ParserOptions& options) noexcept;
 
         // Учитывает одно раскрытие текста длиной bytes на глубине depth
+        // Accounts for one expansion of a text of bytes length at depth depth
         void charge(std::size_t bytes, std::size_t depth);
 
     private:

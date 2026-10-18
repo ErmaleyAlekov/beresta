@@ -1,4 +1,5 @@
 #include "xinclude/internal/xinclude_processor.hpp"
+#include "i18n/i18n.hpp"
 #include "xinclude/xinclude.hpp"
 #include "core/element.hpp"
 #include "exception/dom_exception.hpp"
@@ -8,6 +9,7 @@
 namespace beresta::xinclude::detail
 {
     // Обход в порядке документа; поддеревья самих xi:include не просматриваются
+    // A traversal in document order; the subtrees of the xi:include elements themselves are not examined
     std::vector<Element*> collectIncludes(ContainerNode& root)
     {
         std::vector<Element*> found;
@@ -28,6 +30,7 @@ namespace beresta::xinclude::detail
     }
 
     // Элемент XInclude по пространству имён и локальному имени
+    // An XInclude element by namespace and local name
     bool isXIncludeElement(const Element& element, std::string_view localName)
     {
         return element.getLocalName() == localName
@@ -38,6 +41,10 @@ namespace beresta::xinclude::detail
     ** <xi:fallback>: при ошибке загрузки xi:include заменяется копией его
     ** содержимого. Включения внутри fallback тоже обрабатываются.
     ** Нет fallback — ошибка загрузки распространяется дальше.
+    **
+    ** <xi:fallback>: on a load error xi:include is replaced with a copy of its
+    ** content. Inclusions inside the fallback are processed too.
+    ** No fallback — the load error propagates further.
     */
     std::vector<std::unique_ptr<Node>> XIncludeProcessor::fallbackNodes(const Element& include,
         const std::string& baseUri)
@@ -52,7 +59,7 @@ namespace beresta::xinclude::detail
                 fallback = static_cast<const Element*>(child);
         }
         if (fallback == nullptr)
-            throw DomException(DomErrorCode::RESOURCE_ERROR, "xi:include не выполнен, а xi:fallback отсутствует");
+            throw DomException(DomErrorCode::RESOURCE_ERROR, i18n::format(i18n::Message::XINCLUDE_NO_FALLBACK));
         Element holder = *fallback;
         process(holder, baseUri);
         while (holder.getChildCount() > 0)
@@ -64,6 +71,7 @@ namespace beresta::xinclude::detail
 namespace beresta::xinclude
 {
     // Публичная точка входа: обработка всего документа от его базового URI
+    // The public entry point: processing the whole document from its base URI
     std::size_t processXIncludes(Document& document, const ParserOptions& options)
     {
         detail::XIncludeProcessor processor(options);

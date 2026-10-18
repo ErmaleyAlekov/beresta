@@ -5,6 +5,7 @@
 namespace beresta
 {
     // Изменяемая версия переиспользует константную (DRY)
+    // The mutable version reuses the const one (DRY)
     Document* Node::getOwnerDocument()
     {
         const Node& self = *this;
@@ -15,6 +16,9 @@ namespace beresta
     /*
     ** Поднимаемся к самому верхнему предку. Если это документ — он и есть
     ** владелец. Автономное поддерево (корень — элемент) документа не имеет.
+    **
+    ** Climbs to the topmost ancestor. If it is a document, it is the
+    ** owner. A standalone subtree (the root is an element) has no document.
     */
     const Document* Node::getOwnerDocument() const
     {
@@ -28,12 +32,14 @@ namespace beresta
     }
 
     // Позиция узла в исходном тексте
+    // The node position in the source text
     const SourceLocation& Node::getSourceLocation() const noexcept
     {
         return _location;
     }
 
     // Позицию записывает парсер; пользователь тоже может задать её вручную
+    // The parser records the position; the user can also set it by hand
     void Node::setSourceLocation(SourceLocation location) noexcept
     {
         _location = location;

@@ -6,9 +6,12 @@
 
 namespace beresta::xpath::detail
 {
-    // Полное имя узла: элемента, атрибута или цели PI (у остальных имени нет)
+    // Полное имя узла: элемента, атрибута, цели PI, префикс узла пространства имён
+    // The full name of a node: an element, an attribute, a PI target, the prefix of a namespace node
     static std::string qualifiedNameOf(const XPathItem& item)
     {
+        if (item.isNamespace)
+            return std::string(utils::declaredPrefix(item.attribute->name));
         if (item.attribute != nullptr)
             return item.attribute->name;
         if (item.node == nullptr)
@@ -21,6 +24,7 @@ namespace beresta::xpath::detail
     }
 
     // local-name(): имя без префикса
+    // local-name(): the name without a prefix
     XPathValue functionLocalName(const FunctionCall& call)
     {
         XPathItem item;
@@ -31,12 +35,13 @@ namespace beresta::xpath::detail
         return XPathValue::fromString(std::string(utils::splitQualifiedName(name).localName));
     }
 
-    // namespace-uri(): URI пространства имён элемента или атрибута
+    // namespace-uri(): URI пространства имён элемента или атрибута (у узла пространства имён — "")
+    // namespace-uri(): the namespace URI of an element or an attribute ("" for a namespace node)
     XPathValue functionNamespaceUri(const FunctionCall& call)
     {
         XPathItem item;
 
-        if (!nodeArgument(call, item))
+        if (!nodeArgument(call, item) || item.isNamespace)
             return XPathValue::fromString("");
         if (item.attribute != nullptr)
         {
@@ -52,6 +57,7 @@ namespace beresta::xpath::detail
     }
 
     // name(): полное имя
+    // name(): the full name
     XPathValue functionName(const FunctionCall& call)
     {
         XPathItem item;
@@ -64,6 +70,9 @@ namespace beresta::xpath::detail
     /*
     ** lang('ru'): ближайший xml:lang у узла или его предков равен 'ru'
     ** или начинается с 'ru-' (без учёта регистра).
+    **
+    ** lang('ru'): the nearest xml:lang of the node or its ancestors equals 'ru'
+    ** or starts with 'ru-' (case-insensitively).
     */
     XPathValue functionLang(const FunctionCall& call)
     {

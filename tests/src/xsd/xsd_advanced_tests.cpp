@@ -4,6 +4,7 @@
 namespace
 {
     // Схема с пространством имён, наследованием, simpleContent, xs:all, xs:any, группами и ID
+    // A schema with a namespace, derivation, simpleContent, xs:all, xs:any, groups and IDs
     const char* const ADVANCED_XSD =
         "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:t=\"urn:t\""
         " targetNamespace=\"urn:t\" elementFormDefault=\"qualified\">"
@@ -25,6 +26,7 @@ namespace
         "</xs:sequence></xs:complexType></xs:element></xs:schema>";
 
     // Число ошибок для документа в пространстве urn:t
+    // The number of errors for a document in the urn:t namespace
     std::size_t errorsFor(const std::string& body)
     {
         static const std::shared_ptr<const beresta::xsd::Schema> SCHEMA =
@@ -39,6 +41,10 @@ namespace
     ** Корректный документ: расширение типа, simpleContent, xs:all в любом
     ** порядке, xs:any, ID/IDREF, xsi:nil. Затем по одному нарушению
     ** каждого правила: атрибут simpleContent, xs:all, IDREF, повтор ID, nil, ##other.
+    **
+    ** A valid document: a type extension, simpleContent, xs:all in any
+    ** order, xs:any, ID/IDREF, xsi:nil. Then one violation of
+    ** each rule: a simpleContent attribute, xs:all, IDREF, a repeated ID, nil, ##other.
     */
     void testAdvancedRules()
     {
@@ -55,6 +61,7 @@ namespace
     }
 
     // Проверка схемой прямо при разборе: ошибки со строками приходят в ErrorHandler
+    // Schema validation right during parsing: errors with lines arrive in the ErrorHandler
     void testParserIntegration()
     {
         beresta::CollectingErrorHandler handler;
@@ -72,6 +79,7 @@ namespace
     }
 
     // xs:include через FileResourceResolver
+    // xs:include through FileResourceResolver
     void testSchemaInclude()
     {
         std::filesystem::path root = support::makeTestDirectory("xsd_include");
@@ -94,6 +102,7 @@ namespace
 namespace suites
 {
     // Регистрация расширенных тестов XSD
+    // Registers the advanced XSD tests
     void registerXsdAdvancedTests(test::TestRunner& runner)
     {
         runner.add("XSD: наследование, all, any, ID и их нарушения", testAdvancedRules);

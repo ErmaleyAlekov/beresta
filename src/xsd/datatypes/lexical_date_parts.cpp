@@ -5,6 +5,9 @@ namespace beresta::xsd::detail
     /*
     ** Год: необязательный минус и не меньше 4 цифр; при более чем 4 цифрах
     ** ведущий ноль запрещён. Год 0000 в XSD 1.0 не существует.
+    **
+    ** The year: an optional minus and at least 4 digits; with more than 4 digits
+    ** a leading zero is forbidden. The year 0000 does not exist in XSD 1.0.
     */
     bool readYear(std::string_view text, std::size_t& position, long long& year) noexcept
     {
@@ -30,6 +33,7 @@ namespace beresta::xsd::detail
     }
 
     // Ровно count цифр
+    // Exactly count digits
     bool readDigits(std::string_view text, std::size_t& position, std::size_t count, int& value) noexcept
     {
         value = 0;
@@ -43,6 +47,7 @@ namespace beresta::xsd::detail
     }
 
     // Секунды: две цифры и необязательная дробная часть (.цифры)
+    // Seconds: two digits and an optional fraction (.digits)
     bool readSeconds(std::string_view text, std::size_t& position, long double& seconds) noexcept
     {
         int whole = 0;
@@ -64,6 +69,7 @@ namespace beresta::xsd::detail
     }
 
     // Часовой пояс: Z или ±hh:mm (не более 14:00); отсутствие пояса допустимо
+    // The time zone: Z or ±hh:mm (at most 14:00); no time zone is allowed
     bool readTimezone(std::string_view text, std::size_t& position, DateTimeValue& result) noexcept
     {
         int hours = 0;

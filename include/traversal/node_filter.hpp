@@ -6,16 +6,22 @@
 namespace beresta
 {
     // Решение фильтра (DOM Level 2 Traversal)
+    // The filter decision (DOM Level 2 Traversal)
     enum class FilterResult
     {
-        ACCEPT,     // узел возвращается обходом
+        ACCEPT,     // узел возвращается обходом / the node is returned by the traversal
         SKIP,       // узел пропускается, но его дети рассматриваются
+                    // the node is skipped, but its children are considered
         REJECT      // узел пропускается вместе со всем поддеревом (для NodeIterator = SKIP)
+                    // the node is skipped together with its whole subtree (for NodeIterator = SKIP)
     };
 
     /*
     ** Маски типов узлов для whatToShow: какие узлы вообще видит обход.
     ** Комбинируются побитовым ИЛИ: show::ELEMENTS | show::TEXTS.
+    **
+    ** Node type masks for whatToShow: which nodes the traversal sees at all.
+    ** Combined with bitwise OR: show::ELEMENTS | show::TEXTS.
     */
     namespace show
     {
@@ -30,11 +36,15 @@ namespace beresta
     }
 
     // Бит маски whatToShow для типа узла
+    // The whatToShow mask bit for a node type
     unsigned showMaskFor(NodeType type) noexcept;
 
     /*
     ** NodeFilter — пользовательский фильтр обхода (паттерн Strategy).
     ** Реализуется классом с методом acceptNode — без лямбд и колбэков.
+    **
+    ** NodeFilter — a user traversal filter (the Strategy pattern).
+    ** Implemented by a class with an acceptNode method — without lambdas and callbacks.
     */
     class NodeFilter
     {

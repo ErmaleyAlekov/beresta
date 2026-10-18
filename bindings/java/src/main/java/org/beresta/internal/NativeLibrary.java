@@ -12,6 +12,12 @@ import java.lang.invoke.MethodHandle;
  * сигнатуры (FunctionDescriptor) сам строит вызов функции Си-интерфейса.
  * Библиотека загружается один раз при первом обращении к классу
  * (ленивая инициализация держателя — потокобезопасна по правилам JVM).
+ *
+ * <p>The link to the native library through Project Panama (FFM API, Java 22+).
+ * Instead of JNI there is not a single line of C here: the Linker builds the call
+ * of a C interface function from its signature description (FunctionDescriptor).
+ * The library is loaded once on the first access to the class
+ * (lazy holder initialization — thread-safe by the JVM rules).
  */
 public final class NativeLibrary
 {
@@ -22,7 +28,7 @@ public final class NativeLibrary
     {
     }
 
-    /** Дескриптор вызова Си-функции по имени и сигнатуре. */
+    /** Дескриптор вызова Си-функции по имени и сигнатуре. / A call handle of a C function by name and signature. */
     public static MethodHandle function(String name, FunctionDescriptor descriptor)
     {
         return LINKER.downcallHandle(LOOKUP.find(name).orElseThrow(), descriptor);

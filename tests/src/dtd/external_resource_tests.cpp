@@ -4,6 +4,7 @@
 namespace
 {
     // Внешний DTD с параметрической сущностью и условной секцией
+    // An external DTD with a parameter entity and a conditional section
     void testExternalDtd()
     {
         std::filesystem::path root = support::makeTestDirectory("external_dtd");
@@ -22,6 +23,7 @@ namespace
     }
 
     // Внешняя сущность подставляется как разметка
+    // An external entity is substituted as markup
     void testExternalEntity()
     {
         std::filesystem::path root = support::makeTestDirectory("external_entity");
@@ -37,6 +39,7 @@ namespace
     }
 
     // Без резолвера внешнее не загружается; выход за корень и сеть запрещены
+    // Without a resolver nothing external is loaded; leaving the root and the network are forbidden
     void testResourceSecurity()
     {
         std::filesystem::path root = support::makeTestDirectory("security");
@@ -63,6 +66,7 @@ namespace
 namespace suites
 {
     // Регистрация тестов внешних ресурсов
+    // Registers the external resource tests
     void registerExternalResourceTests(test::TestRunner& runner)
     {
         runner.add("ресурсы: внешний DTD", testExternalDtd);

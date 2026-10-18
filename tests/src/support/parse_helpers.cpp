@@ -3,6 +3,7 @@
 namespace support
 {
     // Код ошибки вместо исключения — удобно проверять в тестах
+    // An error code instead of an exception — convenient to check in tests
     beresta::DomErrorCode errorCodeOf(std::string_view input)
     {
         try
@@ -17,6 +18,7 @@ namespace support
     }
 
     // Все ошибки валидности собираются CollectingErrorHandler за один проход
+    // All validity errors are collected by CollectingErrorHandler in one pass
     std::size_t countValidityErrors(const std::string& document)
     {
         beresta::CollectingErrorHandler handler;
@@ -29,6 +31,7 @@ namespace support
     }
 
     // Встроенный тип ищется по имени, значение проверяется без контекста префиксов
+    // The built-in type is looked up by name, the value is checked without a prefix context
     bool acceptsBuiltin(const char* typeName, const char* value)
     {
         const beresta::xsd::SimpleType* type = beresta::xsd::builtinType(typeName);
@@ -37,6 +40,7 @@ namespace support
     }
 
     // Схема компилируется из текста, документ разбирается и проверяется
+    // The schema is compiled from text, the document is parsed and validated
     std::vector<beresta::Diagnostic> schemaErrors(const std::string& xsd, const std::string& xml)
     {
         std::shared_ptr<const beresta::xsd::Schema> schema = beresta::xsd::Schema::fromString(xsd);

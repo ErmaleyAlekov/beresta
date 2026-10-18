@@ -1,32 +1,37 @@
 #include "core/document.hpp"
+#include "i18n/i18n.hpp"
 #include "exception/dom_exception.hpp"
 
 namespace beresta
 {
     // Пустой документ без декларации, пролога и корня
+    // An empty document without a declaration, a prolog and a root
     Document::Document() noexcept
         : ContainerNode(), _declaration()
     {
     }
 
     // Тип узла — документ
+    // The node type is a document
     NodeType Document::getType() const noexcept
     {
         return NodeType::DOCUMENT;
     }
 
     // Глубокая копия всего документа вместе с декларацией
+    // A deep copy of the whole document together with the declaration
     std::unique_ptr<Node> Document::clone() const
     {
         return std::make_unique<Document>(*this);
     }
 
     // Декларация (если есть), затем дети подряд — без разделителей
+    // The declaration (if there is one), then the children in a row — without separators
     void Document::serialize(std::string& output) const
     {
-        if (_declaration.has_value())
-            serializeXmlDeclaration(_declaration.value(), output);
+        serializeOpen(output);
         serializeChildren(output);
+        serializeClose(output);
     }
 
     /*
@@ -35,6 +40,12 @@ namespace beresta
     ** - DocumentType — один и строго ДО корневого элемента;
     ** - Element — один и строго ПОСЛЕ DOCTYPE;
     ** - Text, CDATA и вложенный Document — запрещены.
+    **
+    ** The XML top-level rules:
+    **  - Comment and PI — anywhere and in any number;
+    **  - DocumentType — one and strictly BEFORE the root element;
+    **  - Element — one and strictly AFTER the DOCTYPE;
+    **  - Text, CDATA and a nested Document — forbidden.
     */
     void Document::validateChild(const Node& child, std::size_t index) const
     {
@@ -50,8 +61,8 @@ namespace beresta
             return;
         if (type == NodeType::ELEMENT || type == NodeType::DOCUMENT_TYPE)
             throw DomException(DomErrorCode::HIERARCHY_VIOLATION,
-                "документ может содержать один корневой элемент и один DOCTYPE перед ним");
+                i18n::format(i18n::Message::DOCUMENT_ONE_ROOT));
         throw DomException(DomErrorCode::HIERARCHY_VIOLATION,
-            "на верхнем уровне документа допустимы только элемент, DOCTYPE, комментарии и PI");
+            i18n::format(i18n::Message::DOCUMENT_TOP_LEVEL_NODE));
     }
 }

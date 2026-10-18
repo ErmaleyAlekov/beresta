@@ -1,4 +1,5 @@
 #include "xsd/internal/schema_builder.hpp"
+#include "i18n/i18n.hpp"
 #include "utils/xml_tokens.hpp"
 
 namespace beresta::xsd::detail
@@ -6,6 +7,9 @@ namespace beresta::xsd::detail
     /*
     ** Частица модели: элемент, xs:any, ссылка на группу или вложенная
     ** группа sequence / choice / all. Глубина вложенности ограничена.
+    **
+    ** A model particle: an element, xs:any, a group reference or a nested
+    ** sequence / choice / all group. The nesting depth is limited.
     */
     content::Particle SchemaBuilder::buildParticle(const Element& definition, const SchemaSource& source,
         ComplexType& owner, std::size_t depth)
@@ -14,7 +18,7 @@ namespace beresta::xsd::detail
         content::Particle group;
 
         if (depth > 64)
-            fail(definition, "слишком глубокая вложенность модели содержимого");
+            fail(definition, i18n::format(i18n::Message::MODEL_TOO_DEEP));
         if (kind == "element")
             return buildElementParticle(definition, source, owner);
         if (kind == "any")
@@ -22,7 +26,7 @@ namespace beresta::xsd::detail
         if (kind == "group")
             return buildGroupReference(definition, owner, depth);
         if (kind != "sequence" && kind != "choice" && kind != "all")
-            fail(definition, "неожиданный xs:" + std::string(kind) + " в модели содержимого");
+            fail(definition, i18n::format(i18n::Message::SCHEMA_UNEXPECTED_IN_MODEL, {kind}));
         if (kind == "choice")
             group.kind = content::ParticleKind::CHOICE;
         if (kind == "all")
@@ -34,6 +38,7 @@ namespace beresta::xsd::detail
     }
 
     // <xs:group ref="g"/>: модель именованной группы с повторениями из места ссылки
+    // <xs:group ref="g"/>: the model of a named group with the repetitions from the reference place
     content::Particle SchemaBuilder::buildGroupReference(const Element& reference, ComplexType& owner,
         std::size_t depth)
     {
@@ -44,13 +49,14 @@ namespace beresta::xsd::detail
         if (named != nullptr)
             model = schemaChildren(*named->element);
         if (model.empty())
-            fail(reference, "группа \"" + name + "\" не найдена или пуста");
+            fail(reference, i18n::format(i18n::Message::SCHEMA_GROUP_MISSING, {name}));
         content::Particle group = buildParticle(*model.front(), *named->source, owner, depth + 1);
         readOccurs(reference, group);
         return group;
     }
 
     // Элемент модели: локальное объявление или ссылка ref на глобальное
+    // A model element: a local declaration or a ref reference to a global one
     content::Particle SchemaBuilder::buildElementParticle(const Element& definition,
         const SchemaSource& source, ComplexType& owner)
     {
@@ -73,6 +79,9 @@ namespace beresta::xsd::detail
     /*
     ** xs:any: ограничение пространств имён (##any, ##other, ##local,
     ** ##targetNamespace или список URI) и режим processContents.
+    **
+    ** xs:any: the namespace constraint (##any, ##other, ##local,
+    ** ##targetNamespace or a list of URIs) and the processContents mode.
     */
     content::Particle SchemaBuilder::buildWildcard(const Element& definition, const SchemaSource& source,
         ComplexType& owner)

@@ -3,7 +3,8 @@ using Beresta;
 
 namespace Beresta.SelfTest
 {
-    /// <summary>Проверки XPath и XML Schema.</summary>
+    /// <summary>Проверки XPath и XML Schema.
+    /// XPath and XML Schema checks.</summary>
     internal static class XPathSchemaChecks
     {
         private const string Shop = "<s:shop xmlns:s='urn:s'><s:item code='A'>5</s:item><s:item code='B'>7</s:item></s:shop>";
@@ -11,7 +12,8 @@ namespace Beresta.SelfTest
         private const string SchemaText = "<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'>"
             + "<xs:element name='n' type='xs:int'/></xs:schema>";
 
-        /// <summary>Префиксы, переменные, число / логическое / строка.</summary>
+        /// <summary>Префиксы, переменные, число / логическое / строка.
+        /// Prefixes, variables, number / boolean / string.</summary>
         internal static void XPathValues()
         {
             using XmlDocument document = Xml.Parse(Shop);
@@ -24,7 +26,8 @@ namespace Beresta.SelfTest
             Expect.Equal("7", second.EvaluateString(document), "string()");
         }
 
-        /// <summary>Выборка узлов, значения атрибутов, пространства имён, синтаксическая ошибка.</summary>
+        /// <summary>Выборка узлов, значения атрибутов, пространства имён, синтаксическая ошибка.
+        /// Selecting nodes, attribute values, namespaces, a syntax error.</summary>
         internal static void XPathSelect()
         {
             using XmlDocument document = Xml.Parse(Shop);
@@ -47,7 +50,8 @@ namespace Beresta.SelfTest
             }
         }
 
-        /// <summary>Проверка по схеме: список нарушений и проверка прямо при разборе.</summary>
+        /// <summary>Проверка по схеме: список нарушений и проверка прямо при разборе.
+        /// Schema validation: a list of violations and validation during parsing.</summary>
         internal static void Schema()
         {
             using XmlSchema schema = XmlSchema.FromString(SchemaText);

@@ -36,6 +36,19 @@ namespace beresta::detail
     **
     ** Сессия сама реализует Locator (позиция текущего события) и
     ** ValidityReporter (маршрутизация ошибок валидности в ErrorHandler).
+    **
+    ** ParseSession — one parsing pass over one text (already in UTF-8).
+    ** Generates SAX events for a ContentHandler; DOM is built by one of the
+    ** handlers (DomBuilder) — so one parser serves both modes.
+    ** Parsing is ITERATIVE: open elements are in an explicit stack, entity
+    ** texts are in the source stack. Deep input will not overflow the
+    ** system call stack. The run() loop determines the kind of the next
+    ** construct and calls its handler.
+    ** All well-formedness checks (tag nesting, a single root,
+    ** namespaces, entities) are done here, so SAX mode is
+    ** as strict as DOM mode.
+    ** The session itself implements Locator (the position of the current event) and
+    ** ValidityReporter (routing validity errors to the ErrorHandler).
     */
     class ParseSession : public Locator, public dtd::ValidityReporter
     {
@@ -43,6 +56,7 @@ namespace beresta::detail
         ParseSession(std::string_view text, const ParserOptions& options, ContentHandler& handler);
 
         // Полный разбор; синтаксические ошибки — ParseException
+        // Full parsing; syntax errors are ParseException
         void run();
 
         SourceLocation getLocation() const override;
@@ -50,6 +64,7 @@ namespace beresta::detail
 
     private:
         // Открытый элемент: полное имя и URI его пространства имён
+        // An open element: the qualified name and the URI of its namespace
         struct OpenElement
         {
             std::string name;
@@ -57,23 +72,27 @@ namespace beresta::detail
         };
 
         // ---- Цикл разбора (parse_session.cpp) ----
+        // ---- The parsing loop (parse_session.cpp) ----
         void parseNext();
         bool handleInputEnd();
         void finish();
 
         // ---- Ошибки (parse_session_errors.cpp) ----
+        // ---- Errors (parse_session_errors.cpp) ----
         void runLoop();
         [[noreturn]] void reportFatal(const ParseException& problem) const;
         ParseException toParseException(const DomException& error);
         void markEvent() noexcept;
 
         // ---- Разметка (parse_markup.cpp) ----
+        // ---- Markup (parse_markup.cpp) ----
         void parseComment();
         void parseCData();
         void parseProcessingInstruction();
         void parseEndTag();
 
         // ---- XML-декларация (parse_declaration.cpp) ----
+        // ---- The XML declaration (parse_declaration.cpp) ----
         void parseXmlDeclaration();
         bool readPseudoAttribute(std::string_view name, std::string& value);
         void readStandalone(XmlDeclaration& declaration);
@@ -86,26 +105,32 @@ namespace beresta::detail
             const std::string& subset);
 
         // ---- Открывающие теги (parse_element.cpp) ----
+        // ---- Start tags (parse_element.cpp) ----
         void parseStartTag();
         void parseAttributes(std::vector<Attribute>& attributes);
         void parseAttribute(std::vector<Attribute>& attributes);
 
         // ---- События элементов (parse_element_events.cpp) ----
+        // ---- Element events (parse_element_events.cpp) ----
         void emitStartElement(std::string name, std::vector<Attribute>& attributes, bool isEmpty);
         void emitEndElement();
         void buildPlainAttributes(const std::vector<Attribute>& attributes);
+        void prepareAttributes(const std::string& name, std::vector<Attribute>& attributes);
 
         // ---- Пространства имён (parse_namespaces.cpp) ----
+        // ---- Namespaces (parse_namespaces.cpp) ----
         void processNamespaces(OpenElement& element, const std::vector<Attribute>& attributes);
         void resolveAttributeNamespaces(const std::vector<Attribute>& attributes);
         void checkExpandedNames() const;
 
         // ---- Текст (parse_text.cpp) ----
+        // ---- Text (parse_text.cpp) ----
         void parseText();
         void appendTextChunk(std::string_view chunk);
         void flushText();
 
         // ---- Ссылки в тексте (parse_text_reference.cpp) ----
+        // ---- References in text (parse_text_reference.cpp) ----
         bool handleTextReference();
         void appendTextCharacterReference(std::size_t start);
         void pushGeneralEntity(std::string_view name, std::size_t referenceOffset);
@@ -120,6 +145,9 @@ namespace beresta::detail
         std::unique_ptr<dtd::DtdValidator> _validator;
         std::vector<OpenElement> _openElements;
         std::vector<SaxAttribute> _saxAttributes;
+        // Буфер атрибутов тега: переиспользуется, чтобы не выделять память на каждый тег
+        // The tag attribute buffer: reused so as not to allocate memory for every tag
+        std::vector<Attribute> _attributeBuffer;
         std::string _pendingText;
         bool _pendingSignificant;
         std::size_t _textMainOffset;
@@ -127,6 +155,9 @@ namespace beresta::detail
         std::size_t _eventMainOffset;
         bool _rootSeen;
         bool _doctypeSeen;
+        // standalone="yes" в XML-декларации: внешние объявления сущностей недоступны
+        // standalone="yes" in the XML declaration: external entity declarations are unavailable
+        bool _standalone;
     };
 }
 

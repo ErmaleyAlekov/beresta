@@ -5,6 +5,7 @@
 namespace beresta::xsd
 {
     // Именованный набор диапазонов (категория или блок Unicode)
+    // A named set of ranges (a Unicode category or block)
     struct PropertyRanges
     {
         const char* name;
@@ -17,6 +18,11 @@ namespace beresta::xsd
     ** письменностей (латиница, кириллица, греческий, иврит, арабский, CJK).
     ** Полные таблицы Unicode занимают сотни килобайт; для фасетов pattern
     ** реальных схем этого покрытия достаточно (ограничение задокументировано).
+    **
+    ** Unicode categories — simplified tables for common scripts
+    ** (Latin, Cyrillic, Greek, Hebrew, Arabic, CJK).
+    ** The full Unicode tables take hundreds of kilobytes; for the pattern facets
+    ** of real schemas this coverage is enough (the limitation is documented).
     */
     static const PropertyRanges PROPERTIES[] = {
         {"Lu", {{0x41, 0x5A}, {0xC0, 0xD6}, {0xD8, 0xDE}, {0x391, 0x3A9}, {0x400, 0x42F}}, 5},
@@ -55,6 +61,9 @@ namespace beresta::xsd
     /*
     ** Имя свойства: точное совпадение или однобуквенная категория для
     ** подкатегорий без собственной таблицы (\p{Lo} -> L, \p{Pd} -> P).
+    **
+    ** The property name: an exact match or a one-letter category for
+    ** subcategories without their own table (\p{Lo} -> L, \p{Pd} -> P).
     */
     CharSet unicodePropertySet(std::string_view name, bool& known)
     {
@@ -80,6 +89,7 @@ namespace beresta::xsd
     }
 
     // \i — начало XML-имени (буквы, '_', ':'); \c — символ имени (ещё цифры, '-', '.', диакритика)
+    // \i — the start of an XML name (letters, '_', ':'); \c — a name character (also digits, '-', '.', diacritics)
     static CharSet nameCharSet(bool fullName)
     {
         CharSet result;
@@ -103,6 +113,10 @@ namespace beresta::xsd
     ** \s — пробельные символы XML; \d — цифры (Nd); \i и \c — символы имён;
     ** \w — всё, кроме знаков препинания, разделителей и управляющих символов
     ** (определение спецификации XSD).
+    **
+    ** \s — XML whitespace; \d — digits (Nd); \i and \c — name characters;
+    ** \w — everything except punctuation, separators and control characters
+    ** (the definition of the XSD specification).
     */
     CharSet multiCharEscapeSet(char letter)
     {

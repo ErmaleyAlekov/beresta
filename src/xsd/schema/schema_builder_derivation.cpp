@@ -8,6 +8,10 @@ namespace beresta::xsd::detail
     ** xs:simpleContent: текст простого типа + атрибуты. Расширение берёт
     ** тип текста как есть; ограничение создаёт производный простой тип
     ** с фасетами из xs:restriction. Атрибуты базового типа наследуются.
+    **
+    ** xs:simpleContent: text of a simple type + attributes. An extension takes
+    ** the text type as is; a restriction creates a derived simple type
+    ** with the facets from xs:restriction. The attributes of the base type are inherited.
     */
     void SchemaBuilder::buildSimpleContent(ComplexType& type, const Element& simpleContent,
         const SchemaSource& source)
@@ -40,6 +44,10 @@ namespace beresta::xsd::detail
     ** xs:complexContent: расширение дописывает собственную модель ПОСЛЕ
     ** модели базового типа и добавляет атрибуты; ограничение задаёт
     ** модель заново, сохраняя базовые атрибуты (если их не переопределили).
+    **
+    ** xs:complexContent: an extension appends its own model AFTER the
+    ** model of the base type and adds attributes; a restriction defines the
+    ** model anew, keeping the base attributes (unless they are overridden).
     */
     void SchemaBuilder::buildComplexContent(ComplexType& type, const Element& complexContent,
         const SchemaSource& source, bool mixed)
@@ -65,6 +73,7 @@ namespace beresta::xsd::detail
     }
 
     // Модель расширения = последовательность (модель базового типа, собственная модель)
+    // The extension model = a sequence (the base type model, the own model)
     void SchemaBuilder::prependBaseParticle(ComplexType& type, const ComplexType& base)
     {
         content::Particle combined;

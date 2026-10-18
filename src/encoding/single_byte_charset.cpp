@@ -4,6 +4,7 @@
 namespace beresta::encoding
 {
     // Однобайтовая кодировка задаётся таблицей старшей половины
+    // A single-byte encoding is defined by the table of its upper half
     SingleByteCharset::SingleByteCharset(std::string_view name, const std::uint16_t* table,
         bool asciiOnly) noexcept
         : _name(name), _table(table), _asciiOnly(asciiOnly)
@@ -11,18 +12,21 @@ namespace beresta::encoding
     }
 
     // Каноническое имя
+    // The canonical name
     std::string_view SingleByteCharset::getName() const noexcept
     {
         return _name;
     }
 
     // Однобайтовые кодировки не используют BOM
+    // Single-byte encodings do not use a BOM
     std::string_view SingleByteCharset::getByteOrderMark() const noexcept
     {
         return "";
     }
 
     // Каждый байт — ровно один символ; неопределённый байт — ошибка
+    // Each byte is exactly one character; an undefined byte is an error
     std::size_t SingleByteCharset::decode(std::string_view bytes, std::string& output) const
     {
         output.reserve(output.size() + bytes.size() * 2);
@@ -43,6 +47,7 @@ namespace beresta::encoding
     }
 
     // Символ вне кодировки — символьная ссылка или ошибка (по выбору вызывающего)
+    // A character outside the encoding — a character reference or an error (as the caller chooses)
     std::size_t SingleByteCharset::encode(std::string_view utf8, std::string& output,
         bool useCharacterReferences) const
     {

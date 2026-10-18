@@ -1,6 +1,9 @@
 # Пакет Python-обёртки «Берёсты».
 # Сборка колеса после копирования бинарника (make PYTHON=1 или
 # cmake -DBERESTA_BUILD_PYTHON=ON):   python -m pip wheel . -w dist
+# The Python package of the Beresta wrapper.
+# Building a wheel after the binary is copied (make PYTHON=1 or
+# cmake -DBERESTA_BUILD_PYTHON=ON):   python -m pip wheel . -w dist
 [build-system]
 requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
@@ -14,6 +17,9 @@ requires-python = ">=3.8"
 # SPDX-выражение лицензии; текст лицензии кладётся в колесо (dist-info/licenses).
 # LICENSE здесь — копия файла из корня репозитория: setuptools не берёт
 # файлы за пределами каталога пакета
+# The SPDX license expression; the license text goes into the wheel (dist-info/licenses).
+# LICENSE here is a copy of the file from the repository root: setuptools does not take
+# files outside the package directory
 license = "MIT"
 license-files = ["LICENSE"]
 dependencies = []
@@ -22,5 +28,6 @@ dependencies = []
 packages = ["beresta"]
 
 # Нативные библиотеки всех собранных платформ входят в пакет
+# The native libraries of all built platforms are included in the package
 [tool.setuptools.package-data]
 beresta = ["_native/*/*"]

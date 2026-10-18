@@ -14,6 +14,12 @@ namespace beresta::detail
     ** xmlns добавляются в неё, закрывающий тег удаляет её (popScope).
     ** Поиск идёт с конца, поэтому ближайшее объявление перекрывает внешние.
     ** Префиксы xml и xmlns связаны со своими URI изначально и навсегда.
+    **
+    ** NamespaceContext — a stack of prefix scopes during parsing.
+    ** Each start tag opens a scope (pushScope), xmlns declarations
+    ** are added to it, the end tag removes it (popScope).
+    ** The lookup goes from the end, so the nearest declaration overrides the outer ones.
+    ** The xml and xmlns prefixes are bound to their URIs from the start and forever.
     */
     class NamespaceContext
     {
@@ -24,9 +30,11 @@ namespace beresta::detail
         void popScope();
 
         // Объявление в текущей области; нарушения правил — DomException(NAMESPACE_ERROR)
+        // A declaration in the current scope; rule violations — DomException(NAMESPACE_ERROR)
         void declare(std::string_view prefix, std::string_view uri);
 
         // URI префикса (пустой — пространство по умолчанию) или nullptr, если не связан
+        // The URI of a prefix (empty — the default namespace) or nullptr if it is not bound
         const std::string* resolve(std::string_view prefix) const noexcept;
 
     private:

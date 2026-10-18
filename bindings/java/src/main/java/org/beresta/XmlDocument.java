@@ -22,10 +22,19 @@ import org.beresta.internal.NativeRelease;
  *     System.out.println(document.root().firstChild().text());
  * }
  * }</pre>
+ *
+ * <p>An XML document — the owner of the whole node tree in native memory.
+ * The document is itself a node (children can be added to it) and implements
+ * AutoCloseable: use try-with-resources. If the document was not closed,
+ * Cleaner frees the memory on garbage collection.
  */
 public final class XmlDocument extends XmlNode implements DocumentOperations, AutoCloseable
 {
     private final long address;
+
+    // Единственные обёртки узлов этого документа (см. NodeRegistry)
+    // The only wrappers of the nodes of this document (see NodeRegistry)
+    final NodeRegistry registry = new NodeRegistry();
     private final Cleaner.Cleanable cleanable;
     private volatile boolean closed;
 
@@ -36,7 +45,10 @@ public final class XmlDocument extends XmlNode implements DocumentOperations, Au
         this.cleanable = NativeRelease.register(this, DocumentFunctions.FREE, pointer);
     }
 
-    /** Адрес без проверки закрытия — для фабрики обёрток. */
+    /**
+     * Адрес без проверки закрытия — для фабрики обёрток.
+     * <p>The address without the closed check — for the wrapper factory.
+     */
     long address()
     {
         return address;
@@ -47,7 +59,10 @@ public final class XmlDocument extends XmlNode implements DocumentOperations, Au
         return closed;
     }
 
-    /** Освобождение нативной памяти; повторный вызов безопасен. */
+    /**
+     * Освобождение нативной памяти; повторный вызов безопасен.
+     * <p>Releases the native memory; calling it again is safe.
+     */
     @Override
     public void close()
     {
@@ -55,7 +70,10 @@ public final class XmlDocument extends XmlNode implements DocumentOperations, Au
         cleanable.clean();
     }
 
-    /** Новый документ; rootName == null — без корневого элемента. */
+    /**
+     * Новый документ; rootName == null — без корневого элемента.
+     * <p>A new document; rootName == null means without a root element.
+     */
     public static XmlDocument create(String rootName)
     {
         try (Arena arena = Arena.ofConfined())

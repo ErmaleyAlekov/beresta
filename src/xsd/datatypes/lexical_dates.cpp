@@ -5,6 +5,9 @@ namespace beresta::xsd::detail
     /*
     ** Формат каждого вида даты/времени: Y — год, M — месяц, D — день,
     ** h — часы, m — минуты, s — секунды; прочие символы — литералы.
+    **
+    ** The format of each kind of date/time: Y — the year, M — the month, D — the day,
+    ** h — hours, m — minutes, s — seconds; other characters are literals.
     */
     static std::string_view dateFormat(Primitive primitive) noexcept
     {
@@ -30,6 +33,7 @@ namespace beresta::xsd::detail
     }
 
     // Один элемент формата: поле или литерал
+    // One format item: a field or a literal
     static bool readField(char field, std::string_view text, std::size_t& position,
         DateTimeValue& result) noexcept
     {
@@ -52,6 +56,7 @@ namespace beresta::xsd::detail
     }
 
     // Число дней в месяце с учётом високосных лет (григорианский календарь)
+    // The number of days in a month taking leap years into account (the Gregorian calendar)
     static int daysInMonth(long long year, int month) noexcept
     {
         static const int DAYS[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
@@ -65,6 +70,7 @@ namespace beresta::xsd::detail
     }
 
     // Диапазоны полей; 24:00:00 допустимо как полночь конца суток
+    // Field ranges; 24:00:00 is allowed as the midnight at the end of the day
     static bool fieldsInRange(Primitive primitive, const DateTimeValue& value) noexcept
     {
         if (value.month < 1 || value.month > 12 || value.minute > 59 || value.second >= 60.0L)
@@ -79,6 +85,7 @@ namespace beresta::xsd::detail
     }
 
     // Разбор по формату, затем необязательный часовой пояс и проверка диапазонов
+    // Parsing by the format, then an optional time zone and the range check
     bool parseDateTimeValue(Primitive primitive, std::string_view value, DateTimeValue& result)
     {
         std::size_t position = 0;

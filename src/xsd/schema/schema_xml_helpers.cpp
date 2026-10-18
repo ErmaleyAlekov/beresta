@@ -3,6 +3,7 @@
 namespace beresta::xsd::detail
 {
     // Элемент из пространства XSD с нужным локальным именем
+    // An element from the XSD namespace with the required local name
     bool isSchemaElement(const Element& element, std::string_view localName)
     {
         return element.getLocalName() == localName
@@ -10,6 +11,7 @@ namespace beresta::xsd::detail
     }
 
     // Компоненты схемы — дочерние элементы XSD; аннотации (документация) пропускаются
+    // Schema components are XSD child elements; annotations (documentation) are skipped
     std::vector<const Element*> schemaChildren(const Element& parent)
     {
         std::vector<const Element*> children;
@@ -28,6 +30,7 @@ namespace beresta::xsd::detail
     }
 
     // Первый ребёнок XSD с указанным именем
+    // The first XSD child with the given name
     const Element* firstSchemaChild(const Element& parent, std::string_view localName)
     {
         for (const Element* child : schemaChildren(parent))
@@ -39,6 +42,7 @@ namespace beresta::xsd::detail
     }
 
     // Значение атрибута без пространства имён или запасное значение
+    // The value of an attribute without a namespace or a fallback value
     std::string attributeOr(const Element& element, std::string_view name, std::string_view fallback)
     {
         std::optional<std::string> value = element.getAttribute(name);

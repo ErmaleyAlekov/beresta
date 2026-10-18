@@ -9,6 +9,9 @@ namespace demo
     /*
     ** Один и тот же документ в двух видах: с отступами и одной строкой.
     ** После разбора пробельные отступы отброшены, поэтому вывод совпадает.
+    **
+    ** The same document in two forms: indented and on one line.
+    ** After parsing the whitespace indentation is discarded, so the output is the same.
     */
     void showFormatIndependence()
     {
@@ -37,6 +40,9 @@ namespace demo
     /*
     ** Копия независима от оригинала, а узел, извлечённый из документа,
     ** продолжает жить после уничтожения самого документа.
+    **
+    ** The copy is independent of the original, and a node extracted from the
+    ** document keeps living after the document itself is destroyed.
     */
     void showSafeCopying()
     {
@@ -57,6 +63,7 @@ namespace demo
     }
 
     // Ручное построение дерева: спецсимволы экранируются автоматически
+    // Building a tree by hand: special characters are escaped automatically
     void showTreeBuilding()
     {
         beresta::Document document;
@@ -72,6 +79,7 @@ namespace demo
     }
 
     // Ошибки разбора и нарушения структуры дерева
+    // Parsing errors and tree structure violations
     void showErrorReporting()
     {
         std::cout << "== 4. Сообщения об ошибках ==\n";

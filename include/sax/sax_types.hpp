@@ -11,6 +11,11 @@ namespace beresta
     ** ТОЛЬКО на время вызова обработчика; чтобы сохранить данные,
     ** скопируйте их в std::string.
     ** namespaceUri пуст для атрибутов вне пространств имён.
+    **
+    ** An attribute in a SAX event. All fields are views valid
+    ** ONLY during the handler call; to keep the data,
+    ** copy it into std::string.
+    ** namespaceUri is empty for attributes in no namespace.
     */
     struct SaxAttribute
     {
@@ -23,6 +28,9 @@ namespace beresta
     /*
     ** Элемент в событиях startElement / endElement.
     ** В endElement список атрибутов всегда пуст.
+    **
+    ** An element in the startElement / endElement events.
+    ** In endElement the attribute list is always empty.
     */
     struct SaxElement
     {

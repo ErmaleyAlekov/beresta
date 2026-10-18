@@ -10,6 +10,16 @@
 
 Имена ОС и архитектуры совпадают с именами в CMake, Makefile и
 Java-обёртке: windows/linux/macos и x86_64/aarch64/x86.
+
+Finding and loading the Beresta shared library through ctypes.
+Lookup order (the first file found wins):
+1. the BERESTA_LIBRARY environment variable — an explicit file path;
+2. the package folder _native/<os>-<arch>/ — the binary is put there by
+CMake (-DBERESTA_BUILD_PYTHON=ON) and the Makefile (make PYTHON=1);
+3. the system lookup (ctypes.util.find_library) — a library
+installed in the system (/usr/lib, PATH and so on).
+The OS and architecture names match CMake, the Makefile and the
+Java wrapper: windows/linux/macos and x86_64/aarch64/x86.
 """
 
 from __future__ import annotations
@@ -23,6 +33,7 @@ import sys
 from pathlib import Path
 
 # Каноническое имя файла библиотеки на каждой ОС
+# The canonical library file name on each OS
 _LIBRARY_FILES = {
     "windows": "beresta.dll",
     "linux": "libberesta.so",
@@ -30,6 +41,7 @@ _LIBRARY_FILES = {
 }
 
 # Разные системы называют одну архитектуру по-разному
+# Different systems name the same architecture differently
 _ARCH_ALIASES = {
     "amd64": "x86_64", "x86_64": "x86_64", "x64": "x86_64",
     "arm64": "aarch64", "aarch64": "aarch64",
@@ -38,7 +50,8 @@ _ARCH_ALIASES = {
 
 
 def platform_name() -> str:
-    """Имя платформы вида windows-x86_64 (имя папки в _native)."""
+    """Имя платформы вида windows-x86_64 (имя папки в _native).
+    The platform name like windows-x86_64 (the folder name in _native)."""
     if sys.platform.startswith("win"):
         system = "windows"
     elif sys.platform == "darwin":
@@ -48,19 +61,21 @@ def platform_name() -> str:
     machine = platform.machine().lower()
     arch = _ARCH_ALIASES.get(machine, machine)
     # 32-битный Python на 64-битном процессоре загрузит только 32-битную библиотеку
+    # A 32-bit Python on a 64-bit processor can load only a 32-bit library
     if arch == "x86_64" and struct.calcsize("P") == 4:
         arch = "x86"
     return system + "-" + arch
 
 
 def library_file_name() -> str:
-    """Имя файла библиотеки для текущей ОС."""
+    """Имя файла библиотеки для текущей ОС. / The library file name for the current OS."""
     system = platform_name().split("-")[0]
     return _LIBRARY_FILES.get(system, "libberesta.so")
 
 
 def _candidates() -> list:
-    """Кандидаты в порядке приоритета (несуществующие отбрасываются позже)."""
+    """Кандидаты в порядке приоритета (несуществующие отбрасываются позже).
+    Candidates in priority order (missing ones are dropped later)."""
     result = []
     explicit = os.environ.get("BERESTA_LIBRARY")
     if explicit:
@@ -74,15 +89,22 @@ def _candidates() -> list:
 
 
 def load_library() -> ctypes.CDLL:
-    """Загрузка библиотеки; понятная ошибка, если бинарник не найден."""
+    """Загрузка библиотеки; понятная ошибка, если бинарник не найден.
+    Loads the library; a clear error if the binary is not found."""
     tried = []
     for candidate in _candidates():
         if os.path.isabs(candidate) and not os.path.exists(candidate):
             tried.append(candidate)
             continue
         return ctypes.CDLL(candidate)
+    # Библиотека ещё не загружена, каталога сообщений нет — текст на двух языках
+    # The library is not loaded yet, so there is no message catalog — the text is bilingual
     raise OSError(
         "Берёста: динамическая библиотека не найдена для платформы "
         + platform_name() + ". Соберите её с флагом PYTHON=1 (make) или "
         + "-DBERESTA_BUILD_PYTHON=ON (CMake) либо задайте BERESTA_LIBRARY. "
-        + "Проверенные пути: " + ", ".join(tried))
+        + "Проверенные пути: " + ", ".join(tried)
+        + " / Beresta: the native library was not found for the platform "
+        + platform_name() + ". Build it with PYTHON=1 (make) or "
+        + "-DBERESTA_BUILD_PYTHON=ON (CMake), or set BERESTA_LIBRARY. "
+        + "Paths tried: " + ", ".join(tried))

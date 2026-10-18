@@ -5,6 +5,7 @@
 namespace
 {
     // Числа: границы целых типов, десятичные и с плавающей точкой
+    // Numbers: the bounds of the integer types, decimal and floating-point
     void testNumericTypes()
     {
         TEST_ASSERT(support::acceptsBuiltin("int", "2147483647") && !support::acceptsBuiltin("int", "2147483648"));
@@ -18,6 +19,7 @@ namespace
     }
 
     // Даты, время, длительности и часовые пояса
+    // Dates, times, durations and time zones
     void testDateTypes()
     {
         TEST_ASSERT(support::acceptsBuiltin("date", "2024-02-29") && !support::acceptsBuiltin("date", "2023-02-29"));
@@ -29,6 +31,7 @@ namespace
     }
 
     // Строковые формы, двоичные данные и списки
+    // String forms, binary data and lists
     void testStringAndBinaryTypes()
     {
         TEST_ASSERT(support::acceptsBuiltin("language", "ru-RU") && !support::acceptsBuiltin("language", "русский"));
@@ -41,6 +44,7 @@ namespace
     }
 
     // Сравнение значений: 1.0 = 1 для decimal, порядок дат с учётом часового пояса
+    // Value comparison: 1.0 = 1 for decimal, the order of dates taking the time zone into account
     void testValueEquality()
     {
         const beresta::xsd::SimpleType& decimal = *beresta::xsd::builtinType("decimal");
@@ -55,6 +59,7 @@ namespace
 namespace suites
 {
     // Регистрация тестов встроенных типов XSD
+    // Registers the tests of the built-in XSD types
     void registerXsdDatatypeTests(test::TestRunner& runner)
     {
         runner.add("XSD: числовые типы", testNumericTypes);

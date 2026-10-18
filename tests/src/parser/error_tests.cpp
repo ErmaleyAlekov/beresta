@@ -4,6 +4,7 @@
 namespace
 {
     // Позиция ошибки указывает на начало неверного закрывающего тега
+    // The error position points to the start of the wrong end tag
     void testMismatchedTagPosition()
     {
         beresta::ParsePosition position = support::parseErrorPosition(
@@ -14,6 +15,7 @@ namespace
     }
 
     // Столбец считается в символах, а не в байтах UTF-8
+    // The column is counted in characters, not in UTF-8 bytes
     void testColumnCountsUtf8Characters()
     {
         beresta::ParsePosition position = support::parseErrorPosition("<я>ёж&bad;</я>");
@@ -23,6 +25,7 @@ namespace
     }
 
     // Структурные ошибки: незакрытый тег, лишний закрывающий, второй корень, пустота
+    // Structural errors: an unclosed tag, an extra end tag, a second root, emptiness
     void testStructuralErrors()
     {
         beresta::XmlParser parser;
@@ -36,6 +39,7 @@ namespace
     }
 
     // Лексические ошибки: атрибуты, сущности, комментарии, объявления, декларация
+    // Lexical errors: attributes, entities, comments, declarations, the XML declaration
     void testLexicalErrors()
     {
         beresta::XmlParser parser;
@@ -55,6 +59,7 @@ namespace
 namespace suites
 {
     // Регистрация тестов сообщений об ошибках
+    // Registers the error message tests
     void registerErrorTests(test::TestRunner& runner)
     {
         runner.add("ошибки: позиция несовпадающего тега", testMismatchedTagPosition);

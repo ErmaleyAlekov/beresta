@@ -9,6 +9,11 @@ namespace beresta::xsd
     ** «звезда» (unbounded), либо (maximum - minimum) необязательных копий.
     ** Каждая копия компилируется заново из дерева — так проще и надёжнее,
     ** чем копировать уже построенный подграф.
+    **
+    ** Thompson repetition: minimum mandatory copies, then either
+    ** a "star" (unbounded), or (maximum - minimum) optional copies.
+    ** Each copy is compiled anew from the tree — this is simpler and more reliable
+    ** than copying an already built subgraph.
     */
     Regex::Fragment Regex::compileNode(const RegexNode& node)
     {
@@ -26,6 +31,7 @@ namespace beresta::xsd
     }
 
     // Узел без учёта его собственного повторения
+    // A node without its own repetition
     Regex::Fragment Regex::compileOnce(const RegexNode& node)
     {
         if (node.kind == RegexKind::CHARACTERS)
@@ -39,6 +45,7 @@ namespace beresta::xsd
     }
 
     // Последовательность: выход каждого фрагмента ведёт во вход следующего
+    // A sequence: the exit of each fragment leads to the entry of the next one
     Regex::Fragment Regex::compileSequence(const std::vector<RegexNode>& children)
     {
         Fragment result{addState(StateKind::EPSILON, 0), {}};
@@ -54,6 +61,7 @@ namespace beresta::xsd
     }
 
     // Выбор: цепочка ε-развилок, выходы всех вариантов объединяются
+    // A choice: a chain of ε-splits, the exits of all alternatives are merged
     Regex::Fragment Regex::compileAlternation(const std::vector<RegexNode>& children)
     {
         Fragment result{addState(StateKind::SPLIT, 0), {}};
@@ -74,6 +82,7 @@ namespace beresta::xsd
     }
 
     // «Висячие» выходы фрагмента направляются в target
+    // The "dangling" exits of a fragment are directed to target
     void Regex::connect(const Fragment& fragment, long target)
     {
         for (const std::pair<long, int>& exit : fragment.exits)

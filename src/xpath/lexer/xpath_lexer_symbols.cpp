@@ -1,4 +1,5 @@
 #include "xpath/internal/xpath_lexer.hpp"
+#include "i18n/i18n.hpp"
 #include "exception/dom_exception.hpp"
 
 #include <utility>
@@ -6,6 +7,7 @@
 namespace beresta::xpath::detail
 {
     // Двухсимвольные лексемы проверяются раньше односимвольных
+    // Two-character tokens are checked before one-character ones
     struct SymbolToken
     {
         const char* text;
@@ -23,6 +25,7 @@ namespace beresta::xpath::detail
     };
 
     // Знаки операций, скобки и переменные ($имя)
+    // Operator signs, brackets and variables ($name)
     Token XPathLexer::readSymbol()
     {
         if (_source[_position] == '$')
@@ -45,12 +48,15 @@ namespace beresta::xpath::detail
             _position += text.size();
             return makeToken(symbol.type, std::string(text));
         }
-        fail("неожиданный символ '" + std::string(1, _source[_position]) + "'");
+        fail(i18n::format(i18n::Message::XPATH_UNEXPECTED_CHAR, {std::string(1, _source[_position])}));
     }
 
     /*
     ** Предыдущая лексема — операнд, если она не '@', '::', '(', '[', ','
     ** и не оператор. Тогда следующий '*' — умножение, а имя — оператор.
+    **
+    ** The previous token is an operand if it is not '@', '::', '(', '[', ','
+    ** and not an operator. Then the next '*' is multiplication, and a name is an operator.
     */
     bool XPathLexer::operatorExpected() const noexcept
     {
@@ -71,15 +77,16 @@ namespace beresta::xpath::detail
     }
 
     // Лексема с нулевым числовым значением
+    // A token with a zero numeric value
     Token XPathLexer::makeToken(TokenType type, std::string text) const
     {
         return Token{type, std::move(text), 0.0};
     }
 
     // Синтаксическая ошибка с позицией в выражении (нумерация символов с единицы)
+    // A syntax error with the position in the expression (characters numbered from one)
     void XPathLexer::fail(const std::string& message) const
     {
-        throw DomException(DomErrorCode::XPATH_ERROR, "XPath, позиция "
-            + std::to_string(_position + 1) + ": " + message + " в \"" + std::string(_source) + "\"");
+        throw DomException(DomErrorCode::XPATH_ERROR, i18n::format(i18n::Message::XPATH_AT_POSITION, {std::to_string(_position + 1), message, _source}));
     }
 }

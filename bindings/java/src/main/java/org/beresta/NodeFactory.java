@@ -9,6 +9,10 @@ import org.beresta.internal.NodeFunctions;
  * Переходы между нативными дескрипторами и объектами Java.
  * wrap — фабрика обёрток (паттерн Factory Method): по типу узла за
  * дескриптором выбирается класс — XmlElement, сам XmlDocument или XmlNode.
+ *
+ * <p>Transitions between native handles and Java objects.
+ * wrap is the wrapper factory (the Factory Method pattern): the class is chosen by
+ * the node type behind the handle — XmlElement, the XmlDocument itself or XmlNode.
  */
 final class NodeFactory
 {
@@ -16,7 +20,15 @@ final class NodeFactory
     {
     }
 
-    /** Обёртка результата Си-функции; NULL без ошибки — null. */
+    /**
+     * Обёртка результата Си-функции; NULL без ошибки — null. Уже выданная
+     * живая обёртка того же узла возвращается повторно (реестр документа,
+     * паттерн Identity Map): у одного узла одна обёртка.
+     *
+     * <p>Wraps the result of a C function; NULL without an error is null. A live
+     * wrapper already handed out for the same node is returned again (the document
+     * registry, the Identity Map pattern): one node has one wrapper.
+     */
     static XmlNode wrap(Object result, XmlDocument document)
     {
         MemorySegment pointer = NativeCalls.handle(result);
@@ -25,13 +37,22 @@ final class NodeFactory
             return null;
         if (pointer.address() == document.address())
             return document;
-        int type = (int) NativeCalls.invoke(NodeFunctions.TYPE, pointer);
-        if (type == NodeType.ELEMENT.ordinal())
-            return new XmlElement(pointer, document);
-        return new XmlNode(pointer, document);
+        boolean element = (int) NativeCalls.invoke(NodeFunctions.TYPE, pointer) == NodeType.ELEMENT.ordinal();
+        XmlNode node = document.registry.find(pointer.address(), element);
+        if (node != null)
+            return node;
+        if (element)
+            node = new XmlElement(pointer, document);
+        else
+            node = new XmlNode(pointer, document);
+        document.registry.store(pointer.address(), node);
+        return node;
     }
 
-    /** Дескриптор схемы для разбора (null -> NULL: без проверки по схеме). */
+    /**
+     * Дескриптор схемы для разбора (null -> NULL: без проверки по схеме).
+     * <p>The schema handle for parsing (null -> NULL: no schema validation).
+     */
     static MemorySegment schemaHandle(XmlSchema schema)
     {
         if (schema == null)

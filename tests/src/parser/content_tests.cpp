@@ -4,6 +4,7 @@
 namespace
 {
     // Пять стандартных сущностей и символьные ссылки (десятичные и hex)
+    // The five standard entities and character references (decimal and hex)
     void testEntitiesAndCharacterReferences()
     {
         beresta::Document document = beresta::XmlParser().parse(
@@ -15,6 +16,7 @@ namespace
     }
 
     // Комментарии, CDATA и инструкции обработки переживают круговой разбор
+    // Comments, CDATA and processing instructions survive a round trip
     void testMarkupRoundTrip()
     {
         const char* xml = "<!--top--><?app run?><r><!-- in --><![CDATA[<b>&</b>]]><?x?></r>";
@@ -23,6 +25,7 @@ namespace
     }
 
     // Смешанное содержимое: текст между тегами сохраняется на своих местах
+    // Mixed content: the text between tags is kept in its places
     void testMixedContent()
     {
         const char* xml = "<p>Hello, <b>big</b> world<i>!</i></p>";
@@ -31,6 +34,7 @@ namespace
     }
 
     // Нормализация: \r\n -> \n в тексте; \t и \n -> пробел в атрибутах; BOM пропускается
+    // Normalization: \r\n -> \n in text; \t and \n -> a space in attributes; the BOM is skipped
     void testNormalizationAndBom()
     {
         beresta::Document document = beresta::XmlParser().parse(
@@ -45,6 +49,7 @@ namespace
 namespace suites
 {
     // Регистрация тестов содержимого
+    // Registers the content tests
     void registerContentTests(test::TestRunner& runner)
     {
         runner.add("содержимое: сущности и символьные ссылки", testEntitiesAndCharacterReferences);

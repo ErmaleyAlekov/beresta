@@ -8,6 +8,7 @@ namespace beresta::capi
     }
 
     // Сообщение хранится готовым: what() ничего не выделяет
+    // The message is stored ready: what() allocates nothing
     const char* InvalidArgumentException::what() const noexcept
     {
         return _message.c_str();

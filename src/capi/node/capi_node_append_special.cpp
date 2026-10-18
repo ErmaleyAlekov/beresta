@@ -3,6 +3,7 @@
 #include "core/processing_instruction.hpp"
 
 // Секция CDATA: "]]>" внутри текста отвергается ядром (INVALID_CONTENT)
+// A CDATA section: "]]>" inside the text is rejected by the core (INVALID_CONTENT)
 extern "C" BERESTA_API beresta_node beresta_node_append_cdata(beresta_node parent, const char* text)
 {
     BERESTA_CAPI_TRY
@@ -13,6 +14,7 @@ extern "C" BERESTA_API beresta_node beresta_node_append_cdata(beresta_node paren
 }
 
 // Инструкция обработки; data == NULL — инструкция без данных
+// A processing instruction; data == NULL means an instruction without data
 extern "C" BERESTA_API beresta_node beresta_node_append_pi(beresta_node parent, const char* target,
     const char* data)
 {

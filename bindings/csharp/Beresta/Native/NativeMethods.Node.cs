@@ -3,7 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace Beresta.Native
 {
-    /// <summary>Разделы «Узлы: свойства и навигация» и «Узлы: изменение дерева».</summary>
+    /// <summary>Разделы «Узлы: свойства и навигация» и «Узлы: изменение дерева».
+    /// The "Nodes: properties and navigation" and "Nodes: changing the tree" sections.</summary>
     internal static partial class NativeMethods
     {
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -47,6 +48,9 @@ namespace Beresta.Native
 
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         internal static extern int beresta_node_copy_to(IntPtr source, IntPtr parent, out IntPtr copy);
+
+        [DllImport(Library, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        internal static extern int beresta_node_move_to(IntPtr node, IntPtr parent);
 
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         internal static extern IntPtr beresta_node_append_element(IntPtr parent, [MarshalAs(UnmanagedType.LPUTF8Str)] string name);

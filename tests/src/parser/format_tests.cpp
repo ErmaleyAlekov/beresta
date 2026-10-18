@@ -4,11 +4,13 @@
 namespace
 {
     // Эталонный вывод: монолитный, без единого лишнего пробельного символа
+    // The reference output: monolithic, without a single extra whitespace character
     const char* const EXPECTED =
         "<?xml version=\"1.0\"?><catalog><item id=\"1\" type=\"a\"><name>Кофе</name>"
         "<price>10</price></item><item id=\"2\"/></catalog>";
 
     // Красиво отформатированный ввод: отступы пробелами и табами, переносы строк
+    // Pretty-formatted input: indentation with spaces and tabs, line breaks
     void testPrettyInput()
     {
         const char* pretty =
@@ -26,6 +28,7 @@ namespace
     }
 
     // Сырой ввод «в одну строку»: теги идут вплотную друг к другу
+    // Raw "one-line" input: the tags go right next to each other
     void testCompactInput()
     {
         const char* compact =
@@ -36,6 +39,7 @@ namespace
     }
 
     // Повторный разбор собственного вывода даёт тот же самый текст
+    // Parsing its own output again gives exactly the same text
     void testOutputIsStable()
     {
         std::string once = support::roundTrip(EXPECTED);
@@ -44,6 +48,7 @@ namespace
     }
 
     // Текст с содержимым сохраняется дословно, отступы — только по опции
+    // Text with content is kept verbatim, indentation only by the option
     void testWhitespaceOption()
     {
         const char* input = "<p>\n  <b> bold </b> tail \n</p>";
@@ -59,6 +64,7 @@ namespace
 namespace suites
 {
     // Регистрация тестов независимости от форматирования
+    // Registers the formatting independence tests
     void registerFormatTests(test::TestRunner& runner)
     {
         runner.add("формат: отформатированный ввод", testPrettyInput);

@@ -6,12 +6,14 @@
 namespace test
 {
     // Добавление теста в реестр
+    // Adds a test to the registry
     void TestRunner::add(std::string name, TestFunction function)
     {
         _cases.push_back(TestCase{std::move(name), function});
     }
 
     // Последовательный запуск всех тестов с итоговой сводкой
+    // Runs all tests one after another with a final summary
     int TestRunner::runAll() const
     {
         int failed = 0;
@@ -30,6 +32,9 @@ namespace test
     /*
     ** Один тест. Отдельно ловим TestFailure (проваленная проверка) и любое
     ** другое исключение (неожиданный сбой в коде библиотеки).
+    **
+    ** One test. TestFailure (a failed check) and any other exception
+    ** (an unexpected failure in the library code) are caught separately.
     */
     bool TestRunner::runOne(const TestCase& testCase) const
     {

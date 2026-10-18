@@ -5,6 +5,7 @@
 namespace beresta::xsd::detail
 {
     // Беззнаковое число с необязательной точкой (знаки и прочее пропускаются)
+    // An unsigned number with an optional point (signs and the rest are skipped)
     static long double parseUnsigned(std::string_view text) noexcept
     {
         long double result = 0.0L;
@@ -25,7 +26,8 @@ namespace beresta::xsd::detail
     }
 
     // float / double в long double: INF, -INF, NaN и мантисса с экспонентой
-    static long double parseFloatValue(std::string_view value) noexcept
+    // float / double to long double: INF, -INF, NaN and a mantissa with an exponent
+    long double parseFloatValue(std::string_view value) noexcept
     {
         if (value == "INF")
             return HUGE_VALL;
@@ -55,8 +57,16 @@ namespace beresta::xsd::detail
     ** поэтому порядок чисел совпадает с порядком моментов времени,
     ** в том числе после сдвига на часовой пояс. Время без пояса
     ** сравнивается как UTC (упрощение частичного порядка XSD).
+    **
+    ** Date/time -> one number of seconds in a mixed radix system
+    ** (the month in base 13, the day in base 32 and so on). The mapping is monotonic,
+    ** so the order of the numbers matches the order of the moments in time,
+    ** including after the shift by the time zone. A time without a zone
+    ** is compared as UTC (a simplification of the XSD partial order).
     */
-    static long double dateTimeKey(const DateTimeValue& value) noexcept
+    // Ключ порядка: дата и время в секундах, приведённые к UTC
+    // The order key: the date and time in seconds, converted to UTC
+    long double dateTimeKey(const DateTimeValue& value) noexcept
     {
         long double days = (static_cast<long double>(value.year) * 13 + value.month) * 32 + value.day;
         long double minutes = (days * 24 + value.hour) * 60 + value.minute - value.timezoneMinutes;
@@ -65,6 +75,7 @@ namespace beresta::xsd::detail
     }
 
     // Сравнение двух длинных чисел с учётом NaN (2 — несравнимы)
+    // Compares two long numbers taking NaN into account (2 — incomparable)
     static int compareLongDoubles(long double left, long double right) noexcept
     {
         if (std::isnan(left) || std::isnan(right))
@@ -77,6 +88,7 @@ namespace beresta::xsd::detail
     }
 
     // Упорядоченное сравнение значений одного примитивного типа
+    // An ordered comparison of values of one primitive type
     int compareOrdered(Primitive primitive, std::string_view left, std::string_view right)
     {
         if (primitive == Primitive::DECIMAL)

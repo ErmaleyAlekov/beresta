@@ -3,6 +3,7 @@
 namespace beresta::encoding
 {
     // Прямой поиск в таблице; для Latin-1 код совпадает с байтом
+    // A direct table lookup; for Latin-1 the code equals the byte
     std::uint32_t SingleByteCharset::highByteToCode(unsigned char byte) const noexcept
     {
         if (_asciiOnly)
@@ -15,6 +16,9 @@ namespace beresta::encoding
     /*
     ** Обратный поиск — линейный по 128 элементам. Это быстрее и проще
     ** хеш-таблицы для такого размера и не требует инициализации.
+    **
+    ** The reverse lookup is linear over 128 items. For this size it is faster
+    ** and simpler than a hash table and needs no initialization.
     */
     int SingleByteCharset::codeToHighByte(std::uint32_t codePoint) const noexcept
     {

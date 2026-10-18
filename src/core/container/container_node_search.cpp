@@ -8,6 +8,11 @@ namespace beresta
     ** явный стек хранит пары «контейнер — индекс следующего ребёнка».
     ** Глубокие деревья не переполнят системный стек вызовов.
     ** match — ссылка на функцию-предикат, отбирающую нужные элементы.
+    **
+    ** A subtree traversal in document order (pre-order) WITHOUT recursion:
+    ** an explicit stack keeps "container — index of the next child" pairs.
+    ** Deep trees will not overflow the system call stack.
+    ** match is a reference to a predicate function selecting the required elements.
     */
     static void collectElements(const ContainerNode& root,
         bool (*match)(const Element&, std::string_view, std::string_view),
@@ -36,6 +41,7 @@ namespace beresta
     }
 
     // Предикат «имя тега совпадает или запрошены все элементы»
+    // The predicate "the tag name matches or all elements are requested"
     static bool matchesTagName(const Element& element, std::string_view name,
         std::string_view unused)
     {
@@ -44,6 +50,7 @@ namespace beresta
     }
 
     // Предикат «пространство имён и локальное имя совпадают ("*" — любое)»
+    // The predicate "the namespace and the local name match ("*" — any)"
     static bool matchesNamespace(const Element& element, std::string_view namespaceUri,
         std::string_view localName)
     {
@@ -55,6 +62,7 @@ namespace beresta
     }
 
     // Глубокий поиск по имени тега (константная версия)
+    // A deep search by tag name (the const version)
     std::vector<const Element*> ContainerNode::getElementsByTagName(std::string_view name) const
     {
         std::vector<const Element*> found;
@@ -64,6 +72,7 @@ namespace beresta
     }
 
     // Глубокий поиск по пространству имён и локальному имени (константная версия)
+    // A deep search by namespace and local name (the const version)
     std::vector<const Element*> ContainerNode::getElementsByTagNameNS(
         std::string_view namespaceUri, std::string_view localName) const
     {

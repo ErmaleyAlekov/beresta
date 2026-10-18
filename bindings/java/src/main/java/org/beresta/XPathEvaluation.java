@@ -9,31 +9,43 @@ import org.beresta.internal.NativeCalls;
 import org.beresta.internal.NativeStrings;
 import org.beresta.internal.XPathFunctions;
 
-/** Вычисление выражения относительно узла (или документа). */
+/**
+ * Вычисление выражения относительно узла (или документа).
+ * <p>Evaluates the expression relative to a node (or a document).
+ */
 public interface XPathEvaluation extends XPathBase
 {
     /**
      * Узлы результата в порядке документа. Атрибуты в DOM «Берёсты» —
      * не узлы и сюда не попадают; их значения возвращает selectValues.
+     *
+     * <p>Result nodes in document order. Attributes in the Beresta DOM are
+     * not nodes and are not included here; selectValues returns their values.
      */
     default List<XmlNode> selectNodes(XmlNode context)
     {
         return NodeSets.nodes(handle(), context);
     }
 
-    /** Строковые значения всех элементов результата, включая атрибуты. */
+    /**
+     * Строковые значения всех элементов результата, включая атрибуты.
+     * <p>String values of all result items, attributes included.
+     */
     default List<String> selectValues(XmlNode context)
     {
         return NodeSets.values(handle(), context);
     }
 
-    /** Результат по правилам функции string(). */
+    /** Результат по правилам функции string(). / The result by the rules of the string() function. */
     default String string(XmlNode context)
     {
         return NativeStrings.take(NativeCalls.invoke(XPathFunctions.STRING, handle(), context.handle()));
     }
 
-    /** Результат по правилам функции number(); NaN — не ошибка. */
+    /**
+     * Результат по правилам функции number(); NaN — не ошибка.
+     * <p>The result by the rules of the number() function; NaN is not an error.
+     */
     default double number(XmlNode context)
     {
         try (Arena arena = Arena.ofConfined())
@@ -45,7 +57,7 @@ public interface XPathEvaluation extends XPathBase
         }
     }
 
-    /** Результат по правилам функции boolean(). */
+    /** Результат по правилам функции boolean(). / The result by the rules of the boolean() function. */
     default boolean bool(XmlNode context)
     {
         int result = (int) NativeCalls.invoke(XPathFunctions.BOOLEAN, handle(), context.handle());

@@ -6,12 +6,14 @@
 namespace
 {
     // Документ SOAP: пространство по умолчанию и префиксное
+    // A SOAP document: the default and a prefixed namespace
     const char* const SOAP =
         "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\""
         " xmlns=\"urn:default\"><soap:Body><item a:id=\"7\" xmlns:a=\"urn:a\"/></soap:Body>"
         "</soap:Envelope>";
 
     // URI элементов вычисляются по объявлениям в предках
+    // The URIs of elements are computed from the declarations in the ancestors
     void testNamespaceResolution()
     {
         beresta::Document document = beresta::XmlParser().parse(SOAP);
@@ -30,6 +32,7 @@ namespace
     }
 
     // setAttributeNS сам объявляет префикс, если он ещё не связан
+    // setAttributeNS declares the prefix itself if it is not bound yet
     void testSetAttributeNamespace()
     {
         beresta::Element element("e");
@@ -44,6 +47,7 @@ namespace
     }
 
     // Нарушения правил пространств имён при разборе — ошибки с кодом NAMESPACE_ERROR
+    // Namespace rule violations while parsing are errors with the NAMESPACE_ERROR code
     void testNamespaceParseErrors()
     {
         beresta::XmlParser parser;
@@ -68,6 +72,7 @@ namespace
     }
 
     // Без поддержки пространств имён префиксы — просто часть имени
+    // Without namespace support prefixes are just part of the name
     void testNamespaceUnaware()
     {
         beresta::ParserOptions options;
@@ -81,6 +86,7 @@ namespace
 namespace suites
 {
     // Регистрация тестов пространств имён
+    // Registers the namespace tests
     void registerNamespaceTests(test::TestRunner& runner)
     {
         runner.add("пространства имён: разрешение URI", testNamespaceResolution);

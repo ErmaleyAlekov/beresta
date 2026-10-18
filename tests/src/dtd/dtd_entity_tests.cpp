@@ -4,6 +4,7 @@
 namespace
 {
     // Внутренние сущности: простой текст, текст с разметкой и вложенные ссылки
+    // Internal entities: plain text, text with markup and nested references
     void testInternalEntities()
     {
         const char* xml =
@@ -18,6 +19,7 @@ namespace
     }
 
     // DOCTYPE сохраняется при сериализации без лишних пробелов
+    // The DOCTYPE is kept on serialization without extra spaces
     void testDoctypeRoundTrip()
     {
         const char* xml = "<!DOCTYPE note SYSTEM \"note.dtd\"[<!ENTITY a \"x\">]><note/>";
@@ -28,6 +30,7 @@ namespace
     }
 
     // Атрибуты по умолчанию из ATTLIST и нормализация не-CDATA значений
+    // Default attributes from ATTLIST and normalization of non-CDATA values
     void testAttributeDefaults()
     {
         const char* xml =
@@ -42,6 +45,7 @@ namespace
     }
 
     // Рекурсия и «billion laughs» останавливаются с понятными ошибками
+    // Recursion and "billion laughs" are stopped with clear errors
     void testEntityProtection()
     {
         beresta::ParserOptions options;
@@ -63,6 +67,7 @@ namespace
 namespace suites
 {
     // Регистрация тестов сущностей и DOCTYPE
+    // Registers the entity and DOCTYPE tests
     void registerDtdEntityTests(test::TestRunner& runner)
     {
         runner.add("DTD: внутренние сущности", testInternalEntities);

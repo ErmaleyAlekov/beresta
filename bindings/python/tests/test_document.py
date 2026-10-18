@@ -1,4 +1,5 @@
-"""Самопроверка Python-обёртки: разбор, навигация, изменение дерева, ошибки."""
+"""Самопроверка Python-обёртки: разбор, навигация, изменение дерева, ошибки.
+Self-test of the Python wrapper: parsing, navigation, tree changes, errors."""
 
 import os
 import tempfile
@@ -8,8 +9,13 @@ import beresta
 from beresta import BerestaError, NodeType, ParseFlags, WriteFlags
 
 
+# Тексты ошибок сверяются по-русски — независимо от языка сборки
+# Error texts are compared in Russian — regardless of the build language
+beresta.set_language("ru")
+
+
 class DocumentTests(unittest.TestCase):
-    """Документы и узлы."""
+    """Документы и узлы. / Documents and nodes."""
 
     def test_parse_and_navigate(self):
         with beresta.parse("<shop><item code='A1'>Чай</item><!--x--><item>Кофе</item></shop>") as document:

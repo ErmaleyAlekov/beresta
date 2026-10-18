@@ -1,4 +1,6 @@
 #include "parser/parse_session.hpp"
+#include "i18n/i18n.hpp"
+#include "parser/internal/declaration_reader.hpp"
 #include "utils/xml_chars.hpp"
 
 namespace beresta::detail
@@ -7,6 +9,10 @@ namespace beresta::detail
     ** XML-декларация распознаётся только в самом начале документа:
     ** "<?xml" и сразу пробельный символ ("<?xml-stylesheet" — обычная PI).
     ** Псевдо-атрибуты идут строго в порядке version, encoding, standalone.
+    **
+    ** The XML declaration is recognized only at the very start of the document:
+    ** "<?xml" immediately followed by a whitespace character ("<?xml-stylesheet" is an ordinary PI).
+    ** The pseudo-attributes go strictly in the order version, encoding, standalone.
     */
     void ParseSession::parseXmlDeclaration()
     {
@@ -18,38 +24,25 @@ namespace beresta::detail
         scanner.advance(5);
         XmlDeclaration declaration;
         if (!readPseudoAttribute("version", declaration.version))
-            scanner.fail("в XML-декларации обязателен псевдо-атрибут version");
+            scanner.fail(i18n::format(i18n::Message::DECLARATION_VERSION_REQUIRED));
         readPseudoAttribute("encoding", declaration.encoding);
         readStandalone(declaration);
         scanner.skipWhitespace();
         scanner.expect("?>");
         validateXmlDeclaration(declaration);
+        _standalone = declaration.standalone.value_or(false);
         _handler.xmlDeclaration(declaration);
     }
 
-    // name = "значение" или name = 'значение'; перед именем обязателен пробел
+    // Псевдо-атрибуты XML-декларации читает общий помощник (он же — для текстовой декларации)
+    // The pseudo-attributes of the XML declaration are read by a common helper (the same one as for the text declaration)
     bool ParseSession::readPseudoAttribute(std::string_view name, std::string& value)
     {
-        XmlScanner& scanner = _inputs.main();
-        std::size_t spaces = scanner.skipWhitespace();
-
-        if (!scanner.startsWith(name))
-            return false;
-        if (spaces == 0)
-            scanner.fail("ожидался пробел перед \"" + std::string(name) + "\"");
-        scanner.advance(name.size());
-        scanner.skipWhitespace();
-        scanner.expect("=");
-        scanner.skipWhitespace();
-        char quote = scanner.peek();
-        if (quote != '"' && quote != '\'')
-            scanner.fail("значение в XML-декларации должно быть в кавычках");
-        scanner.advance(1);
-        value = std::string(scanner.readUntil(std::string_view(&quote, 1)));
-        return true;
+        return detail::readPseudoAttribute(_inputs.main(), name, value);
     }
 
     // standalone допускает только "yes" и "no"
+    // standalone allows only "yes" and "no"
     void ParseSession::readStandalone(XmlDeclaration& declaration)
     {
         std::string value;
@@ -61,6 +54,6 @@ namespace beresta::detail
         else if (value == "no")
             declaration.standalone = false;
         else
-            _inputs.main().fail("standalone может быть только \"yes\" или \"no\"");
+            _inputs.main().fail(i18n::format(i18n::Message::STANDALONE_VALUE));
     }
 }

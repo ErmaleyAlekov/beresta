@@ -3,6 +3,7 @@
 namespace beresta::encoding
 {
     // IBM866 (DOS-кириллица): А..п, псевдографика, р..я, затем Ё/ё и украинские буквы
+    // IBM866 (DOS Cyrillic): А..п, box drawing, р..я, then Ё/ё and Ukrainian letters
     const std::uint16_t IBM866_TABLE[128] = {
         0x0410, 0x0411, 0x0412, 0x0413, 0x0414, 0x0415, 0x0416, 0x0417,
         0x0418, 0x0419, 0x041A, 0x041B, 0x041C, 0x041D, 0x041E, 0x041F,

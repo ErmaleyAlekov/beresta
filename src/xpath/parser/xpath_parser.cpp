@@ -1,13 +1,16 @@
 #include "xpath/internal/xpath_parser.hpp"
+#include "i18n/i18n.hpp"
 
 #include <utility>
 
 namespace beresta::xpath::detail
 {
     // Количество уровней приоритета бинарных операций
+    // The number of precedence levels of binary operations
     static constexpr std::size_t LEVEL_COUNT = 6;
 
     // Строка таблицы операторов: уровень приоритета, лексема и операция
+    // A row of the operator table: the precedence level, the token and the operation
     struct OperatorEntry
     {
         std::size_t level;
@@ -19,6 +22,9 @@ namespace beresta::xpath::detail
     /*
     ** Уровни: 0 — or, 1 — and, 2 — = !=, 3 — < <= > >=, 4 — + -, 5 — * div mod.
     ** Для OPERATOR_NAME дополнительно сравнивается текст лексемы.
+    **
+    ** Levels: 0 — or, 1 — and, 2 — = !=, 3 — < <= > >=, 4 — + -, 5 — * div mod.
+    ** For OPERATOR_NAME the token text is compared too.
     */
     static const OperatorEntry OPERATORS[] = {
         {0, TokenType::OPERATOR_NAME, "or", BinaryOperator::OR_OP},
@@ -37,6 +43,7 @@ namespace beresta::xpath::detail
     };
 
     // Распознаёт оператор уровня level в лексеме token
+    // Recognizes an operator of level level in the token token
     static bool matchOperator(std::size_t level, const Token& token, BinaryOperator& op) noexcept
     {
         for (const OperatorEntry& entry : OPERATORS)
@@ -52,22 +59,25 @@ namespace beresta::xpath::detail
     }
 
     // Парсер работает по готовому списку лексем
+    // The parser works over a ready list of tokens
     XPathParser::XPathParser(std::vector<Token> tokens)
         : _tokens(std::move(tokens)), _index(0)
     {
     }
 
     // Всё выражение — бинарное выражение самого низкого приоритета
+    // The whole expression is a binary expression of the lowest precedence
     ExprPtr XPathParser::parse()
     {
         ExprPtr expression = parseBinary(0);
 
         if (peek().type != TokenType::END_OF_INPUT)
-            fail("лишняя лексема \"" + peek().text + "\"");
+            fail(i18n::format(i18n::Message::XPATH_EXTRA_TOKEN, {peek().text}));
         return expression;
     }
 
     // Левоассоциативная цепочка операторов одного уровня
+    // A left-associative chain of operators of one level
     ExprPtr XPathParser::parseBinary(std::size_t level)
     {
         if (level == LEVEL_COUNT)
@@ -84,6 +94,7 @@ namespace beresta::xpath::detail
     }
 
     // Унарные минусы: чётное число взаимно уничтожается
+    // Unary minuses: an even number cancels out
     ExprPtr XPathParser::parseUnary()
     {
         std::size_t count = 0;

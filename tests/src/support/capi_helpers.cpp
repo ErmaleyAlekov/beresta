@@ -5,6 +5,7 @@
 namespace support
 {
     // NULL превращается в пустую строку; память освобождается всегда
+    // NULL becomes an empty string; the memory is always freed
     std::string takeCapiString(char* text)
     {
         std::string result;
@@ -16,6 +17,7 @@ namespace support
     }
 
     // Обёртка над beresta_document_parse для строк, завершённых нулём
+    // A wrapper over beresta_document_parse for null-terminated strings
     beresta_document parseCapi(const char* xml, std::uint32_t flags)
     {
         beresta_document document = nullptr;

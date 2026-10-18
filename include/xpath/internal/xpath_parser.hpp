@@ -14,6 +14,11 @@ namespace beresta::xpath::detail
     ** Шесть уровней приоритета бинарных операций разбираются одной
     ** функцией по таблице уровней (DRY): or < and < = != < сравнения <
     ** + - < * div mod. Результат — дерево Expr (паттерн Interpreter).
+    **
+    ** XPathParser — recursive descent over the XPath 1.0 grammar (section 3).
+    ** The six precedence levels of binary operations are parsed by one
+    ** function using a table of levels (DRY): or < and < = != < comparisons <
+    ** + - < * div mod. The result is an Expr tree (the Interpreter pattern).
     */
     class XPathParser
     {
@@ -21,16 +26,19 @@ namespace beresta::xpath::detail
         explicit XPathParser(std::vector<Token> tokens);
 
         // Всё выражение целиком; лишние лексемы в конце — ошибка
+        // The whole expression; extra tokens at the end are an error
         ExprPtr parse();
 
     private:
         // ---- Выражения (xpath_parser.cpp) ----
+        // ---- Expressions (xpath_parser.cpp) ----
         ExprPtr parseBinary(std::size_t level);
         ExprPtr parseUnary();
         ExprPtr parseUnion();
         ExprPtr parsePath();
 
         // ---- Первичные выражения (xpath_parser_primary.cpp) ----
+        // ---- Primary expressions (xpath_parser_primary.cpp) ----
         ExprPtr parseFilter();
         ExprPtr parsePrimary();
         ExprPtr parseFunctionCall();
@@ -38,6 +46,7 @@ namespace beresta::xpath::detail
         bool startsLocationPath() const noexcept;
 
         // ---- Пути (xpath_parser_paths.cpp) ----
+        // ---- Paths (xpath_parser_paths.cpp) ----
         ExprPtr parseLocationPath();
         void parseRelativePath(std::vector<Step>& steps);
         Step parseStep();
@@ -46,6 +55,7 @@ namespace beresta::xpath::detail
         Step descendantStep() const;
 
         // ---- Лексемы (xpath_parser_tokens.cpp) ----
+        // ---- Tokens (xpath_parser_tokens.cpp) ----
         const Token& peek() const noexcept;
         Token take();
         bool accept(TokenType type);

@@ -5,6 +5,7 @@
 namespace beresta
 {
     // Изменяемая версия переиспользует константную (DRY)
+    // The mutable version reuses the const one (DRY)
     Element* Document::getRoot()
     {
         const Document& self = *this;
@@ -13,6 +14,7 @@ namespace beresta
     }
 
     // Корень — единственный ребёнок типа ELEMENT
+    // The root is the only child of type ELEMENT
     const Element* Document::getRoot() const
     {
         std::size_t index = findFirstOfType(NodeType::ELEMENT);
@@ -25,6 +27,9 @@ namespace beresta
     /*
     ** Замена корня на том же месте, чтобы не нарушить порядок пролога
     ** и эпилога (комментариев вокруг). Если корня не было — добавляем в конец.
+    **
+    ** Replaces the root in the same place so as not to break the order of the prolog
+    ** and the epilog (the comments around). If there was no root, it is appended to the end.
     */
     Element* Document::setRoot(std::unique_ptr<Element> root)
     {
@@ -40,6 +45,7 @@ namespace beresta
     }
 
     // Извлечение корня: узел становится автономным, документ — без корня
+    // Extracting the root: the node becomes standalone, the document has no root
     std::unique_ptr<Element> Document::releaseRoot()
     {
         std::size_t index = findFirstOfType(NodeType::ELEMENT);
@@ -51,12 +57,13 @@ namespace beresta
     }
 
     // Документы равны, если совпадают декларации и все дети попарно
+    // Documents are equal if the declarations and all children match pairwise
     bool Document::isEqualNode(const Node& other) const
     {
         if (other.getType() != NodeType::DOCUMENT)
             return false;
         const Document& document = static_cast<const Document&>(other);
-        if (document._declaration != _declaration)
+        if (!equalsShallow(document))
             return false;
         return childrenEqual(document);
     }

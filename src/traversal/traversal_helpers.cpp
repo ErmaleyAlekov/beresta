@@ -4,6 +4,7 @@
 namespace beresta
 {
     // Дети есть только у контейнеров (элементов и документа)
+    // Only containers (elements and the document) have children
     Node* firstChildOf(Node& node)
     {
         if (node.getType() != NodeType::ELEMENT && node.getType() != NodeType::DOCUMENT)
@@ -12,6 +13,7 @@ namespace beresta
     }
 
     // Последний ребёнок контейнера
+    // The last child of a container
     Node* lastChildOf(Node& node)
     {
         if (node.getType() != NodeType::ELEMENT && node.getType() != NodeType::DOCUMENT)
@@ -22,6 +24,9 @@ namespace beresta
     /*
     ** Следующий в порядке документа: первый ребёнок, иначе ближайший
     ** правый сосед самого узла или одного из его предков (не выше root).
+    **
+    ** The next in document order: the first child, otherwise the nearest
+    ** right sibling of the node itself or of one of its ancestors (not above root).
     */
     Node* followingNode(Node& node, const Node& root)
     {
@@ -41,6 +46,9 @@ namespace beresta
     /*
     ** Предыдущий в порядке документа: самый глубокий последний потомок
     ** левого соседа, иначе родитель (сам root предыдущего не имеет).
+    **
+    ** The previous in document order: the deepest last descendant of the
+    ** left sibling, otherwise the parent (root itself has no previous node).
     */
     Node* precedingNode(Node& node, const Node& root)
     {

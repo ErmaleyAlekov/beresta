@@ -11,6 +11,10 @@ namespace support
     ** Обработчик SAX для тестов: записывает каждое событие в строку журнала
     ** вида "start:a[x=1]|text:t|end:a", чтобы порядок событий проверялся
     ** одним сравнением строк.
+    **
+    ** A SAX handler for tests: records each event into a log string
+    ** like "start:a[x=1]|text:t|end:a", so that the event order is checked
+    ** with one string comparison.
     */
     class RecordingHandler : public beresta::ContentHandler
     {
@@ -32,6 +36,7 @@ namespace support
 
     private:
         // Добавляет запись в журнал через разделитель '|'
+        // Appends a record to the log with the '|' separator
         void record(const std::string& entry);
 
         std::string _log;

@@ -4,12 +4,21 @@
       Самопроверка C#-обёртки — обычная консольная программа (без xUnit/NUnit).
       Запуск: make CSHARP=1 csharp-test  или  ctest (BERESTA_BUILD_CSHARP=ON).
       Код возврата 0 — все проверки прошли.
+
+      The C# wrapper self-test is an ordinary console program (no xUnit/NUnit).
+      Run: make CSHARP=1 csharp-test  or  ctest (BERESTA_BUILD_CSHARP=ON).
+      Exit code 0 means all checks passed.
   -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <!-- Самая новая среда, которую поддерживает установленный SDK (net9.0 для
          SDK 9, net10.0 для SDK 10): её runtime всегда установлен вместе с SDK,
-         поэтому самопроверка запускается на любой машине без доустановки -->
+         поэтому самопроверка запускается на любой машине без доустановки
+
+        The newest runtime the installed SDK supports (net9.0 for SDK 9,
+        net10.0 for SDK 10): its runtime is always installed with the SDK,
+        so the self-test runs on any machine without extra installation
+    -->
     <TargetFramework>net$(NETCoreAppMaximumVersion)</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>

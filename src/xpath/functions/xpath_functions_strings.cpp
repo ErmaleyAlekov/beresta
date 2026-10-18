@@ -4,12 +4,14 @@
 namespace beresta::xpath::detail
 {
     // string(значение?): строковое представление аргумента или контекстного узла
+    // string(value?): the string representation of the argument or the context node
     XPathValue functionString(const FunctionCall& call)
     {
         return XPathValue::fromString(stringArgument(call, 0));
     }
 
     // concat(a, b, ...): склейка всех аргументов
+    // concat(a, b, ...): joins all arguments
     XPathValue functionConcat(const FunctionCall& call)
     {
         std::string result;
@@ -20,6 +22,7 @@ namespace beresta::xpath::detail
     }
 
     // starts-with(строка, префикс)
+    // starts-with(string, prefix)
     XPathValue functionStartsWith(const FunctionCall& call)
     {
         std::string text = stringArgument(call, 0);
@@ -29,6 +32,7 @@ namespace beresta::xpath::detail
     }
 
     // contains(строка, подстрока)
+    // contains(string, substring)
     XPathValue functionContains(const FunctionCall& call)
     {
         std::string text = stringArgument(call, 0);
@@ -37,6 +41,7 @@ namespace beresta::xpath::detail
     }
 
     // substring-before(строка, разделитель): часть до первого вхождения
+    // substring-before(string, separator): the part before the first occurrence
     XPathValue functionSubstringBefore(const FunctionCall& call)
     {
         std::string text = stringArgument(call, 0);

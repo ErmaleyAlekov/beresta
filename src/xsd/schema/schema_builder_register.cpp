@@ -1,10 +1,12 @@
 #include "xsd/internal/schema_builder.hpp"
+#include "i18n/i18n.hpp"
 #include "exception/dom_exception.hpp"
 #include "parser/xml_parser.hpp"
 
 namespace beresta::xsd::detail
 {
     // Глобальное определение регистрируется под полным именем; дубликат — ошибка схемы
+    // A global definition is registered under its full name; a duplicate is a schema error
     void SchemaBuilder::registerDefinition(const Element& child, const SchemaSource& source)
     {
         std::string kind(child.getLocalName());
@@ -14,10 +16,10 @@ namespace beresta::xsd::detail
             return;
         std::string name = attributeOr(child, "name", "");
         if (name.empty())
-            fail(child, "у глобального xs:" + kind + " нет атрибута name");
+            fail(child, i18n::format(i18n::Message::SCHEMA_GLOBAL_NO_NAME, {kind}));
         QualifiedKey key(source.targetNamespace, name);
         if (!registry->emplace(key, Definition{&child, &source}).second)
-            fail(child, "повторное определение xs:" + kind + " \"" + name + "\"");
+            fail(child, i18n::format(i18n::Message::SCHEMA_REDEFINITION, {kind, name}));
     }
 
     /*
@@ -25,6 +27,11 @@ namespace beresta::xsd::detail
     ** (защита от циклических включений) и регистрируется как обычный.
     ** xs:import без schemaLocation допустим: схема того пространства имён
     ** должна быть передана в Schema::fromDocuments отдельным документом.
+    **
+    ** xs:include / xs:import: a document is loaded through the resolver once
+    ** (protection against circular inclusions) and registered as an ordinary one.
+    ** xs:import without schemaLocation is allowed: the schema of that namespace
+    ** must be passed to Schema::fromDocuments as a separate document.
     */
     void SchemaBuilder::loadReferenced(const Element& directive, const SchemaSource& source)
     {
@@ -34,11 +41,11 @@ namespace beresta::xsd::detail
         if (location.empty() && !include)
             return;
         if (location.empty() || _options.resolver == nullptr)
-            fail(directive, "для загрузки \"" + location + "\" нужен schemaLocation и ResourceResolver");
+            fail(directive, i18n::format(i18n::Message::SCHEMA_LOAD_NEEDS_RESOLVER, {location}));
         std::optional<Resource> resource = _options.resolver->resolve(
             ResourceRequest{ResourceKind::SCHEMA, "", location, source.baseUri});
         if (!resource.has_value())
-            fail(directive, "не удалось загрузить схему \"" + location + "\"");
+            fail(directive, i18n::format(i18n::Message::SCHEMA_LOAD_FAILED, {location}));
         if (!_loadedUris.insert(resource->uri).second)
             return;
         ParserOptions parserOptions;
@@ -46,7 +53,7 @@ namespace beresta::xsd::detail
         _loaded.push_back(std::make_unique<Document>(XmlParser(parserOptions).parse(resource->content)));
         const Element* root = _loaded.back()->getRoot();
         if (root == nullptr || !isSchemaElement(*root, "schema"))
-            fail(directive, "\"" + location + "\" не является XML Schema");
+            fail(directive, i18n::format(i18n::Message::SCHEMA_NOT_A_SCHEMA, {location}));
         std::string chameleon;
         if (include)
             chameleon = source.targetNamespace;
@@ -54,6 +61,7 @@ namespace beresta::xsd::detail
     }
 
     // Реестры глобальных определений по видам компонентов
+    // Registries of global definitions by component kind
     std::map<QualifiedKey, Definition>* SchemaBuilder::registryFor(std::string_view kind)
     {
         static const char* const KINDS[] = {
@@ -69,6 +77,7 @@ namespace beresta::xsd::detail
     }
 
     // Определение по виду и имени или nullptr
+    // A definition by kind and name or nullptr
     const Definition* SchemaBuilder::findDefinition(std::string_view kind, const QualifiedKey& key)
     {
         std::map<QualifiedKey, Definition>* registry = registryFor(kind);

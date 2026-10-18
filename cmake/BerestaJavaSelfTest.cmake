@@ -10,6 +10,15 @@
 #  3) java запускает org.beresta.selftest.SelfTest с разрешённым нативным
 #     доступом (--enable-native-access убирает предупреждение FFM API).
 # ============================================================================
+# BerestaJavaSelfTest.cmake — self-test of the Java wrapper without Maven
+# Called from ctest:  cmake -DJAVAC=... -DJAVA=... -DPROJECT_DIR=...
+#                           -DOUTPUT_DIR=... -P BerestaJavaSelfTest.cmake
+# 1) javac compiles the wrapper and self-test sources into OUTPUT_DIR/classes;
+# 2) the resources (the natives folder with the binary) are copied there too — so no
+#    classpath of several paths with different separators (; and :) is needed;
+# 3) java runs org.beresta.selftest.SelfTest with native access allowed
+#    (--enable-native-access removes the FFM API warning).
+# ============================================================================
 
 file(GLOB_RECURSE sources
     "${PROJECT_DIR}/src/main/java/*.java"

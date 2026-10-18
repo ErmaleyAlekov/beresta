@@ -12,6 +12,9 @@
 #    -DBERESTA_BUILD_JAVA=ON      бинарник -> ресурсы Maven-проекта (Panama)
 #    -DBERESTA_BUILD_CSHARP=ON    бинарник -> runtimes/<rid>/native (P/Invoke)
 #    -DBERESTA_BUILD_PYTHON=ON    бинарник -> пакет Python (ctypes)
+#    -DBERESTA_BUILD_NODE=ON      аддон beresta.node -> пакет Node.js (Node-API)
+#    -DBERESTA_ERRORS_LANG=en     язык сообщений об ошибках (по умолчанию ru)
+#                                 error message language (default ru)
 #
 #  Примеры:
 #    cmake -S . -B build
@@ -21,12 +24,29 @@
 #    cmake --build build --config Release
 #    ctest --test-dir build -C Release --output-on-failure
 # ============================================================================
+# Beresta — cross-platform CMake build
+# Compilers: MSVC, MinGW, GCC, Clang. OS: Windows, Linux, macOS.
+# By default ONLY the core is built — the shared library
+# (beresta.dll / libberesta.so / libberesta.dylib) with a flat C interface.
+# Everything else is enabled with flags:
+#   -DBERESTA_BUILD_STATIC=ON    a static library for C++ (beresta_static)
+#   -DBERESTA_BUILD_EXAMPLES=ON  demo programs in C++ and C
+#   -DBERESTA_BUILD_TESTS=ON     unit tests (and wrapper self-tests)
+#   -DBERESTA_BUILD_JAVA=ON      binary -> Maven project resources (Panama)
+#   -DBERESTA_BUILD_CSHARP=ON    binary -> runtimes/<rid>/native (P/Invoke)
+#   -DBERESTA_BUILD_PYTHON=ON    binary -> the Python package (ctypes)
+#   -DBERESTA_BUILD_NODE=ON      the beresta.node addon -> the Node.js package (Node-API)
+#   -DBERESTA_ERRORS_LANG=en     the error message language (default ru)
+# Examples: see above.
+# ============================================================================
 cmake_minimum_required(VERSION 3.16)
 
 # Версия совпадает с BERESTA_VERSION_STRING в include/capi/beresta_c.h
+# The version matches BERESTA_VERSION_STRING in include/capi/beresta_c.h
 project(beresta VERSION 2.1.0 LANGUAGES CXX)
 
 # ---- Стандарт языка: строго C++17 без расширений компилятора ---------------
+# ---- Language standard: strictly C++17 without compiler extensions ---------------
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -37,10 +57,30 @@ option(BERESTA_BUILD_TESTS "Собирать модульные тесты" OFF)
 option(BERESTA_BUILD_JAVA "Копировать бинарник в ресурсы Java-обёртки" OFF)
 option(BERESTA_BUILD_CSHARP "Копировать бинарник в C#-обёртку" OFF)
 option(BERESTA_BUILD_PYTHON "Копировать бинарник в Python-обёртку" OFF)
+option(BERESTA_BUILD_NODE "Собирать аддон Node.js / Build the Node.js addon" OFF)
 option(BERESTA_STATIC_RUNTIME "Встроить C++ runtime в динамическую библиотеку" ON)
+
+# ---- Язык сообщений об ошибках / Error message language ----------------------
+# Список языков берётся из имён каталогов src/i18n/catalogs/messages_<код>.cpp:
+# новый каталог сразу появляется среди вариантов (cmake-gui, ccmake). Неизвестный
+# код останавливает настройку, а не превращается в молчаливый английский.
+# The language list comes from the catalog names src/i18n/catalogs/messages_<code>.cpp:
+# a new catalog appears among the choices at once (cmake-gui, ccmake). An unknown
+# code stops configuration instead of silently becoming English.
+file(GLOB BERESTA_CATALOG_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/src/i18n/catalogs"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/i18n/catalogs/messages_*.cpp")
+string(REGEX REPLACE "messages_([^;]+)\\.cpp" "\\1" BERESTA_LANGUAGES "${BERESTA_CATALOG_FILES}")
+set(BERESTA_ERRORS_LANG "ru" CACHE STRING "Язык сообщений об ошибках / Error message language")
+set_property(CACHE BERESTA_ERRORS_LANG PROPERTY STRINGS ${BERESTA_LANGUAGES})
+if(NOT BERESTA_ERRORS_LANG IN_LIST BERESTA_LANGUAGES)
+    message(FATAL_ERROR "Берёста: нет каталога сообщений для языка / no message catalog for language "
+        "\"${BERESTA_ERRORS_LANG}\" (${BERESTA_LANGUAGES})")
+endif()
 
 # Тестам и демо на C++ нужна статическая библиотека: из динамической
 # экспортируется только Си-интерфейс, классы C++ скрыты
+# Tests and C++ demos need the static library: the shared one exports
+# only the C interface, the C++ classes are hidden
 if(BERESTA_BUILD_TESTS OR BERESTA_BUILD_EXAMPLES)
     set(BERESTA_BUILD_STATIC ON)
 endif()
@@ -52,6 +92,13 @@ endif()
 # наружу из неё не выходят ни исключения, ни объекты STL — это безопасно.
 # На Linux --exclude-libs,ALL прячет символы встроенной libstdc++, чтобы
 # они не конфликтовали с системной libstdc++ в процессе JVM или Python.
+# ---- Independence of the binary from the C++ runtime ----------------------------------
+# The jar, the NuGet package and the Python package carry ONE library file. If it
+# depends on libstdc++-6.dll / vcruntime140.dll, loading fails on a clean machine.
+# That is why by default the runtime is embedded into the library itself:
+# neither exceptions nor STL objects leave it — this is safe.
+# On Linux --exclude-libs,ALL hides the symbols of the embedded libstdc++ so that
+# they do not conflict with the system libstdc++ in a JVM or Python process.
 if(BERESTA_STATIC_RUNTIME)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
@@ -64,6 +111,9 @@ message(STATUS "Берёста: целевая платформа ${BERESTA_PLAT
 # ---- Единые флаги предупреждений и кодировки для всех целей -----------------
 # /utf-8 для MSVC обязателен: исходники и строковые литералы в UTF-8
 # (кириллица в сообщениях об ошибках), иначе MSVC читает их в кодировке ANSI.
+# ---- Common warning and encoding flags for all targets -----------------
+# /utf-8 for MSVC is mandatory: sources and string literals are in UTF-8
+# (Cyrillic in error messages), otherwise MSVC reads them in the ANSI encoding.
 function(beresta_apply_compile_options target)
     if(MSVC)
         target_compile_options(${target} PRIVATE /W4 /permissive- /utf-8 /EHsc)
@@ -72,16 +122,39 @@ function(beresta_apply_compile_options target)
     endif()
 endfunction()
 
+# ---- Параметры компоновки модулей, которые уезжают в пакеты обёрток ----------
+# Встроенный C++ runtime (см. выше) и, кроме отладочной сборки, удаление
+# отладочных символов (-s): без него beresta.dll от MinGW весит ~18 МБ вместо
+# ~2 МБ. MSVC символы в DLL не кладёт (они в .pdb), у Apple ld ключ -s устарел.
+# ---- Link options of the modules that travel in the binding packages ----------
+# The embedded C++ runtime (see above) and, except for a debug build, stripping
+# the debug symbols (-s): without it the MinGW beresta.dll weighs ~18 MB instead
+# of ~2 MB. MSVC does not put symbols into a DLL (they go to .pdb), Apple ld's -s is obsolete.
+function(beresta_apply_link_options target)
+    if(BERESTA_STATIC_RUNTIME AND MINGW)
+        target_link_options(${target} PRIVATE -static)
+    elseif(BERESTA_STATIC_RUNTIME AND UNIX AND NOT APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        target_link_options(${target} PRIVATE -static-libstdc++ -static-libgcc -Wl,--exclude-libs,ALL)
+    endif()
+    if(NOT MSVC AND NOT APPLE)
+        target_link_options(${target} PRIVATE $<$<NOT:$<CONFIG:Debug>>:-s>)
+    endif()
+endfunction()
+
 # ---- Объектные файлы ядра: компилируются ОДИН раз для обеих библиотек --------
 # PIC обязателен для .so; скрытая видимость оставляет в таблице экспорта
 # только функции с BERESTA_API (Си-интерфейс).
+# ---- Core object files: compiled ONCE for both libraries --------
+# PIC is mandatory for .so; hidden visibility leaves in the export table
+# only the functions with BERESTA_API (the C interface).
 file(GLOB_RECURSE BERESTA_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 file(GLOB_RECURSE BERESTA_HEADERS CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
 
 add_library(beresta_objects OBJECT ${BERESTA_SOURCES} ${BERESTA_HEADERS})
 target_include_directories(beresta_objects PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_compile_definitions(beresta_objects PRIVATE BERESTA_BUILDING_SHARED)
+target_compile_definitions(beresta_objects PRIVATE BERESTA_BUILDING_SHARED
+    BERESTA_ERRORS_LANG=${BERESTA_ERRORS_LANG})
 set_target_properties(beresta_objects PROPERTIES
     POSITION_INDEPENDENT_CODE ON
     CXX_VISIBILITY_PRESET hidden
@@ -91,23 +164,25 @@ beresta_apply_compile_options(beresta_objects)
 # ---- Динамическая библиотека (цель по умолчанию) ------------------------------
 # Имя файла одинаково для всех компиляторов одной ОС: beresta.dll (без
 # префикса lib, который добавил бы MinGW), libberesta.so, libberesta.dylib.
+# ---- The shared library (the default target) ------------------------------
+# The file name is the same for all compilers of one OS: beresta.dll (without
+# the lib prefix that MinGW would add), libberesta.so, libberesta.dylib.
 add_library(beresta SHARED $<TARGET_OBJECTS:beresta_objects>)
 add_library(beresta::beresta ALIAS beresta)
 target_include_directories(beresta PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 # Потребители на Windows получают __declspec(dllimport) (BERESTA_USING_SHARED).
 # INSTALL_NAME_DIR @rpath: на macOS программа ищет библиотеку рядом с собой
+# Consumers on Windows get __declspec(dllimport) (BERESTA_USING_SHARED).
+# INSTALL_NAME_DIR @rpath: on macOS a program looks for the library next to itself
 target_compile_definitions(beresta INTERFACE BERESTA_USING_SHARED)
 set_target_properties(beresta PROPERTIES INSTALL_NAME_DIR "@rpath")
 if(WIN32)
     set_target_properties(beresta PROPERTIES PREFIX "")
 endif()
-if(BERESTA_STATIC_RUNTIME AND MINGW)
-    target_link_options(beresta PRIVATE -static)
-elseif(BERESTA_STATIC_RUNTIME AND UNIX AND NOT APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    target_link_options(beresta PRIVATE -static-libstdc++ -static-libgcc -Wl,--exclude-libs,ALL)
-endif()
+beresta_apply_link_options(beresta)
 
 # ---- Статическая библиотека для программ на C++ --------------------------------
+# ---- The static library for C++ programs --------------------------------
 if(BERESTA_BUILD_STATIC)
     add_library(beresta_static STATIC $<TARGET_OBJECTS:beresta_objects>)
     add_library(beresta::static ALIAS beresta_static)
@@ -115,6 +190,7 @@ if(BERESTA_BUILD_STATIC)
 endif()
 
 # ---- Обёртки для других языков (по флагам) -------------------------------------
+# ---- Wrappers for other languages (by flags) -------------------------------------
 if(BERESTA_BUILD_TESTS)
     enable_testing()
 endif()
@@ -127,8 +203,12 @@ endif()
 if(BERESTA_BUILD_PYTHON)
     beresta_setup_python()
 endif()
+if(BERESTA_BUILD_NODE)
+    beresta_setup_node()
+endif()
 
 # ---- Демонстрационные программы ---------------------------------------------
+# ---- Demo programs ---------------------------------------------
 if(BERESTA_BUILD_EXAMPLES)
     file(GLOB_RECURSE DEMO_SOURCES CONFIGURE_DEPENDS
         "${CMAKE_CURRENT_SOURCE_DIR}/examples/src/*.cpp")
@@ -139,6 +219,8 @@ if(BERESTA_BUILD_EXAMPLES)
 
     # Программа на чистом C через динамическую библиотеку: проверка того,
     # что beresta_c.h — корректный заголовок C99, а экспорт работает
+    # A program in pure C through the shared library: checks that
+    # beresta_c.h is a correct C99 header and that the export works
     enable_language(C)
     add_executable(beresta_capi_demo "${CMAKE_CURRENT_SOURCE_DIR}/examples/capi/capi_demo.c")
     target_link_libraries(beresta_capi_demo PRIVATE beresta)
@@ -146,6 +228,7 @@ if(BERESTA_BUILD_EXAMPLES)
 endif()
 
 # ---- Модульные тесты (собственный мини-фреймворк, без внешних зависимостей) -
+# ---- Unit tests (an own mini framework, without external dependencies) -
 if(BERESTA_BUILD_TESTS)
     file(GLOB_RECURSE TEST_SOURCES CONFIGURE_DEPENDS
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/src/*.cpp")

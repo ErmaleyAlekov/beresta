@@ -3,7 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace Beresta.Native
 {
-    /// <summary>Раздел «XPath 1.0» Си-интерфейса.</summary>
+    /// <summary>Раздел «XPath 1.0» Си-интерфейса.
+    /// The "XPath 1.0" section of the C interface.</summary>
     internal static partial class NativeMethods
     {
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]

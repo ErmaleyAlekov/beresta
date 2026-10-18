@@ -17,6 +17,9 @@ import org.beresta.internal.SchemaFunctions;
 /**
  * Загруженная XML Schema. После загрузки неизменяема: одну схему можно
  * использовать для множества документов, в том числе из разных потоков.
+ *
+ * <p>A loaded XML Schema. Immutable after loading: one schema can be used
+ * for many documents, including from different threads.
  */
 public final class XmlSchema implements AutoCloseable
 {
@@ -29,7 +32,10 @@ public final class XmlSchema implements AutoCloseable
         this.cleanable = NativeRelease.register(this, SchemaFunctions.FREE, pointer);
     }
 
-    /** Схема из текста XSD (xs:include здесь недоступен — нет каталога). */
+    /**
+     * Схема из текста XSD (xs:include здесь недоступен — нет каталога).
+     * <p>A schema from XSD text (xs:include is unavailable here — there is no directory).
+     */
     public static XmlSchema fromString(String xsd)
     {
         byte[] data = xsd.getBytes(StandardCharsets.UTF_8);
@@ -43,7 +49,10 @@ public final class XmlSchema implements AutoCloseable
         }
     }
 
-    /** Схема из файла; xs:include / xs:import ищутся в его каталоге. */
+    /**
+     * Схема из файла; xs:include / xs:import ищутся в его каталоге.
+     * <p>A schema from a file; xs:include / xs:import are looked up in its directory.
+     */
     public static XmlSchema fromFile(Path path)
     {
         try (Arena arena = Arena.ofConfined())
@@ -56,7 +65,10 @@ public final class XmlSchema implements AutoCloseable
         }
     }
 
-    /** Все нарушения за один проход; пустой список — документ корректен. */
+    /**
+     * Все нарушения за один проход; пустой список — документ корректен.
+     * <p>All violations in one pass; an empty list means the document is valid.
+     */
     public List<Diagnostic> validate(XmlDocument document)
     {
         try (Arena arena = Arena.ofConfined())

@@ -3,6 +3,7 @@
 namespace beresta::encoding
 {
     // KOI8-R (RFC 1489): псевдографика, затем строчные и прописные буквы в «телеграфном» порядке
+    // KOI8-R (RFC 1489): box drawing, then lower-case and upper-case letters in the "telegraph" order
     const std::uint16_t KOI8_R_TABLE[128] = {
         0x2500, 0x2502, 0x250C, 0x2510, 0x2514, 0x2518, 0x251C, 0x2524,
         0x252C, 0x2534, 0x253C, 0x2580, 0x2584, 0x2588, 0x258C, 0x2590,

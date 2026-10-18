@@ -23,6 +23,18 @@ import java.util.Locale;
  *
  * <p>Имена ОС и архитектуры совпадают с CMake, Makefile и Python-обёрткой:
  * windows / linux / macos и x86_64 / aarch64 / x86.
+ *
+ * <p>Finding and loading the Beresta native library.
+ * Lookup order:
+ * <ol>
+ *   <li>the system property {@code beresta.library.path} — an explicit file path;</li>
+ *   <li>the jar resource {@code /natives/<os>-<arch>/<file>} — the build puts the binary
+ *       there (CMake {@code -DBERESTA_BUILD_JAVA=ON} or {@code make JAVA=1});
+ *       it is extracted into a temporary directory, because the OS can load
+ *       libraries only from a file.</li>
+ * </ol>
+ * The OS and architecture names match CMake, the Makefile and the Python wrapper:
+ * windows / linux / macos and x86_64 / aarch64 / x86.
  */
 public final class NativeLoader
 {
@@ -30,7 +42,10 @@ public final class NativeLoader
     {
     }
 
-    /** Имя платформы вида {@code windows-x86_64} — имя папки ресурсов. */
+    /**
+     * Имя платформы вида {@code windows-x86_64} — имя папки ресурсов.
+     * <p>The platform name like {@code windows-x86_64} — the resource folder name.
+     */
     public static String platformName()
     {
         String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
@@ -52,7 +67,10 @@ public final class NativeLoader
         return system + "-" + arch;
     }
 
-    /** Каноническое имя файла библиотеки для ОС (первая часть имени платформы). */
+    /**
+     * Каноническое имя файла библиотеки для ОС (первая часть имени платформы).
+     * <p>The canonical library file name for the OS (the first part of the platform name).
+     */
     static String libraryFileName(String platform)
     {
         if (platform.startsWith("windows-"))
@@ -65,6 +83,9 @@ public final class NativeLoader
     /**
      * Извлечение ресурса во временный файл. Каталог уникален для процесса:
      * два приложения с разными версиями библиотеки не мешают друг другу.
+     *
+     * <p>Extracts a resource into a temporary file. The directory is unique per process:
+     * two applications with different library versions do not interfere.
      */
     static Path extract(String resource, String fileName) throws IOException
     {
@@ -73,7 +94,9 @@ public final class NativeLoader
             if (stream == null)
                 throw new UnsatisfiedLinkError("Берёста: в ресурсах нет " + resource
                     + ". Соберите библиотеку с флагом JAVA=1 (make) или -DBERESTA_BUILD_JAVA=ON (CMake)"
-                    + " либо укажите путь: -Dberesta.library.path=...");
+                    + " либо укажите путь: -Dberesta.library.path=... / Beresta: the resources have no "
+                    + resource + ". Build the library with JAVA=1 (make) or -DBERESTA_BUILD_JAVA=ON (CMake)"
+                    + " or set the path: -Dberesta.library.path=...");
             Path directory = Files.createTempDirectory("beresta-");
             Path file = directory.resolve(fileName);
 
@@ -87,6 +110,9 @@ public final class NativeLoader
     /**
      * Загрузка библиотеки. Arena.global(): библиотека остаётся загруженной
      * до конца работы JVM — дескрипторы функций живут в статических полях.
+     *
+     * <p>Loads the library. Arena.global(): the library stays loaded until the JVM
+     * exits — function handles live in static fields.
      */
     public static SymbolLookup load()
     {
@@ -107,7 +133,8 @@ public final class NativeLoader
         }
         catch (IOException error)
         {
-            throw new UnsatisfiedLinkError("Берёста: не удалось извлечь библиотеку: " + error.getMessage());
+            throw new UnsatisfiedLinkError("Берёста: не удалось извлечь библиотеку / Beresta: cannot extract the library: "
+                + error.getMessage());
         }
     }
 }

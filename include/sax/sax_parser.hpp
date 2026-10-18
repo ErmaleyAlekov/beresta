@@ -15,6 +15,11 @@ namespace beresta
     ** Дерево не строится: обработчик получает события по мере чтения,
     ** поэтому расход памяти не зависит от размера документа.
     ** Все проверки корректности, пространств имён и DTD — те же, что в DOM.
+    **
+    ** SaxParser — a streaming parser (the analog of SAX2XMLReader in Xerces).
+    ** No tree is built: the handler receives events as the input is read,
+    ** so the memory use does not depend on the document size.
+    ** All well-formedness, namespace and DTD checks are the same as in DOM.
     */
     class SaxParser
     {
@@ -22,15 +27,19 @@ namespace beresta
         explicit SaxParser(ParserOptions options = ParserOptions());
 
         // Разбирает документ из памяти, отправляя события в handler
+        // Parses a document from memory, sending events to handler
         void parse(std::string_view input, ContentHandler& handler) const;
 
         // Разбирает файл
+        // Parses a file
         void parseFile(const std::filesystem::path& path, ContentHandler& handler) const;
 
         // Разбирает поток до конца
+        // Parses a stream to the end
         void parse(std::istream& stream, ContentHandler& handler) const;
 
         // Текущие настройки
+        // The current settings
         const ParserOptions& getOptions() const noexcept;
 
     private:

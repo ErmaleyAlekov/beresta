@@ -4,18 +4,21 @@
 namespace beresta::encoding
 {
     // Параметры варианта UTF-16 задаются при регистрации кодировки
+    // The parameters of a UTF-16 variant are set when the encoding is registered
     Utf16Charset::Utf16Charset(std::string_view name, bool bigEndian, bool writeBom) noexcept
         : _name(name), _bigEndian(bigEndian), _writeBom(writeBom)
     {
     }
 
     // Каноническое имя
+    // The canonical name
     std::string_view Utf16Charset::getName() const noexcept
     {
         return _name;
     }
 
     // Обобщённый "UTF-16" пишется с BOM, чтобы читатель узнал порядок байтов
+    // The generic "UTF-16" is written with a BOM so that the reader knows the byte order
     std::string_view Utf16Charset::getByteOrderMark() const noexcept
     {
         if (!_writeBom)
@@ -28,6 +31,9 @@ namespace beresta::encoding
     /*
     ** Чтение по 16-битным словам. Старший суррогат (D800-DBFF) обязан
     ** сопровождаться младшим (DC00-DFFF): вместе они дают символ > U+FFFF.
+    **
+    ** Reading by 16-bit words. A high surrogate (D800-DBFF) must be
+    ** followed by a low one (DC00-DFFF): together they give a character > U+FFFF.
     */
     std::size_t Utf16Charset::decode(std::string_view bytes, std::string& output) const
     {
@@ -56,6 +62,7 @@ namespace beresta::encoding
     }
 
     // Символы > U+FFFF кодируются суррогатной парой; UTF-16 представляет любой символ
+    // Characters > U+FFFF are encoded with a surrogate pair; UTF-16 represents any character
     std::size_t Utf16Charset::encode(std::string_view utf8, std::string& output,
         bool useCharacterReferences) const
     {

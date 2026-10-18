@@ -11,6 +11,17 @@
 
       netstandard2.1 — для любых сред (.NET Core 3+, Mono, Unity);
       net9.0 — дополнительно собственный поиск бинарника (NativeLibrary).
+
+      Beresta for .NET is a wrapper over the C interface through P/Invoke.
+
+      The native library lands in runtimes/<rid>/native/ when the core is built:
+          make CSHARP=1   or   cmake -DBERESTA_BUILD_CSHARP=ON
+      This is the standard NuGet layout: in a package (dotnet pack) .NET picks
+      the binary of the right platform itself. With a project reference the files
+      are copied to the output directory, and NativeResolver finds them there.
+
+      netstandard2.1 is for any runtime (.NET Core 3+, Mono, Unity);
+      net9.0 adds its own binary lookup (NativeLibrary).
   -->
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1;net9.0</TargetFrameworks>
@@ -19,7 +30,12 @@
     <RootNamespace>Beresta</RootNamespace>
     <!-- Не "Beresta": на Windows Beresta.dll и нативная beresta.dll — один и
          тот же файл (регистр не различается), а при публикации приложения
-         .NET кладёт нативные библиотеки в тот же каталог, что и сборки -->
+         .NET кладёт нативные библиотеки в тот же каталог, что и сборки
+
+        Not "Beresta": on Windows Beresta.dll and the native beresta.dll are the same
+        file (case is ignored), and when an application is published .NET puts native
+        libraries into the same directory as the assemblies
+    -->
     <AssemblyName>Beresta.NET</AssemblyName>
     <Version>2.1.0</Version>
     <PackageId>Beresta</PackageId>
@@ -30,11 +46,11 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
-  <!-- Нативные библиотеки всех собранных платформ: в пакет и в выходной каталог -->
+  <!-- Нативные библиотеки всех собранных платформ: в пакет и в выходной каталог / Native libraries of all built platforms: into the package and the output directory -->
   <ItemGroup>
     <None Include="runtimes\**\*" Pack="true" PackagePath="runtimes" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\README.md" Pack="true" PackagePath="\" />
-    <!-- Текст лицензии из корня репозитория — в корень пакета -->
+    <!-- Текст лицензии из корня репозитория — в корень пакета / The license text from the repository root goes to the package root -->
     <None Include="..\..\..\LICENSE" Pack="true" PackagePath="\" />
   </ItemGroup>
 

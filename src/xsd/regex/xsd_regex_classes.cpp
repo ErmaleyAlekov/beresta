@@ -1,20 +1,25 @@
 #include "xsd/regex/xsd_regex.hpp"
+#include "i18n/i18n.hpp"
 
 namespace beresta::xsd
 {
     // '[' группа ']'
+    // '[' group ']'
     CharSet RegexParser::parseClassExpression()
     {
         takeCode();
         CharSet set = parseClassGroup();
         if (atEnd() || takeCode() != ']')
-            fail("не закрыт класс символов '['");
+            fail(i18n::format(i18n::Message::PATTERN_CLASS_UNCLOSED));
         return set;
     }
 
     /*
     ** Группа: [^...] — отрицание, [...-[...]] — вычитание вложенного класса.
     ** Вычитание применяется после отрицания, как в спецификации.
+    **
+    ** A group: [^...] is a negation, [...-[...]] is a subtraction of a nested class.
+    ** The subtraction is applied after the negation, as in the specification.
     */
     CharSet RegexParser::parseClassGroup()
     {
@@ -39,6 +44,7 @@ namespace beresta::xsd
     }
 
     // "-[" начинает вычитание: (группа с учётом отрицания) минус вложенный класс
+    // "-[" starts a subtraction: (the group with the negation applied) minus the nested class
     bool RegexParser::applySubtraction(CharSet& set, bool negated)
     {
         bool subtraction = peekCode() == '-' && _position + 1 < _pattern.size()
@@ -56,6 +62,7 @@ namespace beresta::xsd
     }
 
     // Элемент класса: экранирование, символ или диапазон a-z
+    // A class item: an escape, a character or a range a-z
     void RegexParser::parseClassItem(CharSet& set)
     {
         bool single = true;
@@ -84,6 +91,7 @@ namespace beresta::xsd
     }
 
     // Конец диапазона: символ или одиночное экранирование (\- , \] и т.п.)
+    // The end of a range: a character or a single escape (\- , \] and so on)
     std::uint32_t RegexParser::parseRangeEnd()
     {
         bool single = true;
@@ -93,7 +101,7 @@ namespace beresta::xsd
             return takeCode();
         parseEscape(single, last);
         if (!single)
-            fail("конец диапазона не может быть классом символов");
+            fail(i18n::format(i18n::Message::PATTERN_RANGE_END_CLASS));
         return last;
     }
 }

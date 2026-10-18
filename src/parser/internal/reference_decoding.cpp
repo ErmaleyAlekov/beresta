@@ -7,6 +7,7 @@
 namespace beresta::detail
 {
     // Пять сущностей, которые XML знает без всякого DTD
+    // The five entities XML knows without any DTD
     std::optional<char> predefinedEntity(std::string_view name) noexcept
     {
         if (name == "lt")
@@ -23,6 +24,7 @@ namespace beresta::detail
     }
 
     // Значение цифры в системе base или base, если символ — не цифра этой системы
+    // The value of a digit in base base, or base if the character is not a digit of that base
     static std::uint32_t digitValue(char symbol, std::uint32_t base) noexcept
     {
         if (symbol >= '0' && symbol <= '9')
@@ -38,6 +40,10 @@ namespace beresta::detail
     ** Собственный разбор числа (без std::stoul — он принимает пробелы,
     ** знаки и бросает чужие исключения). Диапазон проверяется после
     ** каждой цифры, поэтому переполнение невозможно.
+    **
+    ** An own number parser (without std::stoul — it accepts spaces and
+    ** signs and throws foreign exceptions). The range is checked after
+    ** every digit, so overflow is impossible.
     */
     bool decodeCharacterReference(std::string_view body, std::string& output)
     {
@@ -64,16 +70,5 @@ namespace beresta::detail
             return false;
         utils::appendUtf8(output, value);
         return true;
-    }
-
-    // Текстовая декларация — "<?xml" + пробел ... "?>" в самом начале текста
-    std::string_view stripTextDeclaration(std::string_view text) noexcept
-    {
-        if (text.size() < 6 || text.substr(0, 5) != "<?xml" || !utils::isWhitespace(text[5]))
-            return text;
-        std::size_t end = text.find("?>");
-        if (end == std::string_view::npos)
-            return text;
-        return text.substr(end + 2);
     }
 }

@@ -1,4 +1,5 @@
 #include "xpath/internal/xpath_parser.hpp"
+#include "i18n/i18n.hpp"
 #include "exception/dom_exception.hpp"
 
 namespace beresta::xpath::detail
@@ -6,6 +7,9 @@ namespace beresta::xpath::detail
     /*
     ** Проверка узла: имя / prefix:имя / * / prefix:* или тип узла:
     ** node(), text(), comment(), processing-instruction('цель'?).
+    **
+    ** A node test: name / prefix:name / * / prefix:* or a node type:
+    ** node(), text(), comment(), processing-instruction('target'?).
     */
     void XPathParser::parseNodeTest(Step& step)
     {
@@ -15,7 +19,7 @@ namespace beresta::xpath::detail
             return;
         }
         if (peek().type != TokenType::NAME_TEST)
-            fail("ожидалась проверка узла (имя, * или node())");
+            fail(i18n::format(i18n::Message::XPATH_EXPECTED_NODE_TEST));
         std::string name = take().text;
         std::size_t colon = name.find(':');
         step.test = TestKind::QUALIFIED_NAME;
@@ -29,12 +33,14 @@ namespace beresta::xpath::detail
     }
 
     // Текущая лексема
+    // The current token
     const Token& XPathParser::peek() const noexcept
     {
         return _tokens[_index];
     }
 
     // Забирает текущую лексему (END_OF_INPUT не пропускается)
+    // Takes the current token (END_OF_INPUT is not skipped)
     Token XPathParser::take()
     {
         Token token = _tokens[_index];
@@ -45,6 +51,7 @@ namespace beresta::xpath::detail
     }
 
     // Забирает лексему, если она нужного вида
+    // Takes the token if it is of the required kind
     bool XPathParser::accept(TokenType type)
     {
         if (peek().type != type)
@@ -54,9 +61,10 @@ namespace beresta::xpath::detail
     }
 
     // Обязательная лексема
+    // A mandatory token
     void XPathParser::expect(TokenType type, const char* description)
     {
         if (!accept(type))
-            fail(std::string("ожидалось ") + description + ", найдено \"" + peek().text + "\"");
+            fail(i18n::format(i18n::Message::XPATH_EXPECTED_FOUND, {description, peek().text}));
     }
 }

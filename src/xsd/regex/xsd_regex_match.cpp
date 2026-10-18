@@ -6,6 +6,7 @@
 namespace beresta::xsd
 {
     // Разбор шаблона и построение автомата с завершающим состоянием приёма
+    // Parses the pattern and builds the automaton with a final accepting state
     Regex::Regex(std::string_view pattern)
         : _pattern(pattern), _sets(), _states(), _start(-1)
     {
@@ -19,6 +20,9 @@ namespace beresta::xsd
     /*
     ** ε-замыкание без рекурсии: явный стек и отметки «поколения», чтобы
     ** каждое состояние попадало в список не более одного раза за шаг.
+    **
+    ** The ε-closure without recursion: an explicit stack and "generation" marks so that
+    ** each state gets into the list at most once per step.
     */
     void Regex::addReachable(long state, std::vector<long>& list, std::vector<std::size_t>& marks,
         std::size_t generation) const
@@ -46,6 +50,10 @@ namespace beresta::xsd
     ** Моделирование НКА: множество активных состояний продвигается на
     ** каждый символ текста. Строка подходит, если в конце активно
     ** состояние приёма.
+    **
+    ** The NFA simulation: the set of active states advances on
+    ** each character of the text. The string matches if the accepting state
+    ** is active at the end.
     */
     bool Regex::matches(std::string_view text) const
     {

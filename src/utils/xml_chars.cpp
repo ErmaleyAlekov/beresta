@@ -3,6 +3,7 @@
 namespace beresta::utils
 {
     // Проверяет четыре пробельных символа, определённых стандартом XML
+    // Checks the four whitespace characters defined by the XML standard
     bool isWhitespace(char symbol) noexcept
     {
         if (symbol == ' ' || symbol == '\t')
@@ -13,6 +14,9 @@ namespace beresta::utils
     /*
     ** Первый символ имени: латинская буква, '_', ':' или любой
     ** не-ASCII байт (начало многобайтового символа UTF-8).
+    **
+    ** The first character of a name: a Latin letter, '_', ':' or any
+    ** non-ASCII byte (the start of a multi-byte UTF-8 character).
     */
     bool isNameStartChar(char symbol) noexcept
     {
@@ -26,6 +30,7 @@ namespace beresta::utils
     }
 
     // Внутри имени дополнительно разрешены цифры, '-' и '.'
+    // Inside a name digits, '-' and '.' are allowed additionally
     bool isNameChar(char symbol) noexcept
     {
         if (isNameStartChar(symbol))
@@ -35,20 +40,15 @@ namespace beresta::utils
         return symbol == '-' || symbol == '.';
     }
 
-    // Имя непустое, начинается с допустимого символа и далее состоит из символов имени
+    // Имя непустое: первый символ — NameStartChar, остальные — NameChar (с учётом Unicode)
+    // The name is non-empty: the first character is a NameStartChar, the rest are NameChars (taking Unicode into account)
     bool isValidName(std::string_view name) noexcept
     {
-        if (name.empty() || !isNameStartChar(name[0]))
-            return false;
-        for (std::size_t index = 1; index < name.size(); ++index)
-        {
-            if (!isNameChar(name[index]))
-                return false;
-        }
-        return true;
+        return !name.empty() && nameLength(name, 0) == name.size();
     }
 
     // Пробегаем строку и ищем первый непробельный символ
+    // Runs over the string looking for the first non-whitespace character
     bool isWhitespaceOnly(std::string_view text) noexcept
     {
         for (char symbol : text)

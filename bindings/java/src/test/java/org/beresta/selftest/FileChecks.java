@@ -7,14 +7,17 @@ import org.beresta.WriteFlags;
 import org.beresta.Xml;
 import org.beresta.XmlDocument;
 
-/** Проверки работы с файлами и кодировками. */
+/** Проверки работы с файлами и кодировками. / File and encoding checks. */
 final class FileChecks
 {
     private FileChecks()
     {
     }
 
-    /** Запись в файл в другой кодировке и обратный разбор. */
+    /**
+     * Запись в файл в другой кодировке и обратный разбор.
+     * <p>Writing to a file in another encoding and parsing it back.
+     */
     static void filesAndEncodings() throws Exception
     {
         Path folder = Files.createTempDirectory("beresta-java-");

@@ -1,9 +1,23 @@
 #include "dtd/dtd_validator.hpp"
+#include "i18n/i18n.hpp"
 #include "content/particle.hpp"
 
 namespace beresta::dtd
 {
+    // Любая разметка внутри EMPTY нарушает VC: Element Valid (уточнено errata E15)
+    // Any markup inside EMPTY violates VC: Element Valid (clarified by errata E15)
+    void DtdValidator::markup()
+    {
+        if (_stack.empty() || _stack.back().declaration == nullptr)
+            return;
+        const OpenState& state = _stack.back();
+
+        if (state.declaration->kind == ContentKind::EMPTY_CONTENT)
+            _reporter.reportValidity(i18n::format(i18n::Message::DTD_EMPTY_NOT_EMPTY, {state.name}));
+    }
+
     // Виртуальный деструктор интерфейса
+    // The virtual destructor of the interface
     ValidityReporter::~ValidityReporter()
     {
     }
@@ -12,6 +26,10 @@ namespace beresta::dtd
     ** Немедленные проверки ребёнка: в EMPTY детей быть не может, в MIXED
     ** допустимы только перечисленные элементы. Для CHILDREN имя лишь
     ** запоминается — модель проверяется целиком при закрытии родителя.
+    **
+    ** Immediate checks of a child: EMPTY cannot have children, in MIXED only
+    ** the listed elements are allowed. For CHILDREN the name is only
+    ** remembered — the model is checked as a whole when the parent is closed.
     */
     void DtdValidator::checkChild(OpenState& parent, std::string_view child)
     {
@@ -19,8 +37,7 @@ namespace beresta::dtd
             return;
         ContentKind kind = parent.declaration->kind;
         if (kind == ContentKind::EMPTY_CONTENT)
-            _reporter.reportValidity("элемент <" + parent.name + "> объявлен EMPTY, но содержит <"
-                + std::string(child) + ">");
+            _reporter.reportValidity(i18n::format(i18n::Message::DTD_EMPTY_WITH_CHILD, {parent.name, child}));
         if (kind == ContentKind::CHILDREN)
             parent.children.push_back(std::string(child));
         if (kind != ContentKind::MIXED)
@@ -30,11 +47,11 @@ namespace beresta::dtd
             if (allowed == child)
                 return;
         }
-        _reporter.reportValidity("элемент <" + std::string(child) + "> недопустим внутри <"
-            + parent.name + ">");
+        _reporter.reportValidity(i18n::format(i18n::Message::DTD_CHILD_NOT_ALLOWED, {child, parent.name}));
     }
 
     // Сопоставление последовательности детей с моделью общим алгоритмом content::matchContent
+    // Matches the sequence of children against the model with the common content::matchContent algorithm
     void DtdValidator::checkContent(const OpenState& state)
     {
         std::vector<content::ChildKey> keys;
@@ -47,10 +64,8 @@ namespace beresta::dtd
             return;
         std::string model = content::describeParticle(state.declaration->model);
         if (result.failIndex < keys.size())
-            _reporter.reportValidity("элемент <" + state.children[result.failIndex]
-                + "> недопустим в этой позиции внутри <" + state.name + ">; модель: " + model);
+            _reporter.reportValidity(i18n::format(i18n::Message::DTD_CHILD_POSITION, {state.children[result.failIndex], state.name, model}));
         else
-            _reporter.reportValidity("внутри <" + state.name
-                + "> не хватает обязательных элементов; модель: " + model);
+            _reporter.reportValidity(i18n::format(i18n::Message::DTD_CHILDREN_MISSING, {state.name, model}));
     }
 }

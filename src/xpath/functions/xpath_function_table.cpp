@@ -1,9 +1,11 @@
 #include "xpath/internal/xpath_eval.hpp"
+#include "i18n/i18n.hpp"
 #include "xpath/internal/xpath_functions.hpp"
 
 namespace beresta::xpath::detail
 {
     // Описание функции: имя, допустимое число аргументов и реализация
+    // A function description: the name, the allowed number of arguments and the implementation
     struct FunctionEntry
     {
         const char* name;
@@ -13,9 +15,11 @@ namespace beresta::xpath::detail
     };
 
     // Значение «сколько угодно аргументов» для concat
+    // The "any number of arguments" value for concat
     static constexpr std::size_t ANY_COUNT = static_cast<std::size_t>(-1);
 
     // Базовая библиотека функций XPath 1.0 (раздел 4 спецификации)
+    // The XPath 1.0 core function library (section 4 of the specification)
     static const FunctionEntry FUNCTIONS[] = {
         {"last", 0, 0, functionLast}, {"position", 0, 0, functionPosition},
         {"count", 1, 1, functionCount}, {"id", 1, 1, functionId},
@@ -32,6 +36,7 @@ namespace beresta::xpath::detail
     };
 
     // Поиск функции по имени и проверка числа аргументов
+    // Looks up a function by name and checks the number of arguments
     XPathValue callFunction(const std::string& name, const std::vector<ExprPtr>& arguments,
         const EvalContext& context)
     {
@@ -40,9 +45,9 @@ namespace beresta::xpath::detail
             if (name != entry.name)
                 continue;
             if (arguments.size() < entry.minArguments || arguments.size() > entry.maxArguments)
-                failEvaluation("неверное число аргументов функции " + name + "()");
+                failEvaluation(i18n::format(i18n::Message::XPATH_WRONG_ARGUMENT_COUNT, {name}));
             return entry.implementation(FunctionCall{arguments, context});
         }
-        failEvaluation("неизвестная функция " + name + "()");
+        failEvaluation(i18n::format(i18n::Message::XPATH_UNKNOWN_FUNCTION, {name}));
     }
 }

@@ -3,6 +3,7 @@
 namespace
 {
     // Диагностика по индексу с проверкой диапазона
+    // A diagnostic by index with a range check
     const beresta::Diagnostic& diagnosticAt(beresta_diagnostics diagnostics, int64_t index)
     {
         const beresta::capi::DiagnosticsHandle& handle =
@@ -21,6 +22,7 @@ extern "C" BERESTA_API int64_t beresta_diagnostics_count(beresta_diagnostics dia
 }
 
 // Текст нарушения начинается с пути к элементу, например "/catalog/book[2]: ..."
+// The violation text starts with the element path, for example "/catalog/book[2]: ..."
 extern "C" BERESTA_API char* beresta_diagnostics_message(beresta_diagnostics diagnostics, int64_t index)
 {
     BERESTA_CAPI_TRY
@@ -29,6 +31,7 @@ extern "C" BERESTA_API char* beresta_diagnostics_message(beresta_diagnostics dia
 }
 
 // Строка в исходнике; 0 — документ построен в памяти, а не разобран
+// The line in the source; 0 — the document was built in memory, not parsed
 extern "C" BERESTA_API int64_t beresta_diagnostics_line(beresta_diagnostics diagnostics, int64_t index)
 {
     BERESTA_CAPI_TRY

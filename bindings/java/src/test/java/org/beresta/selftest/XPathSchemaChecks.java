@@ -11,7 +11,7 @@ import org.beresta.XmlElement;
 import org.beresta.XmlNode;
 import org.beresta.XmlSchema;
 
-/** Проверки XPath и XML Schema. */
+/** Проверки XPath и XML Schema. / XPath and XML Schema checks. */
 final class XPathSchemaChecks
 {
     private static final String SHOP = "<s:shop xmlns:s='urn:s'><s:item code='A'>5</s:item>"
@@ -24,7 +24,7 @@ final class XPathSchemaChecks
     {
     }
 
-    /** Префиксы, переменные, число / логическое / строка. */
+    /** Префиксы, переменные, число / логическое / строка. / Prefixes, variables, number / boolean / string. */
     static void xpathValues()
     {
         try (XmlDocument document = Xml.parse(SHOP); XPath sum = new XPath("sum(//p:item[@code != $skip])"))
@@ -39,7 +39,10 @@ final class XPathSchemaChecks
         }
     }
 
-    /** Выборка узлов, значения атрибутов, пространства имён, синтаксическая ошибка. */
+    /**
+     * Выборка узлов, значения атрибутов, пространства имён, синтаксическая ошибка.
+     * <p>Selecting nodes, attribute values, namespaces, a syntax error.
+     */
     static void xpathSelect()
     {
         try (XmlDocument document = Xml.parse(SHOP); XPath items = new XPath("//p:item"); XPath codes = new XPath("//@code"))
@@ -60,7 +63,10 @@ final class XPathSchemaChecks
         }
     }
 
-    /** Проверка по схеме: список нарушений и проверка прямо при разборе. */
+    /**
+     * Проверка по схеме: список нарушений и проверка прямо при разборе.
+     * <p>Schema validation: a list of violations and validation during parsing.
+     */
     static void schema()
     {
         try (XmlSchema schema = XmlSchema.fromString(SCHEMA); XmlDocument bad = Xml.parse("<n>abc</n>"))

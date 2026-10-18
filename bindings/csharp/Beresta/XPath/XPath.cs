@@ -6,6 +6,8 @@ namespace Beresta
     /// <summary>
     /// Скомпилированное выражение XPath 1.0: компилируется один раз,
     /// вычисляется сколько угодно раз для разных узлов и документов.
+    /// A compiled XPath 1.0 expression: compiled once,
+    /// evaluated any number of times for different nodes and documents.
     /// </summary>
     /// <example>
     /// <code>
@@ -17,25 +19,28 @@ namespace Beresta
     {
         private readonly XPathHandle native;
 
-        /// <summary>Компиляция; синтаксическая ошибка — BerestaException(XPATH_ERROR).</summary>
+        /// <summary>Компиляция; синтаксическая ошибка — BerestaException(XPATH_ERROR).
+        /// Compilation; a syntax error throws BerestaException(XPATH_ERROR).</summary>
         public XPath(string expression)
         {
             NativeCalls.Check(NativeMethods.beresta_xpath_compile(expression, out IntPtr pointer));
             native = new XPathHandle(pointer);
         }
 
-        /// <summary>Указатель выражения с проверкой, что оно не освобождено.</summary>
+        /// <summary>Указатель выражения с проверкой, что оно не освобождено.
+        /// The expression pointer, checking that it is not released.</summary>
         private IntPtr Handle
         {
             get
             {
                 if (native.IsClosed)
-                    throw new ObjectDisposedException(nameof(XPath));
+                    throw new ObjectDisposedException(nameof(XPath), "Берёста / Beresta: " + BerestaLibrary.Message(2));
                 return native.DangerousGetHandle();
             }
         }
 
-        /// <summary>Освобождение нативной памяти выражения.</summary>
+        /// <summary>Освобождение нативной памяти выражения.
+        /// Releases the native memory of the expression.</summary>
         public void Dispose()
         {
             native.Dispose();

@@ -15,6 +15,10 @@ namespace beresta::xpath::detail
     ** Контекст вычисления выражения: текущий узел, его позиция и размер
     ** контекстного множества (для position() и last()) и пользовательский
     ** контекст (префиксы и переменные).
+    **
+    ** The expression evaluation context: the current node, its position and the size
+    ** of the context set (for position() and last()) and the user
+    ** context (prefixes and variables).
     */
     struct EvalContext
     {
@@ -28,6 +32,10 @@ namespace beresta::xpath::detail
     ** Expr — узел дерева разбора (паттерн Interpreter, GoF): каждый класс
     ** выражения сам умеет вычислять себя. Добавление нового вида выражения
     ** не затрагивает остальные (принцип открытости/закрытости).
+    **
+    ** Expr — a parse tree node (the Interpreter pattern, GoF): each expression
+    ** class knows how to evaluate itself. Adding a new kind of expression
+    ** does not affect the others (the open/closed principle).
     */
     class Expr
     {
@@ -40,6 +48,7 @@ namespace beresta::xpath::detail
     using ExprPtr = std::unique_ptr<Expr>;
 
     // Бинарные операции (суффикс _OP — чтобы не столкнуться с макросами платформ)
+    // Binary operations (the _OP suffix avoids clashes with platform macros)
     enum class BinaryOperator
     {
         OR_OP, AND_OP, EQUAL_OP, NOT_EQUAL_OP, LESS_OP, LESS_EQUAL_OP, GREATER_OP,
@@ -47,6 +56,7 @@ namespace beresta::xpath::detail
     };
 
     // Бинарное выражение: логика, сравнения, арифметика, объединение множеств
+    // A binary expression: logic, comparisons, arithmetic, set union
     class BinaryExpr : public Expr
     {
     public:
@@ -61,6 +71,7 @@ namespace beresta::xpath::detail
     };
 
     // Унарный минус
+    // Unary minus
     class NegateExpr : public Expr
     {
     public:
@@ -73,6 +84,7 @@ namespace beresta::xpath::detail
     };
 
     // Строковый литерал или число — константа
+    // A string literal or a number — a constant
     class ConstantExpr : public Expr
     {
     public:
@@ -85,6 +97,7 @@ namespace beresta::xpath::detail
     };
 
     // Ссылка на переменную $имя
+    // A reference to a variable $name
     class VariableExpr : public Expr
     {
     public:
@@ -97,6 +110,7 @@ namespace beresta::xpath::detail
     };
 
     // Вызов функции из базовой библиотеки XPath
+    // A call of a function from the XPath core library
     class FunctionCallExpr : public Expr
     {
     public:
@@ -110,6 +124,7 @@ namespace beresta::xpath::detail
     };
 
     // Первичное выражение с предикатами: (выражение)[предикат]
+    // A primary expression with predicates: (expression)[predicate]
     class FilterExpr : public Expr
     {
     public:
@@ -122,26 +137,30 @@ namespace beresta::xpath::detail
         std::vector<ExprPtr> _predicates;
     };
 
-    // Оси XPath (без namespace)
+    // Все 13 осей XPath 1.0, включая namespace
+    // All 13 XPath 1.0 axes, including namespace
     enum class Axis
     {
         ANCESTOR, ANCESTOR_OR_SELF, ATTRIBUTE_AXIS, CHILD, DESCENDANT, DESCENDANT_OR_SELF,
-        FOLLOWING, FOLLOWING_SIBLING, PARENT, PRECEDING, PRECEDING_SIBLING, SELF
+        FOLLOWING, FOLLOWING_SIBLING, PARENT, PRECEDING, PRECEDING_SIBLING, SELF,
+        NAMESPACE_AXIS
     };
 
     // Вид проверки узла в шаге пути
+    // The kind of node test in a path step
     enum class TestKind
     {
-        QUALIFIED_NAME,     // имя или prefix:имя
+        QUALIFIED_NAME,     // имя или prefix:имя / a name or prefix:name
         ANY_NAME,           // *
         NAMESPACE_ANY,      // prefix:*
         ANY_NODE,           // node()
         TEXT_NODE,          // text()
         COMMENT_NODE,       // comment()
-        PI_NODE             // processing-instruction('цель'?)
+        PI_NODE             // processing-instruction('цель'?) / processing-instruction('target'?)
     };
 
     // Шаг пути: ось::проверка[предикаты]
+    // A path step: axis::test[predicates]
     struct Step
     {
         Axis axis = Axis::CHILD;
@@ -153,6 +172,7 @@ namespace beresta::xpath::detail
     };
 
     // Путь: необязательное начальное выражение или корень, затем шаги
+    // A path: an optional initial expression or the root, then the steps
     class PathExpr : public Expr
     {
     public:

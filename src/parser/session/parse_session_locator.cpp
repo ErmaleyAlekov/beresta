@@ -4,6 +4,7 @@
 namespace beresta::detail
 {
     // Строка и столбец текущего события вычисляются только по запросу
+    // The line and column of the current event are computed only on request
     SourceLocation ParseSession::getLocation() const
     {
         ParsePosition position = _inputs.main().computePosition(_eventMainOffset);
@@ -14,6 +15,9 @@ namespace beresta::detail
     /*
     ** Ошибка валидности восстановима: с ErrorHandler разбор продолжается
     ** (если обработчик не бросит сам), без него — прерывается сразу.
+    **
+    ** A validity error is recoverable: with an ErrorHandler parsing continues
+    ** (unless the handler throws itself), without it parsing stops at once.
     */
     void ParseSession::reportValidity(const std::string& message)
     {
@@ -26,6 +30,7 @@ namespace beresta::detail
     }
 
     // Запоминаем позицию текущей конструкции для Locator и сообщений валидатора
+    // Remembers the position of the current construct for the Locator and the validator messages
     void ParseSession::markEvent() noexcept
     {
         _eventMainOffset = _inputs.mainOffsetFor(_tokenStart);

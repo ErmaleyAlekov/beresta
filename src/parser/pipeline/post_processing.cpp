@@ -8,6 +8,9 @@ namespace beresta::detail
     /*
     ** Ошибки схемы — ошибки валидности: с ErrorHandler они собираются,
     ** без него первая же ошибка прерывает разбор исключением.
+    **
+    ** Schema errors are validity errors: with an ErrorHandler they are collected,
+    ** without it the very first error stops parsing with an exception.
     */
     static void validateWithSchema(const Document& document, const ParserOptions& options)
     {
@@ -23,6 +26,7 @@ namespace beresta::detail
     }
 
     // Порядок важен: схема проверяет документ уже после подстановки включений
+    // The order matters: the schema validates the document after the inclusions are substituted
     void postProcessDocument(Document& document, const ParserOptions& options)
     {
         if (options.processXInclude)

@@ -1,4 +1,5 @@
 #include "content/particle.hpp"
+#include "i18n/i18n.hpp"
 #include "content/content_matcher.hpp"
 
 namespace beresta::content
@@ -6,20 +7,26 @@ namespace beresta::content
     /*
     ** Полная проверка: стартуем из позиции 0 и смотрим, достижим ли конец
     ** списка детей. При неудаче ошибка — на самой дальней позиции.
+    **
+    ** The full check: start from position 0 and see whether the end of the
+    ** child list is reachable. On failure the error is at the farthest position.
     */
     MatchResult matchContent(const Particle& model, const std::vector<ChildKey>& children)
     {
+        // Частый случай проверяется одним проходом; общий алгоритм — для остального и для ошибок
+        // The common case is checked in one pass; the general algorithm is for the rest and for errors
+        if (matchesSimpleSequence(model, children))
+            return MatchResult{true, 0};
         ContentMatcher matcher(children);
-        PositionSet starts(children.size() + 1, 0);
+        PositionSet ends = matcher.matchRepeated(model, PositionSet{0});
 
-        starts[0] = 1;
-        PositionSet ends = matcher.matchRepeated(model, starts);
-        if (ends[children.size()])
+        if (!ends.empty() && ends.back() == children.size())
             return MatchResult{true, 0};
         return MatchResult{false, matcher.getFurthest()};
     }
 
     // Пространство имён ребёнка входит в разрешённые для xs:any
+    // The child's namespace is among the ones allowed for xs:any
     static bool wildcardAccepts(const Particle& particle, std::string_view namespaceUri) noexcept
     {
         if (particle.wildcardMode == WildcardMode::ANY_NAMESPACE)
@@ -35,6 +42,7 @@ namespace beresta::content
     }
 
     // Элемент: по полному имени (DTD) или по паре «пространство + локальное имя» (XSD)
+    // An element: by the qualified name (DTD) or by the pair "namespace + local name" (XSD)
     bool particleAccepts(const Particle& particle, const ChildKey& child) noexcept
     {
         if (particle.kind == ParticleKind::WILDCARD)
@@ -47,6 +55,7 @@ namespace beresta::content
     }
 
     // Суффикс повторений в нотации DTD: ?, *, + или {min,max}
+    // The repetition suffix in DTD notation: ?, *, + or {min,max}
     static std::string describeOccurrence(const Particle& particle)
     {
         if (particle.minOccurs == 1 && particle.maxOccurs == 1)
@@ -64,12 +73,13 @@ namespace beresta::content
     }
 
     // Рекурсивная запись модели: группы в скобках с разделителями ", " / " | " / " & "
+    // A recursive notation of the model: groups in parentheses with the separators ", " / " | " / " & "
     std::string describeParticle(const Particle& particle)
     {
         if (particle.kind == ParticleKind::ELEMENT)
             return particle.name + describeOccurrence(particle);
         if (particle.kind == ParticleKind::WILDCARD)
-            return "*любой*" + describeOccurrence(particle);
+            return i18n::format(i18n::Message::MODEL_ANY) + describeOccurrence(particle);
         std::string separator = ", ";
         if (particle.kind == ParticleKind::CHOICE)
             separator = " | ";

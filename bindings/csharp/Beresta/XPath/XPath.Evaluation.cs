@@ -4,12 +4,15 @@ using Beresta.Native;
 
 namespace Beresta
 {
-    /// <summary>Вычисление выражения относительно узла или документа.</summary>
+    /// <summary>Вычисление выражения относительно узла или документа.
+    /// Evaluates the expression relative to a node or a document.</summary>
     public sealed partial class XPath
     {
         /// <summary>
         /// Узлы результата в порядке документа. Атрибуты в DOM «Берёсты» —
         /// не узлы и сюда не попадают; их значения возвращает SelectValues.
+        /// Result nodes in document order. Attributes in the Beresta DOM are
+        /// not nodes and are not included here; SelectValues returns their values.
         /// </summary>
         public IReadOnlyList<XmlNode> SelectNodes(XmlNode context)
         {
@@ -32,7 +35,8 @@ namespace Beresta
             }
         }
 
-        /// <summary>Строковые значения всех элементов результата, включая атрибуты.</summary>
+        /// <summary>Строковые значения всех элементов результата, включая атрибуты.
+        /// String values of all result items, attributes included.</summary>
         public IReadOnlyList<string> SelectValues(XmlNode context)
         {
             NativeCalls.Check(NativeMethods.beresta_xpath_select(Handle, context.Handle, out IntPtr set));
@@ -50,20 +54,23 @@ namespace Beresta
             }
         }
 
-        /// <summary>Результат по правилам функции string().</summary>
+        /// <summary>Результат по правилам функции string().
+        /// The result by the rules of the string() function.</summary>
         public string EvaluateString(XmlNode context)
         {
             return NativeCalls.TakeRequiredString(NativeMethods.beresta_xpath_string(Handle, context.Handle));
         }
 
-        /// <summary>Результат по правилам функции number(); NaN — не ошибка.</summary>
+        /// <summary>Результат по правилам функции number(); NaN — не ошибка.
+        /// The result by the rules of the number() function; NaN is not an error.</summary>
         public double EvaluateNumber(XmlNode context)
         {
             NativeCalls.Check(NativeMethods.beresta_xpath_number(Handle, context.Handle, out double value));
             return value;
         }
 
-        /// <summary>Результат по правилам функции boolean().</summary>
+        /// <summary>Результат по правилам функции boolean().
+        /// The result by the rules of the boolean() function.</summary>
         public bool EvaluateBoolean(XmlNode context)
         {
             int result = NativeMethods.beresta_xpath_boolean(Handle, context.Handle);

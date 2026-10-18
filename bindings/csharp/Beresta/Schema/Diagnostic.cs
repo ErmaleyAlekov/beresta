@@ -7,6 +7,8 @@ namespace Beresta
     /// <summary>
     /// Одно нарушение схемы: текст начинается с пути к элементу
     /// ("/catalog/book[2]: ..."), Line и Column — место в исходнике (0 — неизвестно).
+    /// One schema violation: the text starts with the element path
+    /// ("/catalog/book[2]: ..."), Line and Column are the place in the source (0 — unknown).
     /// </summary>
     public sealed class Diagnostic
     {
@@ -17,16 +19,20 @@ namespace Beresta
             Column = column;
         }
 
-        /// <summary>Текст нарушения.</summary>
+        /// <summary>Текст нарушения.
+        /// The violation text.</summary>
         public string Message { get; }
 
-        /// <summary>Строка в исходнике.</summary>
+        /// <summary>Строка в исходнике.
+        /// The line in the source.</summary>
         public long Line { get; }
 
-        /// <summary>Столбец в исходнике.</summary>
+        /// <summary>Столбец в исходнике.
+        /// The column in the source.</summary>
         public long Column { get; }
 
-        /// <summary>Чтение нативного списка с его освобождением в finally.</summary>
+        /// <summary>Чтение нативного списка с его освобождением в finally.
+        /// Reads the native list and releases it in finally.</summary>
         internal static List<Diagnostic> ReadAll(IntPtr list)
         {
             List<Diagnostic> result = new List<Diagnostic>();

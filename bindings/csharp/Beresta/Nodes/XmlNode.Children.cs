@@ -3,10 +3,12 @@ using Beresta.Native;
 
 namespace Beresta
 {
-    /// <summary>Доступ к детям по индексу и перечислением.</summary>
+    /// <summary>Доступ к детям по индексу и перечислением.
+    /// Access to children by index and by enumeration.</summary>
     public partial class XmlNode
     {
-        /// <summary>Число детей (0 у листовых узлов).</summary>
+        /// <summary>Число детей (0 у листовых узлов).
+        /// The number of children (0 for leaf nodes).</summary>
         public long ChildCount
         {
             get
@@ -19,7 +21,8 @@ namespace Beresta
             }
         }
 
-        /// <summary>Ребёнок по индексу; неверный индекс — BerestaException(INVALID_ARGUMENT).</summary>
+        /// <summary>Ребёнок по индексу; неверный индекс — BerestaException(INVALID_ARGUMENT).
+        /// A child by index; an invalid index throws BerestaException(INVALID_ARGUMENT).</summary>
         public XmlNode Child(long index)
         {
             XmlNode? child = Wrap(NativeMethods.beresta_node_child(Handle, index), Document);
@@ -29,7 +32,8 @@ namespace Beresta
             return child;
         }
 
-        /// <summary>Перечисление детей через соседей — O(1) на шаг, без промежуточных списков.</summary>
+        /// <summary>Перечисление детей через соседей — O(1) на шаг, без промежуточных списков.
+        /// Enumerates children through siblings — O(1) per step, no intermediate lists.</summary>
         public IEnumerable<XmlNode> Children
         {
             get

@@ -1,0 +1,9 @@
+# Результаты сборки программы замеров / Benchmark build results
+/obj/
+/dep/
+/bin/
+/build/
+
+# Отчёт зависит от машины и в репозиторий не кладётся
+# The report depends on the machine and is not put into the repository
+/benchmark_report.md

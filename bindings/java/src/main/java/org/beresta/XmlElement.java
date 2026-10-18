@@ -8,7 +8,10 @@ import org.beresta.internal.ElementFunctions;
 import org.beresta.internal.NativeCalls;
 import org.beresta.internal.NativeStrings;
 
-/** Элемент: узел с именем, атрибутами и пространством имён. */
+/**
+ * Элемент: узел с именем, атрибутами и пространством имён.
+ * <p>An element: a node with a name, attributes and a namespace.
+ */
 public final class XmlElement extends XmlNode implements ElementAttributes
 {
     XmlElement(MemorySegment pointer, XmlDocument owner)
@@ -16,19 +19,25 @@ public final class XmlElement extends XmlNode implements ElementAttributes
         super(pointer, owner);
     }
 
-    /** Имя без префикса: у {@code <s:item>} — "item". */
+    /** Имя без префикса: у {@code <s:item>} — "item". / The name without a prefix: "item" for {@code <s:item>}. */
     public String localName()
     {
         return NativeStrings.take(NativeCalls.invoke(ElementFunctions.LOCAL_NAME, handle()));
     }
 
-    /** URI пространства имён или null, если элемент вне пространств. */
+    /**
+     * URI пространства имён или null, если элемент вне пространств.
+     * <p>The namespace URI or null if the element is in no namespace.
+     */
     public String namespaceUri()
     {
         return NativeStrings.take(NativeCalls.invoke(ElementFunctions.NAMESPACE_URI, handle()));
     }
 
-    /** Снимок атрибутов {имя: значение} в порядке документа. */
+    /**
+     * Снимок атрибутов {имя: значение} в порядке документа.
+     * <p>A snapshot of attributes {name: value} in document order.
+     */
     public Map<String, String> attributes()
     {
         Map<String, String> result = new LinkedHashMap<>();

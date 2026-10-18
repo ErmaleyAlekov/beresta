@@ -4,6 +4,7 @@
 namespace beresta::xpath::detail
 {
     // Строка -> кодовые точки (символы Unicode), чтобы считать позиции по символам
+    // A string -> code points (Unicode characters) to count positions by characters
     std::vector<std::uint32_t> toCodePoints(const std::string& text)
     {
         std::vector<std::uint32_t> codes;
@@ -23,6 +24,7 @@ namespace beresta::xpath::detail
     }
 
     // Кодовые точки [begin, end) -> строка UTF-8
+    // Code points [begin, end) -> a UTF-8 string
     std::string fromCodePoints(const std::vector<std::uint32_t>& codes, std::size_t begin,
         std::size_t end)
     {

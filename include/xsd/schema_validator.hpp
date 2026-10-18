@@ -16,6 +16,12 @@ namespace beresta::xsd
     ** к элементу (/catalog/book[2]/price) и, если документ разобран с
     ** trackLocations, строку и столбец в исходном файле.
     ** Валидатор неизменяем и потокобезопасен.
+    **
+    ** SchemaValidator — validates a ready DOM against an XML Schema.
+    ** Collects ALL errors in one traversal. Each error contains the path
+    ** to the element (/catalog/book[2]/price) and, if the document was parsed with
+    ** trackLocations, the line and column in the source file.
+    ** The validator is immutable and thread-safe.
     */
     class SchemaValidator
     {
@@ -23,9 +29,11 @@ namespace beresta::xsd
         explicit SchemaValidator(std::shared_ptr<const Schema> schema);
 
         // Все найденные ошибки (пустой список — документ корректен)
+        // All errors found (an empty list — the document is valid)
         std::vector<Diagnostic> validate(const Document& document) const;
 
         // Корректен ли документ
+        // Whether the document is valid
         bool isValid(const Document& document) const;
 
     private:

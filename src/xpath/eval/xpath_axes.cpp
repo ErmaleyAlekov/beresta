@@ -5,28 +5,31 @@
 namespace beresta::xpath::detail
 {
     // Функция оси: дописывает узлы оси в результат
+    // An axis function: appends the axis nodes to the result
     using AxisFunction = void (*)(const XPathItem&, std::vector<XPathItem>&);
 
     /*
     ** Таблица осей в порядке перечисления Axis: выбор оси — одно
     ** обращение по индексу вместо длинного switch (паттерн Strategy).
+    **
+    ** The axis table in the order of the Axis enumeration: choosing an axis is one
+    ** indexed access instead of a long switch (the Strategy pattern).
     */
     static const AxisFunction AXIS_FUNCTIONS[] = {
         ancestorAxis, ancestorOrSelfAxis, attributeAxis, childAxis, descendantAxis,
         descendantOrSelfAxis, followingAxis, followingSiblingAxis, parentAxis,
-        precedingAxis, precedingSiblingAxis, selfAxis
+        precedingAxis, precedingSiblingAxis, selfAxis, namespaceAxis
     };
 
     // Узлы оси для одного узла контекста
-    std::vector<XPathItem> axisItems(Axis axis, const XPathItem& item)
+    // The axis nodes for one context node
+    void appendAxisItems(Axis axis, const XPathItem& item, std::vector<XPathItem>& output)
     {
-        std::vector<XPathItem> output;
-
         AXIS_FUNCTIONS[static_cast<std::size_t>(axis)](item, output);
-        return output;
     }
 
     // Корень — самый верхний предок (документ или корень автономного дерева)
+    // The root is the topmost ancestor (the document or the root of a standalone tree)
     XPathItem rootOf(const XPathItem& item)
     {
         const Node* node = item.node;
@@ -39,6 +42,7 @@ namespace beresta::xpath::detail
     }
 
     // Обычный узел без атрибута
+    // An ordinary node without an attribute
     XPathItem nodeItem(const Node* node)
     {
         XPathItem item;
@@ -48,6 +52,7 @@ namespace beresta::xpath::detail
     }
 
     // Сам узел и все его потомки (основа сокращения "//")
+    // The node itself and all its descendants (the basis of the "//" abbreviation)
     void descendantOrSelfAxis(const XPathItem& item, std::vector<XPathItem>& output)
     {
         output.push_back(item);
@@ -56,6 +61,7 @@ namespace beresta::xpath::detail
     }
 
     // Родитель атрибута — его элемент; родитель узла — контейнер
+    // The parent of an attribute is its element; the parent of a node is the container
     XPathItem parentItem(const XPathItem& item)
     {
         if (item.attribute != nullptr)

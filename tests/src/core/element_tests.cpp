@@ -6,6 +6,7 @@
 namespace
 {
     // Атрибуты: добавление, замена с сохранением порядка, удаление
+    // Attributes: adding, replacing keeping the order, removing
     void testAttributes()
     {
         beresta::Element element("item");
@@ -22,6 +23,7 @@ namespace
     }
 
     // Поиск дочерних элементов по имени (только непосредственные дети)
+    // Looking up child elements by name (only direct children)
     void testFindChildren()
     {
         beresta::Document document = beresta::XmlParser().parse(
@@ -34,6 +36,7 @@ namespace
     }
 
     // Текст элемента собирается из всех потомков, без комментариев
+    // The text of an element is collected from all descendants, without comments
     void testTextContent()
     {
         beresta::Document document = beresta::XmlParser().parse(
@@ -43,6 +46,7 @@ namespace
     }
 
     // Недопустимые имена отвергаются с кодом INVALID_NAME
+    // Invalid names are rejected with the INVALID_NAME code
     void testInvalidNames()
     {
         beresta::Element element("ok");
@@ -59,6 +63,7 @@ namespace
 namespace suites
 {
     // Регистрация тестов элемента
+    // Registers the element tests
     void registerElementTests(test::TestRunner& runner)
     {
         runner.add("элемент: атрибуты", testAttributes);

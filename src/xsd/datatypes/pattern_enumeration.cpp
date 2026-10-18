@@ -1,4 +1,5 @@
 #include "xsd/internal/datatype_checks.hpp"
+#include "i18n/i18n.hpp"
 
 namespace beresta::xsd::detail
 {
@@ -6,6 +7,10 @@ namespace beresta::xsd::detail
     ** Шаблоны: значение обязано пройти каждую группу (шаг наследования),
     ** а внутри группы достаточно совпасть с любым шаблоном.
     ** Перечисление: значение равно одному из допустимых (по значению).
+    **
+    ** Patterns: the value must pass each group (a derivation step),
+    ** and inside a group matching any pattern is enough.
+    ** Enumeration: the value equals one of the allowed ones (by value).
     */
     std::optional<std::string> checkPatternsAndEnumeration(const SimpleType& type,
         std::string_view value)
@@ -16,8 +21,7 @@ namespace beresta::xsd::detail
             for (const std::shared_ptr<const Regex>& pattern : group)
                 matched = matched || pattern->matches(value);
             if (!matched)
-                return "значение \"" + std::string(value) + "\" не соответствует шаблону \""
-                    + group.front()->getPattern() + "\"";
+                return i18n::format(i18n::Message::PATTERN_MISMATCH, {value, group.front()->getPattern()});
         }
         if (type.facets.enumeration.empty())
             return std::nullopt;
@@ -26,10 +30,11 @@ namespace beresta::xsd::detail
             if (valuesEqual(type, value, allowed))
                 return std::nullopt;
         }
-        return "значение \"" + std::string(value) + "\" не входит в перечисление типа " + type.name;
+        return i18n::format(i18n::Message::NOT_IN_ENUMERATION, {value, type.name});
     }
 
     // Порядок 2 (несравнимы) границу не нарушает
+    // Order 2 (incomparable) does not violate a bound
     bool breaksBound(int order, bool lower, bool inclusive) noexcept
     {
         if (order == 2)

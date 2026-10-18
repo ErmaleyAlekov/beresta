@@ -1,4 +1,5 @@
 #include "xsd/internal/schema_builder.hpp"
+#include "i18n/i18n.hpp"
 
 namespace beresta::xsd::detail
 {
@@ -6,6 +7,10 @@ namespace beresta::xsd::detail
     ** xs:complexType. Объект регистрируется до построения содержимого
     ** (рекурсивные модели), но помечается незавершённым: наследоваться
     ** от незавершённого типа нельзя — это циклическое наследование.
+    **
+    ** xs:complexType. The object is registered before its content is built
+    ** (recursive models), but marked incomplete: deriving from an
+    ** incomplete type is not allowed — it is circular derivation.
     */
     const ComplexType* SchemaBuilder::buildComplexType(const Element& definition,
         const SchemaSource& source, const QualifiedKey& name)
@@ -38,6 +43,10 @@ namespace beresta::xsd::detail
     ** Тело типа: необязательная модель (sequence / choice / all / group)
     ** и атрибуты. Модель заменяет унаследованную только если она есть;
     ** склейку при расширении выполняет buildComplexContent.
+    **
+    ** The type body: an optional model (sequence / choice / all / group)
+    ** and attributes. The model replaces the inherited one only if it exists;
+    ** the merge on extension is done by buildComplexContent.
     */
     void SchemaBuilder::buildTypeBody(ComplexType& type, const Element& body, const SchemaSource& source,
         bool mixed)
@@ -59,6 +68,7 @@ namespace beresta::xsd::detail
     }
 
     // Наследование задаётся единственным xs:extension или xs:restriction
+    // Derivation is defined by a single xs:extension or xs:restriction
     const Element& SchemaBuilder::derivationOf(const Element& content, bool& extension) const
     {
         const Element* derivation = firstSchemaChild(content, "extension");
@@ -67,11 +77,12 @@ namespace beresta::xsd::detail
         if (derivation == nullptr)
             derivation = firstSchemaChild(content, "restriction");
         if (derivation == nullptr)
-            fail(content, "ожидался xs:extension или xs:restriction");
+            fail(content, i18n::format(i18n::Message::SCHEMA_DERIVATION_EXPECTED));
         return *derivation;
     }
 
     // Базовый тип (по умолчанию xs:anyType); от незавершённого типа наследоваться нельзя
+    // The base type (xs:anyType by default); deriving from an incomplete type is not allowed
     const ComplexType* SchemaBuilder::completeBase(const Element& derivation, TypeRef& base)
     {
         std::optional<std::string> name = derivation.getAttribute("base");
@@ -80,7 +91,7 @@ namespace beresta::xsd::detail
         if (name.has_value())
             base = resolveType(resolveQName(derivation, name.value()));
         if (base.complex != nullptr && _incomplete.count(base.complex) != 0)
-            fail(derivation, "циклическое наследование типа");
+            fail(derivation, i18n::format(i18n::Message::SCHEMA_CYCLIC_DERIVATION));
         return base.complex;
     }
 }

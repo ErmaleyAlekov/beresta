@@ -1,10 +1,12 @@
 #include "xsd/internal/schema_builder.hpp"
+#include "i18n/i18n.hpp"
 
 #include <memory>
 
 namespace beresta::xsd::detail
 {
     // Неотрицательное целое значение фасета; некорректное — nullopt
+    // A non-negative integer facet value; an invalid one is nullopt
     static std::optional<std::size_t> parseSize(const std::string& value)
     {
         std::size_t result = 0;
@@ -21,6 +23,7 @@ namespace beresta::xsd::detail
     }
 
     // Фасеты-числа: length, minLength, maxLength, totalDigits, fractionDigits
+    // Number facets: length, minLength, maxLength, totalDigits, fractionDigits
     static std::optional<std::size_t>* sizeFacet(Facets& facets, std::string_view kind)
     {
         if (kind == "length")
@@ -37,6 +40,7 @@ namespace beresta::xsd::detail
     }
 
     // Фасеты-границы: min/max Inclusive/Exclusive
+    // Bound facets: min/max Inclusive/Exclusive
     static std::optional<std::string>* boundFacet(Facets& facets, std::string_view kind)
     {
         if (kind == "minInclusive")
@@ -51,6 +55,7 @@ namespace beresta::xsd::detail
     }
 
     // Числовые, граничные фасеты и whiteSpace; false — фасет неизвестен или значение некорректно
+    // Number and bound facets and whiteSpace; false — the facet is unknown or the value is invalid
     static bool applySimpleFacet(Facets& facets, std::string_view kind, const std::string& value)
     {
         std::optional<std::size_t>* size = sizeFacet(facets, kind);
@@ -80,6 +85,9 @@ namespace beresta::xsd::detail
     /*
     ** Фасеты одного шага ограничения. Шаблоны шага образуют одну группу
     ** (достаточно совпасть с любым), перечисление шага заменяет базовое.
+    **
+    ** The facets of one restriction step. The patterns of a step form one group
+    ** (matching any is enough), the enumeration of a step replaces the base one.
     */
     void SchemaBuilder::applyFacets(SimpleType& type, const Element& restriction)
     {
@@ -98,7 +106,7 @@ namespace beresta::xsd::detail
             else if (kind == "enumeration")
                 enumeration.push_back(normalizeWhiteSpace(raw, type.facets.whiteSpace));
             else if (!applySimpleFacet(type.facets, kind, value))
-                fail(*facet, "неизвестный или некорректный фасет xs:" + std::string(kind));
+                fail(*facet, i18n::format(i18n::Message::SCHEMA_FACET_INVALID, {kind}));
         }
         if (!patterns.empty())
             type.facets.patterns.push_back(patterns);

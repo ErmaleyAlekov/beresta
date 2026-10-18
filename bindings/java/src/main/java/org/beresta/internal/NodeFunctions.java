@@ -8,7 +8,10 @@ import static org.beresta.internal.Layouts.UINT32;
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.invoke.MethodHandle;
 
-/** Функции узлов (разделы «Узлы: свойства и навигация» и «Узлы: изменение дерева»). */
+/**
+ * Функции узлов (разделы «Узлы: свойства и навигация» и «Узлы: изменение дерева»).
+ * <p>Node functions (the "Nodes: properties and navigation" and "Nodes: changing the tree" sections).
+ */
 public final class NodeFunctions
 {
     private static final FunctionDescriptor NODE_TO_NODE = FunctionDescriptor.of(POINTER, POINTER);
@@ -40,6 +43,8 @@ public final class NodeFunctions
         FunctionDescriptor.of(INT, POINTER));
     public static final MethodHandle COPY_TO = NativeLibrary.function("beresta_node_copy_to",
         FunctionDescriptor.of(INT, POINTER, POINTER, POINTER));
+    public static final MethodHandle MOVE_TO = NativeLibrary.function("beresta_node_move_to",
+        FunctionDescriptor.of(INT, POINTER, POINTER));
     public static final MethodHandle APPEND_ELEMENT = NativeLibrary.function("beresta_node_append_element", NODE_AND_TEXT);
     public static final MethodHandle APPEND_TEXT = NativeLibrary.function("beresta_node_append_text", NODE_AND_TEXT);
     public static final MethodHandle APPEND_COMMENT = NativeLibrary.function("beresta_node_append_comment", NODE_AND_TEXT);

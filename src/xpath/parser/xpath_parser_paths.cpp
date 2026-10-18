@@ -1,27 +1,32 @@
 #include "xpath/internal/xpath_parser.hpp"
+#include "i18n/i18n.hpp"
 
 #include <utility>
 
 namespace beresta::xpath::detail
 {
     // Имя оси и её значение
+    // The axis name and its value
     struct AxisEntry
     {
         const char* name;
         Axis axis;
     };
 
-    // Все оси XPath 1.0, кроме namespace (у DOM «Берёсты» нет узлов пространств имён)
+    // Все 13 осей XPath 1.0 (узлы namespace строятся по объявлениям xmlns)
+    // All 13 XPath 1.0 axes (namespace nodes are built from the xmlns declarations)
     static const AxisEntry AXES[] = {
         {"ancestor", Axis::ANCESTOR}, {"ancestor-or-self", Axis::ANCESTOR_OR_SELF},
         {"attribute", Axis::ATTRIBUTE_AXIS}, {"child", Axis::CHILD},
         {"descendant", Axis::DESCENDANT}, {"descendant-or-self", Axis::DESCENDANT_OR_SELF},
         {"following", Axis::FOLLOWING}, {"following-sibling", Axis::FOLLOWING_SIBLING},
         {"parent", Axis::PARENT}, {"preceding", Axis::PRECEDING},
-        {"preceding-sibling", Axis::PRECEDING_SIBLING}, {"self", Axis::SELF}
+        {"preceding-sibling", Axis::PRECEDING_SIBLING}, {"self", Axis::SELF},
+        {"namespace", Axis::NAMESPACE_AXIS}
     };
 
     // Поиск оси по имени
+    // Looks up an axis by name
     static bool findAxis(const std::string& name, Axis& axis) noexcept
     {
         for (const AxisEntry& entry : AXES)
@@ -36,6 +41,7 @@ namespace beresta::xpath::detail
     }
 
     // Путь начинается с '/', '//', '.', '..', '@', оси, проверки имени или типа узла
+    // A path starts with '/', '//', '.', '..', '@', an axis, a name test or a node type
     bool XPathParser::startsLocationPath() const noexcept
     {
         switch (peek().type)
@@ -52,6 +58,9 @@ namespace beresta::xpath::detail
     /*
     ** Абсолютный путь "/..." или "//...", либо относительный.
     ** Одиночный "/" — корень документа (шагов нет).
+    **
+    ** An absolute path "/..." or "//...", or a relative one.
+    ** A single "/" is the document root (there are no steps).
     */
     ExprPtr XPathParser::parseLocationPath()
     {
@@ -74,6 +83,7 @@ namespace beresta::xpath::detail
     }
 
     // Шаг ('/' | '//') шаг ...
+    // A step ('/' | '//') step ...
     void XPathParser::parseRelativePath(std::vector<Step>& steps)
     {
         steps.push_back(parseStep());
@@ -88,6 +98,9 @@ namespace beresta::xpath::detail
     /*
     ** Шаг: сокращения '.' (self::node()) и '..' (parent::node()),
     ** либо [ось:: | @] проверка [предикаты]. По умолчанию ось — child.
+    **
+    ** A step: the abbreviations '.' (self::node()) and '..' (parent::node()),
+    ** or [axis:: | @] test [predicates]. The default axis is child.
     */
     Step XPathParser::parseStep()
     {
@@ -107,7 +120,7 @@ namespace beresta::xpath::detail
         {
             std::string name = take().text;
             if (!findAxis(name, step.axis))
-                fail("неподдерживаемая ось \"" + name + "\"");
+                fail(i18n::format(i18n::Message::XPATH_UNKNOWN_AXIS, {name}));
             expect(TokenType::DOUBLE_COLON, "'::'");
         }
         parseNodeTest(step);

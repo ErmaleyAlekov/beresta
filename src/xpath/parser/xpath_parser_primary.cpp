@@ -5,6 +5,7 @@
 namespace beresta::xpath::detail
 {
     // Объединение множеств узлов через '|'
+    // The union of node sets through '|'
     ExprPtr XPathParser::parseUnion()
     {
         ExprPtr left = parsePath();
@@ -17,6 +18,9 @@ namespace beresta::xpath::detail
     /*
     ** Выражение пути: путь от корня/текущего узла или первичное выражение
     ** (переменная, скобки, литерал, функция), за которым может идти путь.
+    **
+    ** A path expression: a path from the root/the current node or a primary expression
+    ** (a variable, brackets, a literal, a function) that may be followed by a path.
     */
     ExprPtr XPathParser::parsePath()
     {
@@ -33,6 +37,7 @@ namespace beresta::xpath::detail
     }
 
     // Первичное выражение с предикатами
+    // A primary expression with predicates
     ExprPtr XPathParser::parseFilter()
     {
         ExprPtr primary = parsePrimary();
@@ -45,6 +50,7 @@ namespace beresta::xpath::detail
     }
 
     // $переменная | (выражение) | 'литерал' | число | функция(...)
+    // $variable | (expression) | 'literal' | number | function(...)
     ExprPtr XPathParser::parsePrimary()
     {
         TokenType type = peek().type;
@@ -64,6 +70,7 @@ namespace beresta::xpath::detail
     }
 
     // имя(аргумент, аргумент, ...)
+    // name(argument, argument, ...)
     ExprPtr XPathParser::parseFunctionCall()
     {
         std::string name = take().text;

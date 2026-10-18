@@ -1,9 +1,11 @@
 #include "xinclude/internal/xinclude_processor.hpp"
+#include "i18n/i18n.hpp"
 #include "exception/dom_exception.hpp"
 
 namespace beresta::xinclude::detail
 {
     // Номер шага XPointer (с единицы); некорректный — 0
+    // The number of an XPointer step (from one); an invalid one is 0
     static std::size_t parseStep(std::string_view text) noexcept
     {
         std::size_t value = 0;
@@ -20,6 +22,7 @@ namespace beresta::xinclude::detail
     }
 
     // Дочерний элемент с номером position (среди элементов) или nullptr
+    // The child element with number position (among elements) or nullptr
     static ContainerNode* childElementAt(ContainerNode& parent, std::size_t position)
     {
         for (Node* child = parent.getFirstChild(); child != nullptr; child = child->getNextSibling())
@@ -36,6 +39,10 @@ namespace beresta::xinclude::detail
     ** XPointer: element(/1/3) — путь по номерам дочерних элементов от
     ** документа, element(id/2) — от элемента с ID; без схемы — сам ID.
     ** Выбранный элемент извлекается из загруженного документа.
+    **
+    ** XPointer: element(/1/3) — a path by the numbers of child elements from
+    ** the document, element(id/2) — from the element with the ID; without a scheme — the ID itself.
+    ** The selected element is extracted from the loaded document.
     */
     std::unique_ptr<Node> XIncludeProcessor::selectPointer(Document& document, std::string_view pointer) const
     {
@@ -58,7 +65,7 @@ namespace beresta::xinclude::detail
             slash = next;
         }
         if (cursor == nullptr || cursor == &document)
-            throw DomException(DomErrorCode::RESOURCE_ERROR, "xpointer \"" + std::string(pointer) + "\" не найден");
+            throw DomException(DomErrorCode::RESOURCE_ERROR, i18n::format(i18n::Message::XPOINTER_NOT_FOUND, {pointer}));
         return cursor->getParent()->detachChild(*cursor);
     }
 }

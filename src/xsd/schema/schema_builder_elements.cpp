@@ -1,8 +1,10 @@
 #include "xsd/internal/schema_builder.hpp"
+#include "i18n/i18n.hpp"
 
 namespace beresta::xsd::detail
 {
     // Глобальный элемент строится один раз; ссылки ref указывают на одно объявление
+    // A global element is built once; ref references point to one declaration
     const ElementDecl* SchemaBuilder::globalElement(const QualifiedKey& key)
     {
         auto built = _builtElements.find(key);
@@ -11,7 +13,7 @@ namespace beresta::xsd::detail
             return built->second;
         const Definition* definition = findDefinition("element", key);
         if (definition == nullptr)
-            fail(*_sources.front().root, "элемент {" + key.first + "}" + key.second + " не объявлен");
+            fail(*_sources.front().root, i18n::format(i18n::Message::SCHEMA_ELEMENT_UNDECLARED, {key.first, key.second}));
         return buildElement(*definition->element, *definition->source, true);
     }
 
@@ -19,6 +21,10 @@ namespace beresta::xsd::detail
     ** Объявление элемента. Глобальное регистрируется ДО построения типа:
     ** рекурсивные модели (элемент внутри элемента своего же типа) получают
     ** указатель на уже существующее объявление.
+    **
+    ** An element declaration. A global one is registered BEFORE its type is built:
+    ** recursive models (an element inside an element of its own type) get
+    ** a pointer to an already existing declaration.
     */
     ElementDecl* SchemaBuilder::buildElement(const Element& definition, const SchemaSource& source,
         bool global)
@@ -28,7 +34,7 @@ namespace beresta::xsd::detail
 
         declaration.name = attributeOr(definition, "name", "");
         if (declaration.name.empty())
-            fail(definition, "у xs:element нет ни name, ни ref");
+            fail(definition, i18n::format(i18n::Message::SCHEMA_ELEMENT_NO_NAME));
         declaration.namespaceUri = localNamespace(definition, source, false);
         if (global)
         {
@@ -41,12 +47,16 @@ namespace beresta::xsd::detail
         declaration.isAbstract = attributeOr(definition, "abstract", "false") == "true";
         readValueConstraints(definition, declaration.defaultValue, declaration.fixedValue);
         declaration.type = elementType(definition, source);
+        readIdentityConstraints(definition, source, declaration);
         return &declaration;
     }
 
     /*
     ** Тип элемента: атрибут type, анонимный xs:simpleType / xs:complexType,
     ** тип головы группы замены (substitutionGroup) или xs:anyType.
+    **
+    ** The element type: the type attribute, an anonymous xs:simpleType / xs:complexType,
+    ** the type of the substitution group head (substitutionGroup) or xs:anyType.
     */
     TypeRef SchemaBuilder::elementType(const Element& definition, const SchemaSource& source)
     {
@@ -67,6 +77,7 @@ namespace beresta::xsd::detail
     }
 
     // Ограничения значения: default и fixed (взаимоисключающие по спецификации)
+    // Value constraints: default and fixed (mutually exclusive by the specification)
     void SchemaBuilder::readValueConstraints(const Element& definition,
         std::optional<std::string>& defaultValue, std::optional<std::string>& fixedValue) const
     {
@@ -74,7 +85,7 @@ namespace beresta::xsd::detail
         std::optional<std::string> byFixed = definition.getAttribute("fixed");
 
         if (byDefault.has_value() && byFixed.has_value())
-            fail(definition, "атрибуты default и fixed нельзя указывать одновременно");
+            fail(definition, i18n::format(i18n::Message::SCHEMA_DEFAULT_AND_FIXED));
         if (byDefault.has_value())
             defaultValue = byDefault;
         if (byFixed.has_value())

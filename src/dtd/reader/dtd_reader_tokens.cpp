@@ -4,6 +4,7 @@
 namespace beresta::dtd
 {
     // Подсмотреть символ (исчерпанные сущности снимаются, чтобы не видеть '\0' на их границе)
+    // Peeks at a character (exhausted entities are popped so as not to see '\0' at their boundary)
     char DtdReader::peek()
     {
         popFinished();
@@ -11,6 +12,7 @@ namespace beresta::dtd
     }
 
     // Проверка префикса в текущем сканере
+    // Checks a prefix in the current scanner
     bool DtdReader::startsWith(std::string_view fragment)
     {
         popFinished();
@@ -18,12 +20,14 @@ namespace beresta::dtd
     }
 
     // Сдвиг в текущем сканере
+    // Moves forward in the current scanner
     void DtdReader::advance(std::size_t count)
     {
         current().advance(count);
     }
 
     // Обязательный фрагмент
+    // A mandatory fragment
     void DtdReader::expect(std::string_view fragment)
     {
         popFinished();
@@ -31,6 +35,7 @@ namespace beresta::dtd
     }
 
     // Имя копируется: исходный сканер может быть снят со стека раньше, чем имя понадобится
+    // The name is copied: the source scanner may be popped before the name is needed
     std::string DtdReader::readName()
     {
         popFinished();

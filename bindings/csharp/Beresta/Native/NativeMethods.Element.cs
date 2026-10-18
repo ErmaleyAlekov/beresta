@@ -3,7 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace Beresta.Native
 {
-    /// <summary>Раздел «Элементы и атрибуты» Си-интерфейса.</summary>
+    /// <summary>Раздел «Элементы и атрибуты» Си-интерфейса.
+    /// The "Elements and attributes" section of the C interface.</summary>
     internal static partial class NativeMethods
     {
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]

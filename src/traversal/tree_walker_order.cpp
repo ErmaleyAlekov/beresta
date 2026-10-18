@@ -6,6 +6,10 @@ namespace beresta
     ** Предыдущий в порядке документа (алгоритм DOM): у левого соседа
     ** спускаемся к самому глубокому последнему видимому потомку, иначе
     ** берём родителя, если он принят фильтром.
+    **
+    ** The previous in document order (the DOM algorithm): at the left sibling
+    ** descend to the deepest last visible descendant, otherwise
+    ** take the parent if the filter accepts it.
     */
     Node* TreeWalker::previousNode()
     {
@@ -37,6 +41,7 @@ namespace beresta
     }
 
     // Следующий правый сосед узла или его предков в пределах корня
+    // The next right sibling of the node or its ancestors within the root
     static Node* nextOutside(Node* node, const Node* root)
     {
         for (Node* cursor = node; cursor != nullptr; cursor = cursor->getParent())
@@ -52,6 +57,9 @@ namespace beresta
     /*
     ** Следующий в порядке документа (алгоритм DOM): вглубь через первых
     ** детей (кроме отвергнутых поддеревьев), затем вправо и вверх.
+    **
+    ** The next in document order (the DOM algorithm): down through the first
+    ** children (except rejected subtrees), then right and up.
     */
     Node* TreeWalker::nextNode()
     {
@@ -83,6 +91,7 @@ namespace beresta
     }
 
     // Пока узел не отвергнут и у него есть дети — спускаемся к последнему ребёнку
+    // While the node is not rejected and has children — descend to the last child
     bool TreeWalker::descendToLast(Node*& node) const
     {
         FilterResult result = filterNode(*node);

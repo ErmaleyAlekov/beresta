@@ -8,6 +8,7 @@
 namespace beresta::xpath::detail
 {
     // substring-after(строка, разделитель): часть после первого вхождения
+    // substring-after(string, separator): the part after the first occurrence
     XPathValue functionSubstringAfter(const FunctionCall& call)
     {
         std::string text = stringArgument(call, 0);
@@ -23,6 +24,10 @@ namespace beresta::xpath::detail
     ** substring(строка, начало, длина?) — позиции символов с единицы.
     ** Берутся символы p с round(начало) <= p < round(начало) + round(длина);
     ** сравнения с NaN ложны, поэтому крайние случаи работают по спецификации.
+    **
+    ** substring(string, start, length?) — character positions from one.
+    ** The characters p with round(start) <= p < round(start) + round(length) are taken;
+    ** comparisons with NaN are false, so the edge cases work by the specification.
     */
     XPathValue functionSubstring(const FunctionCall& call)
     {
@@ -48,6 +53,7 @@ namespace beresta::xpath::detail
     }
 
     // string-length(строка?): длина в символах, а не в байтах
+    // string-length(string?): the length in characters, not in bytes
     XPathValue functionStringLength(const FunctionCall& call)
     {
         return XPathValue::fromNumber(
@@ -55,6 +61,7 @@ namespace beresta::xpath::detail
     }
 
     // normalize-space(строка?): пробелы по краям убираются, внутри — сжимаются до одного
+    // normalize-space(string?): spaces at the edges are removed, inside they are collapsed to one
     XPathValue functionNormalizeSpace(const FunctionCall& call)
     {
         std::string text = stringArgument(call, 0);
@@ -72,6 +79,9 @@ namespace beresta::xpath::detail
     /*
     ** translate(строка, откуда, куда): символ из «откуда» заменяется
     ** символом с той же позицией в «куда» или удаляется, если там его нет.
+    **
+    ** translate(string, from, to): a character from "from" is replaced with
+    ** the character at the same position in "to" or removed if there is none there.
     */
     XPathValue functionTranslate(const FunctionCall& call)
     {

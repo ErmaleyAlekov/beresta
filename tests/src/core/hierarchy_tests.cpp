@@ -9,6 +9,9 @@ namespace
     /*
     ** Нельзя вставить пустой указатель и узел внутрь самого себя.
     ** После неудачной вставки владение узлом остаётся у теста.
+    **
+    ** A null pointer and a node inside itself cannot be inserted.
+    ** After a failed insertion the ownership of the node stays with the test.
     */
     void testRejectsNullAndSelf()
     {
@@ -25,6 +28,7 @@ namespace
     }
 
     // Нельзя вставить предка внутрь потомка — получился бы цикл
+    // An ancestor cannot be inserted inside a descendant — that would be a cycle
     void testRejectsAncestorInsertion()
     {
         std::unique_ptr<beresta::Node> root = std::make_unique<beresta::Element>("root");
@@ -40,6 +44,7 @@ namespace
     }
 
     // Извлечённый узел автономен и может быть вставлен в другое дерево
+    // An extracted node is standalone and can be inserted into another tree
     void testRemovedNodeIsAutonomous()
     {
         beresta::Document first = beresta::XmlParser().parse("<a><b>text</b></a>");
@@ -53,6 +58,7 @@ namespace
     }
 
     // В документе только один корень; текст на верхнем уровне запрещён
+    // A document has only one root; text at the top level is forbidden
     void testDocumentRules()
     {
         beresta::Document document;
@@ -70,6 +76,7 @@ namespace
 namespace suites
 {
     // Регистрация тестов структуры дерева
+    // Registers the tree structure tests
     void registerHierarchyTests(test::TestRunner& runner)
     {
         runner.add("иерархия: null и вставка в себя", testRejectsNullAndSelf);

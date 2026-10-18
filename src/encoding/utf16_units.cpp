@@ -3,6 +3,7 @@
 namespace beresta::encoding
 {
     // Слово из двух байтов: порядок определяется вариантом кодировки (BE / LE)
+    // A word of two bytes: the order is determined by the encoding variant (BE / LE)
     std::uint32_t Utf16Charset::readUnit(std::string_view bytes, std::size_t index) const noexcept
     {
         std::uint32_t first = static_cast<unsigned char>(bytes[index]);
@@ -14,6 +15,7 @@ namespace beresta::encoding
     }
 
     // Запись слова в выбранном порядке байтов
+    // Writes a word in the chosen byte order
     void Utf16Charset::writeUnit(std::string& output, std::uint32_t unit) const
     {
         char high = static_cast<char>((unit >> 8) & 0xFF);

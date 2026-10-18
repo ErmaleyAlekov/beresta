@@ -4,6 +4,7 @@
 namespace
 {
     // Фильтр: элементы <skip> пропускаются, но их дети видны; <reject> скрыт целиком
+    // The filter: <skip> elements are skipped but their children are visible; <reject> is hidden whole
     class NameFilter : public beresta::NodeFilter
     {
     public:
@@ -11,6 +12,7 @@ namespace
     };
 
     // Решение по имени элемента
+    // The decision by the element name
     beresta::FilterResult NameFilter::acceptNode(const beresta::Node& node) const
     {
         const std::string& name = static_cast<const beresta::Element&>(node).getName();
@@ -23,6 +25,7 @@ namespace
     }
 
     // Имена элементов, которые выдаёт TreeWalker при обходе nextNode()
+    // The names of the elements TreeWalker returns when traversing with nextNode()
     std::string walkNames(beresta::Node& root, const beresta::NodeFilter* filter)
     {
         beresta::TreeWalker walker(root, beresta::show::ELEMENTS, filter);
@@ -34,6 +37,7 @@ namespace
     }
 
     // SKIP раскрывает детей, REJECT скрывает поддерево; parentNode пропускает SKIP
+    // SKIP exposes the children, REJECT hides the subtree; parentNode skips SKIP
     void testTreeWalker()
     {
         beresta::Document document = beresta::XmlParser().parse(
@@ -52,6 +56,7 @@ namespace
     }
 
     // NodeIterator: плоский обход текста вперёд и назад
+    // NodeIterator: a flat traversal of text forward and backward
     void testNodeIterator()
     {
         beresta::Document document = beresta::XmlParser().parse("<r>1<a>2</a><b>3<c>4</c></b></r>");
@@ -69,6 +74,7 @@ namespace
 namespace suites
 {
     // Регистрация тестов обхода дерева
+    // Registers the tree traversal tests
     void registerTraversalTests(test::TestRunner& runner)
     {
         runner.add("обход: TreeWalker с фильтром", testTreeWalker);

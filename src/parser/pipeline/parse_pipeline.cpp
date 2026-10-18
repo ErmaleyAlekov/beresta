@@ -8,6 +8,7 @@
 namespace beresta::detail
 {
     // Перекодированный текст живёт в decoded до конца разбора — сессия хранит лишь представления
+    // The transcoded text lives in decoded until the end of parsing — the session keeps only views
     void runParse(std::string_view bytes, const ParserOptions& options, ContentHandler& handler)
     {
         std::optional<encoding::DecodedDocument> decoded;
@@ -27,6 +28,7 @@ namespace beresta::detail
     }
 
     // Явно заданный baseUri имеет приоритет над путём к файлу
+    // An explicitly set baseUri has priority over the file path
     ParserOptions optionsForFile(const ParserOptions& options, const std::filesystem::path& path)
     {
         ParserOptions result = options;

@@ -7,7 +7,10 @@ import static org.beresta.internal.Layouts.POINTER;
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.invoke.MethodHandle;
 
-/** Функции XML Schema и диагностик (раздел «XML Schema» beresta_c.h). */
+/**
+ * Функции XML Schema и диагностик (раздел «XML Schema» beresta_c.h).
+ * <p>XML Schema and diagnostics functions (the "XML Schema" section of beresta_c.h).
+ */
 public final class SchemaFunctions
 {
     public static final MethodHandle LOAD = NativeLibrary.function("beresta_schema_load",

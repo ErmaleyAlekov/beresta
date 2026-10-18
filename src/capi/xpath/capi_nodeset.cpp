@@ -3,6 +3,7 @@
 namespace
 {
     // Элемент набора по индексу с проверкой диапазона
+    // A set item by index with a range check
     const beresta::xpath::XPathItem& itemAt(beresta_nodeset nodeset, int64_t index)
     {
         const beresta::capi::NodeSetHandle& handle =
@@ -24,6 +25,11 @@ extern "C" BERESTA_API int64_t beresta_nodeset_size(beresta_nodeset nodeset)
 ** поэтому для атрибута возвращается NULL (код 0), а его значение
 ** доступно через beresta_nodeset_value. Ядро хранит const-указатели;
 ** Си-интерфейс не различает константность, отсюда const_cast.
+**
+** A set node. In the Beresta DOM an attribute is an element property, not a node,
+** so NULL (code 0) is returned for an attribute, and its value
+** is available through beresta_nodeset_value. The core keeps const pointers;
+** the C interface does not distinguish constness, hence const_cast.
 */
 extern "C" BERESTA_API beresta_node beresta_nodeset_node(beresta_nodeset nodeset, int64_t index)
 {
@@ -37,6 +43,7 @@ extern "C" BERESTA_API beresta_node beresta_nodeset_node(beresta_nodeset nodeset
 }
 
 // Строковое значение узла или атрибута (string-value по XPath)
+// The string value of a node or an attribute (string-value by XPath)
 extern "C" BERESTA_API char* beresta_nodeset_value(beresta_nodeset nodeset, int64_t index)
 {
     BERESTA_CAPI_TRY

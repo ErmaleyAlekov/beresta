@@ -1,10 +1,14 @@
 /* SPDX-License-Identifier: MIT — Берёста, см. файл LICENSE в корне проекта */
+/* SPDX-License-Identifier: MIT — Beresta, see the LICENSE file in the project root */
 #ifndef BERESTA_HPP
 #define BERESTA_HPP
 
 /*
 ** «Берёста» — единый заголовок библиотеки: подключает весь публичный
 ** интерфейс. Пользователю достаточно написать #include "beresta.hpp".
+**
+** Beresta — the single library header: includes the whole public
+** interface. A user only needs to write #include "beresta.hpp".
 */
 
 #include "exception/dom_exception.hpp"

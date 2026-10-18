@@ -13,6 +13,10 @@ namespace beresta
     ** Comment — комментарий <!--значение-->.
     ** По стандарту XML значение не может содержать "--" и не может
     ** заканчиваться на '-', иначе вывод станет некорректным XML.
+    **
+    ** Comment — the <!--value--> comment.
+    ** By the XML standard the value cannot contain "--" and cannot
+    ** end with '-', otherwise the output would be invalid XML.
     */
     class Comment : public CharacterNode
     {

@@ -4,6 +4,7 @@
 namespace
 {
     // Разбор файла с обработкой XInclude из каталога root
+    // Parses a file with XInclude processing from the root directory
     std::string includeResult(const std::filesystem::path& root, const char* file)
     {
         beresta::FileResourceResolver resolver(root);
@@ -15,6 +16,7 @@ namespace
     }
 
     // Включение XML, текста и фрагмента по xpointer; вложенные включения
+    // Including XML, text and a fragment by xpointer; nested inclusions
     void testIncludes()
     {
         std::filesystem::path root = support::makeTestDirectory("xinclude");
@@ -32,6 +34,7 @@ namespace
     }
 
     // Недоступный ресурс заменяется содержимым xi:fallback
+    // An unavailable resource is replaced with the content of xi:fallback
     void testFallback()
     {
         std::filesystem::path root = support::makeTestDirectory("xinclude_fallback");
@@ -43,6 +46,7 @@ namespace
     }
 
     // Циклическое включение и отсутствие резолвера — понятные ошибки
+    // A circular inclusion and a missing resolver are clear errors
     void testIncludeErrors()
     {
         std::filesystem::path root = support::makeTestDirectory("xinclude_cycle");
@@ -62,6 +66,7 @@ namespace
 namespace suites
 {
     // Регистрация тестов XInclude
+    // Registers the XInclude tests
     void registerXIncludeTests(test::TestRunner& runner)
     {
         runner.add("XInclude: XML, текст, xpointer", testIncludes);

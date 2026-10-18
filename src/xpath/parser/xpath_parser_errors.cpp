@@ -1,9 +1,11 @@
 #include "xpath/internal/xpath_parser.hpp"
+#include "i18n/i18n.hpp"
 #include "exception/dom_exception.hpp"
 
 namespace beresta::xpath::detail
 {
     // Ноль или больше предикатов [выражение]
+    // Zero or more predicates [expression]
     void XPathParser::parsePredicates(std::vector<ExprPtr>& predicates)
     {
         while (accept(TokenType::LEFT_BRACKET))
@@ -14,6 +16,7 @@ namespace beresta::xpath::detail
     }
 
     // Сокращение "//" — это шаг descendant-or-self::node()
+    // The "//" abbreviation is the descendant-or-self::node() step
     Step XPathParser::descendantStep() const
     {
         Step step;
@@ -24,6 +27,7 @@ namespace beresta::xpath::detail
     }
 
     // node() | text() | comment() | processing-instruction('цель'?)
+    // node() | text() | comment() | processing-instruction('target'?)
     void XPathParser::parseNodeTypeTest(Step& step)
     {
         std::string type = take().text;
@@ -42,9 +46,10 @@ namespace beresta::xpath::detail
     }
 
     // Синтаксическая ошибка с номером лексемы
+    // A syntax error with the token number
     void XPathParser::fail(const std::string& message) const
     {
         throw DomException(DomErrorCode::XPATH_ERROR,
-            "XPath, лексема " + std::to_string(_index + 1) + ": " + message);
+            i18n::format(i18n::Message::XPATH_AT_TOKEN, {std::to_string(_index + 1), message}));
     }
 }

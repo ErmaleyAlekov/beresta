@@ -9,6 +9,7 @@ namespace beresta::xsd::detail
     }
 
     // decimal: [+-]?(цифры(.цифры?)? | .цифры); для integer точка запрещена
+    // decimal: [+-]?(digits(.digits?)? | .digits); for integer the point is forbidden
     bool isDecimalLexical(std::string_view value, bool integerOnly) noexcept
     {
         std::size_t position = 0;
@@ -31,6 +32,7 @@ namespace beresta::xsd::detail
     }
 
     // float / double: INF, -INF, NaN или десятичная мантисса с необязательной экспонентой
+    // float / double: INF, -INF, NaN or a decimal mantissa with an optional exponent
     bool isFloatLexical(std::string_view value) noexcept
     {
         if (value == "INF" || value == "-INF" || value == "NaN")
@@ -43,6 +45,7 @@ namespace beresta::xsd::detail
     }
 
     // hexBinary: чётное число шестнадцатеричных цифр; длина — в байтах
+    // hexBinary: an even number of hexadecimal digits; the length is in bytes
     std::optional<std::size_t> hexBinaryLength(std::string_view value) noexcept
     {
         if (value.size() % 2 != 0)
@@ -60,6 +63,9 @@ namespace beresta::xsd::detail
     /*
     ** base64Binary: символы A-Z a-z 0-9 + / (пробелы игнорируются), длина
     ** кратна 4, '=' — только в конце и не больше двух. Длина — в байтах.
+    **
+    ** base64Binary: the characters A-Z a-z 0-9 + / (spaces are ignored), the length
+    ** is a multiple of 4, '=' only at the end and at most two. The length is in bytes.
     */
     std::optional<std::size_t> base64BinaryLength(std::string_view value) noexcept
     {

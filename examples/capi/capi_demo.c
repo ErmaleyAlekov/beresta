@@ -5,6 +5,12 @@
 ** ровно так же к библиотеке обращаются Java (Panama), C# (P/Invoke) и
 ** Python (ctypes). Если этот файл компилируется компилятором C, значит
 ** заголовок не содержит ничего специфичного для C++.
+**
+** A demonstration of the Beresta C interface from a program in pure C99.
+** The program includes only beresta_c.h and the shared library —
+** exactly the way Java (Panama), C# (P/Invoke) and Python (ctypes) access
+** the library. If this file compiles with a C compiler, the header
+** contains nothing specific to C++.
 */
 #include "capi/beresta_c.h"
 
@@ -16,6 +22,7 @@
 #endif
 
 /* Печать последней ошибки библиотеки и код возврата 1 для main */
+/* Prints the last library error and returns code 1 for main */
 static int report_failure(const char* step)
 {
     int code = beresta_last_error_code();
@@ -25,6 +32,7 @@ static int report_failure(const char* step)
 }
 
 /* Печать строки, полученной от библиотеки, с её освобождением */
+/* Prints a string received from the library and frees it */
 static void print_owned(const char* label, char* text)
 {
     if (text == NULL)
@@ -34,7 +42,7 @@ static void print_owned(const char* label, char* text)
     beresta_string_free(text);
 }
 
-/* Разбор, навигация по дереву и вычисление XPath */
+/* Разбор, навигация по дереву и вычисление XPath / Parsing, tree navigation and XPath evaluation */
 static int show_parsing(void)
 {
     const char* xml = "<shop><item code=\"A1\">Чай</item><item code=\"B2\">Кофе</item></shop>";
@@ -57,6 +65,7 @@ static int show_parsing(void)
 }
 
 /* Построение документа с нуля и сериализация с отступами */
+/* Building a document from scratch and serialization with indentation */
 static int show_building(void)
 {
     beresta_document document = NULL;
@@ -73,12 +82,14 @@ static int show_building(void)
 }
 
 /* Точка входа: версия, два сценария и пример обработки ошибки */
+/* Entry point: the version, two scenarios and an error handling example */
 int main(void)
 {
     beresta_document broken = NULL;
 
 #ifdef _WIN32
     /* Строки библиотеки — UTF-8: консоль Windows переводится в ту же кодировку */
+    /* Library strings are UTF-8: the Windows console is switched to the same encoding */
     SetConsoleOutputCP(CP_UTF8);
 #endif
     printf("Берёста %s (Си-интерфейс)\n", beresta_version());

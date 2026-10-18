@@ -3,6 +3,9 @@ package org.beresta;
 /**
  * Флаги разбора (BERESTA_PARSE_*), объединяются через {@code |}:
  * {@code Xml.parse(text, ParseFlags.DISCARD_COMMENTS | ParseFlags.VALIDATE_DTD, null)}.
+ *
+ * <p>Parsing flags (BERESTA_PARSE_*), combined with {@code |}:
+ * {@code Xml.parse(text, ParseFlags.DISCARD_COMMENTS | ParseFlags.VALIDATE_DTD, null)}.
  */
 public final class ParseFlags
 {

@@ -7,7 +7,10 @@ import static org.beresta.internal.Layouts.POINTER;
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.invoke.MethodHandle;
 
-/** Функции элементов и атрибутов (раздел «Элементы и атрибуты» beresta_c.h). */
+/**
+ * Функции элементов и атрибутов (раздел «Элементы и атрибуты» beresta_c.h).
+ * <p>Element and attribute functions (the "Elements and attributes" section of beresta_c.h).
+ */
 public final class ElementFunctions
 {
     public static final MethodHandle GET_ATTRIBUTE = NativeLibrary.function("beresta_element_get_attribute",

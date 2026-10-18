@@ -4,6 +4,7 @@
 namespace beresta::xpath::detail
 {
     // Дети есть только у элементов и документа
+    // Only elements and the document have children
     const Node* firstChildNode(const Node* node)
     {
         if (node == nullptr)
@@ -14,6 +15,7 @@ namespace beresta::xpath::detail
     }
 
     // Последний ребёнок контейнера
+    // The last child of a container
     const Node* lastChildNode(const Node* node)
     {
         if (node == nullptr)
@@ -26,6 +28,9 @@ namespace beresta::xpath::detail
     /*
     ** Порядок документа без рекурсии: сначала вглубь (первый ребёнок),
     ** затем вправо, а при отсутствии соседа — вверх, но не выше root.
+    **
+    ** Document order without recursion: first down (the first child),
+    ** then right, and if there is no sibling — up, but not above root.
     */
     const Node* nextInDocument(const Node* node, const Node* root)
     {
@@ -43,6 +48,7 @@ namespace beresta::xpath::detail
     }
 
     // Все потомки узла в порядке документа
+    // All descendants of the node in document order
     void appendDescendants(const Node* node, std::vector<XPathItem>& output)
     {
         for (const Node* cursor = firstChildNode(node); cursor != nullptr;
@@ -51,6 +57,7 @@ namespace beresta::xpath::detail
     }
 
     // Дети узла (у атрибутов детей нет)
+    // The children of the node (attributes have no children)
     void childAxis(const XPathItem& item, std::vector<XPathItem>& output)
     {
         if (item.attribute != nullptr)

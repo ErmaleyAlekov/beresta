@@ -5,6 +5,7 @@
 namespace
 {
     // Порядок и содержимое событий
+    // The order and the content of events
     void testEventSequence()
     {
         support::RecordingHandler handler;
@@ -16,6 +17,7 @@ namespace
     }
 
     // Пробелы между тегами приходят отдельным событием и не смешиваются с текстом
+    // Spaces between tags arrive as a separate event and are not mixed with text
     void testIgnorableWhitespace()
     {
         support::RecordingHandler handler;
@@ -25,6 +27,7 @@ namespace
     }
 
     // Пространство имён элемента и атрибутов доступно прямо в событии
+    // The namespace of an element and attributes is available right in the event
     void testNamespaceEvents()
     {
         support::RecordingHandler handler;
@@ -35,6 +38,7 @@ namespace
     }
 
     // trackLocations записывает строку и столбец каждого узла в DOM
+    // trackLocations records the line and column of every node in the DOM
     void testDomLocations()
     {
         beresta::ParserOptions options;
@@ -51,6 +55,7 @@ namespace
 namespace suites
 {
     // Регистрация тестов потокового разбора
+    // Registers the streaming parsing tests
     void registerSaxTests(test::TestRunner& runner)
     {
         runner.add("SAX: последовательность событий", testEventSequence);

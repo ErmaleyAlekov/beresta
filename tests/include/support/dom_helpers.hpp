@@ -11,6 +11,7 @@
 namespace support
 {
     // Итог попытки вставки: успех или код ошибки (code имеет смысл только при неудаче)
+    // The outcome of an insertion attempt: success or an error code (code makes sense only on failure)
     struct AppendResult
     {
         bool succeeded;
@@ -18,18 +19,23 @@ namespace support
     };
 
     // Вставляет child в parent; при ошибке владение остаётся в child
+    // Inserts child into parent; on error the ownership stays in child
     AppendResult tryAppend(beresta::ContainerNode& parent, std::unique_ptr<beresta::Node>& child);
 
     // Разбирает ввод, ожидая ошибку; возвращает её позицию (line = 0, если ошибки не было)
+    // Parses the input expecting an error; returns its position (line = 0 if there was no error)
     beresta::ParsePosition parseErrorPosition(std::string_view input);
 
     // Разбор и немедленная сериализация — основа большинства тестов
+    // Parsing and immediate serialization — the basis of most tests
     std::string roundTrip(std::string_view input);
 
     // Чистый временный каталог для тестов с файлами
+    // A clean temporary directory for tests with files
     std::filesystem::path makeTestDirectory(const std::string& name);
 
     // Записывает файл с указанным содержимым (UTF-8)
+    // Writes a file with the given content (UTF-8)
     void writeTestFile(const std::filesystem::path& path, const std::string& content);
 }
 

@@ -1,0 +1,12 @@
+# Набор W3C XML Conformance Test Suite скачивается make fetch и в
+# репозиторий не кладётся (около 6 МБ чужих файлов со своей лицензией)
+# The W3C XML Conformance Test Suite is downloaded by make fetch and is not
+# put into the repository (about 6 MB of third-party files with their own license)
+/xmlconf/
+/xmlts*.tar.gz
+
+# Результаты сборки прогонщика / Runner build results
+/obj/
+/dep/
+/bin/
+/build/

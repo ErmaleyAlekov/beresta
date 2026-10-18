@@ -1,5 +1,7 @@
 #include "parser/xml_scanner.hpp"
 
+#include "utils/string_utils.hpp"
+
 #include <utility>
 
 namespace beresta::detail
@@ -9,6 +11,11 @@ namespace beresta::detail
     ** Если запрошено смещение левее кэша — счёт начинается заново.
     ** Байты-продолжения UTF-8 (вида 10xxxxxx) не увеличивают столбец,
     ** чтобы кириллица считалась по символам, а не по байтам.
+    **
+    ** The line and column are counted on from the last computed position.
+    ** If an offset to the left of the cache is requested, counting starts over.
+    ** UTF-8 continuation bytes (of the form 10xxxxxx) do not increase the column,
+    ** so that Cyrillic is counted by characters, not by bytes.
     */
     ParsePosition XmlScanner::computePosition(std::size_t offset) const noexcept
     {
@@ -32,6 +39,7 @@ namespace beresta::detail
     }
 
     // Якорь для текста сущности: позиция ссылки и поясняющий префикс
+    // The anchor for an entity text: the reference position and an explanatory prefix
     void XmlScanner::setErrorAnchor(ParsePosition anchor, std::string context)
     {
         _anchor = anchor;
@@ -39,9 +47,10 @@ namespace beresta::detail
     }
 
     // Срез до первого символа из набора или до конца ввода
+    // A slice up to the first character of the set or to the end of input
     std::string_view XmlScanner::readUntilAny(std::string_view symbols) noexcept
     {
-        std::size_t found = _input.find_first_of(symbols, _offset);
+        std::size_t found = utils::findAny(_input, _offset, symbols);
 
         if (found == std::string_view::npos)
             found = _input.size();
@@ -51,6 +60,7 @@ namespace beresta::detail
     }
 
     // Произвольный срез входа; границы за концом ввода обрезаются (пустой срез, а не исключение)
+    // An arbitrary input slice; bounds past the end of input are clipped (an empty slice, not an exception)
     std::string_view XmlScanner::slice(std::size_t begin, std::size_t end) const noexcept
     {
         if (begin > _input.size())

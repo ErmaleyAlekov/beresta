@@ -12,16 +12,20 @@
 namespace beresta::xsd
 {
     // Узел дерева регулярного выражения
+    // A node of the regular expression tree
     enum class RegexKind
     {
-        CHARACTERS,     // один символ из множества
-        SEQUENCE,       // дети подряд
-        ALTERNATION     // один из детей
+        CHARACTERS,     // один символ из множества / one character from the set
+        SEQUENCE,       // дети подряд / the children in a row
+        ALTERNATION     // один из детей / one of the children
     };
 
     /*
     ** RegexNode — разобранное выражение. Повторение хранится в самом узле
     ** (minimum..maximum), как в грамматике XSD: piece = atom quantifier?.
+    **
+    ** RegexNode — a parsed expression. The repetition is stored in the node itself
+    ** (minimum..maximum), as in the XSD grammar: piece = atom quantifier?.
     */
     struct RegexNode
     {
@@ -33,6 +37,7 @@ namespace beresta::xsd
     };
 
     // Значение «без верхней границы» для '*', '+' и {n,}
+    // The "no upper bound" value for '*', '+' and {n,}
     inline constexpr std::size_t REGEX_UNBOUNDED = static_cast<std::size_t>(-1);
 
     /*
@@ -42,6 +47,13 @@ namespace beresta::xsd
     ** «катастрофический» возврат невозможен в принципе. Совпадение всегда
     ** с целой строкой (в XSD шаблон неявно привязан к началу и концу).
     ** Синтаксическая ошибка шаблона — DomException(SCHEMA_ERROR).
+    **
+    ** Regex — an XML Schema regular expression (appendix F of XSD 1.0).
+    ** It is compiled into a Thompson NFA and matched by simulating all
+    ** states at once: time O(text length × number of states),
+    ** "catastrophic" backtracking is impossible in principle. The match is always
+    ** against the whole string (in XSD a pattern is implicitly anchored at the start and the end).
+    ** A pattern syntax error is DomException(SCHEMA_ERROR).
     */
     class Regex
     {
@@ -49,12 +61,14 @@ namespace beresta::xsd
         explicit Regex(std::string_view pattern);
 
         // Соответствует ли ВСЯ строка шаблону
+        // Whether the WHOLE string matches the pattern
         bool matches(std::string_view text) const;
 
         const std::string& getPattern() const noexcept;
 
     private:
         // Состояние автомата: символ из множества, ε-развилка, ε-переход или приём
+        // An automaton state: a character from a set, an ε-split, an ε-transition or acceptance
         enum class StateKind
         {
             CONSUME, SPLIT, EPSILON, ACCEPT
@@ -69,6 +83,7 @@ namespace beresta::xsd
         };
 
         // Фрагмент автомата: вход и «висячие» выходы (состояние, номер выхода)
+        // An automaton fragment: the entry and the "dangling" exits (the state, the exit number)
         struct Fragment
         {
             long start;
@@ -76,6 +91,7 @@ namespace beresta::xsd
         };
 
         // ---- Компиляция (xsd_regex_compile.cpp) ----
+        // ---- Compilation (xsd_regex_compile.cpp) ----
         Fragment compileNode(const RegexNode& node);
         Fragment compileOnce(const RegexNode& node);
         Fragment compileSequence(const std::vector<RegexNode>& children);
@@ -83,6 +99,7 @@ namespace beresta::xsd
         void connect(const Fragment& fragment, long target);
 
         // ---- Построение и шаги автомата (xsd_regex_build.cpp) ----
+        // ---- Building and stepping the automaton (xsd_regex_build.cpp) ----
         void appendOptionalCopies(Fragment& result, const RegexNode& node);
         long addState(StateKind kind, std::size_t setIndex);
         void advanceStates(std::uint32_t code, const std::vector<long>& current,
@@ -90,6 +107,7 @@ namespace beresta::xsd
         bool acceptsAny(const std::vector<long>& states) const noexcept;
 
         // ---- Моделирование (xsd_regex_match.cpp) ----
+        // ---- Simulation (xsd_regex_match.cpp) ----
         void addReachable(long state, std::vector<long>& list, std::vector<std::size_t>& marks,
             std::size_t generation) const;
 
@@ -102,6 +120,9 @@ namespace beresta::xsd
     /*
     ** RegexParser — рекурсивный спуск по грамматике регулярных выражений XSD:
     ** regExp = branch ('|' branch)*, branch = piece*, piece = atom quantifier?
+    **
+    ** RegexParser — recursive descent over the XSD regular expression grammar:
+    ** regExp = branch ('|' branch)*, branch = piece*, piece = atom quantifier?
     */
     class RegexParser
     {
@@ -112,17 +133,20 @@ namespace beresta::xsd
 
     private:
         // ---- Структура (xsd_regex_parser.cpp) ----
+        // ---- Structure (xsd_regex_parser.cpp) ----
         RegexNode parseAlternation(std::size_t depth);
         RegexNode parseBranch(std::size_t depth);
         RegexNode parseAtom(std::size_t depth);
 
         // ---- Атомы и квантификаторы (xsd_regex_quantifier.cpp) ----
+        // ---- Atoms and quantifiers (xsd_regex_quantifier.cpp) ----
         RegexNode parseSimpleAtom();
         void parseQuantifier(RegexNode& node);
         void parseBraceQuantifier(RegexNode& node);
         std::size_t parseNumber();
 
         // ---- Классы символов (xsd_regex_classes.cpp) ----
+        // ---- Character classes (xsd_regex_classes.cpp) ----
         CharSet parseClassExpression();
         CharSet parseClassGroup();
         bool applySubtraction(CharSet& set, bool negated);
@@ -130,10 +154,12 @@ namespace beresta::xsd
         std::uint32_t parseRangeEnd();
 
         // ---- Экранирование (xsd_regex_escapes.cpp) ----
+        // ---- Escapes (xsd_regex_escapes.cpp) ----
         CharSet parseEscape(bool& isSingle, std::uint32_t& single);
         CharSet parseProperty(bool complement);
 
         // ---- Символы (xsd_regex_chars.cpp) ----
+        // ---- Characters (xsd_regex_chars.cpp) ----
         bool atEnd() const noexcept;
         std::uint32_t peekCode() const noexcept;
         std::uint32_t takeCode();

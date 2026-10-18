@@ -6,6 +6,9 @@ import org.beresta.internal.NodeFunctions;
 /**
  * Навигация по дереву за O(1): ядро хранит индекс узла у родителя.
  * Отсутствие соседа или ребёнка — null.
+ *
+ * <p>O(1) tree navigation: the core stores the node's index in its parent.
+ * A missing sibling or child is null.
  */
 public interface NodeNavigation extends NodeBase
 {

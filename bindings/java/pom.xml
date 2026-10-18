@@ -14,6 +14,21 @@
     При запуске приложения разрешите нативный доступ ключом JVM
     enable-native-access=ALL-UNNAMED (без него Java 22+ печатает
     предупреждение; в README.md показана точная команда).
+
+    Beresta for Java is a Maven project of the wrapper over the C interface through
+    Project Panama (Foreign Function & Memory API, Java 22+). JNI is not needed.
+
+    The native library lands in src/main/resources/natives/<os>-<arch>/
+    when the core is built with the Java flag:
+        make JAVA=1
+        or CMake with -DBERESTA_BUILD_JAVA=ON (then an ordinary build)
+    After that:  mvn -f bindings/java/pom.xml package
+    To get one jar for all platforms, build the core on each OS
+    (or in a CI matrix) — each build adds its own natives/<os>-<arch> folder.
+
+    When running the application, allow native access with the JVM option
+    enable-native-access=ALL-UNNAMED (without it Java 22+ prints a
+    warning; README.md shows the exact command).
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -42,12 +57,17 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
-    <!-- Зависимостей нет: только JDK 22+ и собственная нативная библиотека -->
+    <!-- Зависимостей нет: только JDK 22+ и собственная нативная библиотека / No dependencies: only JDK 22+ and our own native library -->
 
     <build>
         <!-- Ресурсы по умолчанию (natives/) и текст лицензии из корня
              репозитория в META-INF/LICENSE: MIT требует, чтобы уведомление
-             распространялось вместе с копиями программы -->
+             распространялось вместе с копиями программы
+
+            Default resources (natives/) and the license text from the repository root
+            into META-INF/LICENSE: MIT requires the notice to be distributed
+            together with copies of the software
+        -->
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -61,7 +81,7 @@
             </resource>
         </resources>
         <plugins>
-            <!-- Двоичные файлы в ресурсах нельзя фильтровать как текст -->
+            <!-- Двоичные файлы в ресурсах нельзя фильтровать как текст / Binary files in resources must not be filtered as text -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
@@ -80,7 +100,11 @@
                 <version>3.13.0</version>
             </plugin>
             <!-- Самопроверка — обычная программа (без JUnit), запускается
-                 через make java-test или ctest; surefire её не ищет -->
+                 через make java-test или ctest; surefire её не ищет
+
+                The self-test is an ordinary program (no JUnit), run through
+                make java-test or ctest; surefire does not look for it
+            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>

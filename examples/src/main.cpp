@@ -8,6 +8,10 @@
 ** Точка входа демонстрации «Берёсты»: последовательно запускает сценарии.
 ** Любое исключение библиотеки перехватывается здесь и выводится
 ** в читаемом виде вместо аварийного завершения программы.
+**
+** The Beresta demo entry point: runs the scenarios one after another.
+** Any library exception is caught here and printed in a readable form
+** instead of crashing the program.
 */
 int main()
 {

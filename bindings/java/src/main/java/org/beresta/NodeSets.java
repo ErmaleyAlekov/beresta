@@ -14,6 +14,10 @@ import org.beresta.internal.XPathFunctions;
  * Чтение результата beresta_xpath_select. Набор узлов живёт только внутри
  * метода: элементы копируются в список Java, нативный набор освобождается
  * в finally — даже если чтение прервалось исключением.
+ *
+ * <p>Reads the result of beresta_xpath_select. The node set lives only inside the
+ * method: items are copied into a Java list, the native set is freed in finally —
+ * even if reading was interrupted by an exception.
  */
 final class NodeSets
 {
@@ -21,7 +25,10 @@ final class NodeSets
     {
     }
 
-    /** Выполнение select: нативный набор узлов (освобождает вызывающий). */
+    /**
+     * Выполнение select: нативный набор узлов (освобождает вызывающий).
+     * <p>Runs select: a native node set (the caller frees it).
+     */
     private static MemorySegment select(MemorySegment xpath, XmlNode context)
     {
         try (Arena arena = Arena.ofConfined())
@@ -33,7 +40,10 @@ final class NodeSets
         }
     }
 
-    /** Узлы набора (атрибуты пропускаются: у них нет узла DOM). */
+    /**
+     * Узлы набора (атрибуты пропускаются: у них нет узла DOM).
+     * <p>Nodes of the set (attributes are skipped: they have no DOM node).
+     */
     static List<XmlNode> nodes(MemorySegment xpath, XmlNode context)
     {
         MemorySegment set = select(xpath, context);
@@ -56,7 +66,7 @@ final class NodeSets
         }
     }
 
-    /** Строковые значения всех элементов набора. */
+    /** Строковые значения всех элементов набора. / String values of all items of the set. */
     static List<String> values(MemorySegment xpath, XmlNode context)
     {
         MemorySegment set = select(xpath, context);

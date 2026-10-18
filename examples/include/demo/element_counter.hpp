@@ -11,6 +11,9 @@ namespace demo
     /*
     ** Обработчик SAX для демонстрации: считает элементы и суммирует
     ** числа из элементов <price>, не храня документ в памяти.
+    **
+    ** A SAX handler for the demo: counts elements and sums the numbers
+    ** from <price> elements without keeping the document in memory.
     */
     class ElementCounter : public beresta::ContentHandler
     {

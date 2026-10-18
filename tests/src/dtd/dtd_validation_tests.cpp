@@ -5,12 +5,14 @@
 namespace
 {
     // DTD библиотеки: модель содержимого, ID/IDREF, обязательный атрибут
+    // The library DTD: a content model, ID/IDREF, a required attribute
     const char* const LIBRARY_DTD =
         "<!DOCTYPE library [<!ELEMENT library (book+)><!ELEMENT book (title, author*)>"
         "<!ELEMENT title (#PCDATA)><!ELEMENT author (#PCDATA)>"
         "<!ATTLIST book id ID #REQUIRED ref IDREF #IMPLIED>]>";
 
     // Корректный документ проходит без ошибок
+    // A valid document passes without errors
     void testValidDocument()
     {
         TEST_ASSERT(support::countValidityErrors(std::string(LIBRARY_DTD) + "<library><book id=\"b1\"><title>T</title>"
@@ -18,6 +20,7 @@ namespace
     }
 
     // Все ошибки собираются за один проход: модель, ID, IDREF, атрибут, элемент
+    // All errors are collected in one pass: the model, ID, IDREF, an attribute, an element
     void testCollectsAllErrors()
     {
         std::size_t errors = support::countValidityErrors(std::string(LIBRARY_DTD) + "<library><book id=\"b1\"><author>A</author>"
@@ -28,6 +31,7 @@ namespace
     }
 
     // Без ErrorHandler первая ошибка валидности прерывает разбор
+    // Without an ErrorHandler the first validity error stops parsing
     void testFailFastWithoutHandler()
     {
         beresta::ParserOptions options;
@@ -40,6 +44,7 @@ namespace
     }
 
     // getElementById работает по атрибутам, объявленным в DTD как ID, и по xml:id
+    // getElementById works by the attributes declared as ID in the DTD and by xml:id
     void testGetElementById()
     {
         beresta::Document document = beresta::XmlParser().parse(std::string(LIBRARY_DTD)
@@ -54,6 +59,7 @@ namespace
 namespace suites
 {
     // Регистрация тестов проверки по DTD
+    // Registers the DTD validation tests
     void registerDtdValidationTests(test::TestRunner& runner)
     {
         runner.add("DTD: корректный документ", testValidDocument);

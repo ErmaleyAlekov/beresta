@@ -1,4 +1,5 @@
 #include "capi/internal/capi_support.hpp"
+#include "i18n/i18n.hpp"
 
 /*
 ** Скомпилированное выражение вместе с контекстом (префиксы и переменные).
@@ -6,6 +7,12 @@
 ** один раз и вычисляют его для множества узлов и документов.
 ** Пока контекст меняется (bind / set), выражение нельзя вычислять
 ** из других потоков; само вычисление контекст не изменяет.
+**
+** A compiled expression together with the context (prefixes and variables).
+** Compilation is expensive, evaluation is cheap: the wrappers compile an expression
+** once and evaluate it for many nodes and documents.
+** While the context is being changed (bind / set), the expression must not be
+** evaluated from other threads; the evaluation itself does not change the context.
 */
 extern "C" BERESTA_API int beresta_xpath_compile(const char* expression, beresta_xpath* out)
 {
@@ -13,7 +20,7 @@ extern "C" BERESTA_API int beresta_xpath_compile(const char* expression, beresta
         std::string_view source = beresta::capi::requireText(expression, "expression");
 
         if (out == nullptr)
-            throw beresta::capi::InvalidArgumentException("out: передан NULL");
+            throw beresta::capi::InvalidArgumentException(beresta::i18n::format(beresta::i18n::Message::ARGUMENT_NULL, {"out"}));
         std::unique_ptr<beresta::capi::XPathHandle> handle(new beresta::capi::XPathHandle{
             beresta::xpath::XPathExpression(source), beresta::xpath::XPathContext()});
         *out = handle.release();
@@ -27,6 +34,7 @@ extern "C" BERESTA_API void beresta_xpath_free(beresta_xpath xpath)
 }
 
 // Префикс для имён p:name в выражении (повторная привязка заменяет URI)
+// A prefix for p:name names in the expression (binding it again replaces the URI)
 extern "C" BERESTA_API int beresta_xpath_bind_namespace(beresta_xpath xpath, const char* prefix,
     const char* uri)
 {

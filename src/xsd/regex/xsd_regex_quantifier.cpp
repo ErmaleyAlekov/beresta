@@ -1,4 +1,5 @@
 #include "xsd/regex/xsd_regex.hpp"
+#include "i18n/i18n.hpp"
 
 #include <utility>
 
@@ -7,6 +8,9 @@ namespace beresta::xsd
     /*
     ** Простой атом: '.' — любой символ, кроме переводов строк;
     ** '\' — экранирование (одиночный символ или класс); иначе — сам символ.
+    **
+    ** A simple atom: '.' — any character except line breaks;
+    ** '\' — an escape (a single character or a class); otherwise — the character itself.
     */
     RegexNode RegexParser::parseSimpleAtom()
     {
@@ -33,6 +37,7 @@ namespace beresta::xsd
     }
 
     // ? * + или {...}; отсутствие квантификатора — ровно один раз
+    // ? * + or {...}; no quantifier means exactly once
     void RegexParser::parseQuantifier(RegexNode& node)
     {
         if (atEnd())
@@ -68,10 +73,11 @@ namespace beresta::xsd
                 node.maximum = parseNumber();
         }
         if (atEnd() || takeCode() != '}' || node.maximum < node.minimum)
-            fail("некорректный квантификатор {n,m}");
+            fail(i18n::format(i18n::Message::PATTERN_QUANTIFIER_INVALID));
     }
 
     // Неотрицательное десятичное число в квантификаторе (с защитой от переполнения)
+    // A non-negative decimal number in a quantifier (with overflow protection)
     std::size_t RegexParser::parseNumber()
     {
         std::size_t value = 0;
@@ -82,10 +88,10 @@ namespace beresta::xsd
             value = value * 10 + (takeCode() - '0');
             digits = true;
             if (value > 100000)
-                fail("слишком большое число в квантификаторе");
+                fail(i18n::format(i18n::Message::PATTERN_QUANTIFIER_TOO_LARGE));
         }
         if (!digits)
-            fail("ожидалось число в квантификаторе");
+            fail(i18n::format(i18n::Message::PATTERN_QUANTIFIER_NUMBER));
         return value;
     }
 }

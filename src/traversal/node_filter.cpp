@@ -3,11 +3,13 @@
 namespace beresta
 {
     // Виртуальный деструктор интерфейса
+    // The virtual destructor of the interface
     NodeFilter::~NodeFilter()
     {
     }
 
     // Соответствие типа узла биту маски whatToShow
+    // Whether the node type matches the whatToShow mask bit
     unsigned showMaskFor(NodeType type) noexcept
     {
         switch (type)

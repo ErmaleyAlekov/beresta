@@ -7,12 +7,14 @@
 namespace demo
 {
     // Магазин для демонстраций XPath, схемы и SAX
+    // A shop for the XPath, schema and SAX demos
     static const char* const SHOP =
         "<shop xmlns=\"urn:shop\"><item code=\"A1\"><name>Чай</name><price>120.50</price></item>"
         "<item code=\"B2\"><name>Кофе</name><price>340</price></item>"
         "<item code=\"C3\"><name>Сахар</name><price>-5</price></item></shop>";
 
     // XPath: префикс в выражении связывается с пространством имён документа
+    // XPath: a prefix in the expression is bound to a namespace of the document
     void showXPath()
     {
         beresta::Document document = beresta::XmlParser().parse(SHOP);
@@ -27,6 +29,7 @@ namespace demo
     }
 
     // XML Schema: все ошибки сразу, с путём к элементу и номером строки
+    // XML Schema: all errors at once, with the element path and the line number
     void showSchemaValidation()
     {
         const char* xsd = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" targetNamespace=\"urn:shop\""
@@ -51,6 +54,7 @@ namespace demo
     }
 
     // SAX: обработчик получает события, дерево не строится
+    // SAX: the handler receives events, no tree is built
     void showSaxStreaming()
     {
         ElementCounter counter;
@@ -61,6 +65,7 @@ namespace demo
     }
 
     // windows-1251 на входе (определяется по декларации), красивый UTF-8 на выходе
+    // windows-1251 on input (detected from the declaration), pretty UTF-8 on output
     void showEncodings()
     {
         std::string cp1251 = "<?xml version=\"1.0\" encoding=\"windows-1251\"?><a><b>\xCF\xF0\xE8\xE2\xE5\xF2</b></a>";

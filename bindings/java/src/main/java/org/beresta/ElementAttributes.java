@@ -7,10 +7,10 @@ import org.beresta.internal.NativeCalls;
 import org.beresta.internal.NativeStrings;
 import org.beresta.internal.NativeMemory;
 
-/** Чтение и запись атрибутов элемента по имени. */
+/** Чтение и запись атрибутов элемента по имени. / Reading and writing element attributes by name. */
 public interface ElementAttributes extends NodeBase
 {
-    /** Значение атрибута или null, если атрибута нет. */
+    /** Значение атрибута или null, если атрибута нет. / The attribute value or null if there is no such attribute. */
     default String getAttribute(String name)
     {
         try (Arena arena = Arena.ofConfined())
@@ -20,7 +20,10 @@ public interface ElementAttributes extends NodeBase
         }
     }
 
-    /** Установка или замена значения; недопустимое имя — BerestaException(INVALID_NAME). */
+    /**
+     * Установка или замена значения; недопустимое имя — BerestaException(INVALID_NAME).
+     * <p>Sets or replaces the value; an invalid name throws BerestaException(INVALID_NAME).
+     */
     default void setAttribute(String name, String value)
     {
         try (Arena arena = Arena.ofConfined())
@@ -42,7 +45,10 @@ public interface ElementAttributes extends NodeBase
         }
     }
 
-    /** true — атрибут был и удалён, false — его не было. */
+    /**
+     * true — атрибут был и удалён, false — его не было.
+     * <p>true means the attribute existed and was removed, false means it did not exist.
+     */
     default boolean removeAttribute(String name)
     {
         try (Arena arena = Arena.ofConfined())

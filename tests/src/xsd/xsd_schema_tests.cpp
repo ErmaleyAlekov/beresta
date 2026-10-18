@@ -5,6 +5,7 @@
 namespace
 {
     // Схема каталога: последовательность, атрибуты, перечисление, шаблон, повторения
+    // A catalog schema: a sequence, attributes, an enumeration, a pattern, repetitions
     const char* const CATALOG_XSD =
         "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">"
         "<xs:simpleType name=\"Isbn\"><xs:restriction base=\"xs:string\">"
@@ -22,6 +23,7 @@ namespace
         "</xs:sequence></xs:complexType></xs:element></xs:schema>";
 
     // Корректный документ — ни одной ошибки
+    // A valid document — not a single error
     void testValidCatalog()
     {
         std::vector<beresta::Diagnostic> errors = support::schemaErrors(CATALOG_XSD, 
@@ -35,6 +37,7 @@ namespace
     }
 
     // Все нарушения собираются за один проход, у каждой ошибки — путь к элементу
+    // All violations are collected in one pass, each error has the element path
     void testCollectsSchemaErrors()
     {
         std::vector<beresta::Diagnostic> errors = support::schemaErrors(CATALOG_XSD, 
@@ -47,6 +50,7 @@ namespace
     }
 
     // Модель содержимого: порядок, обязательность, лишние элементы, текст в element-only
+    // The content model: the order, mandatory elements, extra elements, text in element-only
     void testContentModel()
     {
         TEST_ASSERT(support::schemaErrors(CATALOG_XSD, "<catalog/>").size() == 1);
@@ -58,6 +62,7 @@ namespace
     }
 
     // Ошибки самой схемы: неизвестный тип, неверный шаблон, неизвестный фасет
+    // Errors of the schema itself: an unknown type, an invalid pattern, an unknown facet
     void testSchemaErrors()
     {
         const char* head = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">";
@@ -74,6 +79,7 @@ namespace
 namespace suites
 {
     // Регистрация базовых тестов проверки по схеме
+    // Registers the basic schema validation tests
     void registerXsdSchemaTests(test::TestRunner& runner)
     {
         runner.add("XSD: корректный документ", testValidCatalog);

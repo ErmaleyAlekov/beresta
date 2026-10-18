@@ -6,6 +6,7 @@
 namespace beresta::xsd::detail
 {
     // Ограничения встроенных строковых типов: Name, NCName, NMTOKEN, ID, language, integer
+    // Restrictions of the built-in string types: Name, NCName, NMTOKEN, ID, language, integer
     bool matchesLexicalForm(LexicalForm form, std::string_view value) noexcept
     {
         switch (form)
@@ -26,6 +27,7 @@ namespace beresta::xsd::detail
     }
 
     // Подтег языка: 1-8 символов; первый — только буквы, остальные — буквы и цифры
+    // A language subtag: 1-8 characters; the first one only letters, the rest letters and digits
     static bool isLanguagePart(std::string_view part, bool first) noexcept
     {
         if (part.empty() || part.size() > 8)
@@ -40,6 +42,7 @@ namespace beresta::xsd::detail
     }
 
     // language: ru, en-US, x-klingon — подтеги через дефис
+    // language: ru, en-US, x-klingon — subtags separated by hyphens
     bool isLanguageLexical(std::string_view value) noexcept
     {
         std::size_t start = 0;
@@ -58,6 +61,7 @@ namespace beresta::xsd::detail
     }
 
     // QName: корректное имя, а префикс (если есть) объявлен в элементе-контексте
+    // QName: a valid name, and the prefix (if any) is declared in the context element
     bool isResolvableQName(std::string_view value, const Element* context)
     {
         if (!utils::isValidQualifiedName(value))

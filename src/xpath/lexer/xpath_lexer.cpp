@@ -1,16 +1,19 @@
 #include "xpath/internal/xpath_lexer.hpp"
+#include "i18n/i18n.hpp"
 #include "exception/dom_exception.hpp"
 #include "utils/xml_chars.hpp"
 
 namespace beresta::xpath::detail
 {
     // Лексер работает по представлению исходной строки
+    // The lexer works over a view of the source string
     XPathLexer::XPathLexer(std::string_view source) noexcept
         : _source(source), _position(0), _tokens()
     {
     }
 
     // Лексемы читаются до конца; пробелы между ними игнорируются
+    // Tokens are read to the end; spaces between them are ignored
     std::vector<Token> XPathLexer::tokenize()
     {
         while (true)
@@ -26,6 +29,7 @@ namespace beresta::xpath::detail
     }
 
     // Выбор вида лексемы по первому символу
+    // Chooses the token kind by the first character
     Token XPathLexer::readToken()
     {
         char symbol = _source[_position];
@@ -48,6 +52,7 @@ namespace beresta::xpath::detail
     }
 
     // Число: цифры с необязательной дробной частью (экспоненты в XPath 1.0 нет)
+    // A number: digits with an optional fraction (XPath 1.0 has no exponent)
     Token XPathLexer::readNumber()
     {
         std::size_t start = _position;
@@ -76,13 +81,14 @@ namespace beresta::xpath::detail
     }
 
     // Строковый литерал в одинарных или двойных кавычках (экранирования в XPath 1.0 нет)
+    // A string literal in single or double quotes (XPath 1.0 has no escaping)
     Token XPathLexer::readLiteral()
     {
         char quote = _source[_position];
         std::size_t end = _source.find(quote, _position + 1);
 
         if (end == std::string_view::npos)
-            fail("не закрыт строковый литерал");
+            fail(i18n::format(i18n::Message::XPATH_UNCLOSED_LITERAL));
         std::string text(_source.substr(_position + 1, end - _position - 1));
         _position = end + 1;
         return makeToken(TokenType::LITERAL, text);

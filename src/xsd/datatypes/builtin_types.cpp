@@ -5,6 +5,7 @@
 namespace beresta::xsd
 {
     // Описание встроенного типа: имя, примитив, форма, пробелы, границы, тип элементов списка
+    // A built-in type description: the name, the primitive, the form, whitespace, bounds, the list item type
     struct BuiltinEntry
     {
         const char* name;
@@ -20,6 +21,10 @@ namespace beresta::xsd
     ** Иерархия встроенных типов XSD 1.0 (часть 2 спецификации) в виде таблицы:
     ** производные целые задаются границами minInclusive / maxInclusive,
     ** списковые (NMTOKENS, IDREFS, ENTITIES) — типом элемента списка.
+    **
+    ** The hierarchy of the XSD 1.0 built-in types (part 2 of the specification) as a table:
+    ** derived integers are defined by the minInclusive / maxInclusive bounds,
+    ** list types (NMTOKENS, IDREFS, ENTITIES) by the list item type.
     */
     static const BuiltinEntry BUILTINS[] = {
         {"anySimpleType", Primitive::ANY_SIMPLE, LexicalForm::FREE, WhiteSpace::PRESERVE, "", "", ""},
@@ -72,6 +77,7 @@ namespace beresta::xsd
     };
 
     // Тип элементов списка ищется среди уже созданных (он стоит в таблице раньше)
+    // The list item type is looked up among the already created ones (it is earlier in the table)
     static const SimpleType* findBuilt(const std::deque<SimpleType>& built, std::string_view name)
     {
         for (const SimpleType& type : built)
@@ -83,6 +89,7 @@ namespace beresta::xsd
     }
 
     // Объект встроенного типа по строке таблицы
+    // A built-in type object from a table row
     static SimpleType makeBuiltin(const BuiltinEntry& entry, const std::deque<SimpleType>& built)
     {
         SimpleType type;
@@ -107,6 +114,7 @@ namespace beresta::xsd
     }
 
     // Все встроенные типы в порядке таблицы
+    // All built-in types in table order
     static std::deque<SimpleType> buildRegistry()
     {
         std::deque<SimpleType> registry;
@@ -121,6 +129,11 @@ namespace beresta::xsd
     ** статической переменной в C++11 и новее потокобезопасна. std::deque
     ** не перемещает элементы при перемещении контейнера в статическую
     ** переменную, поэтому указатели на типы (itemType) остаются верными.
+    **
+    ** The registry is created once on first access: initialization of a
+    ** static variable in C++11 and later is thread-safe. std::deque
+    ** does not move its elements when the container is moved into the static
+    ** variable, so the pointers to types (itemType) stay valid.
     */
     const SimpleType* builtinType(std::string_view localName)
     {

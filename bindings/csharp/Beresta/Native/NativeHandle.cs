@@ -11,6 +11,13 @@ namespace Beresta.Native
     /// при аварийной выгрузке домена; счётчик ссылок не даёт освободить
     /// ресурс во время идущего P/Invoke-вызова (защита от гонок).
     /// Конкретный класс определяет только функцию освобождения (Template Method).
+    /// The base of handles owned by the caller (document, XPath, schema).
+    /// 
+    /// SafeHandle is the standard .NET mechanism for unmanaged resources:
+    /// release is guaranteed on Dispose, on finalization and even on an emergency
+    /// domain unload; the reference count prevents releasing the resource while a
+    /// P/Invoke call is in progress (protection against races).
+    /// A concrete class defines only the release function (Template Method).
     /// </summary>
     internal abstract class NativeHandle : SafeHandle
     {
@@ -20,14 +27,16 @@ namespace Beresta.Native
             SetHandle(pointer);
         }
 
-        /// <summary>Нулевой указатель — «нет ресурса», освобождать нечего.</summary>
+        /// <summary>Нулевой указатель — «нет ресурса», освобождать нечего.
+        /// A null pointer means "no resource", nothing to release.</summary>
         public override bool IsInvalid
         {
             get { return handle == IntPtr.Zero; }
         }
     }
 
-    /// <summary>Дескриптор документа: beresta_document_free.</summary>
+    /// <summary>Дескриптор документа: beresta_document_free.
+    /// The document handle: beresta_document_free.</summary>
     internal sealed class DocumentHandle : NativeHandle
     {
         internal DocumentHandle(IntPtr pointer)

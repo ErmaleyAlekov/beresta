@@ -8,6 +8,9 @@ namespace beresta::xpath
     /*
     ** Цифры с необязательной точкой: "12", "12.", "12.5", ".5".
     ** Возвращает false, если встретился посторонний символ или цифр нет.
+    **
+    ** Digits with an optional point: "12", "12.", "12.5", ".5".
+    ** Returns false if a foreign character was met or there are no digits.
     */
     static bool parseDecimal(std::string_view text, long double& result) noexcept
     {
@@ -37,6 +40,9 @@ namespace beresta::xpath
     /*
     ** Собственный разбор (std::strtod зависит от локали и принимает
     ** лишние формы вроде "1e5" или "0x10", которые XPath не допускает).
+    **
+    ** An own parser (std::strtod depends on the locale and accepts
+    ** extra forms like "1e5" or "0x10" that XPath does not allow).
     */
     double stringToNumber(std::string_view text) noexcept
     {

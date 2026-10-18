@@ -1,4 +1,5 @@
 #include "xsd/internal/datatype_checks.hpp"
+#include "i18n/i18n.hpp"
 #include "utils/xml_tokens.hpp"
 
 namespace beresta::xsd
@@ -6,6 +7,9 @@ namespace beresta::xsd
     /*
     ** Атомарное значение: лексика, затем фасеты длины, границ, цифр,
     ** шаблонов и перечисления. Возвращается первая найденная ошибка.
+    **
+    ** An atomic value: the lexis, then the length, bound, digit,
+    ** pattern and enumeration facets. The first error found is returned.
     */
     static std::optional<std::string> validateAtomic(const SimpleType& type, std::string_view value,
         const Element* context)
@@ -24,6 +28,7 @@ namespace beresta::xsd
     }
 
     // Список: фасеты длины считают элементы, каждый элемент проверяется своим типом
+    // A list: the length facets count the items, each item is checked by its type
     static std::optional<std::string> validateList(const SimpleType& type, std::string_view value,
         const Element* context)
     {
@@ -32,11 +37,11 @@ namespace beresta::xsd
         std::string count = std::to_string(items.size());
 
         if (facets.length.has_value() && items.size() != facets.length.value())
-            return "в списке " + count + " элементов вместо " + std::to_string(*facets.length);
+            return i18n::format(i18n::Message::LIST_LENGTH_NOT_EQUAL, {count, std::to_string(*facets.length)});
         if (facets.minLength.has_value() && items.size() < facets.minLength.value())
-            return "в списке " + count + " элементов, меньше " + std::to_string(*facets.minLength);
+            return i18n::format(i18n::Message::LIST_TOO_SHORT, {count, std::to_string(*facets.minLength)});
         if (facets.maxLength.has_value() && items.size() > facets.maxLength.value())
-            return "в списке " + count + " элементов, больше " + std::to_string(*facets.maxLength);
+            return i18n::format(i18n::Message::LIST_TOO_LONG, {count, std::to_string(*facets.maxLength)});
         for (std::string_view item : items)
         {
             std::optional<std::string> error = validateSimpleValue(*type.itemType, item, context);
@@ -46,35 +51,13 @@ namespace beresta::xsd
         return detail::checkPatternsAndEnumeration(type, value);
     }
 
-    // Пробелы по правилу whiteSpace: REPLACE заменяет, COLLAPSE ещё и сжимает
-    std::string normalizeWhiteSpace(std::string_view value, WhiteSpace mode)
-    {
-        std::string result(value);
-
-        if (mode == WhiteSpace::PRESERVE)
-            return result;
-        for (char& symbol : result)
-        {
-            if (symbol == '\t' || symbol == '\n' || symbol == '\r')
-                symbol = ' ';
-        }
-        if (mode == WhiteSpace::REPLACE)
-            return result;
-        std::string collapsed;
-        for (std::string_view token : utils::splitTokens(result))
-        {
-            if (!collapsed.empty())
-                collapsed += ' ';
-            collapsed.append(token);
-        }
-        return collapsed;
-    }
-
     // Точка входа: нормализация пробелов и выбор по разновидности типа
+    // The entry point: whitespace normalization and the choice by the type variety
     std::optional<std::string> validateSimpleValue(const SimpleType& type, std::string_view value,
         const Element* context)
     {
-        std::string normalized = normalizeWhiteSpace(value, type.facets.whiteSpace);
+        std::string buffer;
+        std::string_view normalized = detail::normalizedView(value, type.facets.whiteSpace, buffer);
 
         if (type.variety == Variety::LIST)
             return validateList(type, normalized, context);
@@ -85,14 +68,17 @@ namespace beresta::xsd
             if (!validateSimpleValue(*member, value, context))
                 return detail::checkPatternsAndEnumeration(type, normalized);
         }
-        return "значение \"" + normalized + "\" не подходит ни под один тип объединения " + type.name;
+        return i18n::format(i18n::Message::UNION_NO_MEMBER, {normalized, type.name});
     }
 
     // Равенство в пространстве значений: числа и даты — по значению, остальное — по строке
+    // Equality in the value space: numbers and dates by value, the rest by string
     bool valuesEqual(const SimpleType& type, std::string_view left, std::string_view right)
     {
-        std::string a = normalizeWhiteSpace(left, type.facets.whiteSpace);
-        std::string b = normalizeWhiteSpace(right, type.facets.whiteSpace);
+        std::string leftBuffer;
+        std::string rightBuffer;
+        std::string_view a = detail::normalizedView(left, type.facets.whiteSpace, leftBuffer);
+        std::string_view b = detail::normalizedView(right, type.facets.whiteSpace, rightBuffer);
 
         if (type.variety != Variety::ATOMIC)
             return a == b;

@@ -1,4 +1,5 @@
 #include "xpath/internal/xpath_eval.hpp"
+#include "i18n/i18n.hpp"
 
 #include <cmath>
 #include <utility>
@@ -6,11 +7,13 @@
 namespace beresta::xpath::detail
 {
     // Виртуальный деструктор базового узла дерева разбора
+    // The virtual destructor of the base parse tree node
     Expr::~Expr()
     {
     }
 
     // Бинарное выражение владеет обоими операндами
+    // A binary expression owns both operands
     BinaryExpr::BinaryExpr(BinaryOperator op, ExprPtr left, ExprPtr right) noexcept
         : _operator(op), _left(std::move(left)), _right(std::move(right))
     {
@@ -19,6 +22,9 @@ namespace beresta::xpath::detail
     /*
     ** Деление по IEEE 754 без опоры на неопределённое поведение:
     ** x/0 — бесконечность со знаком, 0/0 и NaN/0 — NaN (как требует XPath).
+    **
+    ** Division by IEEE 754 without relying on undefined behavior:
+    ** x/0 is a signed infinity, 0/0 and NaN/0 are NaN (as XPath requires).
     */
     static double divide(double left, double right) noexcept
     {
@@ -32,6 +38,7 @@ namespace beresta::xpath::detail
     }
 
     // Арифметика над числами (mod — остаток с знаком делимого, как fmod)
+    // Arithmetic on numbers (mod is the remainder with the sign of the dividend, like fmod)
     static double arithmetic(BinaryOperator op, double left, double right) noexcept
     {
         if (op == BinaryOperator::PLUS_OP)
@@ -50,6 +57,9 @@ namespace beresta::xpath::detail
     /*
     ** or / and вычисляются с коротким замыканием; сравнения — по правилам
     ** XPath для множеств; '|' — объединение множеств в порядке документа.
+    **
+    ** or / and are evaluated with short-circuiting; comparisons follow the XPath
+    ** rules for sets; '|' is the union of sets in document order.
     */
     XPathValue BinaryExpr::evaluate(const EvalContext& context) const
     {
@@ -64,7 +74,7 @@ namespace beresta::xpath::detail
         if (_operator == BinaryOperator::UNION_OP)
         {
             if (left.getType() != ValueType::NODE_SET || right.getType() != ValueType::NODE_SET)
-                failEvaluation("операция '|' применима только к множествам узлов");
+                failEvaluation(i18n::format(i18n::Message::XPATH_UNION_NOT_NODESET));
             std::vector<XPathItem> merged = left.getNodes();
             merged.insert(merged.end(), right.getNodes().begin(), right.getNodes().end());
             sortDocumentOrder(merged);

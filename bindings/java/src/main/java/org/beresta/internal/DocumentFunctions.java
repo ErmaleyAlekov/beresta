@@ -8,7 +8,10 @@ import static org.beresta.internal.Layouts.UINT32;
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.invoke.MethodHandle;
 
-/** Функции документов (раздел «Документы» beresta_c.h). */
+/**
+ * Функции документов (раздел «Документы» beresta_c.h).
+ * <p>Document functions (the "Documents" section of beresta_c.h).
+ */
 public final class DocumentFunctions
 {
     public static final MethodHandle CREATE = NativeLibrary.function("beresta_document_create",

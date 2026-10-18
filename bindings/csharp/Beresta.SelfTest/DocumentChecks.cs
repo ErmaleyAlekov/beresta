@@ -6,10 +6,12 @@ using Beresta;
 
 namespace Beresta.SelfTest
 {
-    /// <summary>Проверки документов и узлов.</summary>
+    /// <summary>Проверки документов и узлов.
+    /// Document and node checks.</summary>
     internal static class DocumentChecks
     {
-        /// <summary>Разбор и навигация: дети, соседи, родители, типы узлов.</summary>
+        /// <summary>Разбор и навигация: дети, соседи, родители, типы узлов.
+        /// Parsing and navigation: children, siblings, parents, node types.</summary>
         internal static void ParseAndNavigate()
         {
             using XmlDocument document = Xml.Parse("<shop><item code='A1'>Чай</item><!--x--><item>Кофе</item></shop>");
@@ -24,7 +26,8 @@ namespace Beresta.SelfTest
             Expect.Equal(3, root.Children.Count(), "перечисление детей");
         }
 
-        /// <summary>Построение документа с нуля и сериализация.</summary>
+        /// <summary>Построение документа с нуля и сериализация.
+        /// Building a document from scratch and serialization.</summary>
         internal static void BuildAndSerialize()
         {
             using XmlDocument document = Xml.NewDocument("order");
@@ -38,7 +41,8 @@ namespace Beresta.SelfTest
             Expect.True(item.RemoveAttribute("qty") && !item.HasAttribute("qty"), "удаление атрибута");
         }
 
-        /// <summary>Копирование между документами, удаление, глубокая копия документа.</summary>
+        /// <summary>Копирование между документами, удаление, глубокая копия документа.
+        /// Copying between documents, removal, a deep copy of a document.</summary>
         internal static void CopyAndRemove()
         {
             using XmlDocument source = Xml.Parse("<a><b x='1'/></a>");
@@ -52,7 +56,8 @@ namespace Beresta.SelfTest
             Expect.Equal("<c><b x=\"1\"/></c>", copy.ToXml(), "копия документа");
         }
 
-        /// <summary>Ошибки: синтаксис, обращение к освобождённому документу.</summary>
+        /// <summary>Ошибки: синтаксис, обращение к освобождённому документу.
+        /// Errors: syntax, accessing a disposed document.</summary>
         internal static void Errors()
         {
             try
@@ -79,7 +84,8 @@ namespace Beresta.SelfTest
             }
         }
 
-        /// <summary>Запись в файл в другой кодировке и обратный разбор.</summary>
+        /// <summary>Запись в файл в другой кодировке и обратный разбор.
+        /// Writing to a file in another encoding and parsing it back.</summary>
         internal static void FilesAndEncodings()
         {
             string folder = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), "beresta-cs-" + Guid.NewGuid())).FullName;

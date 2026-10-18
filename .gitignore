@@ -1,18 +1,22 @@
 # ============================================================================
 #  Берёста (beresta) — исключения для Git
+#  Beresta — Git exclusions
 # ============================================================================
 
 # ---- Любые каталоги, имя которых начинается с точки (на любом уровне) -------
 # .vscode/, .idea/, .vs/, .cache/ и т.п. вместе со всем содержимым.
 # Сам файл .gitignore — это файл, а не каталог, поэтому под правило не попадает.
+# ---- Any directories whose name starts with a dot (at any level) ------------
+# .vscode/, .idea/, .vs/, .cache/ and so on with all their content.
+# The .gitignore itself is a file, not a directory, so the rule does not cover it.
 .*/
 
-# ---- Результаты сборки Makefile ---------------------------------------------
+# ---- Результаты сборки Makefile / Makefile build results --------------------
 /obj/
 /dep/
 /bin/
 
-# ---- Результаты сборки CMake ------------------------------------------------
+# ---- Результаты сборки CMake / CMake build results --------------------------
 /build/
 /build-*/
 /cmake-build-*/
@@ -27,12 +31,14 @@ install_manifest.txt
 compile_commands.json
 
 # ---- Копии нативной библиотеки в обёртках (кладёт сборка) -------------------
+# ---- Copies of the native library in the bindings (the build puts them) -----
 /bindings/java/src/main/resources/natives/
 /bindings/csharp/Beresta/runtimes/
 /bindings/python/beresta/_native/
+/bindings/node/native/
 
-# ---- Результаты сборки обёрток ----------------------------------------------
-# Java (Maven и самопроверка)
+# ---- Результаты сборки обёрток / Binding build results ----------------------
+# Java (Maven и самопроверка) / Java (Maven and the self-test)
 /bindings/java/target/
 # .NET
 /bindings/csharp/**/bin/
@@ -45,8 +51,13 @@ __pycache__/
 *.egg-info/
 /bindings/python/build/
 /bindings/python/dist/
+# Node.js (пакет npm pack и зависимости, если их поставили для экспериментов)
+# Node.js (the npm pack package and dependencies, if installed for experiments)
+/bindings/node/*.tgz
+node_modules/
 
 # ---- Объектные файлы, зависимости и бинарники (на случай сборки вне bin/) ---
+# ---- Object files, dependencies and binaries (in case of a build outside bin/)
 *.o
 *.obj
 *.d
@@ -57,6 +68,7 @@ __pycache__/
 *.dylib
 *.dll
 *.exe
+*.node
 *.out
 *.app
 *.pdb
@@ -67,13 +79,13 @@ __pycache__/
 *.class
 *.jar
 
-# ---- Спецификации и рабочие документы ---------------------------------------
+# ---- Спецификации и рабочие документы / Specifications and working documents
 dom_library_spec.txt
 new_spec.txt
 *_spec.txt
 *_spec.md
 
-# ---- Файлы IDE и редакторов -------------------------------------------------
+# ---- Файлы IDE и редакторов / IDE and editor files --------------------------
 *.sln
 *.vcxproj
 *.vcxproj.filters
@@ -83,7 +95,7 @@ new_spec.txt
 *.swp
 *~
 
-# ---- Системный мусор ОС -----------------------------------------------------
+# ---- Системный мусор ОС / OS system clutter ---------------------------------
 .DS_Store
 Thumbs.db
 desktop.ini

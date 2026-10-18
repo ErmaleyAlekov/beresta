@@ -3,7 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace Beresta.Native
 {
-    /// <summary>Раздел «XML Schema» Си-интерфейса.</summary>
+    /// <summary>Раздел «XML Schema» Си-интерфейса.
+    /// The "XML Schema" section of the C interface.</summary>
     internal static partial class NativeMethods
     {
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]

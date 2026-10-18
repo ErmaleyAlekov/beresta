@@ -7,6 +7,7 @@
 namespace beresta::xpath
 {
     // Атрибут — его значение; остальные узлы — текстовое содержимое (у PI — данные)
+    // An attribute — its value; other nodes — the text content (for a PI — the data)
     std::string stringValue(const XPathItem& item)
     {
         if (item.attribute != nullptr)
@@ -17,6 +18,7 @@ namespace beresta::xpath
     }
 
     // Ставит десятичную точку после point цифр, дополняя нулями слева или справа
+    // Puts the decimal point after point digits, padding with zeros on the left or on the right
     static std::string placeDecimalPoint(std::string digits, long point)
     {
         while (point > static_cast<long>(digits.size()))
@@ -34,6 +36,9 @@ namespace beresta::xpath
     /*
     ** Экспоненциальная запись "1.5e+20" переписывается в обычную:
     ** XPath запрещает экспоненту в строковом представлении числа.
+    **
+    ** The exponential form "1.5e+20" is rewritten into the ordinary one:
+    ** XPath forbids an exponent in the string representation of a number.
     */
     static std::string expandExponent(const std::string& text)
     {
@@ -61,6 +66,10 @@ namespace beresta::xpath
     ** Целые печатаются без дробной части, остальные — с минимально
     ** достаточной точностью (15 значащих цифр, при потере точности — 17).
     ** Запятая (возможна при чужой локали) заменяется точкой.
+    **
+    ** Integers are printed without a fraction, the others with the minimally
+    ** sufficient precision (15 significant digits, 17 if precision would be lost).
+    ** A comma (possible with a foreign locale) is replaced with a point.
     */
     std::string numberToString(double value)
     {

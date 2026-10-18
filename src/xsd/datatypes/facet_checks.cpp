@@ -1,9 +1,11 @@
 #include "xsd/internal/datatype_checks.hpp"
+#include "i18n/i18n.hpp"
 #include "utils/utf8.hpp"
 
 namespace beresta::xsd::detail
 {
     // Подходит ли значение под лексическое пространство примитива и встроенной формы
+    // Whether the value fits the lexical space of the primitive and the built-in form
     static bool lexicalAccepted(const SimpleType& type, std::string_view value, const Element* context)
     {
         DateTimeValue moment;
@@ -32,18 +34,25 @@ namespace beresta::xsd::detail
     }
 
     // Лексическая проверка с понятным сообщением
+    // A lexical check with a clear message
     std::optional<std::string> checkLexical(const SimpleType& type, std::string_view value,
         const Element* context)
     {
         if (lexicalAccepted(type, value, context))
             return std::nullopt;
-        return "значение \"" + std::string(value) + "\" не соответствует типу " + type.name;
+        return i18n::format(i18n::Message::VALUE_NOT_OF_TYPE, {value, type.name});
     }
 
     // Длина: в символах для строк, в байтах для двоичных типов
+    // The length: in characters for strings, in bytes for binary types
     std::optional<std::string> checkLengthFacets(const SimpleType& type, std::string_view value)
     {
         const Facets& facets = type.facets;
+
+        // Без фасетов длины не нужно и считать символы (длинный текст — лишний проход)
+        // Without length facets there is no need to count the characters (a long text is an extra pass)
+        if (!facets.length.has_value() && !facets.minLength.has_value() && !facets.maxLength.has_value())
+            return std::nullopt;
         std::size_t length = utils::countCodePoints(value);
 
         if (type.primitive == Primitive::HEX_BINARY)
@@ -51,35 +60,39 @@ namespace beresta::xsd::detail
         if (type.primitive == Primitive::BASE64_BINARY)
             length = base64BinaryLength(value).value_or(0);
         if (facets.length.has_value() && length != facets.length.value())
-            return "длина значения " + std::to_string(length) + " вместо " + std::to_string(*facets.length);
+            return i18n::format(i18n::Message::LENGTH_NOT_EQUAL, {std::to_string(length), std::to_string(*facets.length)});
         if (facets.minLength.has_value() && length < facets.minLength.value())
-            return "длина значения " + std::to_string(length) + " меньше " + std::to_string(*facets.minLength);
+            return i18n::format(i18n::Message::LENGTH_TOO_SMALL, {std::to_string(length), std::to_string(*facets.minLength)});
         if (facets.maxLength.has_value() && length > facets.maxLength.value())
-            return "длина значения " + std::to_string(length) + " больше " + std::to_string(*facets.maxLength);
+            return i18n::format(i18n::Message::LENGTH_TOO_LARGE, {std::to_string(length), std::to_string(*facets.maxLength)});
         return std::nullopt;
     }
 
     // Описание одной границы для таблицы проверок
+    // The description of one bound for the check table
     struct RangeBound
     {
         const std::optional<std::string>& value;
         bool lower;
         bool inclusive;
-        const char* message;
+        i18n::Message message;
     };
 
     /*
     ** Границы min/max Inclusive/Exclusive. Несравнимые значения (NaN, типы
     ** без порядка) границы не нарушают — так ведёт себя частичный порядок XSD.
+    **
+    ** The min/max Inclusive/Exclusive bounds. Incomparable values (NaN, types
+    ** without an order) do not violate the bounds — this is how the XSD partial order behaves.
     */
     std::optional<std::string> checkRangeFacets(const SimpleType& type, std::string_view value)
     {
         const Facets& facets = type.facets;
         const RangeBound bounds[] = {
-            {facets.minInclusive, true, true, "меньше минимума "},
-            {facets.maxInclusive, false, true, "больше максимума "},
-            {facets.minExclusive, true, false, "должно быть больше "},
-            {facets.maxExclusive, false, false, "должно быть меньше "}
+            {facets.minInclusive, true, true, i18n::Message::BELOW_MIN_INCLUSIVE},
+            {facets.maxInclusive, false, true, i18n::Message::ABOVE_MAX_INCLUSIVE},
+            {facets.minExclusive, true, false, i18n::Message::NOT_ABOVE_MIN_EXCLUSIVE},
+            {facets.maxExclusive, false, false, i18n::Message::NOT_BELOW_MAX_EXCLUSIVE}
         };
 
         for (const RangeBound& bound : bounds)
@@ -88,12 +101,13 @@ namespace beresta::xsd::detail
                 continue;
             int order = compareOrdered(type.primitive, value, bound.value.value());
             if (breaksBound(order, bound.lower, bound.inclusive))
-                return "значение \"" + std::string(value) + "\" " + bound.message + bound.value.value();
+                return i18n::format(bound.message, {value, bound.value.value()});
         }
         return std::nullopt;
     }
 
     // totalDigits / fractionDigits — только для десятичных типов
+    // totalDigits / fractionDigits — only for decimal types
     std::optional<std::string> checkDigitFacets(const SimpleType& type, std::string_view value)
     {
         std::size_t total = 0;
@@ -103,11 +117,9 @@ namespace beresta::xsd::detail
             return std::nullopt;
         countDecimalDigits(value, total, fraction);
         if (type.facets.totalDigits.has_value() && total > type.facets.totalDigits.value())
-            return "в числе " + std::string(value) + " больше " + std::to_string(*type.facets.totalDigits)
-                + " значащих цифр";
+            return i18n::format(i18n::Message::TOO_MANY_DIGITS, {value, std::to_string(*type.facets.totalDigits)});
         if (type.facets.fractionDigits.has_value() && fraction > type.facets.fractionDigits.value())
-            return "в числе " + std::string(value) + " больше " + std::to_string(*type.facets.fractionDigits)
-                + " цифр после точки";
+            return i18n::format(i18n::Message::TOO_MANY_FRACTION_DIGITS, {value, std::to_string(*type.facets.fractionDigits)});
         return std::nullopt;
     }
 }

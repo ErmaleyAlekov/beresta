@@ -4,12 +4,14 @@
 namespace beresta::encoding
 {
     // Сравнение начала байтовой строки с сигнатурой
+    // Compares the start of a byte string with a signature
     static bool startsWithBytes(std::string_view bytes, std::string_view signature) noexcept
     {
         return bytes.substr(0, signature.size()) == signature;
     }
 
     // Порядок проверок важен: сначала BOM, затем сигнатуры UTF-16 без BOM
+    // The order of checks matters: first the BOM, then the UTF-16 signatures without a BOM
     DetectedEncoding detectEncoding(std::string_view bytes)
     {
         using namespace std::string_view_literals;
@@ -34,10 +36,20 @@ namespace beresta::encoding
     ** Декларация читается как ASCII: все поддерживаемые однобайтовые
     ** кодировки совпадают с ASCII в первой половине таблицы.
     ** Ищем encoding = "..." или '...' внутри первых "<?xml ... ?>".
+    ** Декларация — только "<?xml" и сразу пробел, как и в парсере: иначе
+    ** инструкция "<?xmlA encoding='...'?>" (найдено фаззингом) меняла бы
+    ** кодировку документа, у которого декларации нет вовсе.
+    **
+    ** The declaration is read as ASCII: all supported single-byte
+    ** encodings match ASCII in the first half of the table.
+    ** It looks for encoding = "..." or '...' inside the first "<?xml ... ?>".
+    ** The declaration is only "<?xml" immediately followed by a space, as in the parser: otherwise
+    ** the instruction "<?xmlA encoding='...'?>" (found by fuzzing) would change
+    ** the encoding of a document that has no declaration at all.
     */
     std::string readDeclaredEncoding(std::string_view bytes)
     {
-        if (!startsWithBytes(bytes, "<?xml"))
+        if (!startsWithBytes(bytes, "<?xml") || bytes.size() < 6 || !utils::isWhitespace(bytes[5]))
             return std::string();
         std::string_view declaration = bytes.substr(0, bytes.find("?>"));
         std::size_t position = declaration.find("encoding");

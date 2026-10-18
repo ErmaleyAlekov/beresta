@@ -6,6 +6,7 @@
 namespace
 {
     // Спецсимволы экранируются при выводе и восстанавливаются при разборе
+    // Special characters are escaped on output and restored on parsing
     void testEscapingRoundTrip()
     {
         beresta::Element element("e");
@@ -21,6 +22,7 @@ namespace
     }
 
     // Пустой элемент выводится как <x/>, с детьми — как <x>...</x>
+    // An empty element is written as <x/>, with children — as <x>...</x>
     void testEmptyAndNonEmptyElements()
     {
         beresta::Element element("x");
@@ -31,6 +33,7 @@ namespace
     }
 
     // Содержимое, которое сломало бы синтаксис вывода, отвергается
+    // Content that would break the output syntax is rejected
     void testInvalidContentRejected()
     {
         beresta::Comment comment("ok");
@@ -44,6 +47,7 @@ namespace
     }
 
     // Инструкция обработки: пробел только между целью и непустыми данными
+    // A processing instruction: a space only between the target and non-empty data
     void testProcessingInstructionFormat()
     {
         beresta::ProcessingInstruction bare("target");
@@ -57,6 +61,7 @@ namespace
 namespace suites
 {
     // Регистрация тестов сериализации
+    // Registers the serialization tests
     void registerSerializeTests(test::TestRunner& runner)
     {
         runner.add("вывод: экранирование и обратный разбор", testEscapingRoundTrip);

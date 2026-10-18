@@ -8,7 +8,10 @@ import static org.beresta.internal.Layouts.POINTER;
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.invoke.MethodHandle;
 
-/** Функции XPath и наборов узлов (раздел «XPath 1.0» beresta_c.h). */
+/**
+ * Функции XPath и наборов узлов (раздел «XPath 1.0» beresta_c.h).
+ * <p>XPath and node-set functions (the "XPath 1.0" section of beresta_c.h).
+ */
 public final class XPathFunctions
 {
     public static final MethodHandle COMPILE = NativeLibrary.function("beresta_xpath_compile",

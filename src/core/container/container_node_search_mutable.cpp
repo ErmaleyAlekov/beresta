@@ -7,6 +7,10 @@ namespace beresta
     ** Снимает константность с результатов поиска. Безопасно: поиск
     ** вызывается на неконстантном контейнере, значит и все найденные
     ** узлы его поддерева изначально неконстантны.
+    **
+    ** Removes the constness from the search results. It is safe: the search
+    ** is called on a non-const container, so all found nodes of its subtree
+    ** are originally non-const too.
     */
     static std::vector<Element*> toMutable(const std::vector<const Element*>& found)
     {
@@ -19,6 +23,7 @@ namespace beresta
     }
 
     // Глубокий поиск по имени (изменяемая версия)
+    // A deep search by name (the mutable version)
     std::vector<Element*> ContainerNode::getElementsByTagName(std::string_view name)
     {
         const ContainerNode& self = *this;
@@ -27,24 +32,12 @@ namespace beresta
     }
 
     // Глубокий поиск по пространству имён (изменяемая версия)
+    // A deep search by namespace (the mutable version)
     std::vector<Element*> ContainerNode::getElementsByTagNameNS(std::string_view namespaceUri,
         std::string_view localName)
     {
         const ContainerNode& self = *this;
 
         return toMutable(self.getElementsByTagNameNS(namespaceUri, localName));
-    }
-
-    // Попарное сравнение детей: одинаковое количество и равенство каждого
-    bool ContainerNode::childrenEqual(const ContainerNode& other) const
-    {
-        if (_children.size() != other._children.size())
-            return false;
-        for (std::size_t index = 0; index < _children.size(); ++index)
-        {
-            if (!_children[index]->isEqualNode(*other._children[index]))
-                return false;
-        }
-        return true;
     }
 }

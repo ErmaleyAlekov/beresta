@@ -1,8 +1,10 @@
 #include "dtd/dtd_parser.hpp"
+#include "i18n/i18n.hpp"
 
 namespace beresta::dtd
 {
     // Суффикс повторения: ? (0..1), * (0..∞), + (1..∞)
+    // The repetition suffix: ? (0..1), * (0..∞), + (1..∞)
     void DtdParser::parseOccurrence(content::Particle& particle)
     {
         char symbol = _reader.peek();
@@ -21,15 +23,16 @@ namespace beresta::dtd
     }
 
     // <!NOTATION имя SYSTEM "..." | PUBLIC "..." ["..."]>
+    // <!NOTATION name SYSTEM "..." | PUBLIC "..." ["..."]>
     void DtdParser::parseNotationDeclaration()
     {
         _reader.advance(10);
         _reader.requireSpace(referencesInMarkup());
-        std::string name = _reader.readName();
+        std::string name = readDeclaredName();
         _reader.requireSpace(referencesInMarkup());
         ExternalId id = _reader.readExternalId(true);
-        if (id.systemId.empty() && id.publicId.empty())
-            _reader.fail("в объявлении NOTATION ожидался SYSTEM или PUBLIC");
+        if (!id.present)
+            _reader.fail(i18n::format(i18n::Message::DTD_NOTATION_ID));
         _reader.skipSpaces(referencesInMarkup());
         _reader.expect(">");
         _reader.getContext().model.addNotation(name);
@@ -39,25 +42,37 @@ namespace beresta::dtd
     ** Условная секция <![INCLUDE[ ... ]]> или <![IGNORE[ ... ]]> — только во
     ** внешнем подмножестве. Ключевое слово часто задаётся параметрической
     ** сущностью (<![%draft;[ ... ]]>), поэтому ссылки здесь разрешены.
+    **
+    ** A conditional section <![INCLUDE[ ... ]]> or <![IGNORE[ ... ]]> — only in
+    ** the external subset. The keyword is often given by a parameter
+    ** entity (<![%draft;[ ... ]]>), so references are allowed here.
     */
     void DtdParser::parseConditionalSection()
     {
-        if (!_reader.getContext().externalSubset)
-            _reader.fail("условные секции допустимы только во внешнем подмножестве DTD");
+        std::size_t startFrame = _reader.frameId();
+
+        if (!_reader.inExternalText())
+            _reader.fail(i18n::format(i18n::Message::DTD_CONDITIONAL_INTERNAL));
         _reader.advance(3);
         _reader.skipSpaces(true);
         std::string keyword = _reader.readName();
         _reader.skipSpaces(true);
         _reader.expect("[");
+        // VC: Proper Conditional Section/PE Nesting — "<![" и "[" в одном тексте
+        // VC: Proper Conditional Section/PE Nesting — "<![" and "[" in the same text
+        if (_reader.frameId() != startFrame)
+            _reader.getContext().model.addValidityNote(
+                i18n::format(i18n::Message::DTD_CONDITIONAL_SPLIT_PE));
         if (keyword == "INCLUDE")
             parseDeclarations(false, true);
         else if (keyword == "IGNORE")
             skipIgnoredSection();
         else
-            _reader.fail("ожидалось INCLUDE или IGNORE");
+            _reader.fail(i18n::format(i18n::Message::DTD_INCLUDE_OR_IGNORE));
     }
 
     // Пропуск IGNORE-секции с учётом вложенных <![ ... ]]>
+    // Skips an IGNORE section taking nested <![ ... ]]> into account
     void DtdParser::skipIgnoredSection()
     {
         detail::XmlScanner& scanner = _reader.current();
@@ -66,7 +81,7 @@ namespace beresta::dtd
         while (depth > 0)
         {
             if (scanner.isAtEnd())
-                scanner.fail("не закрыта секция IGNORE");
+                scanner.fail(i18n::format(i18n::Message::DTD_IGNORE_UNCLOSED));
             if (scanner.startsWith("<!["))
             {
                 ++depth;
@@ -82,9 +97,10 @@ namespace beresta::dtd
         }
     }
 
-    // Ссылки %pe; ВНУТРИ объявлений разрешены только во внешнем подмножестве
+    // Ссылки %pe; ВНУТРИ объявлений разрешены во внешнем подмножестве и во внешних PE
+    // %pe; references INSIDE declarations are allowed in the external subset and in external PEs
     bool DtdParser::referencesInMarkup() const noexcept
     {
-        return _reader.getContext().externalSubset;
+        return _reader.inExternalText();
     }
 }

@@ -8,14 +8,17 @@ import org.beresta.XmlDocument;
 import org.beresta.XmlElement;
 import org.beresta.XmlNode;
 
-/** Проверки документов и узлов. */
+/** Проверки документов и узлов. / Document and node checks. */
 final class DocumentChecks
 {
     private DocumentChecks()
     {
     }
 
-    /** Разбор и навигация: дети, соседи, родители, типы узлов. */
+    /**
+     * Разбор и навигация: дети, соседи, родители, типы узлов.
+     * <p>Parsing and navigation: children, siblings, parents, node types.
+     */
     static void parseAndNavigate()
     {
         try (XmlDocument document = Xml.parse("<shop><item code='A1'>Чай</item><!--x--><item>Кофе</item></shop>"))
@@ -31,7 +34,7 @@ final class DocumentChecks
         }
     }
 
-    /** Построение документа с нуля и сериализация. */
+    /** Построение документа с нуля и сериализация. / Building a document from scratch and serialization. */
     static void buildAndSerialize()
     {
         try (XmlDocument document = XmlDocument.create("order"))
@@ -46,7 +49,10 @@ final class DocumentChecks
         }
     }
 
-    /** Копирование между документами, удаление, глубокая копия документа. */
+    /**
+     * Копирование между документами, удаление, глубокая копия документа.
+     * <p>Copying between documents, removal, a deep copy of a document.
+     */
     static void copyAndRemove()
     {
         try (XmlDocument source = Xml.parse("<a><b x='1'/></a>"); XmlDocument target = Xml.parse("<c/>"))
@@ -62,7 +68,10 @@ final class DocumentChecks
         }
     }
 
-    /** Ошибки: синтаксис, недопустимое имя, обращение к закрытому документу. */
+    /**
+     * Ошибки: синтаксис, недопустимое имя, обращение к закрытому документу.
+     * <p>Errors: syntax, an invalid name, access to a closed document.
+     */
     static void errors()
     {
         try

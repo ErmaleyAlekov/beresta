@@ -5,10 +5,20 @@
 
 namespace beresta
 {
+    // Резерв без изменения содержимого / A reservation without changing the content
+    void Element::reserveAttributes(std::size_t count)
+    {
+        _attributes.reserve(count);
+    }
+
     /*
     ** Поверхностная копия: имя и атрибуты переносятся, дети — нет.
     ** Создаём новый элемент с тем же именем и копируем вектор атрибутов
     ** напрямую (имена уже проверены, повторная проверка не нужна).
+    **
+    ** A shallow copy: the name and the attributes are carried over, the children are not.
+    ** A new element with the same name is created and the attribute vector is copied
+    ** directly (the names are already checked, a repeated check is not needed).
     */
     std::unique_ptr<Element> Element::cloneShallow() const
     {
@@ -20,6 +30,7 @@ namespace beresta
     }
 
     // Все дети заменяются одним текстовым узлом
+    // All children are replaced with one text node
     void Element::setTextContent(std::string text)
     {
         clearChildren();
@@ -28,30 +39,14 @@ namespace beresta
         appendChild(std::make_unique<Text>(std::move(text)));
     }
 
-    /*
-    ** Равенство атрибутов как множеств: порядок не важен (так требует DOM),
-    ** важны совпадение количества и значение каждого атрибута по имени.
-    */
-    static bool attributesEqual(const std::vector<Attribute>& left, const Element& right)
-    {
-        if (left.size() != right.getAttributes().size())
-            return false;
-        for (const Attribute& attribute : left)
-        {
-            std::optional<std::string> value = right.getAttribute(attribute.name);
-            if (!value.has_value() || value.value() != attribute.value)
-                return false;
-        }
-        return true;
-    }
-
     // Элементы равны, если совпадают тип, имя, атрибуты и все дети попарно
+    // Elements are equal if the type, the name, the attributes and all children match pairwise
     bool Element::isEqualNode(const Node& other) const
     {
         if (other.getType() != NodeType::ELEMENT)
             return false;
         const Element& element = static_cast<const Element&>(other);
-        if (element._name != _name || !attributesEqual(_attributes, element))
+        if (!equalsShallow(element))
             return false;
         return childrenEqual(element);
     }

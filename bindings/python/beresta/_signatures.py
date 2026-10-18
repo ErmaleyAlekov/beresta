@@ -8,6 +8,14 @@ ctypes по умолчанию считает, что функция возвр�
 Возвращаемые строки char* объявлены как c_void_p, а не c_char_p: c_char_p
 сразу копирует строку в bytes и теряет указатель — тогда его нельзя
 передать в beresta_string_free, и память утекает.
+
+Signatures of the C interface functions for ctypes (a mirror of include/capi/beresta_c.h).
+By default ctypes assumes that a function returns int and takes int:
+on a 64-bit platform a pointer would be truncated to 32 bits. That is why
+restype and argtypes are set explicitly for EVERY function.
+Returned char* strings are declared as c_void_p, not c_char_p: c_char_p
+copies the string into bytes at once and loses the pointer — then it cannot
+be passed to beresta_string_free, and the memory leaks.
 """
 
 from __future__ import annotations
@@ -19,14 +27,22 @@ _OUT_HANDLE = POINTER(c_void_p)
 _OWNED_TEXT = c_void_p
 
 # (имя, тип результата, типы аргументов)
+# (name, result type, argument types)
 SIGNATURES = (
     # ---- Библиотека и ошибки ----
+    # ---- Library and errors ----
     ("beresta_version", c_char_p, ()),
     ("beresta_last_error_code", c_int, ()),
     ("beresta_last_error_message", c_char_p, ()),
     ("beresta_status_name", c_char_p, (c_int,)),
     ("beresta_string_free", None, (c_void_p,)),
+    # ---- Языки сообщений / Message languages ----
+    ("beresta_set_language", c_int, (c_char_p,)),
+    ("beresta_language", c_char_p, ()),
+    ("beresta_languages", c_char_p, ()),
+    ("beresta_message_text", c_char_p, (c_int,)),
     # ---- Документы ----
+    # ---- Documents ----
     ("beresta_document_create", c_int, (c_char_p, _OUT_HANDLE)),
     ("beresta_document_parse", c_int, (c_char_p, c_int64, c_uint32, _HANDLE, _OUT_HANDLE)),
     ("beresta_document_parse_file", c_int, (c_char_p, c_uint32, _HANDLE, _OUT_HANDLE)),
@@ -36,6 +52,7 @@ SIGNATURES = (
     ("beresta_document_element_by_id", _HANDLE, (_HANDLE, c_char_p)),
     ("beresta_document_save", c_int, (_HANDLE, c_char_p, c_uint32, c_char_p)),
     # ---- Узлы: свойства и навигация ----
+    # ---- Nodes: properties and navigation ----
     ("beresta_node_type", c_int, (_HANDLE,)),
     ("beresta_node_name", _OWNED_TEXT, (_HANDLE,)),
     ("beresta_node_text", _OWNED_TEXT, (_HANDLE,)),
@@ -49,15 +66,18 @@ SIGNATURES = (
     ("beresta_node_child_count", c_int64, (_HANDLE,)),
     ("beresta_node_child", _HANDLE, (_HANDLE, c_int64)),
     # ---- Узлы: изменение дерева ----
+    # ---- Nodes: changing the tree ----
     ("beresta_node_set_text", c_int, (_HANDLE, c_char_p)),
     ("beresta_node_remove", c_int, (_HANDLE,)),
     ("beresta_node_copy_to", c_int, (_HANDLE, _HANDLE, _OUT_HANDLE)),
+    ("beresta_node_move_to", c_int, (_HANDLE, _HANDLE)),
     ("beresta_node_append_element", _HANDLE, (_HANDLE, c_char_p)),
     ("beresta_node_append_text", _HANDLE, (_HANDLE, c_char_p)),
     ("beresta_node_append_comment", _HANDLE, (_HANDLE, c_char_p)),
     ("beresta_node_append_cdata", _HANDLE, (_HANDLE, c_char_p)),
     ("beresta_node_append_pi", _HANDLE, (_HANDLE, c_char_p, c_char_p)),
     # ---- Элементы и атрибуты ----
+    # ---- Elements and attributes ----
     ("beresta_element_get_attribute", _OWNED_TEXT, (_HANDLE, c_char_p)),
     ("beresta_element_set_attribute", c_int, (_HANDLE, c_char_p, c_char_p)),
     ("beresta_element_has_attribute", c_int, (_HANDLE, c_char_p)),
@@ -95,7 +115,8 @@ SIGNATURES = (
 
 
 def bind_signatures(library) -> None:
-    """Назначение restype/argtypes всем функциям загруженной библиотеки."""
+    """Назначение restype/argtypes всем функциям загруженной библиотеки.
+    Assigns restype/argtypes to all functions of the loaded library."""
     for name, result_type, argument_types in SIGNATURES:
         function = getattr(library, name)
         function.restype = result_type

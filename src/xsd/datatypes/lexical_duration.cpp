@@ -6,6 +6,10 @@ namespace beresta::xsd::detail
     ** Часть длительности: последовательность «число + обозначение», где
     ** обозначения идут строго в порядке designators (YMD или HMS).
     ** Дробное число допустимо только у секунд (S).
+    **
+    ** A part of a duration: a sequence of "number + designator", where the
+    ** designators go strictly in the order of designators (YMD or HMS).
+    ** A fractional number is allowed only for seconds (S).
     */
     static bool parseDurationPart(std::string_view part, std::string_view designators) noexcept
     {
@@ -36,6 +40,9 @@ namespace beresta::xsd::detail
     /*
     ** duration: -?P[nY][nM][nD][T[nH][nM][n[.n]S]]. Нужен хотя бы один
     ** компонент; если есть 'T', после неё — хотя бы один из H, M, S.
+    **
+    ** duration: -?P[nY][nM][nD][T[nH][nM][n[.n]S]]. At least one
+    ** component is needed; if there is a 'T', at least one of H, M, S follows it.
     */
     bool isDurationLexical(std::string_view value) noexcept
     {

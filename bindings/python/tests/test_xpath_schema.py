@@ -1,4 +1,4 @@
-"""Самопроверка Python-обёртки: XPath и XML Schema."""
+"""Самопроверка Python-обёртки: XPath и XML Schema. / Self-test of the Python wrapper: XPath and XML Schema."""
 
 import math
 import unittest
@@ -13,8 +13,13 @@ SCHEMA = ("<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'>"
           "<xs:element name='n' type='xs:int'/></xs:schema>")
 
 
+# Тексты ошибок сверяются по-русски — независимо от языка сборки
+# Error texts are compared in Russian — regardless of the build language
+beresta.set_language("ru")
+
+
 class XPathSchemaTests(unittest.TestCase):
-    """XPath 1.0 и проверка по схеме."""
+    """XPath 1.0 и проверка по схеме. / XPath 1.0 and schema validation."""
 
     def test_xpath_values(self):
         with beresta.parse(SHOP) as document:

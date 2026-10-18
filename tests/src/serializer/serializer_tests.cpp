@@ -4,6 +4,7 @@
 namespace
 {
     // Отступы расставляются только между элементами; смешанный текст — дословно
+    // Indentation is placed only between elements; mixed text is written verbatim
     void testPrettyPrint()
     {
         beresta::Document document = beresta::XmlParser().parse(
@@ -19,6 +20,7 @@ namespace
     }
 
     // Вывод в windows-1251: правильная декларация, кириллица одним байтом, эмодзи — ссылкой
+    // Output in windows-1251: a correct declaration, Cyrillic in one byte, emoji as a reference
     void testEncodedOutput()
     {
         beresta::Element element("t");
@@ -33,6 +35,7 @@ namespace
     }
 
     // Файл в UTF-16 с BOM читается обратно без потерь
+    // A file in UTF-16 with a BOM is read back without loss
     void testFileRoundTrip()
     {
         std::filesystem::path directory = support::makeTestDirectory("serializer");
@@ -50,6 +53,7 @@ namespace
 namespace suites
 {
     // Регистрация тестов сериализатора
+    // Registers the serializer tests
     void registerSerializerTests(test::TestRunner& runner)
     {
         runner.add("сериализатор: форматированный вывод", testPrettyPrint);

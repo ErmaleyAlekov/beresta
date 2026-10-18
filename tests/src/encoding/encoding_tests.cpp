@@ -7,6 +7,7 @@
 namespace
 {
     // windows-1251 и KOI8-R по атрибуту encoding: «Привет» в разных байтах
+    // windows-1251 and KOI8-R by the encoding attribute: "Привет" in different bytes
     void testCyrillicSingleByte()
     {
         std::string cp1251 = "<?xml version=\"1.0\" encoding=\"windows-1251\"?><t>\xCF\xF0\xE8\xE2\xE5\xF2</t>";
@@ -20,6 +21,7 @@ namespace
     }
 
     // UTF-16LE с BOM, включая символ вне BMP (суррогатная пара)
+    // UTF-16LE with a BOM, including a character outside the BMP (a surrogate pair)
     void testUtf16()
     {
         std::string utf16("\xFF\xFE<\0a\0>\0\x3D\xD8\x00\xDE<\0/\0a\0>\0", 20);
@@ -29,6 +31,7 @@ namespace
     }
 
     // Принудительная кодировка перекрывает декларацию
+    // A forced encoding overrides the declaration
     void testForcedEncoding()
     {
         beresta::ParserOptions options;
@@ -39,6 +42,7 @@ namespace
     }
 
     // Битый UTF-8, управляющий символ и неизвестная кодировка — ENCODING_ERROR
+    // Broken UTF-8, a control character and an unknown encoding — ENCODING_ERROR
     void testEncodingErrors()
     {
         TEST_ASSERT(support::errorCodeOf("<a>\xC3</a>") == beresta::DomErrorCode::ENCODING_ERROR);
@@ -52,6 +56,7 @@ namespace
 namespace suites
 {
     // Регистрация тестов кодировок
+    // Registers the encoding tests
     void registerEncodingTests(test::TestRunner& runner)
     {
         runner.add("кодировки: windows-1251 и KOI8-R", testCyrillicSingleByte);

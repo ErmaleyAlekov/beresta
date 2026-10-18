@@ -7,6 +7,7 @@ import java.lang.ref.Cleaner;
 import org.beresta.internal.NativeCalls;
 import org.beresta.internal.NativeMemory;
 import org.beresta.internal.NativeRelease;
+import org.beresta.internal.NativeStrings;
 import org.beresta.internal.XPathFunctions;
 
 /**
@@ -27,7 +28,10 @@ public final class XPath implements XPathVariables, XPathEvaluation, AutoCloseab
     private final Cleaner.Cleanable cleanable;
     private volatile boolean closed;
 
-    /** Компиляция; синтаксическая ошибка — BerestaException(XPATH_ERROR). */
+    /**
+     * Компиляция; синтаксическая ошибка — BerestaException(XPATH_ERROR).
+     * <p>Compilation; a syntax error throws BerestaException(XPATH_ERROR).
+     */
     public XPath(String expression)
     {
         try (Arena arena = Arena.ofConfined())
@@ -44,7 +48,7 @@ public final class XPath implements XPathVariables, XPathEvaluation, AutoCloseab
     public MemorySegment handle()
     {
         if (closed)
-            throw new IllegalStateException("Берёста: выражение XPath уже закрыто");
+            throw new IllegalStateException("Берёста / Beresta: " + NativeStrings.message(2));
         return pointer;
     }
 

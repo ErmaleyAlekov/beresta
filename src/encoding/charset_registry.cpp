@@ -5,11 +5,13 @@
 namespace beresta::encoding
 {
     // Виртуальный деструктор интерфейса
+    // The virtual destructor of the interface
     Charset::~Charset()
     {
     }
 
     // Псевдоним имени кодировки и номер кодировки в реестре
+    // An encoding name alias and the encoding number in the registry
     struct CharsetAlias
     {
         const char* alias;
@@ -20,6 +22,10 @@ namespace beresta::encoding
     ** Реестр (паттерн Registry): единственные экземпляры всех кодировок.
     ** Статические локальные объекты создаются потокобезопасно при первом
     ** обращении и живут до конца программы.
+    **
+    ** The registry (the Registry pattern): the single instances of all encodings.
+    ** Static local objects are created thread-safely on first access
+    ** and live until the end of the program.
     */
     static const Charset* charsetByIndex(int index) noexcept
     {
@@ -41,6 +47,7 @@ namespace beresta::encoding
     }
 
     // Поиск по таблице псевдонимов без учёта регистра
+    // A case-insensitive lookup in the alias table
     const Charset* findCharset(std::string_view name) noexcept
     {
         static const CharsetAlias ALIASES[] = {
@@ -60,6 +67,7 @@ namespace beresta::encoding
     }
 
     // Внутренняя кодировка — всегда первая в реестре
+    // The internal encoding is always the first in the registry
     const Charset& utf8Charset() noexcept
     {
         return *charsetByIndex(0);

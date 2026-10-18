@@ -1,11 +1,13 @@
 #include "xsd/internal/schema_builder.hpp"
+#include "i18n/i18n.hpp"
 
 namespace beresta::xsd::detail
 {
     // Строитель заполняет переданную схему
+    // The builder fills the given schema
     SchemaBuilder::SchemaBuilder(Schema& schema, const SchemaLoadOptions& options)
         : _schema(schema), _options(options), _sources(), _loaded(), _loadedUris(),
-          _definitions(), _builtElements(), _builtTypes(), _incomplete()
+          _definitions(), _builtElements(), _builtTypes(), _incomplete(), _builtIdentities()
     {
     }
 
@@ -14,6 +16,11 @@ namespace beresta::xsd::detail
     ** директивы include/import (загружают другие документы) и глобальные
     ** определения. «Хамелеонная» схема без targetNamespace, подключённая
     ** через include, получает пространство имён включающей схемы.
+    **
+    ** Registering a document: the defaults from xs:schema, then the
+    ** include/import directives (they load other documents) and the global
+    ** definitions. A "chameleon" schema without targetNamespace included
+    ** through include gets the namespace of the including schema.
     */
     void SchemaBuilder::addDocument(const Element& root, const std::string& baseUri,
         const std::string& chameleon)
@@ -27,13 +34,21 @@ namespace beresta::xsd::detail
             if (isSchemaElement(*child, "include") || isSchemaElement(*child, "import"))
                 loadReferenced(*child, source);
             else if (isSchemaElement(*child, "redefine") || isSchemaElement(*child, "override"))
-                fail(*child, "xs:redefine и xs:override не поддерживаются");
+                fail(*child, i18n::format(i18n::Message::SCHEMA_REDEFINE));
             else
                 registerDefinition(*child, source);
         }
     }
 
-    // Все глобальные элементы и типы строятся сразу, чтобы ошибки схемы проявились при загрузке
+    /*
+    ** Все глобальные элементы и типы строятся сразу, чтобы ошибки схемы
+    ** проявились при загрузке. Ссылки keyref связываются последними: ключ,
+    ** на который ссылается keyref, может быть объявлен в любом месте схемы.
+    **
+    ** All global elements and types are built at once so that schema errors
+    ** show up at loading. keyref references are bound last: the key a keyref
+    ** refers to may be declared anywhere in the schema.
+    */
     void SchemaBuilder::buildAll()
     {
         std::vector<QualifiedKey> elements;
@@ -49,5 +64,6 @@ namespace beresta::xsd::detail
             globalElement(key);
         for (const QualifiedKey& key : types)
             resolveType(key);
+        resolveKeyReferences();
     }
 }

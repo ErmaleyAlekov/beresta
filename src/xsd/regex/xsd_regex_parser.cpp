@@ -1,22 +1,25 @@
 #include "xsd/regex/xsd_regex.hpp"
+#include "i18n/i18n.hpp"
 
 #include <utility>
 
 namespace beresta::xsd
 {
     // Множества символов складываются в общий список автомата
+    // Character sets are put into the common automaton list
     RegexParser::RegexParser(std::string_view pattern, std::vector<CharSet>& sets)
         : _pattern(pattern), _position(0), _sets(sets)
     {
     }
 
     // Всё выражение; непарная ')' в конце — ошибка
+    // The whole expression; an unpaired ')' at the end is an error
     RegexNode RegexParser::parse()
     {
         RegexNode root = parseAlternation(0);
 
         if (!atEnd())
-            fail("лишняя ')' в шаблоне");
+            fail(i18n::format(i18n::Message::PATTERN_EXTRA_PARENTHESIS));
         return root;
     }
 
@@ -39,6 +42,7 @@ namespace beresta::xsd
     }
 
     // piece* до '|' или ')'; пустая ветвь совпадает с пустой строкой
+    // piece* up to '|' or ')'; an empty branch matches the empty string
     RegexNode RegexParser::parseBranch(std::size_t depth)
     {
         RegexNode branch;
@@ -55,6 +59,9 @@ namespace beresta::xsd
     /*
     ** atom: группа (...), класс [...] или простой атом (символ, '.', экранирование).
     ** Метасимволы ?*+{}] без экранирования на месте атома — ошибка.
+    **
+    ** atom: a group (...), a class [...] or a simple atom (a character, '.', an escape).
+    ** The metacharacters ?*+{}] without an escape in the place of an atom are an error.
     */
     RegexNode RegexParser::parseAtom(std::size_t depth)
     {
@@ -63,17 +70,17 @@ namespace beresta::xsd
         if (code == '(')
         {
             if (depth > 64)
-                fail("слишком глубокая вложенность групп");
+                fail(i18n::format(i18n::Message::PATTERN_GROUPS_TOO_DEEP));
             takeCode();
             RegexNode group = parseAlternation(depth + 1);
             if (atEnd() || takeCode() != ')')
-                fail("не закрыта группа '('");
+                fail(i18n::format(i18n::Message::PATTERN_GROUP_UNCLOSED));
             return group;
         }
         if (code == '[')
             return makeSetNode(parseClassExpression());
         if (code == '?' || code == '*' || code == '+' || code == '{' || code == '}' || code == ']')
-            fail("неожиданный метасимвол в шаблоне");
+            fail(i18n::format(i18n::Message::PATTERN_UNEXPECTED_META));
         return parseSimpleAtom();
     }
 }

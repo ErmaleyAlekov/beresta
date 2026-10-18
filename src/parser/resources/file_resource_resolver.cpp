@@ -7,17 +7,20 @@
 namespace beresta
 {
     // Виртуальный деструктор интерфейса
+    // The virtual destructor of the interface
     ResourceResolver::~ResourceResolver()
     {
     }
 
     // Корень нормализуется один раз, чтобы сравнение префиксов было надёжным
+    // The root is normalized once so that the prefix comparison is reliable
     FileResourceResolver::FileResourceResolver(std::filesystem::path rootDirectory)
         : _root(std::filesystem::absolute(std::move(rootDirectory)).lexically_normal())
     {
     }
 
     // Схема URI ("http:", "file:") — буквы и ':' до первого '/'; одиночная буква — диск Windows
+    // A URI scheme ("http:", "file:") — letters and ':' before the first '/'; a single letter is a Windows drive
     static bool hasUriScheme(std::string_view id) noexcept
     {
         std::size_t colon = id.find(':');
@@ -30,6 +33,9 @@ namespace beresta
     /*
     ** Относительный systemId разрешается от каталога базового документа.
     ** Итоговый путь обязан лежать внутри корня — иначе запрос отвергается.
+    **
+    ** A relative systemId is resolved against the directory of the base document.
+    ** The resulting path must lie inside the root — otherwise the request is rejected.
     */
     std::optional<std::filesystem::path> FileResourceResolver::locate(
         const ResourceRequest& request) const
@@ -48,6 +54,7 @@ namespace beresta
     }
 
     // Чтение файла; ошибка ввода-вывода означает «ресурс недоступен»
+    // Reads the file; an I/O error means "the resource is unavailable"
     std::optional<Resource> FileResourceResolver::resolve(const ResourceRequest& request)
     {
         std::optional<std::filesystem::path> path = locate(request);

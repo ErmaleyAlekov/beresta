@@ -9,10 +9,13 @@ import org.beresta.internal.XPathFunctions;
 /**
  * Контекст выражения: префиксы пространств имён и переменные $name.
  * Методы возвращают само выражение — их удобно вызывать цепочкой.
+ *
+ * <p>The expression context: namespace prefixes and $name variables.
+ * The methods return the expression itself — convenient for chaining.
  */
 public interface XPathVariables extends XPathBase
 {
-    /** Префикс для имён вида p:name в выражении. */
+    /** Префикс для имён вида p:name в выражении. / A prefix for p:name names in the expression. */
     default XPath bind(String prefix, String uri)
     {
         try (Arena arena = Arena.ofConfined())
@@ -23,7 +26,7 @@ public interface XPathVariables extends XPathBase
         }
     }
 
-    /** Строковая переменная. */
+    /** Строковая переменная. / A string variable. */
     default XPath set(String name, String value)
     {
         try (Arena arena = Arena.ofConfined())
@@ -34,7 +37,7 @@ public interface XPathVariables extends XPathBase
         }
     }
 
-    /** Числовая переменная. */
+    /** Числовая переменная. / A numeric variable. */
     default XPath set(String name, double value)
     {
         try (Arena arena = Arena.ofConfined())

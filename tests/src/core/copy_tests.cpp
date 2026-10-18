@@ -7,6 +7,7 @@
 namespace
 {
     // Копия глубокая: изменения копии не затрагивают оригинал, копия автономна
+    // A copy is deep: changes to the copy do not affect the original, the copy is standalone
     void testCopyConstructorIsDeep()
     {
         beresta::Document document = beresta::XmlParser().parse("<a><b x=\"1\"><c/></b></a>");
@@ -22,6 +23,7 @@ namespace
     }
 
     // clone() через базовый указатель сохраняет реальный тип узла
+    // clone() through a base pointer keeps the real node type
     void testCloneKeepsDynamicType()
     {
         std::unique_ptr<beresta::Node> text = std::make_unique<beresta::Text>("t");
@@ -36,6 +38,7 @@ namespace
     }
 
     // При перемещении дети перепривязываются к новому владельцу
+    // On moving the children are rebound to the new owner
     void testMoveReparentsChildren()
     {
         beresta::Element source("root");
@@ -47,6 +50,7 @@ namespace
     }
 
     // Присваивание меняет содержимое, но сохраняет место узла в дереве
+    // Assignment changes the content but keeps the node's place in the tree
     void testAssignmentKeepsTreePosition()
     {
         beresta::Document document = beresta::XmlParser().parse("<a><b/></a>");
@@ -64,6 +68,7 @@ namespace
 namespace suites
 {
     // Регистрация тестов копирования
+    // Registers the copy tests
     void registerCopyTests(test::TestRunner& runner)
     {
         runner.add("копирование: конструктор копирования глубокий", testCopyConstructorIsDeep);

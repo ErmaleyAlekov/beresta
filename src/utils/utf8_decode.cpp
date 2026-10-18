@@ -6,6 +6,10 @@ namespace beresta::utils
     ** Разбор ведущего байта: старшие биты задают длину последовательности,
     ** оставшиеся — старшие биты кода. minimum — наименьший код, допустимый
     ** для этой длины (меньшие коды — запрещённая «длинная» форма).
+    **
+    ** Parses the leading byte: the high bits give the sequence length,
+    ** the remaining ones are the high bits of the code. minimum is the smallest code allowed
+    ** for this length (smaller codes are a forbidden overlong form).
     */
     static bool readLeadByte(unsigned char lead, std::size_t& length,
         std::uint32_t& codePoint, std::uint32_t& minimum) noexcept
@@ -33,6 +37,7 @@ namespace beresta::utils
     }
 
     // Ведущий байт + байты-продолжения вида 10xxxxxx; затем проверка диапазона
+    // The leading byte + continuation bytes of the form 10xxxxxx; then the range check
     bool decodeUtf8Char(std::string_view text, std::size_t& index,
         std::uint32_t& codePoint) noexcept
     {
@@ -66,6 +71,9 @@ namespace beresta::utils
     /*
     ** Один проход по всему входу: печатные ASCII-символы проверяются
     ** быстрым путём, остальные — полным декодированием и правилом Char.
+    **
+    ** One pass over the whole input: printable ASCII characters are checked
+    ** by the fast path, the rest by full decoding and the Char rule.
     */
     std::size_t findInvalidXmlChar(std::string_view text) noexcept
     {
@@ -77,6 +85,12 @@ namespace beresta::utils
             if (byte >= 0x20 && byte < 0x80)
             {
                 ++index;
+                continue;
+            }
+            if (byte >= 0xC2 && byte <= 0xDF && index + 1 < text.size()
+                && (static_cast<unsigned char>(text[index + 1]) & 0xC0) == 0x80)
+            {
+                index += 2;
                 continue;
             }
             std::size_t start = index;

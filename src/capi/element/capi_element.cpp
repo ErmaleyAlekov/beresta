@@ -4,6 +4,10 @@
 ** Атрибуты по имени. Отсутствие атрибута — не ошибка: get возвращает
 ** NULL с кодом 0, has / remove возвращают 0. Так обёртки легко
 ** превращают результат в null / None / Optional без try/catch.
+**
+** Attributes by name. A missing attribute is not an error: get returns
+** NULL with code 0, has / remove return 0. So the wrappers easily turn
+** the result into null / None / Optional without try/catch.
 */
 
 extern "C" BERESTA_API char* beresta_element_get_attribute(beresta_node element, const char* name)
@@ -19,6 +23,7 @@ extern "C" BERESTA_API char* beresta_element_get_attribute(beresta_node element,
 }
 
 // Установка или замена значения; имя проверяется ядром (INVALID_NAME)
+// Sets or replaces a value; the core checks the name (INVALID_NAME)
 extern "C" BERESTA_API int beresta_element_set_attribute(beresta_node element, const char* name,
     const char* value)
 {

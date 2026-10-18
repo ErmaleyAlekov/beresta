@@ -5,6 +5,7 @@
 namespace beresta::xsd
 {
     // Сортировка по началу и слияние пересекающихся или смежных диапазонов
+    // Sorts by the start and merges overlapping or adjacent ranges
     void CharSet::normalize()
     {
         std::vector<Range> merged;
@@ -23,6 +24,7 @@ namespace beresta::xsd
     }
 
     // Диапазоны для чтения
+    // The ranges for reading
     const std::vector<CharSet::Range>& CharSet::getRanges() const noexcept
     {
         return _ranges;

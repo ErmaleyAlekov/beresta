@@ -6,6 +6,7 @@
 namespace
 {
     // Соседи, первый/последний ребёнок и документ-владелец
+    // Siblings, the first/last child and the owner document
     void testSiblingNavigation()
     {
         beresta::Document document = beresta::XmlParser().parse("<r><a/><b/><c/></r>");
@@ -23,6 +24,7 @@ namespace
     }
 
     // Замена, отсоединение по ссылке и глубокий поиск
+    // Replacement, detaching by reference and a deep search
     void testEditingAndDeepSearch()
     {
         beresta::Document document = beresta::XmlParser().parse(
@@ -39,6 +41,7 @@ namespace
     }
 
     // normalize: соседние тексты сливаются, пустые удаляются; setTextContent заменяет детей
+    // normalize: adjacent texts are merged, empty ones removed; setTextContent replaces the children
     void testNormalizeAndTextContent()
     {
         beresta::Element element("p");
@@ -56,6 +59,7 @@ namespace
     }
 
     // isEqualNode игнорирует порядок атрибутов; cloneShallow не копирует детей
+    // isEqualNode ignores the attribute order; cloneShallow does not copy the children
     void testEqualityAndShallowClone()
     {
         beresta::XmlParser parser;
@@ -73,6 +77,7 @@ namespace
 namespace suites
 {
     // Регистрация тестов навигации и редактирования
+    // Registers the navigation and editing tests
     void registerNavigationTests(test::TestRunner& runner)
     {
         runner.add("навигация: соседи и владелец", testSiblingNavigation);

@@ -2,16 +2,9 @@
 
 namespace beresta::xsd::detail
 {
-    // Десятичное число в каноническом виде: знак, целая часть без ведущих нулей, дробь без хвостовых
-    struct DecimalParts
-    {
-        bool negative = false;
-        std::string_view integer;
-        std::string_view fraction;
-    };
-
     // Разбор уже проверенной лексики decimal на части
-    static DecimalParts splitDecimal(std::string_view value) noexcept
+    // Splits already checked decimal lexis into parts
+    DecimalParts splitDecimal(std::string_view value) noexcept
     {
         DecimalParts parts;
 
@@ -34,6 +27,7 @@ namespace beresta::xsd::detail
     }
 
     // Знак результата сравнения: -1, 0 или 1
+    // The sign of a comparison result: -1, 0 or 1
     static int signOf(int value) noexcept
     {
         if (value < 0)
@@ -44,6 +38,7 @@ namespace beresta::xsd::detail
     }
 
     // Сравнение модулей: длина целой части, затем цифры целой и дробной частей
+    // Comparing absolute values: the length of the integer part, then the digits of the integer and fractional parts
     static int compareMagnitude(const DecimalParts& left, const DecimalParts& right) noexcept
     {
         if (left.integer.size() != right.integer.size())
@@ -61,6 +56,9 @@ namespace beresta::xsd::detail
     /*
     ** Точное сравнение десятичных чисел любой длины без преобразования
     ** в double: сначала знак, затем модуль (у отрицательных порядок обратный).
+    **
+    ** An exact comparison of decimal numbers of any length without converting
+    ** to double: first the sign, then the absolute value (reversed for negative numbers).
     */
     int compareDecimal(std::string_view left, std::string_view right)
     {
@@ -80,6 +78,7 @@ namespace beresta::xsd::detail
     }
 
     // Число и дробные цифры: для totalDigits / fractionDigits
+    // The digit and fraction digit counts: for totalDigits / fractionDigits
     void countDecimalDigits(std::string_view value, std::size_t& total, std::size_t& fraction)
     {
         DecimalParts parts = splitDecimal(value);

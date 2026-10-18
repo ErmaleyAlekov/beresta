@@ -1,4 +1,5 @@
 #include "core/element.hpp"
+#include "i18n/i18n.hpp"
 #include "exception/dom_exception.hpp"
 #include "utils/qualified_name.hpp"
 
@@ -7,11 +8,12 @@
 namespace beresta
 {
     // Объявление: xmlns="uri" для пустого префикса, иначе xmlns:prefix="uri"
+    // A declaration: xmlns="uri" for an empty prefix, otherwise xmlns:prefix="uri"
     void Element::declareNamespace(std::string_view prefix, std::string namespaceUri)
     {
         if (prefix == "xml" || prefix == "xmlns")
             throw DomException(DomErrorCode::NAMESPACE_ERROR,
-                "префикс \"" + std::string(prefix) + "\" зарезервирован и не может объявляться");
+                i18n::format(i18n::Message::PREFIX_RESERVED_DECLARE, {prefix}));
         if (prefix.empty())
         {
             setAttribute("xmlns", std::move(namespaceUri));
@@ -19,11 +21,12 @@ namespace beresta
         }
         if (namespaceUri.empty())
             throw DomException(DomErrorCode::NAMESPACE_ERROR,
-                "префикс \"" + std::string(prefix) + "\" нельзя связать с пустым URI");
+                i18n::format(i18n::Message::PREFIX_EMPTY_URI, {prefix}));
         setAttribute("xmlns:" + std::string(prefix), std::move(namespaceUri));
     }
 
     // Значение атрибута по пространству имён
+    // An attribute value by namespace
     std::optional<std::string> Element::getAttributeNS(std::string_view namespaceUri,
         std::string_view localName) const
     {
@@ -35,12 +38,14 @@ namespace beresta
     }
 
     // Наличие атрибута по пространству имён
+    // Whether an attribute exists by namespace
     bool Element::hasAttributeNS(std::string_view namespaceUri, std::string_view localName) const
     {
         return findAttributeNS(namespaceUri, localName) != npos;
     }
 
     // Удаление атрибута по пространству имён
+    // Removes an attribute by namespace
     bool Element::removeAttributeNS(std::string_view namespaceUri, std::string_view localName)
     {
         std::size_t index = findAttributeNS(namespaceUri, localName);
@@ -55,6 +60,10 @@ namespace beresta
     ** Установка атрибута с пространством имён. Если префикс ещё не связан
     ** с нужным URI в этой точке дерева, объявление xmlns:prefix добавляется
     ** автоматически — получившийся XML всегда корректен.
+    **
+    ** Sets an attribute with a namespace. If the prefix is not yet bound
+    ** to the required URI at this point of the tree, the xmlns:prefix declaration is added
+    ** automatically — the resulting XML is always valid.
     */
     void Element::setAttributeNS(std::string_view namespaceUri, std::string_view qualifiedName,
         std::string value)
@@ -63,10 +72,10 @@ namespace beresta
 
         if (!utils::isValidQualifiedName(qualifiedName))
             throw DomException(DomErrorCode::NAMESPACE_ERROR,
-                "недопустимое квалифицированное имя: \"" + std::string(qualifiedName) + "\"");
+                i18n::format(i18n::Message::QUALIFIED_NAME_INVALID, {qualifiedName}));
         if (parts.prefix.empty() && !namespaceUri.empty())
             throw DomException(DomErrorCode::NAMESPACE_ERROR,
-                "атрибут без префикса не может принадлежать пространству имён");
+                i18n::format(i18n::Message::UNPREFIXED_ATTRIBUTE_NAMESPACE));
         if (!parts.prefix.empty() && lookupNamespaceURI(parts.prefix) != namespaceUri)
             declareNamespace(parts.prefix, std::string(namespaceUri));
         std::size_t index = findAttributeNS(namespaceUri, parts.localName);

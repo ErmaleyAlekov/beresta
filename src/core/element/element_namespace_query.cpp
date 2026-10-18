@@ -8,6 +8,11 @@ namespace beresta
     ** - объявления xmlns / xmlns:* принадлежат служебному пространству XMLNS;
     ** - атрибут без префикса НЕ наследует пространство по умолчанию;
     ** - атрибут с префиксом — в пространстве, связанном с префиксом.
+    **
+    ** The namespace of an attribute by the Namespaces in XML rules:
+    **  - xmlns / xmlns:* declarations belong to the service XMLNS namespace;
+    **  - an attribute without a prefix does NOT inherit the default namespace;
+    **  - an attribute with a prefix is in the namespace bound to the prefix.
     */
     std::optional<std::string> Element::attributeNamespace(const Attribute& attribute) const
     {
@@ -20,6 +25,7 @@ namespace beresta
     }
 
     // Пустой namespaceUri означает «атрибут вне пространств имён»
+    // An empty namespaceUri means "the attribute is in no namespace"
     std::size_t Element::findAttributeNS(std::string_view namespaceUri,
         std::string_view localName) const
     {
@@ -38,6 +44,7 @@ namespace beresta
     }
 
     // Изменяемая версия переиспользует константную (DRY)
+    // The mutable version reuses the const one (DRY)
     Element* Element::findChildElementNS(std::string_view namespaceUri, std::string_view localName)
     {
         const Element& self = *this;
@@ -46,6 +53,7 @@ namespace beresta
     }
 
     // Первый непосредственный ребёнок с нужными пространством имён и локальным именем
+    // The first direct child with the required namespace and local name
     const Element* Element::findChildElementNS(std::string_view namespaceUri,
         std::string_view localName) const
     {

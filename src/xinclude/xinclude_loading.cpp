@@ -1,4 +1,5 @@
 #include "xinclude/internal/xinclude_processor.hpp"
+#include "i18n/i18n.hpp"
 #include "core/text.hpp"
 #include "encoding/encoding_detector.hpp"
 #include "exception/dom_exception.hpp"
@@ -13,6 +14,10 @@ namespace beresta::xinclude::detail
     ** Содержимое для подстановки: parse="text" — один текстовый узел,
     ** parse="xml" (по умолчанию) — выбранный элемент загруженного документа
     ** с уже обработанными вложенными включениями.
+    **
+    ** The content to substitute: parse="text" — one text node,
+    ** parse="xml" (the default) — the selected element of the loaded document
+    ** with the nested inclusions already processed.
     */
     std::vector<std::unique_ptr<Node>> XIncludeProcessor::loadReplacement(const Element& include,
         const std::string& baseUri)
@@ -29,28 +34,29 @@ namespace beresta::xinclude::detail
             return nodes;
         }
         if (parse != "xml")
-            throw DomException(DomErrorCode::RESOURCE_ERROR, "недопустимое значение parse=\"" + parse + "\"");
+            throw DomException(DomErrorCode::RESOURCE_ERROR, i18n::format(i18n::Message::XINCLUDE_PARSE_VALUE, {parse}));
         nodes.push_back(loadXml(resource, include));
         return nodes;
     }
 
     // Загрузка через резолвер с проверкой циклов и глубины
+    // Loading through the resolver with cycle and depth checks
     Resource XIncludeProcessor::fetch(const Element& include, const std::string& baseUri) const
     {
         std::string href = include.getAttribute("href").value_or("");
 
         if (href.empty())
-            throw DomException(DomErrorCode::RESOURCE_ERROR, "xi:include без href не поддерживается");
+            throw DomException(DomErrorCode::RESOURCE_ERROR, i18n::format(i18n::Message::XINCLUDE_NO_HREF));
         if (_options.resolver == nullptr)
-            throw DomException(DomErrorCode::RESOURCE_ERROR, "для xi:include нужен ResourceResolver");
+            throw DomException(DomErrorCode::RESOURCE_ERROR, i18n::format(i18n::Message::XINCLUDE_RESOLVER));
         std::optional<Resource> resource = _options.resolver->resolve(
             ResourceRequest{ResourceKind::XINCLUDE, "", href, baseUri});
         if (!resource.has_value())
-            throw DomException(DomErrorCode::RESOURCE_ERROR, "не удалось загрузить \"" + href + "\"");
+            throw DomException(DomErrorCode::RESOURCE_ERROR, i18n::format(i18n::Message::XINCLUDE_LOAD, {href}));
         if (std::find(_stack.begin(), _stack.end(), resource->uri) != _stack.end())
-            throw DomException(DomErrorCode::LIMIT_EXCEEDED, "циклическое включение \"" + href + "\"");
+            throw DomException(DomErrorCode::LIMIT_EXCEEDED, i18n::format(i18n::Message::XINCLUDE_CYCLE, {href}));
         if (_stack.size() >= _options.maxEntityDepth)
-            throw DomException(DomErrorCode::LIMIT_EXCEEDED, "слишком глубокая вложенность xi:include");
+            throw DomException(DomErrorCode::LIMIT_EXCEEDED, i18n::format(i18n::Message::XINCLUDE_TOO_DEEP));
         return std::move(resource.value());
     }
 
@@ -58,6 +64,10 @@ namespace beresta::xinclude::detail
     ** XML-ресурс разбирается с теми же настройками (кроме проверок схемы
     ** и самого XInclude), затем обрабатываются его собственные включения,
     ** и только после этого выбирается фрагмент по xpointer.
+    **
+    ** An XML resource is parsed with the same settings (except the schema checks
+    ** and XInclude itself), then its own inclusions are processed,
+    ** and only after that the fragment is selected by xpointer.
     */
     std::unique_ptr<Node> XIncludeProcessor::loadXml(const Resource& resource, const Element& include)
     {

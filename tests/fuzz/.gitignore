@@ -1,0 +1,15 @@
+# Результаты сборки целей фаззинга / Fuzzing target build results
+/obj/
+/dep/
+/bin/
+/build/
+
+# Корпус пересобирается make corpus и растёт при каждом запуске;
+# находки (crash-*, leak-*, timeout-*) разбираются и превращаются
+# в регрессионные тесты tests/src, а сами файлы в репозиторий не идут
+# The corpus is rebuilt by make corpus and grows on every run;
+# findings (crash-*, leak-*, timeout-*) are analyzed and turned into
+# regression tests in tests/src, while the files themselves do not go into the repository
+/corpus/
+/artifacts/
+fuzz-*.log

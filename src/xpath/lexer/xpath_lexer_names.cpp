@@ -1,9 +1,11 @@
 #include "xpath/internal/xpath_lexer.hpp"
+#include "i18n/i18n.hpp"
 #include "utils/xml_chars.hpp"
 
 namespace beresta::xpath::detail
 {
     // Типы узлов, которые записываются как вызов: node(), text() и т.д.
+    // Node types written as a call: node(), text() and so on
     static bool isNodeTypeName(const std::string& name) noexcept
     {
         if (name == "node" || name == "text")
@@ -14,6 +16,9 @@ namespace beresta::xpath::detail
     /*
     ** Имя или '*'. Правила однозначности XPath 1.0: после операнда '*' —
     ** умножение, а имя — оператор (and, or, mod, div).
+    **
+    ** A name or '*'. The XPath 1.0 disambiguation rules: after an operand '*' is
+    ** multiplication, and a name is an operator (and, or, mod, div).
     */
     Token XPathLexer::readNameLike()
     {
@@ -31,12 +36,15 @@ namespace beresta::xpath::detail
             return classifyName(name);
         if (name == "and" || name == "or" || name == "mod" || name == "div")
             return makeToken(TokenType::OPERATOR_NAME, name);
-        fail("ожидался оператор, найдено имя \"" + name + "\"");
+        fail(i18n::format(i18n::Message::XPATH_EXPECTED_OPERATOR, {name}));
     }
 
     /*
     ** Префикс "p:" (но не ось "p::"), затем классификация: имя перед "::" —
     ** ось, перед '(' — тип узла или функция, иначе — проверка имени.
+    **
+    ** The prefix "p:" (but not the axis "p::"), then the classification: a name before "::" is
+    ** an axis, before '(' — a node type or a function, otherwise — a name test.
     */
     Token XPathLexer::classifyName(std::string name)
     {
@@ -63,22 +71,36 @@ namespace beresta::xpath::detail
         return makeToken(TokenType::NAME_TEST, name);
     }
 
-    // NCName — имя XML без двоеточий
+    /*
+    ** NCName — имя XML без двоеточий. Символы проверяются по таблицам
+    ** XML 1.0 5-й редакции (как у парсера), с учётом многобайтового UTF-8:
+    ** иначе выражение могло бы принять имя, которого нет ни в одном документе.
+    **
+    ** NCName — an XML name without colons. The characters are checked against the
+    ** XML 1.0 5th edition tables (as in the parser), taking multi-byte UTF-8 into account:
+    ** otherwise an expression could accept a name that exists in no document.
+    */
     std::string XPathLexer::readNcName()
     {
         std::size_t start = _position;
+        std::size_t length = 0;
 
-        if (_position >= _source.size() || !utils::isNameStartChar(_source[_position])
-            || _source[_position] == ':')
-            fail("ожидалось имя");
-        ++_position;
-        while (_position < _source.size() && utils::isNameChar(_source[_position])
-            && _source[_position] != ':')
-            ++_position;
+        if (_position < _source.size() && _source[_position] != ':')
+            length = utils::nameCharLength(_source, _position, true);
+        if (length == 0)
+            fail(i18n::format(i18n::Message::XPATH_EXPECTED_NAME));
+        while (length > 0)
+        {
+            _position += length;
+            length = 0;
+            if (_position < _source.size() && _source[_position] != ':')
+                length = utils::nameCharLength(_source, _position, false);
+        }
         return std::string(_source.substr(start, _position - start));
     }
 
     // Подсматривание через пробелы (для распознавания '(' и "::" после имени)
+    // Peeking through spaces (to recognize '(' and "::" after a name)
     char XPathLexer::lookAhead(std::size_t from) const noexcept
     {
         while (from < _source.size() && utils::isWhitespace(_source[from]))

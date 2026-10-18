@@ -22,6 +22,13 @@ namespace beresta
     ** сущностей, элементов и атрибутов) хранится отдельно в неизменяемом
     ** DtdModel; копии узла разделяют одну модель через shared_ptr —
     ** она никогда не меняется, поэтому разделение безопасно.
+    **
+    ** DocumentType — the <!DOCTYPE name PUBLIC "pub" "sys" [subset]> declaration.
+    ** Keeps the root element name, the external identifiers and the verbatim
+    ** text of the internal subset so that DOCTYPE is reproduced without loss
+    ** on serialization. The parsed DTD model (entity, element and attribute
+    ** declarations) is kept separately in an immutable DtdModel; copies of the
+    ** node share one model through shared_ptr — it never changes, so sharing is safe.
     */
     class DocumentType : public Node
     {
@@ -36,18 +43,23 @@ namespace beresta
         bool isEqualNode(const Node& other) const override;
 
         // Имя корневого элемента из объявления
+        // The root element name from the declaration
         const std::string& getName() const noexcept;
 
         // Публичный идентификатор (PUBLIC "...") или пустая строка
+        // The public identifier (PUBLIC "...") or an empty string
         const std::string& getPublicId() const noexcept;
 
         // Системный идентификатор — обычно путь к внешнему DTD
+        // The system identifier — usually the path to the external DTD
         const std::string& getSystemId() const noexcept;
 
         // Дословный текст между '[' и ']'
+        // The verbatim text between '[' and ']'
         const std::string& getInternalSubset() const noexcept;
 
         // Разобранная модель DTD (nullptr, если DTD не разбирался)
+        // The parsed DTD model (nullptr if the DTD was not parsed)
         const std::shared_ptr<const dtd::DtdModel>& getModel() const noexcept;
         void setModel(std::shared_ptr<const dtd::DtdModel> model) noexcept;
 

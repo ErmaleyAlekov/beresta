@@ -3,6 +3,7 @@
 namespace
 {
     // Атрибут по индексу с проверкой диапазона
+    // An attribute by index with a range check
     const beresta::Attribute& attributeAt(beresta_node element, int64_t index)
     {
         const std::vector<beresta::Attribute>& attributes = beresta::capi::toElement(element).getAttributes();
@@ -12,6 +13,7 @@ namespace
 }
 
 // Полное имя атрибута с префиксом, например "xml:lang"
+// The full attribute name with the prefix, for example "xml:lang"
 extern "C" BERESTA_API char* beresta_element_attribute_name(beresta_node element, int64_t index)
 {
     BERESTA_CAPI_TRY
@@ -27,6 +29,7 @@ extern "C" BERESTA_API char* beresta_element_attribute_value(beresta_node elemen
 }
 
 // Имя без префикса: у <s:item> — "item"
+// The name without a prefix: "item" for <s:item>
 extern "C" BERESTA_API char* beresta_element_local_name(beresta_node element)
 {
     BERESTA_CAPI_TRY
@@ -35,6 +38,7 @@ extern "C" BERESTA_API char* beresta_element_local_name(beresta_node element)
 }
 
 // URI пространства имён по объявлениям xmlns предков; NULL — вне пространств
+// The namespace URI by the xmlns declarations of the ancestors; NULL — in no namespace
 extern "C" BERESTA_API char* beresta_element_namespace_uri(beresta_node element)
 {
     BERESTA_CAPI_TRY

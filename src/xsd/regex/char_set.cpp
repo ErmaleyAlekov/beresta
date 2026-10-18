@@ -5,6 +5,7 @@
 namespace beresta::xsd
 {
     // Диапазон добавляется как есть; порядок восстанавливает normalize()
+    // A range is added as is; normalize() restores the order
     void CharSet::add(std::uint32_t first, std::uint32_t last)
     {
         if (first > last)
@@ -13,12 +14,14 @@ namespace beresta::xsd
     }
 
     // Объединение — просто дописывание диапазонов другого множества
+    // A union is simply appending the ranges of the other set
     void CharSet::addSet(const CharSet& other)
     {
         _ranges.insert(_ranges.end(), other._ranges.begin(), other._ranges.end());
     }
 
     // Дополнение: промежутки между диапазонами нормализованного множества
+    // The complement: the gaps between the ranges of the normalized set
     CharSet CharSet::complement() const
     {
         CharSet sorted = *this;
@@ -40,6 +43,7 @@ namespace beresta::xsd
     }
 
     // Разность A \ B = A ∩ дополнение(B): пересекаем каждую пару диапазонов
+    // The difference A \ B = A ∩ complement(B): each pair of ranges is intersected
     CharSet CharSet::subtract(const CharSet& other) const
     {
         CharSet allowed = other.complement();
@@ -62,6 +66,7 @@ namespace beresta::xsd
     }
 
     // Двоичный поиск диапазона, который мог бы содержать код
+    // A binary search for the range that could contain the code
     bool CharSet::contains(std::uint32_t code) const noexcept
     {
         std::size_t low = 0;

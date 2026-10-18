@@ -13,6 +13,10 @@ namespace beresta
     ** CDataSection — секция <![CDATA[значение]]>.
     ** Содержимое выводится без экранирования, поэтому значение не может
     ** содержать завершающую последовательность "]]>".
+    **
+    ** CDataSection — the <![CDATA[value]]> section.
+    ** The content is written without escaping, so the value cannot
+    ** contain the terminating sequence "]]>".
     */
     class CDataSection : public CharacterNode
     {

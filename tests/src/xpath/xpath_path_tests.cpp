@@ -4,6 +4,7 @@
 namespace
 {
     // Каталог для всех тестов XPath
+    // The catalog for all XPath tests
     const char* const CATALOG =
         "<catalog><book id=\"1\" lang=\"ru\"><title>Война и мир</title><price>300</price></book>"
         "<book id=\"2\" lang=\"en\"><title>Dune</title><price>250</price></book>"
@@ -11,12 +12,14 @@ namespace
         "<!-- конец --></catalog>";
 
     // Значение выражения строкой
+    // The value of an expression as a string
     std::string eval(const beresta::Node& context, const char* expression)
     {
         return beresta::xpath::evaluateString(context, expression);
     }
 
     // Абсолютные и относительные пути, // и предикаты
+    // Absolute and relative paths, // and predicates
     void testLocationPaths()
     {
         beresta::Document document = beresta::XmlParser().parse(CATALOG);
@@ -32,6 +35,7 @@ namespace
     }
 
     // Оси ancestor, following, descendant и объединение
+    // The ancestor, following, descendant axes and a union
     void testAxes()
     {
         beresta::Document document = beresta::XmlParser().parse(CATALOG);
@@ -46,6 +50,7 @@ namespace
     }
 
     // Пространства имён: префиксы задаются в XPathContext
+    // Namespaces: the prefixes are set in XPathContext
     void testNamespaces()
     {
         beresta::Document document = beresta::XmlParser().parse(
@@ -65,6 +70,7 @@ namespace
 namespace suites
 {
     // Регистрация тестов путей XPath
+    // Registers the XPath path tests
     void registerXPathPathTests(test::TestRunner& runner)
     {
         runner.add("XPath: пути и предикаты", testLocationPaths);
