@@ -11,6 +11,10 @@
 # The .gitignore itself is a file, not a directory, so the rule does not cover it.
 .*/
 
+# Исключение: workflow GitHub Actions (CI и релизы) обязаны попасть в репозиторий
+# Exception: the GitHub Actions workflows (CI and releases) must go into the repository
+!/.github/
+
 # ---- Результаты сборки Makefile / Makefile build results --------------------
 /obj/
 /dep/
@@ -99,3 +103,6 @@ new_spec.txt
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Сборка WebAssembly (make wasm) / The WebAssembly build (make wasm)
+/bindings/wasm/dist/

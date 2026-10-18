@@ -2,6 +2,9 @@
 
 const { messageText, Messages } = require('../languages.js');
 
+// Кодировщик для сред без Buffer (браузер, Workers) / An encoder for environments without Buffer (browser, Workers)
+const encoder = new TextEncoder();
+
 /*
  * Вход разбора -> байты для аддона. Строка кодируется в UTF-8; Buffer и
  * Uint8Array передаются как есть, без копирования, — кодировку (UTF-16,
@@ -16,7 +19,11 @@ const { messageText, Messages } = require('../languages.js');
 function toBytes(input, functionName)
 {
     if (typeof input === 'string')
-        return Buffer.from(input, 'utf8');
+    {
+        if (typeof Buffer !== 'undefined')
+            return Buffer.from(input, 'utf8');
+        return encoder.encode(input);
+    }
     if (input instanceof Uint8Array)
         return input;
     if (input instanceof ArrayBuffer)

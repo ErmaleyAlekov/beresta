@@ -111,6 +111,19 @@ namespace beresta
         // Reserves room for count attributes: the tree builder allocates memory once
         void reserveAttributes(std::size_t count);
 
+        /*
+        ** Пакетная установка атрибутов — то же, что setAttribute для каждой
+        ** пары по порядку (повтор имени заменяет значение), но за O(n), а не
+        ** O(n²). Все имена проверяются до изменений: при неверном имени
+        ** элемент остаётся прежним. Так строится дерево при разборе.
+        **
+        ** Batch setting of attributes — the same as setAttribute for every
+        ** pair in order (a repeated name replaces the value), but in O(n) rather than
+        ** O(n²). All names are checked before any change: with an invalid name
+        ** the element stays unchanged. This is how the tree is built during parsing.
+        */
+        void setAttributes(std::vector<Attribute> attributes);
+
         // ---- Пространства имён ----
         // ---- Namespaces ----
 
@@ -190,6 +203,10 @@ namespace beresta
         // Вывод атрибутов: ровно один пробел перед каждым атрибутом
         // Writes the attributes: exactly one space before each attribute
         void serializeAttributes(std::string& output) const;
+
+        // Слияние с уже имеющимися атрибутами через индекс имён (element_attributes_bulk.cpp)
+        // Merging with the already present attributes through a name index (element_attributes_bulk.cpp)
+        void mergeAttributes(std::vector<Attribute>& attributes);
 
         std::string _name;
         std::vector<Attribute> _attributes;

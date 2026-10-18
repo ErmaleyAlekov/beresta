@@ -1,0 +1,48 @@
+
+// Загруженные модули по номерам / The loaded modules by number
+const cache = [];
+
+// require внутри сборки: модуль выполняется один раз, дальше берётся из кэша
+// require inside the bundle: a module runs once, after that it is taken from the cache
+function load(id)
+{
+    if (cache[id] !== undefined)
+        return cache[id].exports;
+    const module = { exports: {} };
+    cache[id] = module;
+    definitions[id](module, module.exports, load);
+    return module.exports;
+}
+
+// Создание модуля WebAssembly — один раз на всё приложение / Creating the WebAssembly module — once per application
+let ready = null;
+
+/*
+ * Подготовка «Берёсты»: загрузка и компиляция beresta_core.wasm, затем
+ * возвращается тот же API, что у пакета для Node.js (parse, XPath, Schema...).
+ * options передаются Emscripten как есть: locateFile — где лежит .wasm,
+ * wasmBinary — уже загруженные байты, instantiateWasm — своя загрузка
+ * (так модуль подключают в Cloudflare Workers).
+ *
+ * Preparing Beresta: loading and compiling beresta_core.wasm, then
+ * the same API as in the Node.js package is returned (parse, XPath, Schema...).
+ * options are passed to Emscripten as is: locateFile — where the .wasm lies,
+ * wasmBinary — already loaded bytes, instantiateWasm — custom loading
+ * (this is how the module is connected in Cloudflare Workers).
+ */
+async function createApi(options)
+{
+    const core = await createBerestaCore(options);
+    load(@BACKEND_ID@).install(core);
+    return load(0);
+}
+
+// Публичная точка входа: повторный вызов возвращает тот же API / The public entry point: a repeated call returns the same API
+export function init(options)
+{
+    if (ready === null)
+        ready = createApi(options || {});
+    return ready;
+}
+
+export default init;

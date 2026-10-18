@@ -1,4 +1,5 @@
 #include "xsd/internal/validation_run.hpp"
+#include "utils/seeded_hash.hpp"
 
 #include <string_view>
 #include <unordered_map>
@@ -73,7 +74,9 @@ namespace beresta::xsd::detail
     static void numberManyChildren(const std::vector<const Element*>& children, std::size_t parent,
         std::vector<PathStep>& steps)
     {
-        std::unordered_map<std::string_view, std::pair<std::size_t, std::size_t>> counters;
+        // Имена элементов приходят из документа, поэтому хеш с секретным ключом (hash flooding)
+        // Element names come from the document, hence the hash with a secret key (hash flooding)
+        std::unordered_map<std::string_view, std::pair<std::size_t, std::size_t>, utils::SeededHash> counters;
 
         for (const Element* child : children)
             ++counters[child->getName()].second;

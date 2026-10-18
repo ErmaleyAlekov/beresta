@@ -8,6 +8,11 @@
 #                           (имя папки ресурсов Java и Python)
 #    BERESTA_DOTNET_RID     идентификатор среды .NET: win-x64, linux-arm64,
 #                           osx-arm64 ... (папка runtimes/<rid>/native NuGet)
+#    BERESTA_PLATFORMS      список папок <os>-<arch>, куда кладётся бинарник;
+#    BERESTA_DOTNET_RIDS    список RID. Обычно в них по одному значению, а
+#                           универсальный бинарник macOS (CMAKE_OSX_ARCHITECTURES
+#                           = "x86_64;arm64", BERESTA_PLATFORM_ARCH = universal)
+#                           один и тот же файл кладётся в папки обеих архитектур
 #
 #  Важно: определяется ЦЕЛЕВАЯ платформа, а не та, на которой идёт сборка.
 #  При кросс-компиляции (например, ARM64 на машине x64) бинарник должен
@@ -21,6 +26,11 @@
 #                          (the Java and Python resource folder name)
 #   BERESTA_DOTNET_RID     the .NET runtime identifier: win-x64, linux-arm64,
 #                          osx-arm64 ... (the NuGet runtimes/<rid>/native folder)
+#   BERESTA_PLATFORMS      the list of <os>-<arch> folders the binary goes into;
+#   BERESTA_DOTNET_RIDS    the list of RIDs. Usually they hold one value each, while
+#                          for a universal macOS binary (CMAKE_OSX_ARCHITECTURES
+#                          = "x86_64;arm64", BERESTA_PLATFORM_ARCH = universal)
+#                          one and the same file goes into the folders of both architectures
 # Important: the TARGET platform is detected, not the one the build runs on.
 # With cross-compilation (for example, ARM64 on an x64 machine) the binary must
 # go into the folder of the architecture where it will run.
@@ -43,12 +53,15 @@ function(beresta_raw_architecture out_var)
     if(MSVC AND MSVC_CXX_ARCHITECTURE_ID)
         set(raw "${MSVC_CXX_ARCHITECTURE_ID}")
     elseif(APPLE AND CMAKE_OSX_ARCHITECTURES)
+        # Несколько архитектур — универсальный (fat) бинарник: Apple Clang
+        # компилирует каждую и склеивает результат сам, как lipo -create
+        # Several architectures — a universal (fat) binary: Apple Clang
+        # compiles each one and glues the result itself, like lipo -create
         list(LENGTH CMAKE_OSX_ARCHITECTURES arch_count)
-        if(arch_count GREATER 1)
-            message(FATAL_ERROR "Берёста: укажите одну архитектуру в CMAKE_OSX_ARCHITECTURES "
-                "(сейчас: ${CMAKE_OSX_ARCHITECTURES}) — каждая кладётся в свою папку ресурсов")
-        endif()
         set(raw "${CMAKE_OSX_ARCHITECTURES}")
+        if(arch_count GREATER 1)
+            set(raw "universal")
+        endif()
     endif()
     string(TOLOWER "${raw}" raw)
     set(${out_var} "${raw}" PARENT_SCOPE)
@@ -116,4 +129,12 @@ function(beresta_detect_platform)
     set(BERESTA_PLATFORM "${BERESTA_PLATFORM_OS}-${BERESTA_PLATFORM_ARCH}" PARENT_SCOPE)
     beresta_dotnet_rid("${BERESTA_PLATFORM_OS}" "${BERESTA_PLATFORM_ARCH}" rid)
     set(BERESTA_DOTNET_RID "${rid}" PARENT_SCOPE)
+    set(platforms "${BERESTA_PLATFORM_OS}-${BERESTA_PLATFORM_ARCH}")
+    set(rids "${rid}")
+    if(BERESTA_PLATFORM_ARCH STREQUAL "universal")
+        set(platforms "${BERESTA_PLATFORM_OS}-x86_64" "${BERESTA_PLATFORM_OS}-aarch64")
+        set(rids "osx-x64" "osx-arm64")
+    endif()
+    set(BERESTA_PLATFORMS "${platforms}" PARENT_SCOPE)
+    set(BERESTA_DOTNET_RIDS "${rids}" PARENT_SCOPE)
 endfunction()

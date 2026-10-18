@@ -77,12 +77,40 @@ namespace beresta::detail
             scanner.fail(i18n::format(i18n::Message::ATTRIBUTE_VALUE_QUOTES));
         scanner.advance(1);
         std::string_view raw = scanner.readUntil(std::string_view(&quote, 1));
-        for (const Attribute& existing : attributes)
-        {
-            if (existing.name == name)
-                scanner.failAt(i18n::format(i18n::Message::ATTRIBUTE_DUPLICATE, {name}), start);
-        }
+        if (!isNewAttributeName(attributes, name))
+            scanner.failAt(i18n::format(i18n::Message::ATTRIBUTE_DUPLICATE, {name}), start);
         std::string value = AttributeValueDecoder(_dtd.get(), _budget, _standalone).decode(raw);
         attributes.push_back(Attribute{std::move(name), std::move(value)});
+    }
+
+    /*
+    ** Нет ли уже атрибута с таким именем. Пока атрибутов мало — перебор без
+    ** выделения памяти; на атрибуте номер utils::LINEAR_SEARCH_LIMIT имена переносятся в
+    ** хеш-таблицу (она очищается заново для каждого большого тега), и
+    ** дальше каждая проверка — O(1).
+    **
+    ** Whether there is already an attribute with this name. While there are few attributes — a loop without
+    ** memory allocation; at the attribute number utils::LINEAR_SEARCH_LIMIT the names are moved into
+    ** the hash table (it is cleared anew for every large tag), and
+    ** from then on every check is O(1).
+    */
+    bool ParseSession::isNewAttributeName(const std::vector<Attribute>& attributes, const std::string& name)
+    {
+        if (attributes.size() < utils::LINEAR_SEARCH_LIMIT)
+        {
+            for (const Attribute& existing : attributes)
+            {
+                if (existing.name == name)
+                    return false;
+            }
+            return true;
+        }
+        if (attributes.size() == utils::LINEAR_SEARCH_LIMIT)
+        {
+            _attributeNames.clear();
+            for (const Attribute& existing : attributes)
+                _attributeNames.insert(existing.name);
+        }
+        return _attributeNames.insert(name).second;
     }
 }

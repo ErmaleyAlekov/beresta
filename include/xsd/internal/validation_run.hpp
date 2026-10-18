@@ -2,6 +2,7 @@
 #define XSD_VALIDATION_RUN_HPP
 
 #include "parser/error_handler.hpp"
+#include "utils/seeded_hash.hpp"
 #include "xsd/schema.hpp"
 
 #include <cstdint>
@@ -174,7 +175,9 @@ namespace beresta::xsd::detail
 
         const Schema& _schema;
         std::vector<Diagnostic> _diagnostics;
-        std::unordered_set<std::string> _ids;
+        // Значения ID приходят из документа: хеш с секретным ключом против hash flooding
+        // ID values come from the document: a hash with a secret key against hash flooding
+        std::unordered_set<std::string, utils::SeededHash> _ids;
         std::vector<std::pair<std::string, std::size_t>> _references;
         std::vector<PendingElement> _pending;
         std::vector<PathStep> _steps;

@@ -1,0 +1,32 @@
+/**
+ * Берёста для WebAssembly: тот же API, что у пакета для Node.js, но
+ * доступный после init(). Типы классов — в api.d.ts (копия типов
+ * Node.js-пакета).
+ *
+ * Beresta for WebAssembly: the same API as the Node.js package, but
+ * available after init(). The class types are in api.d.ts (a copy of the
+ * Node.js package types).
+ */
+import type * as Api from './api.js';
+
+export type * from './api.js';
+
+/** Весь API «Берёсты» после загрузки модуля Wasm. / The whole Beresta API after the Wasm module is loaded. */
+export type Beresta = typeof Api;
+
+/** Параметры загрузки, передаются Emscripten. / Loading parameters, passed to Emscripten. */
+export interface InitOptions
+{
+    /** Путь к beresta_core.wasm по имени файла. / The path to beresta_core.wasm by the file name. */
+    locateFile?(path: string, prefix: string): string;
+    /** Уже загруженные байты beresta_core.wasm. / Already loaded beresta_core.wasm bytes. */
+    wasmBinary?: ArrayBuffer | Uint8Array;
+    /** Своя загрузка модуля (Cloudflare Workers). / Custom module loading (Cloudflare Workers). */
+    instantiateWasm?(imports: WebAssembly.Imports,
+        done: (instance: WebAssembly.Instance, module: WebAssembly.Module) => void): WebAssembly.Exports | object;
+}
+
+/** Загрузка модуля Wasm; повторный вызов возвращает тот же API. / Loads the Wasm module; a repeated call returns the same API. */
+export function init(options?: InitOptions): Promise<Beresta>;
+
+export default init;

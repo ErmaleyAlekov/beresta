@@ -17,6 +17,25 @@
 #  бинарник» (beresta_copy_native_library) и частные шаги каждой обёртки
 #  (упаковка Maven, dotnet build, тесты).
 # ============================================================================
+#  BerestaBindings.cmake — the wrappers for Java, C#, Python and Node.js
+#
+#  All wrappers work with ONE AND THE SAME binary — the beresta shared
+#  library with a flat C interface. The task of CMake is to put this binary,
+#  after every build, where the wrapper loader will find it:
+#
+#    Java   bindings/java/src/main/resources/natives/<os>-<arch>/
+#           (Maven packs it into the jar; the loader extracts it and connects it
+#           through Project Panama — SymbolLookup.libraryLookup)
+#    C#     bindings/csharp/Beresta/runtimes/<rid>/native/
+#           (the standard NuGet layout: .NET picks the right RID itself)
+#    Python bindings/python/beresta/_native/<os>-<arch>/
+#           (ctypes.CDLL loads the file by an absolute path)
+#    Node   bindings/node/native/<os>-<arch>/ (the beresta.node addon)
+#
+#  The pattern: Template Method at the build level — the common step "copy the
+#  binary" (beresta_copy_native_library) and the specific steps of each wrapper
+#  (Maven packaging, dotnet build, tests).
+# ============================================================================
 
 set(BERESTA_BINDINGS_DIR "${PROJECT_SOURCE_DIR}/bindings")
 
@@ -36,6 +55,16 @@ function(beresta_copy_native_library target destination)
         VERBATIM)
 endfunction()
 
+# Копия в папку каждой платформы списка: prefix/<платформа>/suffix. Для
+# универсального бинарника macOS список содержит обе архитектуры.
+# A copy into the folder of every platform in the list: prefix/<platform>/suffix. For
+# a universal macOS binary the list holds both architectures.
+function(beresta_copy_for_platforms target prefix platforms suffix)
+    foreach(platform IN LISTS platforms)
+        beresta_copy_native_library(${target} "${prefix}/${platform}${suffix}")
+    endforeach()
+endfunction()
+
 # ---- Java (Project Panama, Java 22+) ------------------------------------------
 # Самопроверка запускается без Maven: javac + java из JDK (скрипт
 # BerestaJavaSelfTest.cmake), поэтому ctest работает и без доступа к
@@ -46,8 +75,8 @@ endfunction()
 # the Maven Central repository. Packaging into a jar is a separate target beresta_java_package.
 function(beresta_setup_java)
     set(BERESTA_JAVA_PROJECT_DIR "${BERESTA_BINDINGS_DIR}/java" CACHE PATH "Maven-проект Java-обёртки")
-    set(resources "${BERESTA_JAVA_PROJECT_DIR}/src/main/resources/natives/${BERESTA_PLATFORM}")
-    beresta_copy_native_library(beresta "${resources}")
+    beresta_copy_for_platforms(beresta "${BERESTA_JAVA_PROJECT_DIR}/src/main/resources/natives"
+        "${BERESTA_PLATFORMS}" "")
     find_program(BERESTA_MAVEN_EXECUTABLE NAMES mvn mvn.cmd)
     if(BERESTA_MAVEN_EXECUTABLE)
         add_custom_target(beresta_java_package
@@ -68,7 +97,7 @@ endfunction()
 # ---- C# (.NET, P/Invoke) -------------------------------------------------------
 function(beresta_setup_csharp)
     set(project_dir "${BERESTA_BINDINGS_DIR}/csharp")
-    beresta_copy_native_library(beresta "${project_dir}/Beresta/runtimes/${BERESTA_DOTNET_RID}/native")
+    beresta_copy_for_platforms(beresta "${project_dir}/Beresta/runtimes" "${BERESTA_DOTNET_RIDS}" "/native")
     find_program(BERESTA_DOTNET_EXECUTABLE NAMES dotnet)
     if(NOT BERESTA_DOTNET_EXECUTABLE)
         message(STATUS "Берёста: dotnet не найден — C#-обёртка только получит бинарник")
@@ -88,7 +117,7 @@ endfunction()
 # ---- Python (ctypes) ------------------------------------------------------------
 function(beresta_setup_python)
     set(package_dir "${BERESTA_BINDINGS_DIR}/python")
-    beresta_copy_native_library(beresta "${package_dir}/beresta/_native/${BERESTA_PLATFORM}")
+    beresta_copy_for_platforms(beresta "${package_dir}/beresta/_native" "${BERESTA_PLATFORMS}" "")
     find_package(Python3 COMPONENTS Interpreter)
     if(BERESTA_BUILD_TESTS AND Python3_FOUND)
         add_test(NAME beresta_python_selftest
@@ -122,7 +151,7 @@ function(beresta_setup_node)
         POSITION_INDEPENDENT_CODE ON CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON)
     beresta_apply_compile_options(beresta_node)
     beresta_apply_link_options(beresta_node)
-    beresta_copy_native_library(beresta_node "${package_dir}/native/${BERESTA_PLATFORM}")
+    beresta_copy_for_platforms(beresta_node "${package_dir}/native" "${BERESTA_PLATFORMS}" "")
     find_program(BERESTA_NODE_EXECUTABLE NAMES node)
     find_program(BERESTA_NPM_EXECUTABLE NAMES npm npm.cmd)
     if(BERESTA_NPM_EXECUTABLE)

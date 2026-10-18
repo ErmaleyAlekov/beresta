@@ -10,10 +10,16 @@ namespace beresta
     void DomBuilder::startElement(const SaxElement& element)
     {
         auto node = std::make_unique<Element>(std::string(element.name));
+        std::vector<Attribute> attributes;
 
-        node->reserveAttributes(element.attributes.size());
+        // Пакетом, а не по одному: setAttribute ищет повтор перебором, и тег
+        // с множеством атрибутов давал бы O(n²)
+        // As a batch, not one by one: setAttribute searches for a repetition with a loop, and a tag
+        // with many attributes would give O(n²)
+        attributes.reserve(element.attributes.size());
         for (const SaxAttribute& attribute : element.attributes)
-            node->setAttribute(attribute.name, std::string(attribute.value));
+            attributes.push_back(Attribute{std::string(attribute.name), std::string(attribute.value)});
+        node->setAttributes(std::move(attributes));
         Element* raw = node.get();
         attach(std::move(node));
         _stack.push_back(raw);

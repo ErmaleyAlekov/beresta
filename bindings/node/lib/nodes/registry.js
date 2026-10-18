@@ -88,19 +88,9 @@ class NodeRegistry
         while (pending.length > 0)
         {
             const current = pending.pop();
-            const entry = this.wrappers.get(current);
-            let node;
-            if (entry !== undefined)
-            {
-                this.wrappers.delete(current);
-                node = entry.ref.deref();
-            }
-            if (node !== undefined)
-            {
-                node[OWNER] = target;
-                target[REGISTRY].store(current, node, entry.element);
-            }
             let child = null;
+
+            this.adopt(current, target);
             if (deep)
                 child = native.node_first_child(current);
             while (child !== null)
@@ -109,6 +99,22 @@ class NodeRegistry
                 child = native.node_next_sibling(child);
             }
         }
+    }
+
+    /** Передача одной обёртки (если она ещё жива) реестру документа target.
+     *  Hands one wrapper (if it is still alive) over to the registry of the target document. */
+    adopt(handle, target)
+    {
+        const entry = this.wrappers.get(handle);
+
+        if (entry === undefined)
+            return;
+        this.wrappers.delete(handle);
+        const node = entry.ref.deref();
+        if (node === undefined)
+            return;
+        node[OWNER] = target;
+        target[REGISTRY].store(handle, node, entry.element);
     }
 }
 
