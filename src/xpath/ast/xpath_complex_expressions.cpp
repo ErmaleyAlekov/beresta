@@ -5,10 +5,15 @@
 
 namespace beresta::xpath::detail
 {
-    // Значение переменной из пользовательского контекста; неизвестная — ошибка
-    // The variable value from the user context; an unknown one is an error
+    // Сначала локальные привязки (кванторы, $value), затем пользовательский контекст; неизвестная — ошибка
+    // First the local bindings (quantifiers, $value), then the user context; an unknown one is an error
     XPathValue VariableExpr::evaluate(const EvalContext& context) const
     {
+        for (const LocalVariable* local = context.locals; local != nullptr; local = local->next)
+        {
+            if (local->name == _name)
+                return *local->value;
+        }
         auto found = context.user.variables.find(_name);
 
         if (found == context.user.variables.end())
@@ -52,6 +57,6 @@ namespace beresta::xpath::detail
             failEvaluation(i18n::format(i18n::Message::XPATH_PREDICATE_NOT_NODESET));
         std::vector<XPathItem> items = value.getNodes();
         sortDocumentOrder(items);
-        return XPathValue::fromNodeSet(applyPredicates(_predicates, std::move(items), context.user));
+        return XPathValue::fromNodeSet(applyPredicates(_predicates, std::move(items), context));
     }
 }

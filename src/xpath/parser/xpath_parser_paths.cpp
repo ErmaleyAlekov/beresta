@@ -57,16 +57,22 @@ namespace beresta::xpath::detail
 
     /*
     ** Абсолютный путь "/..." или "//...", либо относительный.
-    ** Одиночный "/" — корень документа (шагов нет).
+    ** Одиночный "/" — корень документа (шагов нет). В утверждении XSD 1.1
+    ** корень дерева — сам проверяемый элемент, а не документ, и "/" там —
+    ** ошибка XPDY0050; она выдаётся сразу, при загрузке схемы.
     **
     ** An absolute path "/..." or "//...", or a relative one.
-    ** A single "/" is the document root (there are no steps).
+    ** A single "/" is the document root (there are no steps). In an XSD 1.1 assertion
+    ** the tree root is the validated element itself, not a document, and "/" there is
+    ** the XPDY0050 error; it is reported at once, when the schema is loaded.
     */
     ExprPtr XPathParser::parseLocationPath()
     {
         std::vector<Step> steps;
         bool absolute = peek().type == TokenType::SLASH || peek().type == TokenType::DOUBLE_SLASH;
 
+        if (absolute && _dialect == XPathDialect::XSD_ASSERTION)
+            fail(i18n::format(i18n::Message::XPATH_ASSERTION_ABSOLUTE_PATH));
         if (accept(TokenType::DOUBLE_SLASH))
         {
             steps.push_back(descendantStep());

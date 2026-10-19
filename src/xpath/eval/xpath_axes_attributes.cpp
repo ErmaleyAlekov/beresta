@@ -76,13 +76,17 @@ namespace beresta::xpath::detail
     /*
     ** Проверка имени. Имя проверяется только у узлов главного типа оси:
     ** атрибутов на оси attribute, узлов пространств имён на оси namespace,
-    ** элементов на остальных осях.
+    ** элементов на остальных осях. Имя без префикса — вне пространств имён;
+    ** лишь в утверждениях XSD имя элемента без префикса берёт пространство
+    ** xpathDefaultNamespace (оно лежит в namespaces под пустым префиксом).
     **
     ** The name test. The name is checked only for nodes of the principal type of the axis:
     ** attributes on the attribute axis, namespace nodes on the namespace axis,
-    ** elements on the other axes.
+    ** elements on the other axes. A name without a prefix is in no namespace;
+    ** only in XSD assertions an element name without a prefix takes the
+    ** xpathDefaultNamespace namespace (it lies in namespaces under the empty prefix).
     */
-    static bool matchesName(const Step& step, const XPathItem& item, const XPathContext& user)
+    static bool matchesName(const Step& step, const XPathItem& item, const EvalContext& context)
     {
         bool attributeAxis = step.axis == Axis::ATTRIBUTE_AXIS;
 
@@ -98,25 +102,25 @@ namespace beresta::xpath::detail
         if (!itemNameMatches(step, item, uri))
             return false;
         std::string expected;
-        if (!step.prefix.empty())
-        {
-            auto found = user.namespaces.find(step.prefix);
-            if (found == user.namespaces.end())
-                failEvaluation(i18n::format(i18n::Message::XPATH_UNBOUND_PREFIX, {step.prefix}));
+        if (step.prefix.empty() && (context.typed == nullptr || attributeAxis))
+            return uri.empty();
+        auto found = context.user.namespaces.find(step.prefix);
+        if (found != context.user.namespaces.end())
             expected = found->second;
-        }
+        else if (!step.prefix.empty())
+            failEvaluation(i18n::format(i18n::Message::XPATH_UNBOUND_PREFIX, {step.prefix}));
         return uri == expected;
     }
 
     // Проверка узла: тип узла или имя
     // The node test: the node type or the name
-    bool matchesTest(const Step& step, const XPathItem& item, const XPathContext& user)
+    bool matchesTest(const Step& step, const XPathItem& item, const EvalContext& context)
     {
         if (step.test == TestKind::ANY_NODE)
             return true;
         if (step.test != TestKind::TEXT_NODE && step.test != TestKind::COMMENT_NODE
             && step.test != TestKind::PI_NODE)
-            return matchesName(step, item, user);
+            return matchesName(step, item, context);
         if (item.attribute != nullptr || item.node == nullptr)
             return false;
         NodeType type = item.node->getType();

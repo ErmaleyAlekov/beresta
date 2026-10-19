@@ -49,28 +49,42 @@ namespace beresta::xpath::detail
         return std::make_unique<FilterExpr>(std::move(primary), std::move(predicates));
     }
 
-    // $переменная | (выражение) | 'литерал' | число | функция(...)
-    // $variable | (expression) | 'literal' | number | function(...)
+    /*
+    ** $переменная | (выражение) | 'литерал' | число | функция(...). Число в
+    ** утверждениях XSD — точный xs:decimal / xs:integer (как в XPath 2.0),
+    ** в XPath 1.0 — double.
+    **
+    ** $variable | (expression) | 'literal' | number | function(...). A number in
+    ** XSD assertions is an exact xs:decimal / xs:integer (as in XPath 2.0),
+    ** in XPath 1.0 — a double.
+    */
     ExprPtr XPathParser::parsePrimary()
     {
         TokenType type = peek().type;
+        utils::Decimal exact;
 
         if (type == TokenType::VARIABLE)
             return std::make_unique<VariableExpr>(take().text);
         if (type == TokenType::LITERAL)
             return std::make_unique<ConstantExpr>(XPathValue::fromString(take().text));
+        if (type == TokenType::NUMBER && _dialect == XPathDialect::XSD_ASSERTION
+            && utils::readDecimal(peek().text, exact))
+        {
+            take();
+            return std::make_unique<ConstantExpr>(XPathValue::fromDecimal(exact));
+        }
         if (type == TokenType::NUMBER)
             return std::make_unique<ConstantExpr>(XPathValue::fromNumber(take().number));
         if (type == TokenType::FUNCTION_NAME)
             return parseFunctionCall();
         expect(TokenType::LEFT_PAREN, "'('");
-        ExprPtr inner = parseBinary(0);
+        ExprPtr inner = parseExprSingle();
         expect(TokenType::RIGHT_PAREN, "')'");
         return inner;
     }
 
-    // имя(аргумент, аргумент, ...)
-    // name(argument, argument, ...)
+    // имя(аргумент, аргумент, ...); в утверждениях имя проверяется сразу
+    // name(argument, argument, ...); in assertions the name is checked at once
     ExprPtr XPathParser::parseFunctionCall()
     {
         std::string name = take().text;
@@ -79,11 +93,13 @@ namespace beresta::xpath::detail
         expect(TokenType::LEFT_PAREN, "'('");
         if (!accept(TokenType::RIGHT_PAREN))
         {
-            arguments.push_back(parseBinary(0));
+            arguments.push_back(parseExprSingle());
             while (accept(TokenType::COMMA))
-                arguments.push_back(parseBinary(0));
+                arguments.push_back(parseExprSingle());
             expect(TokenType::RIGHT_PAREN, "')'");
         }
+        if (_dialect == XPathDialect::XSD_ASSERTION)
+            return assertionCall(std::move(name), std::move(arguments));
         return std::make_unique<FunctionCallExpr>(std::move(name), std::move(arguments));
     }
 }

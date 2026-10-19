@@ -1,4 +1,5 @@
 #include "xpath/internal/xpath_eval.hpp"
+#include "xpath/internal/xpath_typed.hpp"
 
 #include <utility>
 
@@ -11,10 +12,12 @@ namespace beresta::xpath::detail
     {
     }
 
-    // Отрицание числового значения операнда
-    // The negation of the numeric value of the operand
+    // Отрицание числового значения операнда (в утверждениях XSD — точное для decimal)
+    // The negation of the numeric value of the operand (in XSD assertions — exact for a decimal)
     XPathValue NegateExpr::evaluate(const EvalContext& context) const
     {
+        if (context.typed != nullptr)
+            return typedNegate(_operand->evaluate(context), context);
         return XPathValue::fromNumber(-_operand->evaluate(context).toNumber());
     }
 

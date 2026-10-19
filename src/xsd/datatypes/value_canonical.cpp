@@ -1,4 +1,5 @@
 #include "xsd/internal/datatype_checks.hpp"
+#include "utils/decimal.hpp"
 #include "utils/xml_tokens.hpp"
 
 #include <cmath>
@@ -11,7 +12,7 @@ namespace beresta::xsd::detail
     // The canonical form of decimal: "-12.5", "0", "3" (without extra zeros and a sign for zero)
     static std::string canonicalDecimal(std::string_view value)
     {
-        DecimalParts parts = splitDecimal(value);
+        utils::DecimalParts parts = utils::splitDecimal(value);
         std::string result;
 
         if (parts.negative)

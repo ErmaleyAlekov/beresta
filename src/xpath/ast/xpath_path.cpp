@@ -31,7 +31,7 @@ namespace beresta::xpath::detail
         else
             current.push_back(context.item);
         for (const Step& step : _steps)
-            current = applyStep(step, current, context.user);
+            current = applyStep(step, current, context);
         return XPathValue::fromNodeSet(std::move(current));
     }
 

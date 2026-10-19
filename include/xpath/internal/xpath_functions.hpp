@@ -78,6 +78,23 @@ namespace beresta::xpath::detail
     XPathValue functionFloor(const FunctionCall& call);
     XPathValue functionCeiling(const FunctionCall& call);
     XPathValue functionRound(const FunctionCall& call);
+
+    // ---- Типизированный режим утверждений XSD (xpath_functions_typed.cpp) ----
+    // ---- The typed mode of XSD assertions (xpath_functions_typed.cpp) ----
+
+    // Округление точного числа: utils::floorDecimal, ceilingDecimal или roundDecimal
+    // Rounding of an exact number: utils::floorDecimal, ceilingDecimal or roundDecimal
+    using DecimalRounding = utils::Decimal (*)(const utils::Decimal& value);
+
+    // sum() по типизированным значениям: точная, если все слагаемые точные
+    // sum() over typed values: exact if all the terms are exact
+    XPathValue typedSum(const XPathValue& value, const EvalContext& context);
+    bool exactRounding(const FunctionCall& call, DecimalRounding rounding, XPathValue& result);
+
+    // Функции XPath 2.0, доступные только в утверждениях
+    // XPath 2.0 functions available only in assertions
+    XPathValue functionExists(const FunctionCall& call);
+    XPathValue functionEmpty(const FunctionCall& call);
 }
 
 #endif

@@ -33,12 +33,14 @@ namespace beresta::xsd::detail
     ** Проверка элемента с объявлением — в том же порядке, что у обхода
     ** дерева: область ключей, xsi:type (ошибка — дальше не проверяется),
     ** abstract, xsi:nil (принятый — содержимое не проверяется), затем
-    ** простой или составной тип. xs:anyType допускает что угодно.
+    ** простой или составной тип. xs:anyType допускает что угодно. Типы
+    ** атрибутов запоминаются для ключей и утверждений (аналог PSVI).
     **
     ** Checking an element with a declaration — in the same order as the tree
     ** traversal: the key scope, xsi:type (an error — no further checks),
     ** abstract, xsi:nil (an accepted one — the content is not checked), then
-    ** a simple or a complex type. xs:anyType allows anything.
+    ** a simple or a complex type. xs:anyType allows anything. The attribute
+    ** types are remembered for keys and assertions (an analog of the PSVI).
     */
     void StreamValidator::beginValidation(const SaxElement& element, const ElementDecl& declaration)
     {
@@ -50,10 +52,11 @@ namespace beresta::xsd::detail
         frame.mode = FrameMode::OPAQUE;
         if (!declaration.identityConstraints.empty())
             openScope(declaration);
-        if (_identity != nullptr)
-            frame.attributeTypes.assign(element.attributes.size(), nullptr);
         if (!applyXsiType(xsi, declaration, type))
             return;
+        bool asserted = type.complex != nullptr && !type.complex->assertions.empty();
+        if (_identity != nullptr || recordingAssertions() || asserted)
+            frame.attributeTypes.assign(element.attributes.size(), nullptr);
         if (declaration.isAbstract)
             report(_depth - 1, CheckPhase::ABSTRACT, i18n::format(i18n::Message::XSD_ABSTRACT_ELEMENT));
         if (isNil(xsi, declaration))

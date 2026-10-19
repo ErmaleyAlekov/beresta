@@ -5,10 +5,10 @@
 
 namespace beresta::xpath::detail
 {
-    // Лексер работает по представлению исходной строки
-    // The lexer works over a view of the source string
-    XPathLexer::XPathLexer(std::string_view source) noexcept
-        : _source(source), _position(0), _tokens()
+    // Лексер работает по представлению исходной строки в заданном диалекте
+    // The lexer works over a view of the source string in the given dialect
+    XPathLexer::XPathLexer(std::string_view source, XPathDialect dialect) noexcept
+        : _source(source), _dialect(dialect), _position(0), _tokens()
     {
     }
 

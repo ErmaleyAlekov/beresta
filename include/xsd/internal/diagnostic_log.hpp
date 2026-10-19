@@ -49,7 +49,8 @@ namespace beresta::xsd::detail
         ATTRIBUTES = 5,
         VALUE = 6,
         MODEL = 7,
-        WILDCARD = 8
+        WILDCARD = 8,
+        ASSERTION = 9
     };
 
     /*

@@ -1,4 +1,5 @@
 #include "xsd/internal/stream_validator.hpp"
+#include "xsd/internal/assertion_recorder.hpp"
 
 namespace beresta::xsd::detail
 {
@@ -8,12 +9,12 @@ namespace beresta::xsd::detail
         : _schema(schema), _settings(settings), _locator(nullptr), _frames(), _depth(0), _nextOrdinal(0),
           _paths(), _prefixes(), _log(), _ids(), _normalized(), _references(), _rootPosition(), _text(), _plans(),
           _lastParticle(nullptr), _lastPlan(content::CursorPlan::GREEDY_SEQUENCE),
-          _identity(), _resolvedAttributes(), _resolvedUris(), _resolvedElementUri()
+          _identity(), _assertions(), _resolvedAttributes(), _resolvedUris(), _resolvedElementUri()
     {
     }
 
-    // Стратегия ключей удаляется через unique_ptr — здесь её тип полностью известен
-    // The key strategy is deleted through unique_ptr — its type is fully known here
+    // Стратегия ключей и буфер утверждений удаляются через unique_ptr — здесь их типы полностью известны
+    // The key strategy and the assertion buffer are deleted through unique_ptr — their types are fully known here
     StreamValidator::~StreamValidator()
     {
     }

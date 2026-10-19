@@ -62,7 +62,7 @@ std::cout << doc.toString();                                      // <greeting l
 ## Advantages
 
 ### In short
-1. **The full set of standards without dependencies.** XML 1.0, namespaces, eight encodings, DTD, XML Schema 1.0 with keys, all of XPath 1.0, XInclude, SAX, DOM Traversal — and not a single third-party library, not even iconv or ICU.
+1. **The full set of standards without dependencies.** XML 1.0, namespaces, eight encodings, DTD, XML Schema 1.0 with keys and XSD 1.1 `xs:assert` assertions, all of XPath 1.0, XInclude, SAX, DOM Traversal — and not a single third-party library, not even iconv or ICU.
 2. **The most compact tree among full-featured libraries.** A 26 MB catalog takes 172 MB in memory — against 248 MB for libxml2 and 348 MB for Xerces-C++ (see [Performance](#performance)).
 3. **The speed of a full-featured library.** Parsing is twice as fast as Xerces-C++, and almost on par with libxml2 on text. XPath is faster than libxml2, XSD validation is 1.8 times faster than Xerces-C++ — right during parsing or as a stream without a tree.
 4. **Standalone nodes.** A node is created without a document, moved between documents without `importNode`/`adoptNode` and outlives the document it was taken from. Almost no C++ library has this (see the [comparison](#comparison-with-other-libraries)).
@@ -97,6 +97,7 @@ std::cout << doc.toString();                                      // <greeting l
 - **Eight encodings:** UTF-8, UTF-16 LE/BE, ISO-8859-1, US-ASCII, windows-1251, windows-1252, KOI8-R, IBM866. The encoding is detected by the BOM and the declaration. All tables are written from scratch, without iconv or ICU.
 - **DTD:** internal and external subsets, parameter entities, conditional sections, default attributes, full validity checking, `getElementById`.
 - **XML Schema 1.0:** 45 built-in types, facets, `restriction`/`extension`, `list`/`union`, `sequence`/`choice`/`all`, groups, `xs:any`, substitution groups, `xsi:type` with derivation checks, `block`/`final`, abstract elements and types, `xsi:nil`, ID/IDREF, the identity constraints `xs:key`/`xs:unique`/`xs:keyref`, `include`/`import`/`redefine`/`override`.
+- **From XML Schema 1.1:** the `xs:assert` and `xs:assertion` assertions in XPath 1.0 with the common XPath 2.0 constructs (`if`, `some`/`every`, `eq`/`lt`…, `xs:decimal(…)`, `xs:date(…)`) and **exact decimal arithmetic** (`0.10 + 0.20 = 0.30` is true), `xs:override`, `vc:minVersion`/`vc:maxVersion`. Neither Xerces-C++, nor libxml2, nor .NET has assertions.
 - **All of XPath 1.0:** all 13 axes, including `namespace`, all 27 functions of the core library, variables and prefixes.
 - **XInclude 1.0:** `parse="xml|text"`, `xi:fallback`, XPointer `element()` and by ID, cycle protection.
 - **DOM Traversal:** `TreeWalker` and `NodeIterator` with filters — the algorithms strictly follow the W3C specification.
@@ -148,7 +149,7 @@ What popular XML libraries for C and C++ can do "out of the box" (versions as in
 | Strings in the API | `std::string` (UTF-8) | `xmlChar*` (UTF-8), manual `xmlFree` | `XMLCh*` (UTF-16), `transcode`/`release` | `char*` or `wchar_t*` | `const char*` | `char*` |
 | Namespaces | yes, "live" URIs | yes | yes | no (the prefix is part of the name) | no | no |
 | DTD validation | yes | yes | yes | no | no | no |
-| XML Schema | 1.0: keys, substitution groups, `redefine` | 1.0, partial | 1.0, the most complete | no | no | no |
+| XML Schema | 1.0: keys, substitution groups, `redefine`; from 1.1 — `xs:assert` | 1.0, partial | 1.0, the most complete | no | no | no |
 | XPath 1.0 | all of it, with the `namespace` axis | yes | only for XSD keys | yes, prefixes are part of the name | no | no |
 | XInclude | yes | yes | yes | no | no | no |
 | Encodings without external libraries | 8, including windows-1251, KOI8-R, IBM866 | UTF-8/16, Latin-1; the rest through iconv | many built in, the rest through ICU | UTF-8/16/32, Latin-1 | UTF-8 | UTF-8 |
@@ -948,7 +949,9 @@ std::vector<beresta::Diagnostic> errors = validator.takeDiagnostics();
 - all **45 built-in types** of XSD 1.0 (strings, integers with exact bounds, `decimal`, `float`/`double`, dates and times with time zones, `duration`, `hexBinary`, `base64Binary`, `QName`, ID/IDREF(S), NMTOKEN(S), ENTITY(IES) and so on);
 - `ID` uniqueness and the existence of `IDREF` targets;
 - the identity constraints `xs:unique`, `xs:key`, `xs:keyref` (details below);
-- `xs:include` (including "chameleon" schemas), `xs:import`, `xs:redefine` and `xs:override` (from XSD 1.1: replacing a component entirely).
+- `xs:include` (including "chameleon" schemas), `xs:import`, `xs:redefine` and `xs:override` (from XSD 1.1: replacing a component entirely);
+- XSD 1.1 assertions: `xs:assert` of complex types (the ones inherited through `extension`/`restriction` are checked too) and the `xs:assertion` facet of simple types with `$value` (details below);
+- XSD 1.1 conditional inclusion: Beresta is a version 1.1 processor, components with `vc:minVersion` > 1.1 or `vc:maxVersion` <= 1.1 are skipped at loading.
 
 **Substitution groups and `xs:redefine` do not slow validation down.** Replacing components through `xs:redefine` / `xs:override` happens in the definition registry before the models are built — the validated document does not know about it. The set of admissible substitutes of every head is computed once when the schema is loaded (transitively, taking `abstract`, `block` and `final` into account) and kept ordered: a child's name is looked up by a binary search only if it did not match the particle itself. The group flag sits on the model particle, so models without substitution groups still take the fast greedy path.
 
@@ -964,6 +967,48 @@ std::vector<beresta::Diagnostic> errors = validator.takeDiagnostics();
     </xs:complexType>
 </xs:redefine>
 ```
+
+### XSD 1.1 assertions: xs:assert and xs:assertion
+
+Rules that a content model cannot express — reconciling sums, dependencies between fields, conditions on dates — are written right in the schema as an XPath expression. An example is a bank statement whose closing balance must match the transactions:
+
+```xml
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:vc="http://www.w3.org/2007/XMLSchema-versioning" vc:minVersion="1.1">
+  <xs:element name="Statement">
+    <xs:complexType>
+      <xs:sequence>
+        <!-- AccountInfo: saldoAwal, saldoAkhir (xs:decimal); Transactions/Tx: type, amount (xs:decimal) -->
+      </xs:sequence>
+      <!-- without transactions the balances are equal -->
+      <xs:assert test="if (not(Transactions/Tx)) then AccountInfo/saldoAwal = AccountInfo/saldoAkhir else true()"/>
+      <!-- opening balance + credit - debit = closing balance -->
+      <xs:assert test="if (Transactions/Tx) then (AccountInfo/saldoAwal + sum(Transactions/Tx[type='cr']/amount)
+                       - sum(Transactions/Tx[type='dr']/amount) = AccountInfo/saldoAkhir) else true()"/>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- a facet: a non-negative amount with at most two digits after the point -->
+  <xs:simpleType name="Amount">
+    <xs:restriction base="xs:decimal">
+      <xs:assertion test="$value ge 0 and $value * 100 = floor($value * 100)"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>
+```
+
+```
+line 2, column 1: /Statement: the assertion if (Transactions/Tx) then (AccountInfo/saldoAwal + … is not satisfied
+/payment/amount: the value "10.005" does not satisfy the assertion $value ge 0 and $value * 100 = floor($value * 100)
+```
+
+- **Exact decimal arithmetic.** Values of `xs:decimal` and its derivatives (`xs:integer`, `xs:long` …) and the numbers in the expression itself are exact decimal numbers of any length: `+ - *`, `div` (18 digits after the point), `mod`, `sum()`, `floor`/`ceiling`/`round` and comparisons are computed without `double`. So `0.10 + 0.20 = 0.30` is true, ten credits of `0.10` give exactly `1.00`, and sums beyond the precision of `double` match to the cent. An untyped text that looks like a decimal number is added exactly too; `xs:double`/`xs:float` are computed in `double`, as XPath 2.0 requires.
+- **Typed values.** A node is atomized by its type from validation (an analog of the PSVI): `xs:decimal` is a number, `xs:boolean` is a boolean, `xs:date`/`xs:dateTime` are moments in time with the time zone taken into account, everything else is a string. So `1000.00 = 1000` is true. An empty element with a `default` value sees that value. An element with element-only content has no typed value: comparing with it is an error.
+- **The assertion language** is the whole of XPath 1.0 plus the common XPath 2.0 constructs: `if (…) then … else …`, `some`/`every $x in … satisfies …` (several bindings separated by commas), the value comparisons `eq ne lt le gt ge`, the constructors `xs:string`, `xs:boolean`, `xs:decimal`, `xs:integer`, `xs:double`, `xs:date`, `xs:dateTime`, the functions `exists()` and `empty()`. A name without a prefix is in no namespace unless `xpathDefaultNamespace` is given (on `xs:assert`, `xs:assertion` or `xs:schema`: a URI, `##targetNamespace`, `##defaultNamespace`, `##local`).
+- **Everything else from XPath 2.0 is a schema loading error**, not a "silent" truth during validation: `for`, `instance of`, `cast as`, `castable as`, `to`, `idiv`, `intersect`/`except`, `is`, sequences `(1, 2)`, numbers with an exponent, functions outside the list (`matches`, `tokenize`, `string-join`, `fn:*` …), constructors of other types (`xs:time`, durations) and absolute paths (the root of the assertion tree is the element itself, not a document). The message gives the schema line and the assertion text: `schema, line 12: the assertion test="…" is invalid or uses an unsupported XPath 2.0 construct: …`.
+- **An evaluation error is a violation**, as XSD 1.1 requires: a string that cannot be cast to a number, division by zero, date arithmetic, several nodes where one value is expected — the assertion is not satisfied, the reason is in the message.
+- **Inheritance.** The assertions of the base type are checked for derived types too (`extension`, `restriction`, `xsi:type`); `xs:assertion` facets accumulate over the restriction steps, and for a union `$value` is typed by the matching member.
+- **Three modes — the same violations** (path, line, column): validation of a ready tree, parsing into a DOM with a schema and the streaming `SaxParser`. An assertion needs the whole element, so the stream copies into a mini-tree the subtree of only those elements whose type has assertions, and evaluates them when the element closes; the rest of the validation still takes O(depth). The mini-tree of a nested element moves into the outer one after its check without copying, and the traversal uses an explicit stack.
 
 ### Identity constraints: xs:key, xs:unique, xs:keyref
 
@@ -1557,11 +1602,12 @@ Deliberate limitations (KISS / YAGNI):
 
 - **XML Schema** is a subset of XSD 1.0:
   - when the schema is loaded, the validity of a content model restriction under `restriction` (cos-particle-restrict) and the unambiguity of a model (UPA) are not checked: an ambiguous model is accepted and checked exactly, without picking the first branch;
-  - from XSD 1.1 there is only `xs:override`; `xs:assert`, `xs:alternative` and open content are not supported;
+  - from XSD 1.1 there are `xs:override`, the `xs:assert`/`xs:assertion` assertions and `vc:minVersion`/`vc:maxVersion`; `xs:alternative`, open content, `vc:typeAvailable` and the other version attributes are not supported;
+  - the assertion language is XPath 1.0 and a subset of XPath 2.0 (see "XSD 1.1 assertions" above), the other XPath 2.0 constructs are a schema loading error. Dates are compared, but there is no date and duration arithmetic; an assertion sees the values of `xs:time`, `xs:duration`, the g-types, the binary types, `QName` and lists as strings; the `xs:assertion` facet of a list type is a loading error; assertions are not checked for an element with `xsi:nil="true"`; comments and processing instructions do not get into the assertion tree;
   - default values from the schema are not added to the DOM;
   - `duration` has no order for the bound facets;
   - Unicode categories in `pattern` (`\p{L}` and the like) cover the main scripts (Latin, Cyrillic, Greek, Hebrew, Arabic, CJK), not the whole Unicode table.
-- **XPath:** XPath 1.0 is fully supported; XPath 2.0/3.1 (the XSD type system, sequences, FLWOR) is a separate language and is not part of Beresta. Xerces, Xalan, libxml2 and System.Xml do not have it either.
+- **XPath:** XPath 1.0 is fully supported; from XPath 2.0 — only the subset for XSD 1.1 assertions (with typed values and exact xs:decimal arithmetic). General XPath 2.0/3.1 (sequences, FLWOR, the full type system) is a separate language and is not part of Beresta. Xerces, Xalan, libxml2 and System.Xml do not have it either.
 - **XInclude:** the `xml:base` attribute is not added to included content; XPointer is only `element()` and ID.
 - **Encodings:** the eight listed above. Others have to be converted in advance or added with your own table.
 - **No** XSLT, DOM Range, XML 1.1 specifics (`version="1.1"` is parsed by the 1.0 rules) or network loading.
@@ -1653,11 +1699,11 @@ A node wrapper is a native handle plus a reference to the owner document: while 
 make test
 ```
 
-**159 C++ tests in 53 suites:**
+**173 C++ tests in 59 suites:**
 - the core: copying, hierarchy, elements, navigation, namespaces, serialization, trees 100,000 levels deep;
 - the parser: formats, content, errors, limits, SAX (including PIs from the DTD), encodings, protection from complexity attacks (repeated attributes beyond the loop threshold, the keyed hash, a linear growth of the parse time from 25,000 to 200,000 attributes), mapping files into memory (Cyrillic names, an empty file, CRLF and windows-1251);
 - DTD: entities, validity checking, external resources;
-- the serializer, tree traversal, XPath (paths, axes, functions, the `namespace` axis, names), XSD (types, schemas, advanced features, `xs:key`/`xs:unique`/`xs:keyref`, paths in error messages, whitespace rules, substitution groups, `xsi:type` with `block`/`final`/`abstract`, `xs:redefine`/`xs:override`; streaming validation: SAX, DOM and a ready tree give the same errors, streaming keys, a deep document), a recursive schema 10,000 levels deep with `xs:unique` in all three modes), the content model (the step-by-step cursor against the general algorithm on thousands of random models), XInclude;
+- the serializer, tree traversal, XPath (paths, axes, functions, the `namespace` axis, names), XSD (types, schemas, advanced features, `xs:key`/`xs:unique`/`xs:keyref`, paths in error messages, whitespace rules, substitution groups, `xsi:type` with `block`/`final`/`abstract`, `xs:redefine`/`xs:override`; the XSD 1.1 assertions `xs:assert`/`xs:assertion` — the bank statement example, negative cases, exact arithmetic of cents, inheritance, XPath 2.0 constructs, unsupported XPath 2.0 as a loading error, `vc:minVersion`, a shared schema from 8 threads; streaming validation: SAX, DOM and a ready tree give the same errors, streaming keys, a deep document), a recursive schema 10,000 levels deep with `xs:unique` in all three modes), the content model (the step-by-step cursor against the general algorithm on thousands of random models), exact decimal arithmetic, XInclude;
 - the C interface: error codes, building and changing the tree, moving nodes between documents (with freeing the source document and rolling back a rejected move), XPath, XML Schema, streaming validation (matches the tree validation, files, errors); load like the wrappers': 20 threads on a shared schema, XPath and document (every thread has its own errors), 50,000 moves between documents with a check of every previously given handle;
 - message languages: catalog completeness (every message has a translation with the same `{N}` markers), changing the language at run time, argument substitution;
 - regressions: differences from the W3C suite (syntax, entities, validity, encodings) and fuzzing findings.

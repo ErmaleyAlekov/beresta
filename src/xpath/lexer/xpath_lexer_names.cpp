@@ -15,10 +15,14 @@ namespace beresta::xpath::detail
 
     /*
     ** Имя или '*'. Правила однозначности XPath 1.0: после операнда '*' —
-    ** умножение, а имя — оператор (and, or, mod, div).
+    ** умножение, а имя — оператор (and, or, mod, div; в утверждениях XSD
+    ** ещё then, else, in, satisfies, eq, ne, lt, le, gt, ge). Любое другое
+    ** слово после операнда (instance, cast, to, idiv…) — синтаксическая ошибка.
     **
     ** A name or '*'. The XPath 1.0 disambiguation rules: after an operand '*' is
-    ** multiplication, and a name is an operator (and, or, mod, div).
+    ** multiplication, and a name is an operator (and, or, mod, div; in XSD assertions
+    ** also then, else, in, satisfies, eq, ne, lt, le, gt, ge). Any other
+    ** word after an operand (instance, cast, to, idiv…) is a syntax error.
     */
     Token XPathLexer::readNameLike()
     {
@@ -34,7 +38,7 @@ namespace beresta::xpath::detail
         std::string name = readNcName();
         if (!afterOperand)
             return classifyName(name);
-        if (name == "and" || name == "or" || name == "mod" || name == "div")
+        if (isOperatorName(name))
             return makeToken(TokenType::OPERATOR_NAME, name);
         fail(i18n::format(i18n::Message::XPATH_EXPECTED_OPERATOR, {name}));
     }

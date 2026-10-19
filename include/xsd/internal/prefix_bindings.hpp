@@ -54,6 +54,10 @@ namespace beresta::xsd::detail
 
         bool isBound(std::string_view prefix) const override;
 
+        // Действующие объявления (ближайшее для каждого префикса; prefix_bindings_scope.cpp)
+        // The declarations in effect (the nearest one for each prefix; prefix_bindings_scope.cpp)
+        std::vector<PrefixBinding> inScope() const;
+
     private:
         std::vector<PrefixBinding> _bindings;
         std::size_t _used;

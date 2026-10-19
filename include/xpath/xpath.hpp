@@ -17,6 +17,7 @@ namespace beresta::xpath
     namespace detail
     {
         class Expr;
+        class ExpressionAccess;
     }
 
     /*
@@ -70,6 +71,12 @@ namespace beresta::xpath
         const std::string& getSource() const noexcept;
 
     private:
+        // Утверждения XSD 1.1 компилируются и вычисляются через detail::ExpressionAccess
+        // XSD 1.1 assertions are compiled and evaluated through detail::ExpressionAccess
+        friend class detail::ExpressionAccess;
+
+        XPathExpression(std::string source, std::shared_ptr<const detail::Expr> root) noexcept;
+
         std::string _source;
         std::shared_ptr<const detail::Expr> _root;
     };

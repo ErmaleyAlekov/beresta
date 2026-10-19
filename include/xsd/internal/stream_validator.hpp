@@ -27,6 +27,8 @@
 
 namespace beresta::xsd::detail
 {
+    class AssertionRecorder;
+
     // Как проверяется открытый элемент
     // How an open element is validated
     enum class FrameMode
@@ -186,6 +188,12 @@ namespace beresta::xsd::detail
         void notifyIdentityStart(const SaxElement& element);
         void notifyIdentityEnd(const ElementFrame& frame, const SimpleType* valueType);
 
+        // ---- Утверждения xs:assert (stream_assertions.cpp) ----
+        // ---- xs:assert assertions (stream_assertions.cpp) ----
+        bool recordingAssertions() const noexcept;
+        void notifyAssertionStart(const SaxElement& element);
+        void notifyAssertionEnd(const ElementFrame& frame, const SimpleType* valueType);
+
         // ---- Пространства имён без поддержки парсера (stream_namespaces.cpp) ----
         // ---- Namespaces without the parser's support (stream_namespaces.cpp) ----
         SaxElement resolveNames(const SaxElement& element);
@@ -208,6 +216,7 @@ namespace beresta::xsd::detail
         const content::Particle* _lastParticle;
         content::CursorPlan _lastPlan;
         std::unique_ptr<IdentityTracker> _identity;
+        std::unique_ptr<AssertionRecorder> _assertions;
         std::vector<SaxAttribute> _resolvedAttributes;
         std::vector<std::string> _resolvedUris;
         std::string _resolvedElementUri;

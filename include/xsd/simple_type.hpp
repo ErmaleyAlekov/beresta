@@ -15,6 +15,7 @@
 namespace beresta::xsd
 {
     class PrefixResolver;
+    struct Assertion;
 
     // Пространство имён XML Schema
     // The XML Schema namespace
@@ -61,11 +62,15 @@ namespace beresta::xsd
     ** базового типа копируются и уточняются. Шаблоны хранятся группами:
     ** внутри группы (один шаг наследования) достаточно совпасть с любым,
     ** но значение обязано пройти КАЖДУЮ группу (все шаги наследования).
+    ** Утверждения xs:assertion (XSD 1.1) накапливаются так же: значение
+    ** обязано удовлетворить утверждениям всех шагов.
     **
     ** Facets are value restrictions. On derivation by restriction the facets
     ** of the base type are copied and refined. Patterns are stored in groups:
     ** inside a group (one derivation step) matching any one is enough,
     ** but the value must pass EVERY group (all derivation steps).
+    ** xs:assertion assertions (XSD 1.1) accumulate the same way: the value
+    ** must satisfy the assertions of all the steps.
     */
     struct Facets
     {
@@ -81,6 +86,7 @@ namespace beresta::xsd
         std::optional<std::string> minExclusive;
         std::optional<std::string> maxExclusive;
         WhiteSpace whiteSpace = WhiteSpace::PRESERVE;
+        std::vector<std::shared_ptr<const Assertion>> assertions;
     };
 
     /*

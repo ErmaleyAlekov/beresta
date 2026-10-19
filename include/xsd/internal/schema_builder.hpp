@@ -167,7 +167,14 @@ namespace beresta::xsd::detail
             const SchemaSource& source);
         void buildRestriction(SimpleType& type, const Element& restriction, const SchemaSource& source);
         void buildMembers(SimpleType& type, const Element& definition, const SchemaSource& source);
-        void applyFacets(SimpleType& type, const Element& restriction);
+        void applyFacets(SimpleType& type, const Element& restriction, const SchemaSource& source);
+
+        // ---- Утверждения XSD 1.1 (schema_builder_assertions.cpp) ----
+        // ---- XSD 1.1 assertions (schema_builder_assertions.cpp) ----
+        std::shared_ptr<const Assertion> buildAssertion(const Element& definition,
+            const SchemaSource& source) const;
+        void readAssertions(const Element& body, const SchemaSource& source, ComplexType& type) const;
+        void readAssertionFacets(SimpleType& type, const Element& restriction, const SchemaSource& source) const;
 
         // ---- Составные типы (schema_builder_complex.cpp) ----
         // ---- Complex types (schema_builder_complex.cpp) ----
@@ -255,6 +262,17 @@ namespace beresta::xsd::detail
     // Префиксы, объявленные на элементе схемы и его предках (для XPath селекторов)
     // The prefixes declared on the schema element and its ancestors (for XPath selectors)
     xpath::XPathContext namespacesInScope(const Element& element);
+
+    /*
+    ** Условное включение XSD 1.1 (schema_versioning.cpp): «Берёста» — процессор
+    ** версии 1.1, поэтому компонент с vc:minVersion > 1.1 или vc:maxVersion <= 1.1
+    ** пропускается при загрузке, как будто его нет в документе схемы.
+    **
+    ** XSD 1.1 conditional inclusion (schema_versioning.cpp): Beresta is a processor
+    ** of version 1.1, so a component with vc:minVersion > 1.1 or vc:maxVersion <= 1.1
+    ** is skipped at loading, as if it were not in the schema document.
+    */
+    bool versionAccepted(const Element& element);
 }
 
 #endif

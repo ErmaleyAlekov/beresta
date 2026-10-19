@@ -4,7 +4,7 @@ namespace beresta::xpath::detail
 {
     // Сравнение чисел (NaN ни с чем не равен — так ведёт себя IEEE 754)
     // Comparing numbers (NaN equals nothing — this is how IEEE 754 behaves)
-    static bool compareNumbers(BinaryOperator op, double left, double right) noexcept
+    bool compareNumbers(BinaryOperator op, double left, double right) noexcept
     {
         switch (op)
         {

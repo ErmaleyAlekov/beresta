@@ -59,23 +59,8 @@ namespace beresta::xsd::detail
     bool readSeconds(std::string_view text, std::size_t& position, long double& seconds) noexcept;
     bool readTimezone(std::string_view text, std::size_t& position, DateTimeValue& result) noexcept;
 
-    // ---- Сравнение значений (value_compare.cpp) ----
-    // ---- Value comparison (value_compare.cpp) ----
-
-    // Десятичное число по частям: знак, целая часть без ведущих нулей, дробь без хвостовых
-    // A decimal number in parts: the sign, the integer part without leading zeros, the fraction without trailing ones
-    struct DecimalParts
-    {
-        bool negative = false;
-        std::string_view integer;
-        std::string_view fraction;
-    };
-
     // ---- Значения (value_compare.cpp, value_order.cpp) ----
-    // Разбор уже проверенной лексики decimal на части (части ссылаются на value)
     // ---- Values (value_compare.cpp, value_order.cpp) ----
-    // Splits already checked decimal lexis into parts (the parts refer to value)
-    DecimalParts splitDecimal(std::string_view value) noexcept;
 
     // float / double в long double: INF, -INF, NaN, мантисса и экспонента
     // float / double to long double: INF, -INF, NaN, the mantissa and the exponent
@@ -89,9 +74,8 @@ namespace beresta::xsd::detail
     // The canonical form of an atomic value with the primitive prefix (value_canonical.cpp)
     std::string canonicalAtomic(Primitive primitive, const std::string& value);
 
-    // -1, 0, 1 — порядок; 2 — несравнимы (NaN, разные виды значений)
-    // -1, 0, 1 — the order; 2 — incomparable (NaN, different kinds of values)
-    int compareDecimal(std::string_view left, std::string_view right);
+    // -1, 0, 1 — порядок; 2 — несравнимы (NaN, разные виды значений); decimal — utils::compareDecimalText
+    // -1, 0, 1 — the order; 2 — incomparable (NaN, different kinds of values); decimal — utils::compareDecimalText
     int compareOrdered(Primitive primitive, std::string_view left, std::string_view right);
 
     // Нарушает ли результат сравнения границу (нижнюю/верхнюю, включающую/исключающую)

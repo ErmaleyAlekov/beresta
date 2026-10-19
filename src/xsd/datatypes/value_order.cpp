@@ -1,4 +1,5 @@
 #include "xsd/internal/datatype_checks.hpp"
+#include "utils/decimal.hpp"
 
 #include <cmath>
 
@@ -92,7 +93,7 @@ namespace beresta::xsd::detail
     int compareOrdered(Primitive primitive, std::string_view left, std::string_view right)
     {
         if (primitive == Primitive::DECIMAL)
-            return compareDecimal(left, right);
+            return utils::compareDecimalText(left, right);
         if (primitive == Primitive::FLOAT || primitive == Primitive::DOUBLE)
             return compareLongDoubles(parseFloatValue(left), parseFloatValue(right));
         DateTimeValue a;

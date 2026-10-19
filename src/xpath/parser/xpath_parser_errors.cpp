@@ -10,7 +10,7 @@ namespace beresta::xpath::detail
     {
         while (accept(TokenType::LEFT_BRACKET))
         {
-            predicates.push_back(parseBinary(0));
+            predicates.push_back(parseExprSingle());
             expect(TokenType::RIGHT_BRACKET, "']'");
         }
     }

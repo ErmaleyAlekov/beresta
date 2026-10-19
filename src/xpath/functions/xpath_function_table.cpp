@@ -35,19 +35,49 @@ namespace beresta::xpath::detail
         {"floor", 1, 1, functionFloor}, {"ceiling", 1, 1, functionCeiling}, {"round", 1, 1, functionRound}
     };
 
+    // Функции XPath 2.0, нужные утверждениям XSD (в XPath 1.0 их нет)
+    // XPath 2.0 functions needed by XSD assertions (XPath 1.0 has none of them)
+    static const FunctionEntry XPATH2_FUNCTIONS[] = {
+        {"exists", 1, 1, functionExists}, {"empty", 1, 1, functionEmpty}
+    };
+
+    // Описание функции по имени: базовая библиотека, а при xpath2 — и функции XPath 2.0
+    // A function description by name: the core library, and with xpath2 — also the XPath 2.0 functions
+    static const FunctionEntry* findFunction(const std::string& name, bool xpath2) noexcept
+    {
+        for (const FunctionEntry& entry : FUNCTIONS)
+        {
+            if (name == entry.name)
+                return &entry;
+        }
+        for (const FunctionEntry& entry : XPATH2_FUNCTIONS)
+        {
+            if (xpath2 && name == entry.name)
+                return &entry;
+        }
+        return nullptr;
+    }
+
+    // Известна ли функция с таким числом аргументов (проверка утверждений при загрузке схемы)
+    // Whether a function with this number of arguments is known (checking assertions when loading a schema)
+    bool isKnownFunction(const std::string& name, std::size_t count, bool xpath2)
+    {
+        const FunctionEntry* entry = findFunction(name, xpath2);
+
+        return entry != nullptr && count >= entry->minArguments && count <= entry->maxArguments;
+    }
+
     // Поиск функции по имени и проверка числа аргументов
     // Looks up a function by name and checks the number of arguments
     XPathValue callFunction(const std::string& name, const std::vector<ExprPtr>& arguments,
         const EvalContext& context)
     {
-        for (const FunctionEntry& entry : FUNCTIONS)
-        {
-            if (name != entry.name)
-                continue;
-            if (arguments.size() < entry.minArguments || arguments.size() > entry.maxArguments)
-                failEvaluation(i18n::format(i18n::Message::XPATH_WRONG_ARGUMENT_COUNT, {name}));
-            return entry.implementation(FunctionCall{arguments, context});
-        }
-        failEvaluation(i18n::format(i18n::Message::XPATH_UNKNOWN_FUNCTION, {name}));
+        const FunctionEntry* entry = findFunction(name, context.typed != nullptr);
+
+        if (entry == nullptr)
+            failEvaluation(i18n::format(i18n::Message::XPATH_UNKNOWN_FUNCTION, {name}));
+        if (arguments.size() < entry->minArguments || arguments.size() > entry->maxArguments)
+            failEvaluation(i18n::format(i18n::Message::XPATH_WRONG_ARGUMENT_COUNT, {name}));
+        return entry->implementation(FunctionCall{arguments, context});
     }
 }

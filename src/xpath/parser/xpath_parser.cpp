@@ -20,21 +20,29 @@ namespace beresta::xpath::detail
     };
 
     /*
-    ** Уровни: 0 — or, 1 — and, 2 — = !=, 3 — < <= > >=, 4 — + -, 5 — * div mod.
-    ** Для OPERATOR_NAME дополнительно сравнивается текст лексемы.
+    ** Уровни: 0 — or, 1 — and, 2 — = != eq ne, 3 — < <= > >= lt le gt ge,
+    ** 4 — + -, 5 — * div mod. Для OPERATOR_NAME дополнительно сравнивается
+    ** текст лексемы; eq … ge лексер выдаёт только в диалекте утверждений.
     **
-    ** Levels: 0 — or, 1 — and, 2 — = !=, 3 — < <= > >=, 4 — + -, 5 — * div mod.
-    ** For OPERATOR_NAME the token text is compared too.
+    ** Levels: 0 — or, 1 — and, 2 — = != eq ne, 3 — < <= > >= lt le gt ge,
+    ** 4 — + -, 5 — * div mod. For OPERATOR_NAME the token text is compared
+    ** too; the lexer produces eq … ge only in the assertion dialect.
     */
     static const OperatorEntry OPERATORS[] = {
         {0, TokenType::OPERATOR_NAME, "or", BinaryOperator::OR_OP},
         {1, TokenType::OPERATOR_NAME, "and", BinaryOperator::AND_OP},
         {2, TokenType::EQUAL, "", BinaryOperator::EQUAL_OP},
         {2, TokenType::NOT_EQUAL, "", BinaryOperator::NOT_EQUAL_OP},
+        {2, TokenType::OPERATOR_NAME, "eq", BinaryOperator::VALUE_EQUAL_OP},
+        {2, TokenType::OPERATOR_NAME, "ne", BinaryOperator::VALUE_NOT_EQUAL_OP},
         {3, TokenType::LESS, "", BinaryOperator::LESS_OP},
         {3, TokenType::LESS_EQUAL, "", BinaryOperator::LESS_EQUAL_OP},
         {3, TokenType::GREATER, "", BinaryOperator::GREATER_OP},
         {3, TokenType::GREATER_EQUAL, "", BinaryOperator::GREATER_EQUAL_OP},
+        {3, TokenType::OPERATOR_NAME, "lt", BinaryOperator::VALUE_LESS_OP},
+        {3, TokenType::OPERATOR_NAME, "le", BinaryOperator::VALUE_LESS_EQUAL_OP},
+        {3, TokenType::OPERATOR_NAME, "gt", BinaryOperator::VALUE_GREATER_OP},
+        {3, TokenType::OPERATOR_NAME, "ge", BinaryOperator::VALUE_GREATER_EQUAL_OP},
         {4, TokenType::PLUS, "", BinaryOperator::PLUS_OP},
         {4, TokenType::MINUS_SIGN, "", BinaryOperator::MINUS_OP},
         {5, TokenType::MULTIPLY, "", BinaryOperator::MULTIPLY_OP},
@@ -58,18 +66,18 @@ namespace beresta::xpath::detail
         return false;
     }
 
-    // Парсер работает по готовому списку лексем
-    // The parser works over a ready list of tokens
-    XPathParser::XPathParser(std::vector<Token> tokens)
-        : _tokens(std::move(tokens)), _index(0)
+    // Парсер работает по готовому списку лексем в заданном диалекте
+    // The parser works over a ready list of tokens in the given dialect
+    XPathParser::XPathParser(std::vector<Token> tokens, XPathDialect dialect, const XPathContext* namespaces)
+        : _tokens(std::move(tokens)), _index(0), _dialect(dialect), _namespaces(namespaces)
     {
     }
 
-    // Всё выражение — бинарное выражение самого низкого приоритета
-    // The whole expression is a binary expression of the lowest precedence
+    // Всё выражение — одиночное выражение (в XPath 1.0 — бинарное самого низкого приоритета)
+    // The whole expression is a single expression (in XPath 1.0 — a binary one of the lowest precedence)
     ExprPtr XPathParser::parse()
     {
-        ExprPtr expression = parseBinary(0);
+        ExprPtr expression = parseExprSingle();
 
         if (peek().type != TokenType::END_OF_INPUT)
             fail(i18n::format(i18n::Message::XPATH_EXTRA_TOKEN, {peek().text}));

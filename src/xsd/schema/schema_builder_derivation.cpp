@@ -8,10 +8,12 @@ namespace beresta::xsd::detail
     ** xs:simpleContent: текст простого типа + атрибуты. Расширение берёт
     ** тип текста как есть; ограничение создаёт производный простой тип
     ** с фасетами из xs:restriction. Атрибуты базового типа наследуются.
+    ** Свои утверждения xs:assert идут после унаследованных (completeBase).
     **
     ** xs:simpleContent: text of a simple type + attributes. An extension takes
     ** the text type as is; a restriction creates a derived simple type
     ** with the facets from xs:restriction. The attributes of the base type are inherited.
+    ** Own xs:assert assertions follow the inherited ones (completeBase).
     */
     void SchemaBuilder::buildSimpleContent(ComplexType& type, const Element& simpleContent,
         const SchemaSource& source)
@@ -38,10 +40,11 @@ namespace beresta::xsd::detail
             SimpleType& restricted = _schema._simpleTypes.back();
             restricted.baseType = type.simpleContent;
             restricted.finalSet = 0;
-            applyFacets(restricted, derivation);
+            applyFacets(restricted, derivation, source);
             type.simpleContent = &restricted;
         }
         buildAttributes(derivation, source, type, 0);
+        readAssertions(derivation, source, type);
     }
 
     /*

@@ -95,6 +95,14 @@ namespace beresta::i18n
         {Message::XPATH_UNKNOWN_FUNCTION, "an unknown function {0}()"},
         {Message::XPATH_COUNT_NOT_NODESET, "count() expects a node-set"},
         {Message::XPATH_SUM_NOT_NODESET, "sum() expects a node-set"},
+        {Message::XPATH_DATE_BOOLEAN, "the date \"{0}\" has no boolean value"},
+        {Message::XPATH_SEVERAL_ITEMS, "at most one value was expected, but there are {0} nodes"},
+        {Message::XPATH_CAST_FAILED, "the value \"{0}\" cannot be cast to the type xs:{1}"},
+        {Message::XPATH_DIVISION_BY_ZERO, "division by zero"},
+        {Message::XPATH_DATE_ARITHMETIC, "arithmetic on dates is not supported"},
+        {Message::XPATH_ASSERTION_FUNCTION, "the function {0}() with this number of arguments is not supported in XSD assertions (available: the XPath 1.0 functions, exists(), empty() and the constructors xs:string, xs:boolean, xs:decimal, xs:integer, xs:double, xs:date, xs:dateTime)"},
+        {Message::XPATH_ASSERTION_ABSOLUTE_PATH, "an absolute path is not allowed in an XSD assertion: the root of its tree is the validated element itself, not a document (XPDY0050)"},
+        {Message::XPATH_ELEMENT_ONLY, "the element {0} with element-only content has no typed value"},
 
         // ---- Разбор XML / XML parsing ----
         {Message::ATTRIBUTE_LT, "the character '<' is not allowed in an attribute value"},
@@ -317,6 +325,9 @@ namespace beresta::i18n
         {Message::SCHEMA_SIMPLE_TYPE_BODY, "xs:simpleType must contain restriction, list or union"},
         {Message::SCHEMA_UNION_MEMBER, "a union member must be a simple type"},
         {Message::SCHEMA_UNION_EMPTY, "a union without member types"},
+        {Message::SCHEMA_ASSERT_NO_TEST, "xs:{0} has no test attribute"},
+        {Message::SCHEMA_ASSERT_INVALID, "the assertion test=\"{0}\" is invalid or uses an unsupported XPath 2.0 construct: {1}"},
+        {Message::SCHEMA_ASSERTION_LIST, "the xs:assertion facet of a list type is not supported"},
 
         // ---- XML Schema: проверка документа / XML Schema validation ----
         {Message::XSD_ATTRIBUTE_UNDECLARED, "the attribute \"{0}\" is not declared in the type"},
@@ -346,6 +357,9 @@ namespace beresta::i18n
         {Message::XSD_SIMPLE_WITH_ATTRIBUTE, "the attribute \"{0}\" is not allowed on an element of a simple type"},
         {Message::XSD_ELEMENT_FIXED, "the value must be equal to the fixed value \"{0}\""},
         {Message::IDENTITY_NOT_STREAMABLE, "the constraint \"{0}\" is not checked: streaming validation without a tree requires xs:selector and xs:field to fit the XSD path grammar (the child and attribute axes, \".//\" and \"|\")"},
+        {Message::XSD_ASSERTION_FAILED, "the assertion {0} is not satisfied"},
+        {Message::XSD_ASSERTION_ERROR, "the assertion {0} is not satisfied: {1}"},
+        {Message::XSD_ASSERTION_FACET_FAILED, "the value \"{0}\" does not satisfy the assertion {1}"},
 
         // ---- Обёртки для других языков / Bindings for other languages ----
         {Message::BINDING_DOCUMENT_CLOSED, "the document is already closed, its nodes are no longer valid"},
