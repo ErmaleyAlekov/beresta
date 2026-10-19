@@ -45,13 +45,13 @@ namespace beresta::xsd::detail
     }
 
     /*
-    ** Тело типа: необязательная модель (sequence / choice / all / group)
-    ** и атрибуты. Модель заменяет унаследованную только если она есть;
-    ** склейку при расширении выполняет buildComplexContent.
+    ** Тело типа: необязательная модель (sequence / choice / all / group),
+    ** атрибуты и утверждения xs:assert. Модель заменяет унаследованную только
+    ** если она есть; склейку при расширении выполняет buildComplexContent.
     **
-    ** The type body: an optional model (sequence / choice / all / group)
-    ** and attributes. The model replaces the inherited one only if it exists;
-    ** the merge on extension is done by buildComplexContent.
+    ** The type body: an optional model (sequence / choice / all / group),
+    ** attributes and xs:assert assertions. The model replaces the inherited one only
+    ** if it exists; the merge on extension is done by buildComplexContent.
     */
     void SchemaBuilder::buildTypeBody(ComplexType& type, const Element& body, const SchemaSource& source,
         bool mixed)
@@ -70,6 +70,7 @@ namespace beresta::xsd::detail
         if (mixed)
             type.content = ContentType::MIXED_CONTENT;
         buildAttributes(body, source, type, 0);
+        readAssertions(body, source, type);
     }
 
     // Наследование задаётся единственным xs:extension или xs:restriction
@@ -91,11 +92,13 @@ namespace beresta::xsd::detail
     ** запоминаются в типе — по ним проверяется xsi:type. От незавершённого
     ** типа наследоваться нельзя (цикл), от типа с этим способом в final —
     ** тоже. Ссылка на собственное имя в xs:redefine ведёт к прежнему типу.
+    ** Утверждения базового типа наследуются и при расширении, и при ограничении.
     **
     ** The base type (xs:anyType by default) and the derivation method
     ** are remembered in the type — xsi:type is checked by them. Deriving from an
     ** incomplete type is not allowed (a cycle), nor from a type with this method in
     ** final. A reference to its own name in xs:redefine leads to the former type.
+    ** The assertions of the base type are inherited both on extension and on restriction.
     */
     const ComplexType* SchemaBuilder::completeBase(const Element& derivation, bool extension, ComplexType& type)
     {
@@ -112,6 +115,8 @@ namespace beresta::xsd::detail
             fail(derivation, i18n::format(i18n::Message::SCHEMA_CYCLIC_DERIVATION));
         if (base != nullptr)
             checkFinal(derivation, base->finalSet, base->name, type.derivationMethod);
+        if (base != nullptr)
+            type.assertions = base->assertions;
         return base;
     }
 

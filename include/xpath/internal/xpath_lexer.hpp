@@ -8,6 +8,21 @@
 
 namespace beresta::xpath::detail
 {
+    /*
+    ** Диалект выражения: чистый XPath 1.0 (XPathExpression, ключи XSD) или
+    ** язык утверждений XSD 1.1 — XPath 1.0 плюс небольшое подмножество
+    ** XPath 2.0 (if, some / every, eq …, конструкторы xs:*, exists / empty).
+    **
+    ** The expression dialect: pure XPath 1.0 (XPathExpression, XSD keys) or
+    ** the XSD 1.1 assertion language — XPath 1.0 plus a small subset of
+    ** XPath 2.0 (if, some / every, eq …, xs:* constructors, exists / empty).
+    */
+    enum class XPathDialect
+    {
+        XPATH_1_0,
+        XSD_ASSERTION
+    };
+
     // Вид лексемы XPath 1.0 (раздел 3.7 спецификации)
     // The kind of an XPath 1.0 token (section 3.7 of the specification)
     enum class TokenType
@@ -42,7 +57,7 @@ namespace beresta::xpath::detail
     class XPathLexer
     {
     public:
-        explicit XPathLexer(std::string_view source) noexcept;
+        explicit XPathLexer(std::string_view source, XPathDialect dialect = XPathDialect::XPATH_1_0) noexcept;
 
         // Все лексемы; последняя — END_OF_INPUT. Ошибка — DomException(XPATH_ERROR)
         // All tokens; the last one is END_OF_INPUT. An error is DomException(XPATH_ERROR)
@@ -63,6 +78,10 @@ namespace beresta::xpath::detail
         // Whether an operator can be expected at this position (the previous token is an operand)
         bool operatorExpected() const noexcept;
 
+        // Слово-оператор после операнда (xpath_lexer_operators.cpp)
+        // An operator word after an operand (xpath_lexer_operators.cpp)
+        bool isOperatorName(const std::string& name) const noexcept;
+
         // NCName (имя без двоеточия)
         // NCName (a name without a colon)
         std::string readNcName();
@@ -78,6 +97,7 @@ namespace beresta::xpath::detail
         [[noreturn]] void fail(const std::string& message) const;
 
         std::string_view _source;
+        XPathDialect _dialect;
         std::size_t _position;
         std::vector<Token> _tokens;
     };

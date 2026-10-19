@@ -4,6 +4,7 @@
 #include "content/particle.hpp"
 #include "core/document.hpp"
 #include "parser/resource_resolver.hpp"
+#include "xsd/assertion.hpp"
 #include "xsd/simple_type.hpp"
 #include "xpath/xpath.hpp"
 
@@ -90,12 +91,16 @@ namespace beresta::xsd
     ** Составной тип: модель содержимого и атрибуты. baseType и
     ** derivationMethod описывают шаг наследования (у типа без
     ** complexContent / simpleContent — ограничение xs:anyType); по ним
-    ** проверяется, выведен ли тип из xsi:type из объявленного.
+    ** проверяется, выведен ли тип из xsi:type из объявленного. assertions —
+    ** утверждения xs:assert (XSD 1.1): сначала унаследованные от базового
+    ** типа (и при расширении, и при ограничении), затем свои.
     **
     ** A complex type: the content model and the attributes. baseType and
     ** derivationMethod describe the derivation step (a type without
     ** complexContent / simpleContent is a restriction of xs:anyType); they are used
-    ** to check whether the xsi:type type is derived from the declared one.
+    ** to check whether the xsi:type type is derived from the declared one. assertions are
+    ** the xs:assert assertions (XSD 1.1): first the ones inherited from the base
+    ** type (both on extension and on restriction), then the own ones.
     */
     struct ComplexType
     {
@@ -116,6 +121,7 @@ namespace beresta::xsd
         ProcessContents attributeWildcard = ProcessContents::STRICT_CHECK;
         bool hasElementWildcard = false;
         ProcessContents elementWildcard = ProcessContents::STRICT_CHECK;
+        std::vector<std::shared_ptr<const Assertion>> assertions;
     };
 
     // Вид ограничения идентичности

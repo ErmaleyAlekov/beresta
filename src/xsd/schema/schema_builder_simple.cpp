@@ -111,7 +111,7 @@ namespace beresta::xsd::detail
         type.namespaceUri = namespaceUri;
         type.baseType = base;
         type.finalSet = 0;
-        applyFacets(type, restriction);
+        applyFacets(type, restriction, source);
     }
 
     // Объединение: типы из memberTypes (без циклов и запретов final) и вложенные анонимные типы

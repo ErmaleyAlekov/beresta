@@ -94,6 +94,14 @@ namespace beresta::i18n
         {Message::XPATH_UNKNOWN_FUNCTION, "неизвестная функция {0}()"},
         {Message::XPATH_COUNT_NOT_NODESET, "count() ожидает множество узлов"},
         {Message::XPATH_SUM_NOT_NODESET, "sum() ожидает множество узлов"},
+        {Message::XPATH_DATE_BOOLEAN, "у даты \"{0}\" нет логического значения"},
+        {Message::XPATH_SEVERAL_ITEMS, "ожидалось не больше одного значения, а узлов {0}"},
+        {Message::XPATH_CAST_FAILED, "значение \"{0}\" нельзя привести к типу xs:{1}"},
+        {Message::XPATH_DIVISION_BY_ZERO, "деление на ноль"},
+        {Message::XPATH_DATE_ARITHMETIC, "арифметика над датами не поддерживается"},
+        {Message::XPATH_ASSERTION_FUNCTION, "функция {0}() с таким числом аргументов не поддерживается в утверждениях XSD (доступны функции XPath 1.0, exists(), empty() и конструкторы xs:string, xs:boolean, xs:decimal, xs:integer, xs:double, xs:date, xs:dateTime)"},
+        {Message::XPATH_ASSERTION_ABSOLUTE_PATH, "абсолютный путь недопустим в утверждении XSD: корень его дерева — сам проверяемый элемент, а не документ (XPDY0050)"},
+        {Message::XPATH_ELEMENT_ONLY, "у элемента {0} с содержимым только из элементов нет типизированного значения"},
 
         // ---- Разбор XML / XML parsing ----
         {Message::ATTRIBUTE_LT, "символ '<' недопустим в значении атрибута"},
@@ -316,6 +324,9 @@ namespace beresta::i18n
         {Message::SCHEMA_SIMPLE_TYPE_BODY, "xs:simpleType должен содержать restriction, list или union"},
         {Message::SCHEMA_UNION_MEMBER, "член объединения должен быть простым типом"},
         {Message::SCHEMA_UNION_EMPTY, "объединение без типов-членов"},
+        {Message::SCHEMA_ASSERT_NO_TEST, "у xs:{0} нет атрибута test"},
+        {Message::SCHEMA_ASSERT_INVALID, "утверждение test=\"{0}\" некорректно или использует неподдерживаемую конструкцию XPath 2.0: {1}"},
+        {Message::SCHEMA_ASSERTION_LIST, "фасет xs:assertion у списочного типа не поддерживается"},
 
         // ---- XML Schema: проверка документа / XML Schema validation ----
         {Message::XSD_ATTRIBUTE_UNDECLARED, "атрибут \"{0}\" не объявлен в типе"},
@@ -345,6 +356,9 @@ namespace beresta::i18n
         {Message::XSD_SIMPLE_WITH_ATTRIBUTE, "атрибут \"{0}\" недопустим у элемента простого типа"},
         {Message::XSD_ELEMENT_FIXED, "значение должно быть равно фиксированному \"{0}\""},
         {Message::IDENTITY_NOT_STREAMABLE, "ограничение \"{0}\" не проверено: при потоковой проверке без дерева xs:selector и xs:field должны укладываться в грамматику путей XSD (оси child и attribute, \".//\" и \"|\")"},
+        {Message::XSD_ASSERTION_FAILED, "не выполнено утверждение {0}"},
+        {Message::XSD_ASSERTION_ERROR, "не выполнено утверждение {0}: {1}"},
+        {Message::XSD_ASSERTION_FACET_FAILED, "значение \"{0}\" не удовлетворяет утверждению {1}"},
 
         // ---- Обёртки для других языков / Bindings for other languages ----
         {Message::BINDING_DOCUMENT_CLOSED, "документ уже закрыт, его узлы недействительны"},

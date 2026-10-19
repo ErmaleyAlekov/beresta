@@ -7,7 +7,7 @@ namespace beresta::xpath
     // Пустое значение создаётся только фабричными методами ниже
     // An empty value is created only by the factory methods below
     XPathValue::XPathValue() noexcept
-        : _type(ValueType::BOOLEAN), _nodes(), _boolean(false), _number(0.0), _string()
+        : _type(ValueType::BOOLEAN), _nodes(), _boolean(false), _number(0.0), _string(), _decimal(), _dateKey(0.0L)
     {
     }
 

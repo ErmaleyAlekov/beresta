@@ -1,4 +1,5 @@
 #include "xsd/internal/stream_validator.hpp"
+#include "xsd/internal/assertion_recorder.hpp"
 #include "i18n/i18n.hpp"
 #include "utils/xml_chars.hpp"
 
@@ -18,11 +19,11 @@ namespace beresta::xsd::detail
     /*
     ** Приём ребёнка родителем (шаг модели, поиск объявления) или проверка
     ** корня, затем собственная проверка элемента и, наконец, ограничения
-    ** идентичности (им нужны уже известные типы атрибутов).
+    ** идентичности (им нужны уже известные типы атрибутов) и утверждения.
     **
     ** The admission of the child by the parent (a model step, the declaration lookup) or the check
     ** of the root, then the element's own check and, finally, the identity
-    ** constraints (they need the already known attribute types).
+    ** constraints (they need the already known attribute types) and the assertions.
     */
     void StreamValidator::checkStart(const SaxElement& element)
     {
@@ -36,16 +37,17 @@ namespace beresta::xsd::detail
             beginValidation(element, *declaration);
         if (_identity != nullptr)
             notifyIdentityStart(element);
+        notifyAssertionStart(element);
     }
 
     /*
     ** Конец элемента: итог простого значения или модели содержимого,
-    ** пустота при xsi:nil, затем ключи и закрытие уровня. Накопленный
-    ** текст принадлежал только этому элементу и больше не нужен.
+    ** пустота при xsi:nil, затем утверждения, ключи и закрытие уровня.
+    ** Накопленный текст принадлежал только этому элементу и больше не нужен.
     **
     ** An element end: the result of the simple value or the content model,
-    ** emptiness with xsi:nil, then the keys and closing the level. The accumulated
-    ** text belonged only to this element and is no longer needed.
+    ** emptiness with xsi:nil, then the assertions, the keys and closing the level.
+    ** The accumulated text belonged only to this element and is no longer needed.
     */
     void StreamValidator::endElement()
     {
@@ -58,6 +60,8 @@ namespace beresta::xsd::detail
             valueType = closeComplex(frame);
         else if (frame.mode == FrameMode::NIL && frame.hasChildNode)
             report(_depth - 1, CheckPhase::NIL, i18n::format(i18n::Message::XSD_NIL_NOT_EMPTY));
+        if (recordingAssertions())
+            notifyAssertionEnd(frame, valueType);
         if (_identity != nullptr)
             notifyIdentityEnd(frame, valueType);
         _paths.close();
@@ -72,12 +76,14 @@ namespace beresta::xsd::detail
     ** уже ребёнок для xsi:nil; значимость нужна лишь составному типу, у
     ** остальных текст не просматривается. Текст копится, только если он нужен
     ** (простое значение или поле ключа) и детей-элементов ещё не было.
+    ** Внутри элемента с утверждениями текст ещё и копируется в мини-дерево.
     **
     ** Text or CDATA. As in a tree after DomBuilder: significant text is
     ** non-whitespace or CDATA (unless it is merged with text); any piece is
     ** already a child for xsi:nil; significance is needed only by a complex type, for
     ** the others the text is not scanned. The text is accumulated only if it is needed
     ** (a simple value or a key field) and there have been no child elements yet.
+    ** Inside an element with assertions the text is also copied into the mini-tree.
     */
     void StreamValidator::text(std::string_view content, bool isCData)
     {
@@ -90,6 +96,8 @@ namespace beresta::xsd::detail
             frame.significantText = true;
         if (frame.collectText && !frame.hasChildElement)
             _text.append(content.data(), content.size());
+        if (recordingAssertions())
+            _assertions->textAppended(content);
     }
 
     // Комментарий (если DomBuilder его не выбрасывает) или PI — ребёнок, но не текст

@@ -84,12 +84,16 @@ namespace beresta::xsd::detail
 
     /*
     ** Фасеты одного шага ограничения. Шаблоны шага образуют одну группу
-    ** (достаточно совпасть с любым), перечисление шага заменяет базовое.
+    ** (достаточно совпасть с любым), перечисление шага заменяет базовое,
+    ** утверждения xs:assertion добавляются к унаследованным. xs:assert
+    ** внутри xs:simpleContent / xs:restriction — не фасет, его читает тип.
     **
     ** The facets of one restriction step. The patterns of a step form one group
-    ** (matching any is enough), the enumeration of a step replaces the base one.
+    ** (matching any is enough), the enumeration of a step replaces the base one,
+    ** the xs:assertion assertions are added to the inherited ones. xs:assert
+    ** inside xs:simpleContent / xs:restriction is not a facet, the type reads it.
     */
-    void SchemaBuilder::applyFacets(SimpleType& type, const Element& restriction)
+    void SchemaBuilder::applyFacets(SimpleType& type, const Element& restriction, const SchemaSource& source)
     {
         std::vector<std::shared_ptr<const Regex>> patterns;
         std::vector<std::string> enumeration;
@@ -99,7 +103,9 @@ namespace beresta::xsd::detail
             std::string_view kind = facet->getLocalName();
             std::string raw = facet->getAttribute("value").value_or("");
             std::string value = normalizeWhiteSpace(raw, WhiteSpace::COLLAPSE);
-            if (kind == "simpleType" || kind == "attribute" || kind == "attributeGroup" || kind == "anyAttribute")
+            bool notFacet = kind == "simpleType" || kind == "attribute" || kind == "attributeGroup"
+                || kind == "anyAttribute" || kind == "assert" || kind == "assertion";
+            if (notFacet)
                 continue;
             if (kind == "pattern")
                 patterns.push_back(std::make_shared<Regex>(raw));
@@ -112,5 +118,6 @@ namespace beresta::xsd::detail
             type.facets.patterns.push_back(patterns);
         if (!enumeration.empty())
             type.facets.enumeration = enumeration;
+        readAssertionFacets(type, restriction, source);
     }
 }

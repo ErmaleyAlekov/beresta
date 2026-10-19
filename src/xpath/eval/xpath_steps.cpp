@@ -50,7 +50,7 @@ namespace beresta::xpath::detail
     ** nodes go straight into the result — without an intermediate list per input node.
     */
     std::vector<XPathItem> applyStep(const Step& step, const std::vector<XPathItem>& inputs,
-        const XPathContext& user)
+        const EvalContext& context)
     {
         std::vector<XPathItem> result;
         std::vector<XPathItem> axis;
@@ -66,12 +66,12 @@ namespace beresta::xpath::detail
             appendAxisItems(step.axis, input, axis);
             for (const XPathItem& item : axis)
             {
-                if (matchesTest(step, item, user))
+                if (matchesTest(step, item, context))
                     target->push_back(item);
             }
             if (step.predicates.empty())
                 continue;
-            candidates = applyPredicates(step.predicates, std::move(candidates), user);
+            candidates = applyPredicates(step.predicates, std::move(candidates), context);
             result.insert(result.end(), candidates.begin(), candidates.end());
         }
         orderStepResult(step.axis, inputs.size(), result);
@@ -80,24 +80,33 @@ namespace beresta::xpath::detail
 
     /*
     ** Предикат-число означает «позиция равна числу» ([2] = [position() = 2]),
-    ** любой другой результат приводится к логическому значению.
+    ** любой другой результат приводится к логическому значению. В
+    ** утверждениях XSD число в предикате — точный xs:integer (DECIMAL).
+    ** Переменные и источник типов внешнего контекста видны в предикате.
     **
     ** A number predicate means "the position equals the number" ([2] = [position() = 2]),
-    ** any other result is converted to a boolean.
+    ** any other result is converted to a boolean. In
+    ** XSD assertions a number in a predicate is an exact xs:integer (DECIMAL).
+    ** The variables and the type source of the outer context are visible in the predicate.
     */
     std::vector<XPathItem> applyPredicates(const std::vector<ExprPtr>& predicates,
-        std::vector<XPathItem> items, const XPathContext& user)
+        std::vector<XPathItem> items, const EvalContext& outer)
     {
         for (const ExprPtr& predicate : predicates)
         {
             std::vector<XPathItem> kept;
             for (std::size_t index = 0; index < items.size(); ++index)
             {
-                EvalContext context{items[index], index + 1, items.size(), user};
+                EvalContext context{items[index], index + 1, items.size(), outer.user, outer.typed, outer.locals};
                 XPathValue value = predicate->evaluate(context);
-                bool keep = value.toBoolean();
+                bool keep = false;
                 if (value.getType() == ValueType::NUMBER)
                     keep = value.toNumber() == static_cast<double>(index + 1);
+                else if (value.getType() == ValueType::DECIMAL)
+                    keep = utils::compareDecimals(value.getDecimal(),
+                        utils::decimalFromInteger(static_cast<long long>(index + 1))) == 0;
+                else
+                    keep = value.toBoolean();
                 if (keep)
                     kept.push_back(items[index]);
             }

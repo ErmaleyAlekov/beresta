@@ -102,6 +102,14 @@ namespace beresta::i18n
         XPATH_UNKNOWN_FUNCTION,
         XPATH_COUNT_NOT_NODESET,
         XPATH_SUM_NOT_NODESET,
+        XPATH_DATE_BOOLEAN,
+        XPATH_SEVERAL_ITEMS,
+        XPATH_CAST_FAILED,
+        XPATH_DIVISION_BY_ZERO,
+        XPATH_DATE_ARITHMETIC,
+        XPATH_ASSERTION_FUNCTION,
+        XPATH_ASSERTION_ABSOLUTE_PATH,
+        XPATH_ELEMENT_ONLY,
 
         // ---- Разбор XML / XML parsing ----
         ATTRIBUTE_LT,
@@ -324,6 +332,9 @@ namespace beresta::i18n
         SCHEMA_SIMPLE_TYPE_BODY,
         SCHEMA_UNION_MEMBER,
         SCHEMA_UNION_EMPTY,
+        SCHEMA_ASSERT_NO_TEST,
+        SCHEMA_ASSERT_INVALID,
+        SCHEMA_ASSERTION_LIST,
 
         // ---- XML Schema: проверка документа / XML Schema validation ----
         XSD_ATTRIBUTE_UNDECLARED,
@@ -353,6 +364,9 @@ namespace beresta::i18n
         XSD_SIMPLE_WITH_ATTRIBUTE,
         XSD_ELEMENT_FIXED,
         IDENTITY_NOT_STREAMABLE,
+        XSD_ASSERTION_FAILED,
+        XSD_ASSERTION_ERROR,
+        XSD_ASSERTION_FACET_FAILED,
 
         // ---- Обёртки для других языков / Bindings for other languages ----
         BINDING_DOCUMENT_CLOSED,

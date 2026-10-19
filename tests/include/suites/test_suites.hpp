@@ -56,6 +56,7 @@ namespace suites
     void registerXPathFunctionTests(test::TestRunner& runner);
     void registerXPathNamespaceTests(test::TestRunner& runner);
     void registerXPathNameTests(test::TestRunner& runner);
+    void registerDecimalTests(test::TestRunner& runner);
 
     // ---- XML Schema и XInclude ----
     // ---- XML Schema and XInclude ----
@@ -72,6 +73,11 @@ namespace suites
     void registerXsdFinalTests(test::TestRunner& runner);
     void registerXsdRedefineTests(test::TestRunner& runner);
     void registerXsdDeepTests(test::TestRunner& runner);
+    void registerXsdAssertTests(test::TestRunner& runner);
+    void registerXsdAssertRulesTests(test::TestRunner& runner);
+    void registerXsdAssertXPathTests(test::TestRunner& runner);
+    void registerXsdAssertSchemaTests(test::TestRunner& runner);
+    void registerXsdAssertParallelTests(test::TestRunner& runner);
     void registerContentCursorTests(test::TestRunner& runner);
     void registerContentPlanTests(test::TestRunner& runner);
     void registerXIncludeTests(test::TestRunner& runner);

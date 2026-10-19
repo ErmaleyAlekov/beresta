@@ -1,4 +1,5 @@
 #include "xpath/internal/xpath_eval.hpp"
+#include "xpath/internal/xpath_typed.hpp"
 #include "i18n/i18n.hpp"
 
 #include <cmath>
@@ -39,7 +40,7 @@ namespace beresta::xpath::detail
 
     // Арифметика над числами (mod — остаток с знаком делимого, как fmod)
     // Arithmetic on numbers (mod is the remainder with the sign of the dividend, like fmod)
-    static double arithmetic(BinaryOperator op, double left, double right) noexcept
+    double numberArithmetic(BinaryOperator op, double left, double right) noexcept
     {
         if (op == BinaryOperator::PLUS_OP)
             return left + right;
@@ -57,9 +58,11 @@ namespace beresta::xpath::detail
     /*
     ** or / and вычисляются с коротким замыканием; сравнения — по правилам
     ** XPath для множеств; '|' — объединение множеств в порядке документа.
+    ** В утверждениях XSD (typed) сравнения и арифметика — типизированные.
     **
     ** or / and are evaluated with short-circuiting; comparisons follow the XPath
     ** rules for sets; '|' is the union of sets in document order.
+    ** In XSD assertions (typed) comparisons and arithmetic are typed.
     */
     XPathValue BinaryExpr::evaluate(const EvalContext& context) const
     {
@@ -80,8 +83,10 @@ namespace beresta::xpath::detail
             sortDocumentOrder(merged);
             return XPathValue::fromNodeSet(std::move(merged));
         }
+        if (context.typed != nullptr)
+            return typedBinary(_operator, left, right, context);
         if (_operator >= BinaryOperator::EQUAL_OP && _operator <= BinaryOperator::GREATER_EQUAL_OP)
             return XPathValue::fromBoolean(compareValues(_operator, left, right));
-        return XPathValue::fromNumber(arithmetic(_operator, left.toNumber(), right.toNumber()));
+        return XPathValue::fromNumber(numberArithmetic(_operator, left.toNumber(), right.toNumber()));
     }
 }

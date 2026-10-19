@@ -10,8 +10,13 @@ namespace beresta::xsd::detail
             && element.getNamespaceURI().value_or("") == XSD_NAMESPACE_URI;
     }
 
-    // Компоненты схемы — дочерние элементы XSD; аннотации (документация) пропускаются
-    // Schema components are XSD child elements; annotations (documentation) are skipped
+    /*
+    ** Компоненты схемы — дочерние элементы XSD; аннотации (документация)
+    ** пропускаются, как и компоненты, исключённые vc:minVersion / vc:maxVersion.
+    **
+    ** Schema components are XSD child elements; annotations (documentation)
+    ** are skipped, as are the components excluded by vc:minVersion / vc:maxVersion.
+    */
     std::vector<const Element*> schemaChildren(const Element& parent)
     {
         std::vector<const Element*> children;
@@ -23,7 +28,7 @@ namespace beresta::xsd::detail
             const Element* element = static_cast<const Element*>(child);
             if (element->getNamespaceURI().value_or("") != XSD_NAMESPACE_URI)
                 continue;
-            if (element->getLocalName() != "annotation")
+            if (element->getLocalName() != "annotation" && versionAccepted(*element))
                 children.push_back(element);
         }
         return children;

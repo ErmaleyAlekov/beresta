@@ -13,13 +13,20 @@ namespace beresta::xpath::detail
         return XPathValue::fromNumber(numberArgument(call, 0));
     }
 
-    // sum(множество): сумма чисел из строковых значений узлов
-    // sum(set): the sum of the numbers from the string values of the nodes
+    /*
+    ** sum(множество): сумма чисел из строковых значений узлов. В утверждениях
+    ** XSD — по типизированным значениям, точно для xs:decimal (typedSum).
+    **
+    ** sum(set): the sum of the numbers from the string values of the nodes. In XSD
+    ** assertions — over the typed values, exactly for xs:decimal (typedSum).
+    */
     XPathValue functionSum(const FunctionCall& call)
     {
         XPathValue value = argument(call, 0);
         double total = 0.0;
 
+        if (call.context.typed != nullptr)
+            return typedSum(value, call.context);
         if (value.getType() != ValueType::NODE_SET)
             failEvaluation(i18n::format(i18n::Message::XPATH_SUM_NOT_NODESET));
         for (const XPathItem& item : value.getNodes())
@@ -27,17 +34,25 @@ namespace beresta::xpath::detail
         return XPathValue::fromNumber(total);
     }
 
-    // floor(число): округление вниз
-    // floor(number): rounding down
+    // floor(число): округление вниз (точное число остаётся точным)
+    // floor(number): rounding down (an exact number stays exact)
     XPathValue functionFloor(const FunctionCall& call)
     {
+        XPathValue exact = XPathValue::fromBoolean(false);
+
+        if (exactRounding(call, utils::floorDecimal, exact))
+            return exact;
         return XPathValue::fromNumber(std::floor(numberArgument(call, 0)));
     }
 
-    // ceiling(число): округление вверх
-    // ceiling(number): rounding up
+    // ceiling(число): округление вверх (точное число остаётся точным)
+    // ceiling(number): rounding up (an exact number stays exact)
     XPathValue functionCeiling(const FunctionCall& call)
     {
+        XPathValue exact = XPathValue::fromBoolean(false);
+
+        if (exactRounding(call, utils::ceilingDecimal, exact))
+            return exact;
         return XPathValue::fromNumber(std::ceil(numberArgument(call, 0)));
     }
 
@@ -45,8 +60,12 @@ namespace beresta::xpath::detail
     // round(number): to the nearest integer, a half goes up (round(-2.5) = -2)
     XPathValue functionRound(const FunctionCall& call)
     {
-        double value = numberArgument(call, 0);
+        XPathValue exact = XPathValue::fromBoolean(false);
+        double value = 0.0;
 
+        if (exactRounding(call, utils::roundDecimal, exact))
+            return exact;
+        value = numberArgument(call, 0);
         if (std::isnan(value) || std::isinf(value))
             return XPathValue::fromNumber(value);
         return XPathValue::fromNumber(std::floor(value + 0.5));

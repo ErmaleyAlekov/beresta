@@ -1,4 +1,6 @@
 #include "xsd/internal/datatype_checks.hpp"
+#include "xsd/internal/assertion_values.hpp"
+#include "utils/decimal.hpp"
 #include "xsd/prefix_resolver.hpp"
 #include "i18n/i18n.hpp"
 #include "utils/xml_tokens.hpp"
@@ -7,13 +9,15 @@ namespace beresta::xsd
 {
     /*
     ** Атомарное значение: лексика, затем фасеты длины, границ, цифр,
-    ** шаблонов и перечисления. Возвращается первая найденная ошибка.
+    ** шаблонов и перечисления и утверждения xs:assertion (XSD 1.1).
+    ** Возвращается первая найденная ошибка.
     ** Группа фасетов проверяется, только если у типа они есть: у
     ** большинства значений фасетов нет вовсе, а проверка идёт на каждом
     ** атрибуте и элементе документа.
     **
     ** An atomic value: the lexis, then the length, bound, digit,
-    ** pattern and enumeration facets. The first error found is returned.
+    ** pattern and enumeration facets and the xs:assertion assertions (XSD 1.1).
+    ** The first error found is returned.
     ** A group of facets is checked only if the type has them: most
     ** values have no facets at all, and the check runs on every
     ** attribute and element of the document.
@@ -36,6 +40,8 @@ namespace beresta::xsd
             error = detail::checkDigitFacets(type, value);
         if (!error && (!facets.patterns.empty() || !facets.enumeration.empty()))
             error = detail::checkPatternsAndEnumeration(type, value);
+        if (!error && !facets.assertions.empty())
+            error = detail::checkAssertionFacets(type, type, value);
         return error;
     }
 
@@ -63,13 +69,19 @@ namespace beresta::xsd
         return detail::checkPatternsAndEnumeration(type, value);
     }
 
-    // Точка входа: нормализация пробелов и выбор по разновидности типа
-    // The entry point: whitespace normalization and the choice by the type variety
+    /*
+    ** Точка входа: нормализация пробелов и выбор по разновидности типа. У
+    ** объединения $value его утверждений типизирован подошедшим членом.
+    **
+    ** The entry point: whitespace normalization and the choice by the type variety. For
+    ** a union $value of its assertions is typed by the matching member.
+    */
     std::optional<std::string> validateSimpleValue(const SimpleType& type, std::string_view value,
         const PrefixResolver& prefixes)
     {
         std::string buffer;
         std::string_view normalized = detail::normalizedView(value, type.facets.whiteSpace, buffer);
+        std::optional<std::string> error;
 
         if (type.variety == Variety::LIST)
             return validateList(type, normalized, prefixes);
@@ -77,8 +89,12 @@ namespace beresta::xsd
             return validateAtomic(type, normalized, prefixes);
         for (const SimpleType* member : type.memberTypes)
         {
-            if (!validateSimpleValue(*member, value, prefixes))
-                return detail::checkPatternsAndEnumeration(type, normalized);
+            if (validateSimpleValue(*member, value, prefixes))
+                continue;
+            error = detail::checkPatternsAndEnumeration(type, normalized);
+            if (!error && !type.facets.assertions.empty())
+                error = detail::checkAssertionFacets(type, *member, normalized);
+            return error;
         }
         return i18n::format(i18n::Message::UNION_NO_MEMBER, {normalized, type.name});
     }
@@ -105,7 +121,7 @@ namespace beresta::xsd
         if (type.primitive == Primitive::BOOLEAN)
             return (a == "true" || a == "1") == (b == "true" || b == "1");
         if (type.primitive == Primitive::DECIMAL && detail::isDecimalLexical(a, false))
-            return detail::compareDecimal(a, b) == 0;
+            return utils::compareDecimalText(a, b) == 0;
         bool ordered = type.primitive == Primitive::FLOAT || type.primitive == Primitive::DOUBLE
             || (type.primitive >= Primitive::DATE_TIME && type.primitive <= Primitive::G_MONTH);
         if (ordered)

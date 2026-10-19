@@ -18,14 +18,16 @@ namespace beresta::xsd::detail
     ** redefine/override (загружают и подменяют компоненты) и глобальные
     ** определения. «Хамелеонная» схема без targetNamespace, подключённая
     ** через include / redefine / override, получает пространство имён
-    ** включающей схемы.
+    ** включающей схемы. Документ, чей xs:schema исключён vc:minVersion /
+    ** vc:maxVersion, ничего не добавляет.
     **
     ** Registering a document: the defaults from xs:schema, then the
     ** include/import directives (they load other documents),
     ** redefine/override (they load and replace components) and the global
     ** definitions. A "chameleon" schema without targetNamespace included
     ** through include / redefine / override gets the namespace of the
-    ** including schema.
+    ** including schema. A document whose xs:schema is excluded by
+    ** vc:minVersion / vc:maxVersion contributes nothing.
     */
     void SchemaBuilder::addDocument(const Element& root, const std::string& baseUri,
         const std::string& chameleon)
@@ -36,6 +38,8 @@ namespace beresta::xsd::detail
             derivationAttribute(root, "blockDefault", 0, ELEMENT_BLOCK_ALL),
             derivationAttribute(root, "finalDefault", 0, SCHEMA_FINAL_ALL)});
         const SchemaSource& source = _sources.back();
+        if (!versionAccepted(root))
+            return;
         for (const Element* child : schemaChildren(root))
         {
             if (isSchemaElement(*child, "include") || isSchemaElement(*child, "import"))

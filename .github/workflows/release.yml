@@ -128,7 +128,7 @@ jobs:
           sdk="beresta-${{ needs.version.outputs.version }}-${{ matrix.platform }}"
           mkdir -p "sdk/$sdk/lib"
           cp -R include "sdk/$sdk/"
-          cp LICENSE README.md "sdk/$sdk/"
+          cp -R LICENSE README.md README.en.md docs "sdk/$sdk/"
           for file in bin/libberesta.a bin/libberesta.so bin/libberesta.dylib \
                       build/Release/beresta.dll build/Release/beresta.lib build/Release/beresta_static.lib; do
             if [ -f "$file" ]; then cp "$file" "sdk/$sdk/lib/"; fi

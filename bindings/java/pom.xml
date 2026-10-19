@@ -15,7 +15,7 @@
 
     При запуске приложения разрешите нативный доступ ключом JVM
     enable-native-access=ALL-UNNAMED (без него Java 22+ печатает
-    предупреждение; в README.md показана точная команда).
+    предупреждение; в docs/bindings.md показана точная команда).
 
     Beresta for Java is a Maven project of the wrapper over the C interface through
     Project Panama (Foreign Function & Memory API, Java 22+). JNI is not needed.
@@ -32,7 +32,7 @@
 
     When running the application, allow native access with the JVM option
     enable-native-access=ALL-UNNAMED (without it Java 22+ prints a
-    warning; README.md shows the exact command).
+    warning; docs/bindings.en.md shows the exact command).
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -45,7 +45,7 @@
          the Java package and the module name stay org.beresta -->
     <groupId>io.github.ermaleyalekov</groupId>
     <artifactId>beresta</artifactId>
-    <version>2.1.0</version>
+    <version>2.1.1</version>
     <packaging>jar</packaging>
 
     <name>Beresta</name>
