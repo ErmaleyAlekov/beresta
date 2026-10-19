@@ -13,7 +13,19 @@ try (XmlDocument document = Xml.parse("<shop><item code='A1'>Чай</item></shop
 }
 ```
 
-Готовый jar прикладывается к каждому [релизу на GitHub](https://github.com/ErmaleyAlekov/beresta/releases) и уже содержит библиотеку для Windows (x64, arm64), Linux (x64, arm64; glibc 2.35+) и macOS (универсальная); загрузчик сам извлечёт нужную. Запускайте приложение с ключом `--enable-native-access=ALL-UNNAMED`.
+Подключение из Maven Central (Java-пакет — `org.beresta`):
+
+```xml
+<dependency>
+    <groupId>io.github.ermaleyalekov</groupId>
+    <artifactId>beresta</artifactId>
+    <version>2.1.0</version>
+</dependency>
+```
+
+Gradle: `implementation("io.github.ermaleyalekov:beresta:2.1.0")`.
+
+Тот же jar прикладывается к каждому [релизу на GitHub](https://github.com/ErmaleyAlekov/beresta/releases) и уже содержит библиотеку для Windows (x64, arm64), Linux (x64, arm64; glibc 2.35+) и macOS (универсальная); загрузчик сам извлечёт нужную. Запускайте приложение с ключом `--enable-native-access=ALL-UNNAMED`.
 Сборка из исходников: `make JAVA=1` или CMake с `-DBERESTA_BUILD_JAVA=ON` (библиотека попадёт в `src/main/resources/natives/<os>-<arch>/`), затем `mvn package`.
 
 **Как получить скорость C++.** Каждый шаг ручного обхода (`firstChild`, `nextSibling`) — вызов через Panama и объект-обёртка. Тяжёлую работу отдавайте ядру целиком:
@@ -40,7 +52,19 @@ try (XmlSchema schema = XmlSchema.fromFile(Path.of("export.xsd"));
 A wrapper over the Beresta C interface through Project Panama (the Foreign Function & Memory API, Java 22+).
 Neither JNI nor third-party dependencies.
 
-A ready jar is attached to every [GitHub release](https://github.com/ErmaleyAlekov/beresta/releases) and already contains the library for Windows (x64, arm64), Linux (x64, arm64; glibc 2.35+) and macOS (universal); the loader extracts the right one itself. Run the application with the `--enable-native-access=ALL-UNNAMED` flag.
+Getting it from Maven Central (the Java package is `org.beresta`):
+
+```xml
+<dependency>
+    <groupId>io.github.ermaleyalekov</groupId>
+    <artifactId>beresta</artifactId>
+    <version>2.1.0</version>
+</dependency>
+```
+
+Gradle: `implementation("io.github.ermaleyalekov:beresta:2.1.0")`.
+
+The same jar is attached to every [GitHub release](https://github.com/ErmaleyAlekov/beresta/releases) and already contains the library for Windows (x64, arm64), Linux (x64, arm64; glibc 2.35+) and macOS (universal); the loader extracts the right one itself. Run the application with the `--enable-native-access=ALL-UNNAMED` flag.
 Building from source: `make JAVA=1` or CMake with `-DBERESTA_BUILD_JAVA=ON` (the library lands in `src/main/resources/natives/<os>-<arch>/`), then `mvn package`.
 
 **How to get C++ speed.** Every step of a manual walk (`firstChild`, `nextSibling`) is a call through Panama and a wrapper object. Hand heavy work over to the core entirely:

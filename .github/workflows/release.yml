@@ -10,9 +10,11 @@
 #       npm install beresta / beresta-wasm, pip install beresta,
 #       dotnet add package Beresta, jar для Maven.
 #     Пользователю ничего не нужно компилировать.
-#  4. Публикация: GitHub Release всегда; npm, PyPI и NuGet — только если
-#     в настройках репозитория заданы секреты NPM_TOKEN, PYPI_API_TOKEN,
-#     NUGET_API_KEY (без них шаг пропускается, а пакеты лежат в релизе).
+#  4. Публикация: GitHub Release всегда; npm, PyPI, NuGet и Maven Central —
+#     только если в настройках репозитория заданы их секреты (NPM_TOKEN,
+#     PYPI_API_TOKEN, NUGET_API_KEY, MAVEN_CENTRAL_*, MAVEN_GPG_*); без них
+#     шаг пропускается, а пакеты лежат в релизе. Каждый шаг пропускает уже
+#     опубликованное, поэтому упавший релиз можно просто перезапустить.
 #
 #  Linux собирается на Ubuntu 22.04: бинарники работают с glibc 2.35+
 #  (Ubuntu 22.04+, Debian 12+, RHEL/Astra/РЕД ОС с glibc того же уровня).
@@ -28,9 +30,11 @@
 #       npm install beresta / beresta-wasm, pip install beresta,
 #       dotnet add package Beresta, a jar for Maven.
 #     The user does not need to compile anything.
-#  4. Publishing: a GitHub Release always; npm, PyPI and NuGet only if
-#     the repository settings define the secrets NPM_TOKEN, PYPI_API_TOKEN,
-#     NUGET_API_KEY (without them the step is skipped, and the packages lie in the release).
+#  4. Publishing: a GitHub Release always; npm, PyPI, NuGet and Maven Central
+#     only if the repository settings define their secrets (NPM_TOKEN,
+#     PYPI_API_TOKEN, NUGET_API_KEY, MAVEN_CENTRAL_*, MAVEN_GPG_*); without them
+#     the step is skipped, and the packages lie in the release. Every step skips what is
+#     already published, so a failed release can simply be re-run.
 #
 #  Linux is built on Ubuntu 22.04: the binaries work with glibc 2.35+
 #  (Ubuntu 22.04+, Debian 12+, RHEL/Astra/RED OS with a glibc of the same level).
@@ -64,6 +68,7 @@ jobs:
             grep -q "\"version\": \"$version\"" "$file" || { echo "$file: версия не $version / version is not $version"; exit 1; }
           done
           grep -q "^version = \"$version\"" bindings/python/pyproject.toml || { echo "pyproject.toml: не $version"; exit 1; }
+          grep -q "<version>$version</version>" bindings/java/pom.xml || { echo "pom.xml: не $version"; exit 1; }
           if [ "${GITHUB_REF_TYPE}" = "tag" ] && [ "${GITHUB_REF_NAME}" != "v$version" ]; then
             echo "Тег ${GITHUB_REF_NAME} не совпадает с версией $version / The tag does not match the version"; exit 1
           fi
@@ -178,12 +183,24 @@ jobs:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+      MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+      MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+      MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
     steps:
       - uses: actions/checkout@v4
+      # server-id central — учётные данные Central Portal в settings.xml (из переменных выше),
+      # gpg-private-key — импорт ключа подписи (пустой секрет — импорт пропускается)
+      # server-id central — the Central Portal credentials in settings.xml (from the variables above),
+      # gpg-private-key — importing the signing key (an empty secret skips the import)
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '25'
+          server-id: central
+          server-username: MAVEN_CENTRAL_USERNAME
+          server-password: MAVEN_CENTRAL_PASSWORD
+          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.0.x'
@@ -230,19 +247,42 @@ jobs:
         if: github.ref_type == 'tag'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${GITHUB_REF_NAME}" dist/* --title "Берёста ${VERSION}" --generate-notes
+        # Релиз уже есть (перезапуск) — файлы заменяются / The release exists (a re-run) — the files are replaced
+        run: |
+          if gh release view "${GITHUB_REF_NAME}" > /dev/null 2>&1; then
+            gh release upload "${GITHUB_REF_NAME}" dist/* --clobber
+          else
+            gh release create "${GITHUB_REF_NAME}" dist/* --title "Берёста ${VERSION}" --generate-notes
+          fi
+      # Версию, уже лежащую в npm, второй раз не публикуем / A version already in npm is not published again
       - name: npm publish
         if: github.ref_type == 'tag' && env.NPM_TOKEN != ''
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          npm publish dist/beresta-${VERSION}.tgz --provenance --access public
-          npm publish dist/beresta-wasm-${VERSION}.tgz --provenance --access public
+          for package in beresta beresta-wasm; do
+            if npm view "${package}@${VERSION}" version > /dev/null 2>&1; then
+              echo "${package}@${VERSION} уже в npm / already in npm"
+            else
+              npm publish "dist/${package}-${VERSION}.tgz" --provenance --access public
+            fi
+          done
       - name: PyPI
         if: github.ref_type == 'tag' && env.PYPI_API_TOKEN != ''
         run: |
           python -m pip install twine
-          python -m twine upload -u __token__ -p "$PYPI_API_TOKEN" dist/*.whl
+          python -m twine upload --skip-existing -u __token__ -p "$PYPI_API_TOKEN" dist/*.whl
       - name: NuGet
         if: github.ref_type == 'tag' && env.NUGET_API_KEY != ''
-        run: dotnet nuget push "dist/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push "dist/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
+      # Тот же jar с бинарниками всех платформ, плюс исходники, javadoc и подписи GPG
+      # The same jar with the binaries of all platforms, plus sources, javadoc and GPG signatures
+      - name: Maven Central
+        if: github.ref_type == 'tag' && env.MAVEN_CENTRAL_USERNAME != ''
+        # pom версии уже в Central — публикация была / The version pom is already in Central — it was published
+        run: |
+          if curl -sfI "https://repo1.maven.org/maven2/io/github/ermaleyalekov/beresta/${VERSION}/beresta-${VERSION}.pom" > /dev/null; then
+            echo "beresta ${VERSION} уже в Maven Central / already in Maven Central"
+          else
+            mvn -B -f bindings/java/pom.xml -P central deploy
+          fi
