@@ -24,6 +24,12 @@ license = "MIT"
 license-files = ["LICENSE"]
 dependencies = []
 
+# Ссылки на странице пакета в PyPI / The links on the package page in PyPI
+[project.urls]
+Homepage = "https://github.com/ErmaleyAlekov/beresta"
+Source = "https://github.com/ErmaleyAlekov/beresta/tree/main/bindings/python"
+Issues = "https://github.com/ErmaleyAlekov/beresta/issues"
+
 [tool.setuptools]
 packages = ["beresta"]
 

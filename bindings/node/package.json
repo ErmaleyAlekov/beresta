@@ -4,6 +4,15 @@
   "description": "Берёста — быстрая XML-библиотека на C++17: DOM, XPath 1.0, XML Schema, DTD, восемь кодировок. Без зависимостей и без node-gyp.",
   "keywords": ["xml", "dom", "xpath", "xsd", "xml-schema", "dtd", "parser", "native", "node-api"],
   "license": "MIT",
+  "homepage": "https://github.com/ErmaleyAlekov/beresta#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ErmaleyAlekov/beresta.git",
+    "directory": "bindings/node"
+  },
+  "bugs": {
+    "url": "https://github.com/ErmaleyAlekov/beresta/issues"
+  },
   "type": "commonjs",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

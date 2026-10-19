@@ -4,6 +4,15 @@
   "description": "Берёста в WebAssembly: DOM, XPath 1.0, XML Schema и DTD в браузере, Web Workers, Cloudflare Workers и Node.js. Без зависимостей.",
   "keywords": ["xml", "dom", "xpath", "xsd", "xml-schema", "dtd", "parser", "wasm", "webassembly", "browser", "workers"],
   "license": "MIT",
+  "homepage": "https://github.com/ErmaleyAlekov/beresta#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ErmaleyAlekov/beresta.git",
+    "directory": "bindings/wasm"
+  },
+  "bugs": {
+    "url": "https://github.com/ErmaleyAlekov/beresta/issues"
+  },
   "type": "module",
   "main": "./dist/beresta.mjs",
   "types": "./dist/beresta.d.mts",
