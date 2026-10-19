@@ -19,7 +19,8 @@ const Messages = Object.freeze({
     SCHEMA_CLOSED: 3,
     NATIVE_CALL_FAILED: 4,
     UNKNOWN_NODE_TYPE: 5,
-    INVALID_ARGUMENT: 6
+    INVALID_ARGUMENT: 6,
+    NO_FILE_SYSTEM: 7
 });
 
 // Смена языка; неизвестный код — BerestaError(INVALID_ARGUMENT) / Switches the language; an unknown code is BerestaError(INVALID_ARGUMENT)

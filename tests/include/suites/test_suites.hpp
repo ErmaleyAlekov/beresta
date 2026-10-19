@@ -25,6 +25,8 @@ namespace suites
     void registerErrorTests(test::TestRunner& runner);
     void registerLimitTests(test::TestRunner& runner);
     void registerFloodTests(test::TestRunner& runner);
+    void registerAttributeScaleTests(test::TestRunner& runner);
+    void registerMappedFileTests(test::TestRunner& runner);
     void registerSaxTests(test::TestRunner& runner);
     void registerSaxDtdTests(test::TestRunner& runner);
     void registerEncodingTests(test::TestRunner& runner);
@@ -65,6 +67,11 @@ namespace suites
     void registerXsdPathTests(test::TestRunner& runner);
     void registerXsdStreamTests(test::TestRunner& runner);
     void registerXsdStreamIdentityTests(test::TestRunner& runner);
+    void registerXsdSubstitutionTests(test::TestRunner& runner);
+    void registerXsdDerivationTests(test::TestRunner& runner);
+    void registerXsdFinalTests(test::TestRunner& runner);
+    void registerXsdRedefineTests(test::TestRunner& runner);
+    void registerXsdDeepTests(test::TestRunner& runner);
     void registerContentCursorTests(test::TestRunner& runner);
     void registerContentPlanTests(test::TestRunner& runner);
     void registerXIncludeTests(test::TestRunner& runner);
@@ -73,6 +80,9 @@ namespace suites
     // ---- The C interface for other languages ----
     void registerCapiTests(test::TestRunner& runner);
     void registerCapiMoveTests(test::TestRunner& runner);
+    void registerCapiStreamTests(test::TestRunner& runner);
+    void registerCapiParallelTests(test::TestRunner& runner);
+    void registerCapiBulkMoveTests(test::TestRunner& runner);
 
     // ---- Языки сообщений / Message languages ----
     void registerI18nTests(test::TestRunner& runner);

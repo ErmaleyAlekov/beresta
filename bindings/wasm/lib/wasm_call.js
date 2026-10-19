@@ -94,12 +94,12 @@ function convertArguments(binding, scope, values)
 
 /*
  * Общий вызов любой функции Си-интерфейса по её сигнатуре. Привязывается к
- * описанию функции через bind (см. native_wasm.js), поэтому для 66 функций
- * не нужно 66 обёрток.
+ * описанию функции через bind (см. native_wasm.js), поэтому для 68 функций
+ * не нужно 68 обёрток.
  *
  * The common call of any C interface function by its signature. It is bound to
- * the function description through bind (see native_wasm.js), so 66 functions
- * do not need 66 wrappers.
+ * the function description through bind (see native_wasm.js), so 68 functions
+ * do not need 68 wrappers.
  */
 function invokeBinding(binding, ...values)
 {

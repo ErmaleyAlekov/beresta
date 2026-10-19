@@ -21,7 +21,10 @@ const ParseFlags = Object.freeze({
     VALIDATE_DTD: 1 << 3,
     NO_NAMESPACES: 1 << 4,
     XINCLUDE: 1 << 5,
-    FILE_RESOURCES: 1 << 6
+    FILE_RESOURCES: 1 << 6,
+    // Строка и столбец узлов: места нарушений в schema.validate(document)
+    // The line and column of nodes: the places of violations in schema.validate(document)
+    TRACK_LOCATIONS: 1 << 7
 });
 
 // Флаги вывода BERESTA_WRITE_*: по умолчанию — ни одного лишнего пробела

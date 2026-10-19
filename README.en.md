@@ -68,11 +68,12 @@ std::cout << doc.toString();                                      // <greeting l
 4. **Standalone nodes.** A node is created without a document, moved between documents without `importNode`/`adoptNode` and outlives the document it was taken from. Almost no C++ library has this (see the [comparison](#comparison-with-other-libraries)).
 5. **Secure by default.** Entity bombs are always limited, external resources are not loaded without explicit permission, XSD regular expressions run in linear time, and hash tables keyed by document data are protected with a secret key against collision attacks (hash flooding).
 6. **No recursion at all.** Parsing, copying, comparison, output, XSD validation and the destructor walk the tree with an explicit stack — a deep document will not crash the process.
-7. **Well tested.** 136 unit tests, 100 % of the applicable cases of the W3C XML Conformance Test Suite, the ASan/UBSan/LSan sanitizers, libFuzzer fuzzing.
+7. **Well tested.** 159 unit tests, including load tests (20 threads on shared handles, 50,000 node moves, 50,000 attributes in a tag, a recursive schema 10,000 levels deep), 100 % of the applicable cases of the W3C XML Conformance Test Suite, the ASan/UBSan/LSan/TSan sanitizers, libFuzzer fuzzing.
 8. **Six languages from one binary, plus WebAssembly.** C++, C, Java (Panama), C# (P/Invoke), Python (ctypes) and Node.js (Node-API) — all included, without JNI, node-gyp or packages from the network. The same API for browsers and Cloudflare Workers is the `beresta-wasm` package.
-9. **Ready packages for all platforms.** `npm install beresta`, `pip install beresta`, `dotnet add package Beresta`: the binaries for Windows and Linux (x64, arm64) and a universal one for macOS (Intel and Apple Silicon) are already inside — nothing needs to be compiled.
-10. **Messages in Russian and English.** The language is chosen at build time and changed at run time; a new language is added with one file.
-11. **Readable code.** Short functions, small files, bilingual comments everywhere — the library can be read, audited and improved on your own.
+9. **Wrappers that do not slow down on heavy work.** Parsing, XPath and schema validation run inside the core at C++ speed. Streaming validation from Java, .NET and Python is faster than the native tools of these languages, and a multi-gigabyte export is validated in tens of megabytes of memory. Parsing with XSD validation in .NET is 2.3 times faster than `XmlDocument`, XPath in Java is 1.4–1.8 times faster than the JDK (see [Performance](#performance)).
+10. **Ready packages for all platforms.** `npm install beresta`, `pip install beresta`, `dotnet add package Beresta`: the binaries for Windows and Linux (x64, arm64) and a universal one for macOS (Intel and Apple Silicon) are already inside — nothing needs to be compiled.
+11. **Messages in Russian and English.** The language is chosen at build time and changed at run time; a new language is added with one file.
+12. **Readable code.** Short functions, small files, bilingual comments everywhere — the library can be read, audited and improved on your own.
 
 ### Modern C++
 - **Only `std::string` in UTF-8.** No `XMLCh`, `XMLString::transcode()` or manual `release()`. Values from the tree fit any C++ code right away.
@@ -95,7 +96,7 @@ std::cout << doc.toString();                                      // <greeting l
 - **Namespaces in XML:** checked while parsing, with "live" URIs in the DOM.
 - **Eight encodings:** UTF-8, UTF-16 LE/BE, ISO-8859-1, US-ASCII, windows-1251, windows-1252, KOI8-R, IBM866. The encoding is detected by the BOM and the declaration. All tables are written from scratch, without iconv or ICU.
 - **DTD:** internal and external subsets, parameter entities, conditional sections, default attributes, full validity checking, `getElementById`.
-- **XML Schema 1.0:** 45 built-in types, facets, `restriction`/`extension`, `list`/`union`, `sequence`/`choice`/`all`, groups, `xs:any`, `xsi:type`, `xsi:nil`, ID/IDREF, the identity constraints `xs:key`/`xs:unique`/`xs:keyref`, `include`/`import`.
+- **XML Schema 1.0:** 45 built-in types, facets, `restriction`/`extension`, `list`/`union`, `sequence`/`choice`/`all`, groups, `xs:any`, substitution groups, `xsi:type` with derivation checks, `block`/`final`, abstract elements and types, `xsi:nil`, ID/IDREF, the identity constraints `xs:key`/`xs:unique`/`xs:keyref`, `include`/`import`/`redefine`/`override`.
 - **All of XPath 1.0:** all 13 axes, including `namespace`, all 27 functions of the core library, variables and prefixes.
 - **XInclude 1.0:** `parse="xml|text"`, `xi:fallback`, XPointer `element()` and by ID, cycle protection.
 - **DOM Traversal:** `TreeWalker` and `NodeIterator` with filters — the algorithms strictly follow the W3C specification.
@@ -107,7 +108,9 @@ std::cout << doc.toString();                                      // <greeting l
 - **No quadratic checks on hostile input.** Repeated attributes are searched by a loop only in tags with a few attributes, beyond that — by a hash table. A tag with 100,000 attributes (1.3 MB) is parsed in 0.07 s.
 - **Our own XSD regular expressions on a Thompson NFA.** The check time is linear, "catastrophic backtracking" is impossible in principle.
 - **Exact facet arithmetic.** Decimal numbers are compared as digit strings of any length, without the precision loss of `double`.
-- **Checked by sanitizers:** all tests pass under AddressSanitizer, LeakSanitizer, UBSan and `_GLIBCXX_ASSERTIONS` — without memory leaks, undefined behavior or out-of-bounds container access.
+- **Checked by sanitizers:** all tests pass under AddressSanitizer, LeakSanitizer, UBSan and `_GLIBCXX_ASSERTIONS` — without memory leaks, undefined behavior or out-of-bounds container access, and under ThreadSanitizer — without races (20 threads on a shared schema, XPath and document).
+- **Load tests for the wrapper scenarios:** 50,000 node moves between documents with a check of every previously given handle after the source document is freed; the parse time of a tag with 50,000 and 200,000 attributes grows linearly; a recursive schema 10,000 levels deep is validated the same way in SAX, DOM and over a ready tree.
+- **The child index in O(1).** A node stores its number among its siblings, so `nextSibling`, `removeChild` of the last child and node moves from the wrappers do not search for the node by a scan: 150,000 moves through the C interface take 13 ms.
 - **Checked by fuzzing:** three libFuzzer targets (parsing with any `ParserOptions`, XPath, XML Schema) under ASan + UBSan; the latest round has no findings, see [`tests/fuzz`](tests/fuzz/README.md).
 
 ### Output
@@ -116,15 +119,16 @@ std::cout << doc.toString();                                      // <greeting l
 - **Any output encoding.** The declaration gets the right `encoding` itself, a BOM is written when needed, and characters outside the encoding become `&#N;`.
 
 ### One binary — six languages
-- **A flat C interface** (`extern "C"`, 69 functions): a stable ABI, undecorated names, objects go out as opaque `void*` handles. C++ exceptions never cross the library boundary.
+- **A flat C interface** (`extern "C"`, 71 functions): a stable ABI, undecorated names, objects go out as opaque `void*` handles. C++ exceptions never cross the library boundary.
 - **Java 22+ through Project Panama** (the Foreign Function & Memory API): not a line of JNI, Java works with native memory directly. The binary travels inside the jar and extracts itself for the right OS and architecture.
 - **C# through P/Invoke** with `SafeHandle`: memory is freed deterministically (`using`) and reliably (on finalization). A NuGet package with the standard `runtimes/<rid>/native` layout.
 - **Python through ctypes:** not a single package from PyPI and no compiler on the user's machine.
 - **Node.js through an own Node-API addon:** without `ffi-napi`, node-gyp or npm dependencies; the ready binary travels in the package, TypeScript types are included.
 - **WebAssembly** (`bindings/wasm`, the `beresta-wasm` package): the same core built by Emscripten and the same JS layer as for Node.js — DOM, XPath and XSD in browsers, Web Workers and Cloudflare Workers. The module weighs about 650 KB (about 250 KB gzipped).
 - **A universal binary for macOS:** `make universal` glues the x86_64 and arm64 builds with `lipo`, CMake does the same with `CMAKE_OSX_ARCHITECTURES="x86_64;arm64"`.
+- **Heavy work stays inside the core.** XPath (`selectValues` without node objects), schema validation and streaming validation of files of any size are called from any language with one call, and only the result crosses the language boundary.
 - **The build lays out the binary itself.** CMake and the Makefile detect the OS and the processor architecture and copy the library into the Maven project resources, into `runtimes/<rid>/native` for .NET, into the Python package and (as an addon) into the npm package.
-- **Only the C interface functions are visible from outside** — exactly 69 symbols. C++ classes are hidden (`-fvisibility=hidden`, on Windows only `BERESTA_API` is exported). The C++ runtime is embedded into the library, so a clean machine needs neither `libstdc++` nor `vcruntime`. On Linux the symbols of the embedded `libstdc++` are hidden too (`--exclude-libs,ALL`): in a JVM or Python process they do not conflict with the system `libstdc++`.
+- **Only the C interface functions are visible from outside** — exactly 71 symbols. C++ classes are hidden (`-fvisibility=hidden`, on Windows only `BERESTA_API` is exported). The C++ runtime is embedded into the library, so a clean machine needs neither `libstdc++` nor `vcruntime`. On Linux the symbols of the embedded `libstdc++` are hidden too (`--exclude-libs,ALL`): in a JVM or Python process they do not conflict with the system `libstdc++`.
 
 ### Engineering qualities
 - **Zero dependencies:** only the C++17 standard library. The wrappers need nothing either except the JDK, .NET, Python or Node.js.
@@ -144,7 +148,7 @@ What popular XML libraries for C and C++ can do "out of the box" (versions as in
 | Strings in the API | `std::string` (UTF-8) | `xmlChar*` (UTF-8), manual `xmlFree` | `XMLCh*` (UTF-16), `transcode`/`release` | `char*` or `wchar_t*` | `const char*` | `char*` |
 | Namespaces | yes, "live" URIs | yes | yes | no (the prefix is part of the name) | no | no |
 | DTD validation | yes | yes | yes | no | no | no |
-| XML Schema | 1.0, with keys | 1.0, partial | 1.0, the most complete | no | no | no |
+| XML Schema | 1.0: keys, substitution groups, `redefine` | 1.0, partial | 1.0, the most complete | no | no | no |
 | XPath 1.0 | all of it, with the `namespace` axis | yes | only for XSD keys | yes, prefixes are part of the name | no | no |
 | XInclude | yes | yes | yes | no | no | no |
 | Encodings without external libraries | 8, including windows-1251, KOI8-R, IBM866 | UTF-8/16, Latin-1; the rest through iconv | many built in, the rest through ICU | UTF-8/16/32, Latin-1 | UTF-8 | UTF-8 |
@@ -165,7 +169,7 @@ What popular XML libraries for C and C++ can do "out of the box" (versions as in
 - **pugixml, tinyxml2, RapidXML** allocate nodes from the pool of their document: a node does not exist without a document, and it can be moved into another document only by copying.
 - A similar model exists in other languages: **LINQ to XML** (`XElement` in .NET), **JDOM** in Java and **ElementTree** in Python. In C++ Beresta gives the same, but with ownership through `std::unique_ptr`: whoever holds the pointer owns the node.
 
-**What to choose.** If you need only fast parsing of trusted XML without namespaces and checks, pugixml or RapidXML are 10–15 times faster. If you need complete XML Schema 1.0 with `xs:redefine` and substitution groups (large industry schemas), take Xerces-C++ or libxml2. Beresta is for everything in between: full-featured XML with namespaces, DTD, XSD and XPath, secure by default, without dependencies, with a convenient C++ API and wrappers for five languages and WebAssembly.
+**What to choose.** If you need only fast parsing of trusted XML without namespaces and checks, pugixml or RapidXML are 10–15 times faster. If you need strict checking of the schema itself against all the XSD 1.0 constraints (the validity of `restriction` for content models, an unambiguous model — UPA), take Xerces-C++. Large industry schemas with `xs:redefine` and substitution groups are loaded and validated by Beresta itself. Beresta is for everything in between: full-featured XML with namespaces, DTD, XSD and XPath, secure by default, without dependencies, with a convenient C++ API and wrappers for five languages and WebAssembly.
 
 ---
 
@@ -224,7 +228,7 @@ How to read these numbers:
 - **Among full-featured libraries** (DOM + namespaces + DTD + XSD + encoding checks) Beresta parses twice as fast as Xerces-C++, text almost on par with libxml2 (the catalog 1.4 times slower), and runs XPath on the catalog faster than libxml2. It needs less memory for the tree than both.
 - **pugixml and RapidXML** are 10–15 times faster, but they are a different class: in-place parsing without checks — no namespaces, DTD, XSD, character or encoding checks, and RapidXML also modifies the input buffer. If you need only fast parsing of trusted XML, they are the right choice.
 - **Parsing with XSD validation** is 1.8 times faster than with Xerces-C++ and 1.2 times slower than with libxml2. Beresta validates the document right while parsing, in one pass; libxml2 in this measurement builds a tree and validates it in a second pass (`xmlSchemaValidateDoc`). The gap to libxml2 is mostly the difference in the speed of parsing itself (86 against 120 MB/s): validation costs Beresta no more.
-- **Streaming validation without a tree** (`SaxParser` with a schema) — 93 MB/s, 1.5 times faster than with building a tree; libxml2 (`xmlSchemaValidateStream`) — 112 MB/s. The validation needs O(document depth) memory — for multi-gigabyte exports that do not fit into a tree.
+- **Streaming validation without a tree** (`SaxParser` with a schema, and `validateFile` from the wrappers) — 93 MB/s, 1.5 times faster than with building a tree; libxml2 (`xmlSchemaValidateStream`) — 112 MB/s. The file is mapped into memory, so the process needs O(document depth) of its own memory: a 135 MB export is validated in 37 MB, while a tree would take 857 MB.
 
 Repeating the measurement (Linux; the libraries for comparison are needed only by the benchmark program):
 
@@ -258,28 +262,38 @@ cd benchmarks && make run
 
 WebAssembly parses about a third slower than native code (the usual price of Wasm), while its XPath is even faster: the result is assembled inside the module, without crossing the Node-API boundary at every node.
 
-**Wrappers against the native XML libraries of their languages** (a 13 MB catalog, 50,000 products; parsing and validation — MB/s, walk and XPath — ms; memory — the growth of the process memory after parsing; all libraries agree on the element count, the XPath node count and the schema error count):
+**Wrappers against the native XML libraries of their languages** (a 13 MB catalog, 50,000 products; parsing and validation — MB/s, walk and XPath — ms; "Stream + XSD" — validation without a tree; memory — the growth of the process memory after parsing; all libraries agree on the element count, the XPath node count and the schema error count):
 
-| Language | Library | Parse | Walk | XPath | Parse + XSD | Memory |
-|---|---|---|---|---|---|---|
-| Java 25 | **Beresta (Panama)** | 103 | 438 | **69** | 63 | **88 MB (×6.6)** |
-| | JDK DOM (`javax.xml`, Xerces-J) | **146** | **4** | 97 | **68** | 123 MB (×9.3) |
-| .NET 10 | **Beresta (P/Invoke)** | 105 | 228 | 88 | **65** | 86 MB (×6.5) |
-| | `XmlDocument` | 70 | 30 | **23** | 28 | 72 MB (×5.5) |
-| | `XDocument` (LINQ to XML) | **116** | **4** | 28 | 42 | **54 MB (×4.1)** |
-| Python 3.14 | **Beresta (ctypes)** | 103 | 2420 | 103 | 66 | 86 MB (×6.5) |
-| | lxml 6.1 (libxml2 2.14) | **126** | 25 | **57** | **78** | 119 MB (×8.9) |
-| | `xml.etree.ElementTree` | 61 | **6** | — | — | **82 MB (×6.2)** |
+| Language | Library | Parse | Walk | XPath | Parse + XSD | Stream + XSD | Memory |
+|---|---|---|---|---|---|---|---|
+| Java 25 | **Beresta (Panama)** | 105 | 305 | **69** | 64 | **97** | **88 MB (×6.6)** |
+| | JDK (`javax.xml`, Xerces-J) | **149** | **4** | 127 | **67** | 90 (`Validator`) | 123 MB (×9.3) |
+| .NET 10 | **Beresta (P/Invoke)** | 102 | 240 | 91 | **64** | **94** | 86 MB (×6.5) |
+| | `XmlDocument` | 74 | 32 | **20** | 28 | 85 (`XmlReader`) | 72 MB (×5.5) |
+| | `XDocument` (LINQ to XML) | **109** | **4** | 29 | 42 | 85 (`XmlReader`) | **54 MB (×4.1)** |
+| Python 3.14 | **Beresta (ctypes)** | 103 | 1545 | 100 | 63 | **93** | 86 MB (×6.5) |
+| | lxml 6.1 (libxml2 2.14) | **121** | 27 | **59** | **77** | 49 (`iterparse`) | 119 MB (×8.9) |
+| | `xml.etree.ElementTree` | 56 | **5** | — | — | — | **82 MB (×6.2)** |
+
+"Stream + XSD" for the native libraries is their standard way to validate a document without a DOM: `javax.xml.validation.Validator` over a `StreamSource`, a validating `XmlReader` read to the end, and `lxml.etree.iterparse` with a schema and clearing of elements. Streaming validation needs almost no memory: a 135 MB file (500,000 products) validated through `schema.validate_file` from Python takes 37 MB of the process's own memory at the peak, while `parse_file` + `validate` takes 857 MB.
+
+> 💡 **How to get C++ speed from a wrapper.** The slow spot of any wrapper is the boundary between languages. Every step of a manual walk (`firstChild`, `nextSibling`) is a call through Panama, P/Invoke or ctypes and a new wrapper object. A million small steps from Python measure the speed of ctypes, not of the parser. So hand heavy work over to the core entirely:
+> - **XPath:** an expression (`XPath`) is compiled once and evaluated any number of times, including from different threads. Take node values through `selectValues` / `SelectValues` / `select_values`: the strings are assembled inside the core, and no node objects are created.
+> - **XSD validation:** `schema.validate(document)` for a ready tree. In .NET it is 2.3 times faster than `XmlDocument` and 1.5 times faster than `XDocument`.
+> - **Streaming validation without a tree:** `validateFile` / `ValidateFile` / `validate_file`. It suits multi-gigabyte exports: no tree is built, and the file is mapped into memory.
+>
+> In these scenarios Beresta runs at the speed of compiled code, and its tree takes about 30 % less memory than the JDK DOM and lxml.
 
 Where the wrappers make sense:
-- **The core is the same everywhere**, so parsing and schema validation run at C++ speed (63–105 MB/s) in any language. Walking the tree from a wrapper is slow: every step (`firstChild`, `nextSibling`) is a call across the language boundary and a wrapper object. The fewer tree steps on the language side, the better the wrapper pays off: XPath, `selectValues`, schema validation and output run entirely inside the core.
+- **The core is the same everywhere**, so parsing and schema validation run at C++ speed (63–105 MB/s) in any language. A step-by-step walk from a wrapper is still tens of times slower than in the native libraries, although it became 1.4 times faster in Java (`invokeExact` on the hot calls) and 1.6 times faster in Python (the node type and the wrapper classes are remembered).
+- **Streaming schema validation** wins in all three languages: faster than the JDK `Validator` (97 against 90 MB/s), faster than the validating .NET `XmlReader` (94 against 85) and almost twice as fast as lxml (93 against 49).
 - **Node.js and the browser** are the clearest win: among libraries with a real DOM, XPath and XSD Beresta is the fastest (see the table above), and a browser has no built-in XSD validation at all.
-- **.NET** — XSD validation is 1.5–2.3 times faster than in `System.Xml`, parsing is on par with `XDocument`. If no schema is needed, `XDocument` is faster and leaner.
-- **Java** — XPath is 1.4 times faster, the tree is 30 % more compact; parsing is slower than in the built-in Xerces-J, XSD validation is on par. Another difference is security by default: the standard `DocumentBuilder` loads external entities until it is explicitly configured not to.
-- **Python** — lxml is faster in everything except memory: the ctypes overhead is large. Here the wrapper is justified if the same behavior as in the other languages, no dependencies or memory matter.
-- Common reasons to choose the wrapper: the same error messages, paths and rules in all languages, security by default, the windows-1251/KOI8-R/IBM866 encodings without external libraries.
+- **.NET** — parsing with XSD validation is 2.3 times faster than `XmlDocument` (64 against 28 MB/s) and 1.5 times faster than `XDocument`, parsing is on par with `XDocument`. If no schema is needed, `XDocument` is faster and leaner.
+- **Java** — XPath is 1.4–1.8 times faster than in the JDK (in different runs the JDK shows 97 to 127 ms), the tree is 28 % more compact (88 against 123 MB), XSD validation is on par. Parsing is slower than the built-in Xerces-J. An important difference is security by default: the standard `DocumentBuilder` loads external entities (XXE) until it is explicitly configured not to.
+- **Python** — lxml is faster at parsing into a tree and in XPath, but Beresta's streaming validation is almost twice as fast, and its tree is 28 % more compact (86 against 119 MB). XPath 1.0 and XSD work without third-party packages: the built-in `xml.etree` can do neither, and the documentation of the `xml` module explicitly warns that it is not secure against hostile data.
+- **Common reasons to choose the wrapper:** the same error messages (in Russian or English), `/order/item[2]`-style paths, XPath and XSD rules in all languages — microservices in Java, .NET, Python and Node.js validate the same files the same way. The protection against entity bombs and XXE is on in the core and does not need to be configured in every language. The windows-1251, KOI8-R and IBM866 encodings work without external libraries.
 
-To repeat: `node benchmarks/wrappers/make_data.js`, then the programs in `benchmarks/wrappers/` (see [`benchmarks/README.md`](benchmarks/README.md)).
+To repeat: `node benchmarks/wrappers/make_data.js`, then the programs in `benchmarks/wrappers/` — `WrapperBench` and `StreamBench` (Java), `WrapperBench` with the `--stream` switch (.NET), `bench.py` and `stream_bench.py` (Python); see [`benchmarks/README.md`](benchmarks/README.md).
 
 ---
 
@@ -913,12 +927,29 @@ std::vector<beresta::Diagnostic> errors = validator.takeDiagnostics();
 - `xs:group`, `xs:attributeGroup`, `xs:any` (`##any`, `##other`, `##local`, `##targetNamespace`, a list; `strict`/`lax`/`skip`), `xs:anyAttribute`;
 - attributes: `use="required|optional|prohibited"`, `default`, `fixed`;
 - elements: `default`, `fixed`, `nillable` + `xsi:nil`, `abstract`, `xsi:type`;
+- substitution groups `substitutionGroup`: members (including transitive ones) stand in place of the head and are checked by their own declaration; abstract members and the ones blocked by `block` are not in the group;
+- derivation: the `xsi:type` type must be derived from the declared one (built-in type chains, `extension`/`restriction`, `union` members), `block`/`blockDefault` on the element and the type prohibit substitution methods, `final`/`finalDefault` prohibit derivation when the schema is loaded; an abstract type without a derived `xsi:type` is an error;
 - `simpleType` `restriction`/`list`/`union`;
 - the facets `length`, `minLength`, `maxLength`, `pattern`, `enumeration`, `whiteSpace`, `minInclusive`, `maxInclusive`, `minExclusive`, `maxExclusive`, `totalDigits`, `fractionDigits`;
 - all **45 built-in types** of XSD 1.0 (strings, integers with exact bounds, `decimal`, `float`/`double`, dates and times with time zones, `duration`, `hexBinary`, `base64Binary`, `QName`, ID/IDREF(S), NMTOKEN(S), ENTITY(IES) and so on);
 - `ID` uniqueness and the existence of `IDREF` targets;
 - the identity constraints `xs:unique`, `xs:key`, `xs:keyref` (details below);
-- `xs:include` (including "chameleon" schemas) and `xs:import`.
+- `xs:include` (including "chameleon" schemas), `xs:import`, `xs:redefine` and `xs:override` (from XSD 1.1: replacing a component entirely).
+
+**Substitution groups and `xs:redefine` do not slow validation down.** Replacing components through `xs:redefine` / `xs:override` happens in the definition registry before the models are built — the validated document does not know about it. The set of admissible substitutes of every head is computed once when the schema is loaded (transitively, taking `abstract`, `block` and `final` into account) and kept ordered: a child's name is looked up by a binary search only if it did not match the particle itself. The group flag sits on the model particle, so models without substitution groups still take the fast greedy path.
+
+```xml
+<!-- v2.xsd: a new version of an industry schema without editing the original -->
+<xs:redefine schemaLocation="v1.xsd">
+    <xs:complexType name="Party">
+        <xs:complexContent>
+            <xs:extension base="Party">          <!-- base is the former Party from v1.xsd -->
+                <xs:sequence><xs:element name="inn" type="xs:string"/></xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+</xs:redefine>
+```
 
 ### Identity constraints: xs:key, xs:unique, xs:keyref
 
@@ -1203,7 +1234,7 @@ A complete example is `examples/capi/capi_demo.c` (built together with the demos
 gcc -std=c99 -Ipath/to/beresta/include app.c -Lpath/to/beresta/bin -lberesta -o app
 ```
 
-### Conventions (the same for all 69 functions)
+### Conventions (the same for all 71 functions)
 
 | Rule | Explanation |
 |---|---|
@@ -1214,7 +1245,7 @@ gcc -std=c99 -Ipath/to/beresta/include app.c -Lpath/to/beresta/bin -lberesta -o 
 | Strings | always UTF-8. A `char*` from the library is freed through `beresta_string_free`, a `const char*` is borrowed |
 | Sizes and indices | `int64_t` — the same type in all languages; `-1` in a result means an error |
 | Ownership | the caller frees a document, a schema, an expression, a node set and a diagnostics list (`beresta_*_free`). A node belongs to its document; `beresta_node_move_to` hands it (with its descendants) over to another document, and the handles do not change |
-| Threads | different documents in different threads in parallel; a schema is thread-safe after loading |
+| Threads | different documents in different threads in parallel. A schema, a compiled XPath expression and a document nobody changes can be shared between threads: a test runs 20 threads on shared handles under ThreadSanitizer |
 
 | Group | Functions |
 |---|---|
@@ -1225,9 +1256,25 @@ gcc -std=c99 -Ipath/to/beresta/include app.c -Lpath/to/beresta/bin -lberesta -o 
 | Tree changes | `node_set_text`, `node_remove`, `node_copy_to` (including between documents), `node_move_to` (a move without copying, including between documents), `node_append_element`, `node_append_text`, `node_append_comment`, `node_append_cdata`, `node_append_pi` |
 | Attributes | `element_get_attribute`, `element_set_attribute`, `element_has_attribute`, `element_remove_attribute`, `element_attribute_count`, `element_attribute_name`, `element_attribute_value`, `element_local_name`, `element_namespace_uri` |
 | XPath | `xpath_compile`, `xpath_bind_namespace`, `xpath_set_string`, `xpath_set_number`, `xpath_select`, `xpath_string`, `xpath_number`, `xpath_boolean`, `nodeset_size`, `nodeset_node`, `nodeset_value`, `xpath_free`, `nodeset_free` |
-| XML Schema | `schema_load`, `schema_load_file`, `schema_validate`, `diagnostics_count`, `diagnostics_message`, `diagnostics_line`, `diagnostics_column`, `schema_free`, `diagnostics_free` |
+| XML Schema | `schema_load`, `schema_load_file`, `schema_validate` (a ready tree), `schema_validate_bytes` and `schema_validate_file` (a stream without a tree), `diagnostics_count`, `diagnostics_message`, `diagnostics_line`, `diagnostics_column`, `schema_free`, `diagnostics_free` |
 
-The parse flags are the `BERESTA_PARSE_*` bit mask: `PRESERVE_WHITESPACE`, `DISCARD_COMMENTS`, `COALESCE_CDATA`, `VALIDATE_DTD`, `NO_NAMESPACES`, `XINCLUDE`, `FILE_RESOURCES`. The last one allows external DTDs, entities and XInclude, but only from the directory of the parsed file. The output flags are `BERESTA_WRITE_PRETTY` and `BERESTA_WRITE_DECLARATION`. A mask was chosen over a settings structure on purpose: an integer is passed the same way from any language.
+The parse flags are the `BERESTA_PARSE_*` bit mask: `PRESERVE_WHITESPACE`, `DISCARD_COMMENTS`, `COALESCE_CDATA`, `VALIDATE_DTD`, `NO_NAMESPACES`, `XINCLUDE`, `FILE_RESOURCES`, `TRACK_LOCATIONS`. `FILE_RESOURCES` allows external DTDs, entities and XInclude, but only from the directory of the parsed file. `TRACK_LOCATIONS` remembers the line and column of every node: then `schema_validate` reports the places of violations (without the flag they are 0; parsing with it is about 8 % slower).
+
+**Streaming validation without a tree.** `beresta_schema_validate_bytes` and `beresta_schema_validate_file` take the same arguments as `beresta_document_parse` and `beresta_document_parse_file`, but return a list of violations instead of a document. Inside, the SAX parser works with a `ValidatingHandler`: no tree is built, the memory is O(document depth) plus ID values and key tables, and the file is mapped into memory, not copied. Schema violations are not a call error (`BERESTA_OK` and a list), an XML syntax error is `BERESTA_PARSE_ERROR`. The places of violations are always known, the `TRACK_LOCATIONS` flag is not needed.
+
+```c
+beresta_diagnostics problems = NULL;
+if (beresta_schema_validate_file("export.xml", BERESTA_PARSE_DEFAULT, schema, &problems) == BERESTA_OK)
+{
+    for (int64_t i = 0; i < beresta_diagnostics_count(problems); ++i)
+    {
+        char* text = beresta_diagnostics_message(problems, i);
+        printf("%lld: %s\n", (long long)beresta_diagnostics_line(problems, i), text);
+        beresta_string_free(text);
+    }
+    beresta_diagnostics_free(problems);
+}
+``` The output flags are `BERESTA_WRITE_PRETTY` and `BERESTA_WRITE_DECLARATION`. A mask was chosen over a settings structure on purpose: an integer is passed the same way from any language.
 
 Codes 1–15 equal `DomErrorCode` + 1 (`BERESTA_PARSE_ERROR`, `BERESTA_VALIDATION_ERROR`...). Three more codes exist only in the C interface: `BERESTA_INVALID_ARGUMENT` (NULL or a handle of the wrong type), `BERESTA_OUT_OF_MEMORY`, `BERESTA_UNKNOWN_ERROR`.
 
@@ -1261,10 +1308,11 @@ try (XmlDocument order = XmlDocument.create("order"))
 }
 
 try (XmlSchema schema = XmlSchema.fromFile(Path.of("order.xsd"));
-     XmlDocument document = Xml.parseFile(Path.of("order.xml"), ParseFlags.DEFAULT, null))
+     XmlDocument document = Xml.parseFile(Path.of("order.xml"), ParseFlags.TRACK_LOCATIONS, null))
 {
-    for (Diagnostic problem : schema.validate(document))
+    for (Diagnostic problem : schema.validate(document))                    // a ready tree
         System.out.println(problem.line() + ": " + problem.message());
+    List<Diagnostic> export = schema.validateFile(Path.of("export.xml"));   // a stream without a tree, even gigabytes
 }
 catch (BerestaException error)
 {
@@ -1292,7 +1340,8 @@ How it works:
 - Call handles (`MethodHandle`) are built once from a `FunctionDescriptor`, strings are passed through `Arena.ofConfined()` and freed right after the call.
 - `XmlDocument`, `XPath`, `XmlSchema` implement `AutoCloseable`. If an object was not closed, a `Cleaner` frees the native memory.
 - A node keeps a reference to its document. After `close()` accessing a node gives an `IllegalStateException`, not a JVM crash.
-- The node methods are split over interfaces (`NodeContent`, `NodeNavigation`, `NodeChildren`, `NodeEditing`, `NodeStructure`, `ElementAttributes`): a method can accept exactly the part of the API it needs.
+- The node methods are split over interfaces (`NodeContent`, `NodeNavigation`, `NodeChildren`, `NodeEditing`, `NodeStructure`, `ElementAttributes`), schema validation is in `SchemaValidation`: a method can accept exactly the part of the API it needs.
+- The hot walk calls (navigation, the node type, a child by index, the nodes of an XPath result) go through `invokeExact` with an exact type, the others through the common `invokeWithArguments`. The JIT inlines `invokeExact` almost like a direct call of a C function, so walking the tree from Java became 1.4–1.7 times faster.
 
 A self-test without Maven or JUnit (only JDK 22+ is needed): `make JAVA=1 java-test`.
 
@@ -1325,9 +1374,10 @@ using (XmlDocument order = Xml.NewDocument("order"))
 try
 {
     using XmlSchema schema = XmlSchema.FromFile("order.xsd");
-    using XmlDocument document = Xml.ParseFile("order.xml");
-    foreach (Diagnostic problem in schema.Validate(document))
+    using XmlDocument document = Xml.ParseFile("order.xml", ParseFlags.TrackLocations);
+    foreach (Diagnostic problem in schema.Validate(document))               // a ready tree
         Console.WriteLine(problem.Line + ": " + problem.Message);
+    var export = schema.ValidateFile("export.xml");                         // a stream without a tree, even gigabytes
 }
 catch (BerestaException error)
 {
@@ -1373,9 +1423,11 @@ with beresta.new_document("order") as order:
 
 try:
     schema = Schema.from_file("order.xsd")
-    with beresta.parse_file("order.xml", ParseFlags.DISCARD_COMMENTS) as document:
-        for problem in schema.validate(document):
+    with beresta.parse_file("order.xml", ParseFlags.TRACK_LOCATIONS) as document:
+        for problem in schema.validate(document):                     # a ready tree
             print(problem.line, problem.message)
+        prices = XPath("//item/@price").select_values(document)      # strings without node objects
+    export = schema.validate_file("export.xml")                       # a stream without a tree, even gigabytes
 except BerestaError as error:
     print(error.name, error.message)
 ```
@@ -1394,6 +1446,7 @@ How it works:
 - Returned `char*`s are declared as `c_void_p`, not `c_char_p`: this way the pointer is not lost, and the string can be freed.
 - A document works as a context manager (`with`). If it was not closed, `weakref.finalize` frees the memory.
 - Nodes are plain Python objects: `len(node)`, `node[i]`, `for child in node`, the `text`, `name`, `parent` properties.
+- The wrapper remembers the node type and the wrapper classes, so a walk step makes fewer ctypes calls, and a step-by-step walk became 1.6 times faster. But the fastest way is not to walk the tree from Python at all: `select_values` assembles the strings inside the core.
 - The library is looked up in `BERESTA_LIBRARY`, then in `beresta/_native/<os>-<arch>/`, then in the system.
 
 A self-test on the standard `unittest`: `make PYTHON=1 python-test`. The Makefile runs `python` on Windows and `python3` on Linux and macOS; another interpreter is set like this: `make PYTHON_EXE=/path/python3.12 python-test`.
@@ -1422,6 +1475,7 @@ order.save('order.xml', { encoding: 'windows-1251' });
 using schema = beresta.Schema.fromFile('order.xsd');
 for (const problem of schema.validate(order))
     console.log(problem.line, problem.message);
+const exported = schema.validateFile('export.xml');                         // a stream without a tree
 
 try { beresta.parse('<a><b></a>'); }
 catch (error) { console.log(error.code, error.message); }                   // PARSE_ERROR line 1, ...
@@ -1437,7 +1491,7 @@ make NODE=1 node-package
 ```
 
 How it works:
-- The addon (`addon/`, C++17) is 31 signature adapters for 66 C interface functions (the Adapter and Command patterns). It turns error codes into `BerestaError` exceptions with a code (`PARSE_ERROR`) and a text in the current language itself.
+- The addon (`addon/`, C++17) is 31 signature adapters for 68 C interface functions (the Adapter and Command patterns). It turns error codes into `BerestaError` exceptions with a code (`PARSE_ERROR`) and a text in the current language itself.
 - Handles are `BigInt`s: an address does not have to fit into the 53 bits of a number, and equal addresses are equal by `===`. Two wrappers of one node are compared through `node.isSameNode(other)`.
 - Parsing a `Buffer` or a `Uint8Array` goes without copying the bytes; a string is encoded into UTF-8.
 - `XmlDocument`, `XPath` and `Schema` are closed through `close()` or `using` (`Symbol.dispose`). If you forget, `FinalizationRegistry` frees the memory.
@@ -1460,6 +1514,7 @@ const order = beresta.parse(xmlText);
 const schema = beresta.Schema.fromString(xsdText);
 for (const problem of schema.validate(order))
     console.log(problem.message);                 // /order/item[3]: the attribute "price": the value "-5" is less than the minimum 0
+const problems = schema.validateBytes(fileBytes); // a stream without a tree: a Uint8Array from <input type="file">
 console.log(new beresta.XPath('sum(//@price)').number(order));
 order.close();
 schema.close();
@@ -1487,9 +1542,8 @@ How it works:
 Deliberate limitations (KISS / YAGNI):
 
 - **XML Schema** is a subset of XSD 1.0:
-  - `xs:redefine` and `xs:override` are not supported;
-  - `substitutionGroup` sets the type, but membership in a substitution group is not taken into account when the model is checked;
-  - the derivation validity of `xsi:type` and `restriction` is not checked;
+  - when the schema is loaded, the validity of a content model restriction under `restriction` (cos-particle-restrict) and the unambiguity of a model (UPA) are not checked: an ambiguous model is accepted and checked exactly, without picking the first branch;
+  - from XSD 1.1 there is only `xs:override`; `xs:assert`, `xs:alternative` and open content are not supported;
   - default values from the schema are not added to the DOM;
   - `duration` has no order for the bound facets;
   - Unicode categories in `pattern` (`\p{L}` and the like) cover the main scripts (Latin, Cyrillic, Greek, Hebrew, Arabic, CJK), not the whole Unicode table.
@@ -1500,11 +1554,12 @@ Deliberate limitations (KISS / YAGNI):
 - **An external entity with `version="1.1"`** in the text declaration is rejected. The 5th edition of XML 1.0 does not require this directly; it is done this way after the W3C case `rmt-e2e-38` (an erratum of the 2nd edition: an XML 1.0 document cannot include an XML 1.1 entity).
 - **Processing instructions inside the DTD** are passed to the SAX handler (`dtdProcessingInstruction`, by default a plain `processingInstruction`), but do not become DOM nodes: `DocumentType` has no children. PIs of the internal subset are kept in the `getInternalSubset()` text and in serialization.
 - **Extreme depth.** There is no recursion anywhere, so the stack will not overflow. But some results themselves grow faster than the depth: the total indentation of pretty output and the document order keys in XPath are proportional to the depth for every node (so is the path in an XSD validator message, but it is built only on an error). On trees tens of thousands of levels deep these operations are noticeably slower. By default the parser limits the depth to `maxDepth` = 1024.
-- **The C interface and the wrappers** cover DOM, XPath and XML Schema. SAX, `TreeWalker`, a custom `ResourceResolver` and the fine settings of `ParserOptions` (limits, a forced encoding) are available only from C++. DTD validation and XInclude are enabled with parse flags in other languages. Nodes in the wrappers live inside their document, but they can be both copied (`copyTo` / `CopyTo` / `copy_to`) and moved without copying (`moveTo` / `MoveTo` / `move_to`), including between documents. Creating a node without a document, as in C++, is not possible from other languages, and the root element of a document is not moved — only copied. Walking the tree step by step from the wrappers is tens to hundreds of times slower than from C++: every step is a call across the language boundary; for bulk processing use XPath (`selectValues`) or SAX in C++.
+- **The C interface and the wrappers** cover DOM, XPath and XML Schema, including streaming validation without a tree. A custom SAX handler, `TreeWalker`, a custom `ResourceResolver` and the fine settings of `ParserOptions` (limits, a forced encoding) are available only from C++. From the wrappers the depth limit is always 1024: a deeper document gives `LIMIT_EXCEEDED`, not a stack overflow. DTD validation and XInclude are enabled with parse flags in other languages. Nodes in the wrappers live inside their document, but they can be both copied (`copyTo` / `CopyTo` / `copy_to`) and moved without copying (`moveTo` / `MoveTo` / `move_to`), including between documents. Creating a node without a document, as in C++, is not possible from other languages, and the root element of a document is not moved — only copied. Walking the tree step by step from the wrappers is tens to hundreds of times slower than from C++: every step is a call across the language boundary; for bulk processing use XPath (`selectValues`) or SAX in C++.
 - **A node after removal.** After `remove()` the wrapper of the removed node and the wrappers of its descendants are invalid and must not be used. A document checks only its own closing.
 - **32-bit platforms** are supported by the core, but the wrappers were checked on 64-bit ones.
-- **WebAssembly:** there is no file system, so `parseFile`, `save`, `Schema.fromFile` and loading external DTDs, entities and XInclude from files are unavailable — parse strings and bytes, output to a string.
-- **Streaming XSD validation** (`SaxParser` with a schema) checks the `xs:key`/`xs:unique`/`xs:keyref` keys only with selectors and fields from the XSD grammar; expressions beyond it (the check over a tree accepts them) are not evaluated in a stream, and a message reports that. Schema errors are reported after the end of the document (the sibling numbers in paths are known only then), and the SAX parser, like the DOM one, reads the input into memory entirely — without a tree, but not as a byte stream.
+- **WebAssembly:** there is no file system, so `parseFile`, `save`, `Schema.fromFile`, `validateFile` and loading external DTDs, entities and XInclude from files are unavailable: the file functions give `IO_ERROR` with an explanation at once. Parse and validate strings and bytes, output to a string.
+- **Streaming XSD validation** (`SaxParser` with a schema) checks the `xs:key`/`xs:unique`/`xs:keyref` keys only with selectors and fields from the XSD grammar; expressions beyond it (the check over a tree accepts them) are not evaluated in a stream, and a message reports that. Schema errors are reported after the end of the document (the sibling numbers in paths are known only then). A file (`parseFile`, `validateFile`) is mapped into memory: the process's own memory stays O(depth), and the OS loads and drops the file pages by itself. A string, a buffer and an `std::istream` are taken by the parser entirely — without a tree, but not as a byte stream.
+- **An attribute lookup by name** (`getAttribute`, `hasAttribute`) is a scan, as in libxml2, Xerces and pugixml. During parsing, repetitions are searched by a hash table, so a tag with 50,000 attributes is parsed in linear time; many attributes are better read through `getAttributes()` or XPath.
 
 ---
 
@@ -1584,12 +1639,12 @@ A node wrapper is a native handle plus a reference to the owner document: while 
 make test
 ```
 
-**136 C++ tests in 43 suites:**
+**159 C++ tests in 53 suites:**
 - the core: copying, hierarchy, elements, navigation, namespaces, serialization, trees 100,000 levels deep;
-- the parser: formats, content, errors, limits, SAX (including PIs from the DTD), encodings, protection from complexity attacks (repeated attributes beyond the loop threshold, the keyed hash);
+- the parser: formats, content, errors, limits, SAX (including PIs from the DTD), encodings, protection from complexity attacks (repeated attributes beyond the loop threshold, the keyed hash, a linear growth of the parse time from 50,000 to 200,000 attributes), mapping files into memory (Cyrillic names, an empty file, CRLF and windows-1251);
 - DTD: entities, validity checking, external resources;
-- the serializer, tree traversal, XPath (paths, axes, functions, the `namespace` axis, names), XSD (types, schemas, advanced features, `xs:key`/`xs:unique`/`xs:keyref`, paths in error messages, whitespace rules; streaming validation: SAX, DOM and a ready tree give the same errors, streaming keys, a deep document), the content model (the step-by-step cursor against the general algorithm on thousands of random models), XInclude;
-- the C interface: error codes, building and changing the tree, moving nodes between documents (with freeing the source document and rolling back a rejected move), XPath, XML Schema;
+- the serializer, tree traversal, XPath (paths, axes, functions, the `namespace` axis, names), XSD (types, schemas, advanced features, `xs:key`/`xs:unique`/`xs:keyref`, paths in error messages, whitespace rules, substitution groups, `xsi:type` with `block`/`final`/`abstract`, `xs:redefine`/`xs:override`; streaming validation: SAX, DOM and a ready tree give the same errors, streaming keys, a deep document), a recursive schema 10,000 levels deep with `xs:unique` in all three modes), the content model (the step-by-step cursor against the general algorithm on thousands of random models), XInclude;
+- the C interface: error codes, building and changing the tree, moving nodes between documents (with freeing the source document and rolling back a rejected move), XPath, XML Schema, streaming validation (matches the tree validation, files, errors); load like the wrappers': 20 threads on a shared schema, XPath and document (every thread has its own errors), 50,000 moves between documents with a check of every previously given handle;
 - message languages: catalog completeness (every message has a translation with the same `{N}` markers), changing the language at run time, argument substitution;
 - regressions: differences from the W3C suite (syntax, entities, validity, encodings) and fuzzing findings.
 
@@ -1600,7 +1655,7 @@ cd tests/conformance && make fetch && make run      # W3C XML Conformance Test S
 cd tests/fuzz && make -j && make corpus && make -j3 fuzz FUZZ_TIME=600 FUZZ_JOBS=3   # libFuzzer, Clang only
 ```
 
-The tests pass both in a regular build and under `-fsanitize=undefined -D_GLIBCXX_ASSERTIONS`.
+The tests pass in a regular build, under AddressSanitizer + UBSan + LeakSanitizer with `-D_GLIBCXX_ASSERTIONS` and under ThreadSanitizer.
 
 The wrapper self-tests work without test frameworks (JUnit, xUnit and pytest are not needed):
 
@@ -1608,7 +1663,7 @@ The wrapper self-tests work without test frameworks (JUnit, xUnit and pytest are
 make JAVA=1 CSHARP=1 PYTHON=1 NODE=1 bindings-test
 ```
 
-They check parsing, navigation, building, copying and moving between documents (including "move from A to B, close A, use the node in B"), errors, writing in another encoding, XPath, XML Schema and message languages: Java — 13 checks, C# — 12, Python — 15, Node.js — 16 (the built-in `node --test`), WebAssembly — 5 (`make wasm-test`). In CMake all of this (and the C++ tests) is run by `ctest` if `BERESTA_BUILD_TESTS` and the wrapper flags are on.
+They check parsing, navigation, building, copying and moving between documents (including "move from A to B, close A, use the node in B"), errors, writing in another encoding, XPath, XML Schema, streaming validation (matches the tree, files with Cyrillic names), load (50,000 moves keeping the wrapper registry, 8 threads on a shared schema and XPath) and message languages: Java — 17 checks, C# — 16, Python — 21, Node.js — 19 (the built-in `node --test`), WebAssembly — 6 (`make wasm-test`). In CMake all of this (and the C++ tests) is run by `ctest` if `BERESTA_BUILD_TESTS` and the wrapper flags are on.
 
 Where it was checked (without a single compiler warning):
 
@@ -1617,6 +1672,7 @@ Where it was checked (without a single compiler warning):
 | Windows 11 x64 | MSVC (Visual Studio 2026), MinGW GCC 15 | CMake and the Makefile, the C++ tests, `ctest`, the self-tests of Java 25 / .NET 9 / Python 3.12 / Node.js 24, `dotnet pack` |
 | Ubuntu 26.04 x64 | GCC 15, Clang 21 | CMake and the Makefile, the C++ tests, `ctest`, the self-tests of Java 25 / .NET 10 / Python 3.14 / Node.js 22, `mvn package` (running with the binary from the jar), `dotnet pack`, a wheel in a clean venv |
 | Ubuntu 26.04 x64 | GCC 15 + ASan, UBSan, LeakSanitizer | the C++ tests, the C and C++ demos: no memory leaks, no undefined behavior |
+| Ubuntu 26.04 x64 | GCC 15 + ThreadSanitizer | the C++ tests, including 20 threads on shared C interface handles: not a single race |
 | Ubuntu 26.04 x64 | Clang 21 + ASan, UBSan, LeakSanitizer, libFuzzer | the C++ tests, the W3C XML Conformance Test Suite run (100 %), fuzzing of three targets |
 | WebAssembly | Emscripten 3.1.69 | `make wasm` and `emcmake cmake` + `ctest`, the self-test in Node.js 22, the example page in Chromium |
 

@@ -2,7 +2,13 @@
 
 const { SIGNATURES, BINDINGS } = require('./wasm_signatures.js');
 const { invokeBinding } = require('./wasm_call.js');
-const { BerestaLoadError } = require('../../node/lib/errors.js');
+const { BerestaError, BerestaLoadError } = require('../../node/lib/errors.js');
+
+// Код BERESTA_IO_ERROR / The BERESTA_IO_ERROR code
+const IO_ERROR = 9;
+
+// Функции, которым нужна файловая система / The functions that need a file system
+const FILE_FUNCTIONS = Object.freeze(['document_parse_file', 'document_save', 'schema_load_file', 'schema_validate_file']);
 
 /*
  * Бэкенд WebAssembly для общего JS-слоя «Берёсты» (паттерн Adapter). Для
@@ -34,6 +40,28 @@ function platformName()
 }
 
 /*
+ * Модуль собран без файловой системы (-sFILESYSTEM=0), и тогда Emscripten
+ * «открывает» любой путь и отдаёт пустое содержимое: отсутствующий файл
+ * выглядел бы как PARSE_ERROR «нет корня». Поэтому файловые функции
+ * отказывают сразу и честно — IO_ERROR с объяснением на текущем языке.
+ * languages.js загружается при вызове, а не при загрузке модуля: он сам
+ * зависит от native, и раннее подключение дало бы цикл.
+ *
+ * The module is built without a file system (-sFILESYSTEM=0), and then Emscripten
+ * "opens" any path and returns empty content: a missing file would look like
+ * a PARSE_ERROR "no root". That is why the file functions refuse at once and
+ * honestly — IO_ERROR with an explanation in the current language.
+ * languages.js is loaded on the call, not at module load: it depends on native
+ * itself, and an early require would make a cycle.
+ */
+function refuseFileSystem(name)
+{
+    const { messageText, Messages } = require('../../node/lib/languages.js');
+
+    throw new BerestaError(IO_ERROR, 'IO_ERROR', messageText(Messages.NO_FILE_SYSTEM, 'beresta_' + name));
+}
+
+/*
  * Заполнение native функциями модуля Wasm core. Функция, которой нет в
  * модуле (exports.json разошёлся с таблицей BINDINGS), — ошибка загрузки
  * сразу, а не TypeError при первом вызове где-то в глубине программы.
@@ -52,6 +80,10 @@ function install(core)
                 + 'beresta_' + name + ' (bindings/wasm/exports.json)');
         native[name] = invokeBinding.bind(null, { name, signature: SIGNATURES[signature], target, core });
     }
+    // Файловые функции без файловой системы отказывают сразу (см. refuseFileSystem)
+    // The file functions without a file system refuse at once (see refuseFileSystem)
+    for (const name of FILE_FUNCTIONS)
+        native[name] = refuseFileSystem.bind(null, name);
 }
 
 module.exports = { native, platformName, install };

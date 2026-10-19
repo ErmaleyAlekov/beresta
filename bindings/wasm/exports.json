@@ -65,6 +65,8 @@
     "_beresta_schema_load_file",
     "_beresta_schema_free",
     "_beresta_schema_validate",
+    "_beresta_schema_validate_bytes",
+    "_beresta_schema_validate_file",
     "_beresta_diagnostics_count",
     "_beresta_diagnostics_message",
     "_beresta_diagnostics_line",

@@ -1,5 +1,6 @@
 #include "parser/xml_parser.hpp"
 #include "io/file_io.hpp"
+#include "io/mapped_file.hpp"
 #include "parser/internal/parse_pipeline.hpp"
 
 #include <istream>
@@ -20,13 +21,20 @@ namespace beresta
         return parseWithOptions(input, _options);
     }
 
-    // Файл читается целиком в двоичном режиме — кодировку определит конвейер
-    // The file is read whole in binary mode — the pipeline will detect the encoding
+    /*
+    ** Файл отображается в память (MappedFile), а не копируется: дерево
+    ** хранит собственные строки, поэтому байты файла нужны только на время
+    ** разбора. Кодировку определит конвейер.
+    **
+    ** The file is mapped into memory (MappedFile), not copied: the tree
+    ** keeps its own strings, so the file bytes are needed only during
+    ** parsing. The pipeline will detect the encoding.
+    */
     Document XmlParser::parseFile(const std::filesystem::path& path) const
     {
-        std::string bytes = io::readFile(path);
+        io::MappedFile file(path);
 
-        return parseWithOptions(bytes, detail::optionsForFile(_options, path));
+        return parseWithOptions(file.getBytes(), detail::optionsForFile(_options, path));
     }
 
     // Поток читается до конца, затем разбирается как обычный буфер

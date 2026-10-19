@@ -280,7 +280,12 @@ namespace beresta::i18n
 
         // ---- XML Schema: загрузка схемы / XML Schema loading ----
         SCHEMA_ROOT_INVALID,
-        SCHEMA_REDEFINE,
+        SCHEMA_REDEFINE_UNEXPECTED,
+        SCHEMA_REDEFINE_MISSING,
+        SCHEMA_REDEFINE_NOT_SELF,
+        SCHEMA_FINAL_DERIVATION,
+        SCHEMA_SUBSTITUTION_FINAL,
+        SCHEMA_SUBSTITUTION_CYCLE,
         SCHEMA_ATTRIBUTE_GROUPS_TOO_DEEP,
         SCHEMA_ATTRIBUTE_GROUP_MISSING,
         SCHEMA_ATTRIBUTE_UNDECLARED,
@@ -340,6 +345,8 @@ namespace beresta::i18n
         XSD_ROOT_UNDECLARED,
         XSD_ABSTRACT_ELEMENT,
         XSD_XSI_TYPE_NOT_FOUND,
+        XSD_XSI_TYPE_NOT_DERIVED,
+        XSD_ABSTRACT_TYPE,
         XSD_NOT_NILLABLE,
         XSD_NIL_NOT_EMPTY,
         XSD_SIMPLE_WITH_CHILDREN,
@@ -354,6 +361,7 @@ namespace beresta::i18n
         BINDING_NATIVE_CALL_FAILED,
         BINDING_UNKNOWN_NODE_TYPE,
         BINDING_INVALID_ARGUMENT,
+        BINDING_NO_FILE_SYSTEM,
         LANGUAGE_UNKNOWN,
 
         // Число сообщений (не сообщение) / The number of messages (not a message)

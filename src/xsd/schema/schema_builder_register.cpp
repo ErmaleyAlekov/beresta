@@ -5,8 +5,15 @@
 
 namespace beresta::xsd::detail
 {
-    // Глобальное определение регистрируется под полным именем; дубликат — ошибка схемы
-    // A global definition is registered under its full name; a duplicate is a schema error
+    /*
+    ** Глобальное определение регистрируется под полным именем; дубликат —
+    ** ошибка схемы. Имя, уже занятое через xs:override, пропускается:
+    ** это и есть подменённое определение подключаемого документа.
+    **
+    ** A global definition is registered under its full name; a duplicate is
+    ** a schema error. A name already taken through xs:override is skipped:
+    ** this is exactly the replaced definition of the included document.
+    */
     void SchemaBuilder::registerDefinition(const Element& child, const SchemaSource& source)
     {
         std::string kind(child.getLocalName());
@@ -18,25 +25,31 @@ namespace beresta::xsd::detail
         if (name.empty())
             fail(child, i18n::format(i18n::Message::SCHEMA_GLOBAL_NO_NAME, {kind}));
         QualifiedKey key(source.targetNamespace, name);
+        if (_overridden.count(std::make_pair(kind, key)) != 0)
+            return;
         if (!registry->emplace(key, Definition{&child, &source}).second)
             fail(child, i18n::format(i18n::Message::SCHEMA_REDEFINITION, {kind, name}));
     }
 
     /*
-    ** xs:include / xs:import: документ загружается через резолвер один раз
-    ** (защита от циклических включений) и регистрируется как обычный.
+    ** xs:include / xs:import / xs:redefine / xs:override: документ
+    ** загружается через резолвер один раз (защита от циклических
+    ** включений) и регистрируется как обычный. Все, кроме import, ведут
+    ** себя как include (в том числе «хамелеонные» схемы).
     ** xs:import без schemaLocation допустим: схема того пространства имён
     ** должна быть передана в Schema::fromDocuments отдельным документом.
     **
-    ** xs:include / xs:import: a document is loaded through the resolver once
-    ** (protection against circular inclusions) and registered as an ordinary one.
+    ** xs:include / xs:import / xs:redefine / xs:override: a document is
+    ** loaded through the resolver once (protection against circular
+    ** inclusions) and registered as an ordinary one. All except import behave
+    ** like include (including "chameleon" schemas).
     ** xs:import without schemaLocation is allowed: the schema of that namespace
     ** must be passed to Schema::fromDocuments as a separate document.
     */
     void SchemaBuilder::loadReferenced(const Element& directive, const SchemaSource& source)
     {
         std::string location = attributeOr(directive, "schemaLocation", "");
-        bool include = isSchemaElement(directive, "include");
+        bool include = !isSchemaElement(directive, "import");
 
         if (location.empty() && !include)
             return;

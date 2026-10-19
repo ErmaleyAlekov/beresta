@@ -22,6 +22,8 @@ any access to the node gives a clear error instead of a process crash.
 
 from __future__ import annotations
 
+from typing import Optional
+
 from ._node_children import NodeChildrenMixin
 from ._node_content import NodeContentMixin
 from ._node_editing import NodeEditingMixin
@@ -35,11 +37,16 @@ class Node(NodeContentMixin, NodeNavigationMixin, NodeChildrenMixin,
     """Узел документа: дескриптор Си-интерфейса и документ-владелец.
     A document node: the C interface handle and the owning document."""
 
-    def __init__(self, pointer: int, document) -> None:
+    def __init__(self, pointer: int, document, kind: Optional[int] = None) -> None:
         self._pointer = pointer
         # Документ-владелец; move_to меняет его (см. _wrapping.transfer_wrappers)
         # The owner document; move_to changes it (see _wrapping.transfer_wrappers)
         self._document = document
+        # Тип узла не меняется за его жизнь: фабрика уже узнала его, повторный
+        # вызов ctypes на каждое обращение к .type не нужен (обход быстрее)
+        # The node type never changes during its life: the factory already learned it,
+        # a repeated ctypes call on every .type access is not needed (a faster walk)
+        self._kind = kind
 
     @property
     def handle(self) -> int:

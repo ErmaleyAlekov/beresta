@@ -2,39 +2,36 @@
 Schema — загруженная XML Schema (неизменяема, потокобезопасна).
 
     schema = Schema.from_file("order.xsd")
-    for problem in schema.validate(document):
+    for problem in schema.validate(document):          # готовое дерево
         print(problem.line, problem.message)
+    problems = schema.validate_file("export.xml")      # поток без дерева
 
 Schema — a loaded XML Schema (immutable, thread-safe).
     schema = Schema.from_file("order.xsd")
-    for problem in schema.validate(document):
+    for problem in schema.validate(document):          # a ready tree
         print(problem.line, problem.message)
+    problems = schema.validate_file("export.xml")      # a stream without a tree
 """
 
 from __future__ import annotations
 
 import os
 import weakref
-from dataclasses import dataclass
 from typing import List, Union
 
+from ._diagnostics import Diagnostic, take_diagnostics
 from ._native import LIB, encode, out_handle
-from .errors import check, take_text
+from ._schema_streaming import SchemaStreaming
+from .errors import check
+
+__all__ = ["Diagnostic", "Schema"]
 
 
-@dataclass(frozen=True)
-class Diagnostic:
-    """Одно нарушение: текст с путём к элементу и место в исходнике (0 — неизвестно).
-    One violation: the text with the element path and the place in the source (0 — unknown)."""
-
-    message: str
-    line: int
-    column: int
-
-
-class Schema:
+class Schema(SchemaStreaming):
     """Создаётся только фабричными методами from_string / from_file.
-    Created only by the factory methods from_string / from_file."""
+    Потоковая проверка без дерева — validate_bytes / validate_file (SchemaStreaming).
+    Created only by the factory methods from_string / from_file.
+    Streaming validation without a tree is validate_bytes / validate_file (SchemaStreaming)."""
 
     def __init__(self, pointer: int) -> None:
         self.handle = pointer
@@ -64,16 +61,4 @@ class Schema:
         All violations in one pass; an empty list means the document is valid."""
         diagnostics = out_handle()
         check(LIB.beresta_schema_validate(self.handle, document.handle, diagnostics))
-        try:
-            return [_diagnostic_at(diagnostics, index)
-                    for index in range(LIB.beresta_diagnostics_count(diagnostics))]
-        finally:
-            LIB.beresta_diagnostics_free(diagnostics)
-
-
-def _diagnostic_at(diagnostics, index: int) -> Diagnostic:
-    """Чтение одного нарушения из нативного списка. / Reads one violation from the native list."""
-    message = take_text(LIB.beresta_diagnostics_message(diagnostics, index))
-    line = LIB.beresta_diagnostics_line(diagnostics, index)
-    column = LIB.beresta_diagnostics_column(diagnostics, index)
-    return Diagnostic(message, line, column)
+        return take_diagnostics(diagnostics)

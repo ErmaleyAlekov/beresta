@@ -31,6 +31,9 @@ namespace Beresta
         /// <summary>Разрешить внешние DTD, сущности и XInclude из каталога файла.
         /// Allow external DTDs, entities and XInclude from the file's directory.</summary>
         FileResources = 1u << 6,
+        /// <summary>Запоминать строку и столбец узлов: места нарушений в Validate(document).
+        /// Remember the line and column of nodes: the places of violations in Validate(document).</summary>
+        TrackLocations = 1u << 7,
     }
 
     /// <summary>Флаги вывода (BERESTA_WRITE_*).

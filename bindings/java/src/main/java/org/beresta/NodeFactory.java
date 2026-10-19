@@ -2,6 +2,7 @@ package org.beresta;
 
 import java.lang.foreign.MemorySegment;
 
+import org.beresta.internal.NodeCalls;
 import org.beresta.internal.NativeCalls;
 import org.beresta.internal.NodeFunctions;
 
@@ -37,7 +38,7 @@ final class NodeFactory
             return null;
         if (pointer.address() == document.address())
             return document;
-        boolean element = (int) NativeCalls.invoke(NodeFunctions.TYPE, pointer) == NodeType.ELEMENT.ordinal();
+        boolean element = NodeCalls.type(pointer) == NodeType.ELEMENT.ordinal();
         XmlNode node = document.registry.find(pointer.address(), element);
         if (node != null)
             return node;

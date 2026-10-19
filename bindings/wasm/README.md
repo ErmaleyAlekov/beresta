@@ -49,6 +49,8 @@ export default {
 
 Пример страницы — [`examples/browser.html`](examples/browser.html). Сборка из исходников: `make wasm` (нужен Emscripten), самопроверка — `make wasm-test`.
 
+**Проверка без дерева.** `schema.validateBytes(bytes)` проверяет документ потоком, не строя DOM: так удобно проверять большой файл, выбранный в `<input type="file">`, прямо в браузере. Файловой системы в WebAssembly нет, поэтому `validateFile` даёт `IO_ERROR`; используйте байты.
+
 ---
 
 # Beresta for WebAssembly
@@ -66,3 +68,5 @@ The API is the same as in the [`beresta`](../node/README.md) package for Node.js
 **Limitations.** WebAssembly has no file system: `parseFile`, `save` and `Schema.fromFile` are unavailable — parse strings and bytes, output to a string (`toXml`). Parsing speed is about 65 % of the native Node.js addon, XPath is just as fast.
 
 An example page is [`examples/browser.html`](examples/browser.html). Building from source: `make wasm` (Emscripten is required), the self-test is `make wasm-test`.
+
+**Validation without a tree.** `schema.validateBytes(bytes)` validates a document as a stream without building a DOM: this is convenient for checking a large file chosen in `<input type="file">` right in the browser. WebAssembly has no file system, so `validateFile` gives `IO_ERROR`; use bytes.

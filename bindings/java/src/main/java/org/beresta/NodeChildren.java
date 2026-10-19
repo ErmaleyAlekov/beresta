@@ -3,6 +3,7 @@ package org.beresta;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.beresta.internal.NodeCalls;
 import org.beresta.internal.NativeCalls;
 import org.beresta.internal.NodeFunctions;
 
@@ -25,7 +26,7 @@ public interface NodeChildren extends NodeBase
      */
     default XmlNode child(long index)
     {
-        return NodeFactory.wrap(NativeCalls.invoke(NodeFunctions.CHILD, handle(), index), document());
+        return NodeFactory.wrap(NodeCalls.indexed(NodeFunctions.CHILD, handle(), index), document());
     }
 
     /**
@@ -35,7 +36,7 @@ public interface NodeChildren extends NodeBase
     default List<XmlNode> children()
     {
         List<XmlNode> result = new ArrayList<>();
-        XmlNode child = NodeFactory.wrap(NativeCalls.invoke(NodeFunctions.FIRST_CHILD, handle()), document());
+        XmlNode child = NodeFactory.wrap(NodeCalls.relative(NodeFunctions.FIRST_CHILD, handle()), document());
 
         while (child != null)
         {

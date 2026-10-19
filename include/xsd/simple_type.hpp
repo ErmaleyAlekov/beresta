@@ -5,6 +5,7 @@
 #include "xsd/regex/xsd_regex.hpp"
 
 #include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <string>
@@ -82,12 +83,23 @@ namespace beresta::xsd
         WhiteSpace whiteSpace = WhiteSpace::PRESERVE;
     };
 
-    // Простой тип XML Schema: встроенный или объявленный в схеме
-    // An XML Schema simple type: built-in or declared in the schema
+    /*
+    ** Простой тип XML Schema: встроенный или объявленный в схеме.
+    ** baseType — тип, из которого он получен ограничением (у list и union —
+    ** anySimpleType, у самого anySimpleType — nullptr); finalSet — запреты
+    ** final (флаги DERIVATION_* из schema.hpp).
+    **
+    ** An XML Schema simple type: built-in or declared in the schema.
+    ** baseType is the type it was obtained from by restriction (for list and union —
+    ** anySimpleType, for anySimpleType itself — nullptr); finalSet is the final
+    ** prohibitions (the DERIVATION_* flags from schema.hpp).
+    */
     struct SimpleType
     {
         std::string name;
         std::string namespaceUri;
+        const SimpleType* baseType = nullptr;
+        std::uint8_t finalSet = 0;
         Variety variety = Variety::ATOMIC;
         Primitive primitive = Primitive::STRING;
         LexicalForm form = LexicalForm::FREE;

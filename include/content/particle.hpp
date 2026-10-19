@@ -37,6 +37,25 @@ namespace beresta::content
                             // a list of URIs (an empty string means "no namespace")
     };
 
+    // Имя элемента, который может стоять вместо частицы (член группы замены XSD)
+    // The name of an element that may stand in place of a particle (a member of an XSD substitution group)
+    struct ElementName
+    {
+        std::string localName;
+        std::string namespaceUri;
+    };
+
+    /*
+    ** Допустимые заменители головы группы замены, упорядоченные по паре
+    ** (пространство имён, локальное имя): поиск — двоичный, за O(log n),
+    ** даже для отраслевых схем с сотнями членов одной группы.
+    **
+    ** The admissible substitutes of a substitution group head, ordered by the pair
+    ** (namespace, local name): the lookup is binary, in O(log n),
+    ** even for industry schemas with hundreds of members in one group.
+    */
+    using SubstitutionGroup = std::vector<ElementName>;
+
     /*
     ** Particle — узел дерева модели содержимого (паттерн Composite).
     ** Одна и та же структура описывает и DTD (<!ELEMENT a (b, c*)>),
@@ -45,6 +64,9 @@ namespace beresta::content
     **
     ** ELEMENT в режиме DTD сравнивается по полному имени (byQualifiedName),
     ** в режиме XSD — по паре «пространство имён + локальное имя».
+    ** substitutes — группа замены глобального элемента (ссылка ref): она
+    ** заполняется после загрузки всей схемы, поэтому частица хранит лишь
+    ** указатель на неё. У DTD и у локальных элементов он пустой.
     **
     ** Particle — a node of the content model tree (the Composite pattern).
     ** The same structure describes both a DTD (<!ELEMENT a (b, c*)>)
@@ -52,6 +74,9 @@ namespace beresta::content
     ** algorithm is written once for both validators (DRY).
     ** ELEMENT in DTD mode is compared by the qualified name (byQualifiedName),
     ** in XSD mode — by the pair "namespace + local name".
+    ** substitutes is the substitution group of a global element (a ref reference): it
+    ** is filled after the whole schema is loaded, so the particle keeps only
+    ** a pointer to it. For a DTD and for local elements it is null.
     */
     struct Particle
     {
@@ -64,6 +89,7 @@ namespace beresta::content
         WildcardMode wildcardMode = WildcardMode::ANY_NAMESPACE;
         std::vector<std::string> wildcardNamespaces;
         std::vector<Particle> children;
+        const SubstitutionGroup* substitutes = nullptr;
     };
 
     // Ребёнок проверяемого элемента: полное имя, локальное имя и пространство имён
@@ -90,6 +116,18 @@ namespace beresta::content
     // Подходит ли один ребёнок под частицу ELEMENT или WILDCARD
     // Whether one child fits an ELEMENT or WILDCARD particle
     bool particleAccepts(const Particle& particle, const ChildKey& child) noexcept;
+
+    // Есть ли у частицы непустая группа замены (такие модели не идут жадным путём; substitution.cpp)
+    // Whether the particle has a non-empty substitution group (such models do not take the greedy path; substitution.cpp)
+    bool hasSubstitutes(const Particle& particle) noexcept;
+
+    // Входит ли ребёнок в упорядоченную группу замены (substitution.cpp)
+    // Whether the child belongs to an ordered substitution group (substitution.cpp)
+    bool isSubstitute(const SubstitutionGroup& group, const ChildKey& child) noexcept;
+
+    // Порядок имён в группе замены: сначала пространство имён, затем локальное имя (substitution.cpp)
+    // The order of names in a substitution group: the namespace first, then the local name (substitution.cpp)
+    bool operator<(const ElementName& left, const ElementName& right) noexcept;
 
     // Человекочитаемая запись модели для сообщений об ошибках: "(a, b*, (c | d))"
     // A human-readable notation of the model for error messages: "(a, b*, (c | d))"

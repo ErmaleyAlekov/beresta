@@ -273,7 +273,12 @@ namespace beresta::i18n
 
         // ---- XML Schema: загрузка схемы / XML Schema loading ----
         {Message::SCHEMA_ROOT_INVALID, "the schema root element must be xs:schema from {0}"},
-        {Message::SCHEMA_REDEFINE, "xs:redefine and xs:override are not supported"},
+        {Message::SCHEMA_REDEFINE_UNEXPECTED, "xs:{0} cannot contain xs:{1}"},
+        {Message::SCHEMA_REDEFINE_MISSING, "xs:redefine: the included schema has no xs:{0} \"{1}\""},
+        {Message::SCHEMA_REDEFINE_NOT_SELF, "xs:redefine: the type \"{0}\" must derive from the former definition with the same name"},
+        {Message::SCHEMA_FINAL_DERIVATION, "the type \"{0}\" prohibits derivation by {1} (the final attribute)"},
+        {Message::SCHEMA_SUBSTITUTION_FINAL, "the element \"{0}\" cannot be a member of the substitution group \"{1}\": its type is not derived from the head type or such derivation is prohibited by the final attribute"},
+        {Message::SCHEMA_SUBSTITUTION_CYCLE, "a circular substitution group at the element \"{0}\""},
         {Message::SCHEMA_ATTRIBUTE_GROUPS_TOO_DEEP, "attribute groups are nested too deeply"},
         {Message::SCHEMA_ATTRIBUTE_GROUP_MISSING, "the attribute group \"{0}\" was not found"},
         {Message::SCHEMA_ATTRIBUTE_UNDECLARED, "the attribute \"{0}\" is not declared"},
@@ -333,6 +338,8 @@ namespace beresta::i18n
         {Message::XSD_ROOT_UNDECLARED, "the root element {{0}}{1} is not declared in the schema"},
         {Message::XSD_ABSTRACT_ELEMENT, "an abstract element cannot be used in a document"},
         {Message::XSD_XSI_TYPE_NOT_FOUND, "the type xsi:type=\"{0}\" was not found in the schema"},
+        {Message::XSD_XSI_TYPE_NOT_DERIVED, "the type xsi:type=\"{0}\" is not derived from the declared type of the element or such derivation is prohibited by the block attribute"},
+        {Message::XSD_ABSTRACT_TYPE, "the abstract type \"{0}\" cannot be used for a document element: give a derived type through xsi:type"},
         {Message::XSD_NOT_NILLABLE, "the element does not allow xsi:nil (no nillable=\"true\")"},
         {Message::XSD_NIL_NOT_EMPTY, "an element with xsi:nil=\"true\" must be empty"},
         {Message::XSD_SIMPLE_WITH_CHILDREN, "an element of the simple type {0} cannot contain elements"},
@@ -347,6 +354,7 @@ namespace beresta::i18n
         {Message::BINDING_NATIVE_CALL_FAILED, "a native call failed"},
         {Message::BINDING_UNKNOWN_NODE_TYPE, "an unknown node type {0}"},
         {Message::BINDING_INVALID_ARGUMENT, "invalid argument #{0} of {1}: {2} expected"},
+        {Message::BINDING_NO_FILE_SYSTEM, "WebAssembly has no file system: {0} is unavailable, pass a string or bytes"},
         {Message::LANGUAGE_UNKNOWN, "an unknown message language \"{0}\"; available: {1}"},
     };
 

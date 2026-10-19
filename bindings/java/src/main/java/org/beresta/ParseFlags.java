@@ -17,6 +17,8 @@ public final class ParseFlags
     public static final int NO_NAMESPACES = 1 << 4;
     public static final int XINCLUDE = 1 << 5;
     public static final int FILE_RESOURCES = 1 << 6;
+    /** Строка и столбец узлов: места нарушений в validate(document). / The line and column of nodes: the places of violations in validate(document). */
+    public static final int TRACK_LOCATIONS = 1 << 7;
 
     private ParseFlags()
     {

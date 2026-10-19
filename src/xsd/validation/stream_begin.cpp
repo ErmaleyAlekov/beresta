@@ -1,6 +1,7 @@
 #include "xsd/internal/stream_validator.hpp"
 #include "i18n/i18n.hpp"
 #include "utils/qualified_name.hpp"
+#include "xsd/internal/type_derivation.hpp"
 
 namespace beresta::xsd::detail
 {
@@ -51,7 +52,7 @@ namespace beresta::xsd::detail
             openScope(declaration);
         if (_identity != nullptr)
             frame.attributeTypes.assign(element.attributes.size(), nullptr);
-        if (!applyXsiType(xsi, type))
+        if (!applyXsiType(xsi, declaration, type))
             return;
         if (declaration.isAbstract)
             report(_depth - 1, CheckPhase::ABSTRACT, i18n::format(i18n::Message::XSD_ABSTRACT_ELEMENT));
@@ -63,23 +64,47 @@ namespace beresta::xsd::detail
             beginComplex(element, *type.complex);
     }
 
-    // xsi:type="p:Тип": префикс ищется среди объявлений открытых элементов, включая этот
-    // xsi:type="p:Type": the prefix is looked up among the declarations of the open elements, including this one
-    bool StreamValidator::applyXsiType(const XsiValues& xsi, TypeRef& type)
+    /*
+    ** Действующий тип элемента. xsi:type="p:Тип": префикс ищется среди
+    ** объявлений открытых элементов, включая этот; тип обязан быть выведен
+    ** из объявленного способами, не запрещёнными block элемента и
+    ** объявленного типа (cvc-elt.4.3). Абстрактный составной тип для
+    ** элемента документа недопустим (cvc-type.2). Ошибка — содержимое
+    ** дальше не проверяется. Без xsi:type проверка стоит одно сравнение.
+    **
+    ** The effective type of the element. xsi:type="p:Type": the prefix is looked up
+    ** among the declarations of the open elements, including this one; the type must be
+    ** derived from the declared one by methods not prohibited by the block of the element
+    ** and of the declared type (cvc-elt.4.3). An abstract complex type for a
+    ** document element is not allowed (cvc-type.2). An error — the content
+    ** is not checked further. Without xsi:type the check costs one comparison.
+    */
+    bool StreamValidator::applyXsiType(const XsiValues& xsi, const ElementDecl& declaration, TypeRef& type)
     {
-        if (!xsi.hasType)
-            return true;
-        utils::QualifiedNameParts parts = utils::splitQualifiedName(xsi.type);
-        std::string_view namespaceUri = _prefixes.lookup(parts.prefix).value_or(std::string_view());
-        bool found = false;
-        TypeRef replacement = _schema.findType(namespaceUri, parts.localName, found);
-        if (!found)
+        if (xsi.hasType)
         {
-            report(_depth - 1, CheckPhase::XSI_TYPE, i18n::format(i18n::Message::XSD_XSI_TYPE_NOT_FOUND, {xsi.type}));
-            return false;
+            utils::QualifiedNameParts parts = utils::splitQualifiedName(xsi.type);
+            std::string_view namespaceUri = _prefixes.lookup(parts.prefix).value_or(std::string_view());
+            bool found = false;
+            TypeRef replacement = _schema.findType(namespaceUri, parts.localName, found);
+            DerivationSet blocked = declaration.blockSet;
+            if (type.complex != nullptr)
+                blocked |= type.complex->blockSet;
+            bool accepted = found && isDerivedFrom(replacement, type, blocked);
+            i18n::Message problem = i18n::Message::XSD_XSI_TYPE_NOT_FOUND;
+            if (found)
+                problem = i18n::Message::XSD_XSI_TYPE_NOT_DERIVED;
+            if (!accepted)
+            {
+                report(_depth - 1, CheckPhase::XSI_TYPE, i18n::format(problem, {xsi.type}));
+                return false;
+            }
+            type = replacement;
         }
-        type = replacement;
-        return true;
+        if (type.complex == nullptr || !type.complex->isAbstract)
+            return true;
+        report(_depth - 1, CheckPhase::XSI_TYPE, i18n::format(i18n::Message::XSD_ABSTRACT_TYPE, {type.complex->name}));
+        return false;
     }
 
     // xsi:nil="true" допустим только у nillable-элементов; пустоту содержимого проверит закрытие

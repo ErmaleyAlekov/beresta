@@ -9,10 +9,12 @@ namespace Beresta
     /// <summary>
     /// Загруженная XML Schema. После загрузки неизменяема: одну схему можно
     /// использовать для множества документов, в том числе из разных потоков.
+    /// Потоковая проверка без дерева — в XmlSchema.Streaming.cs.
     /// A loaded XML Schema. Immutable after loading: one schema can be used
     /// for many documents, including from different threads.
+    /// Streaming validation without a tree is in XmlSchema.Streaming.cs.
     /// </summary>
-    public sealed class XmlSchema : IDisposable
+    public sealed partial class XmlSchema : IDisposable
     {
         private XmlSchema(IntPtr pointer)
         {

@@ -13,6 +13,8 @@ namespace beresta::xsd::detail
     ** A QName value ("xs:string", "tns:Book") is resolved by the xmlns
     ** declarations in the schema document itself. A name without a prefix takes the default
     ** namespace (xmlns="..."), and if there is none — "no namespace".
+    ** In a "chameleon" schema a name outside namespaces takes the namespace
+    ** of the including schema — the same one its components were registered under.
     */
     QualifiedKey SchemaBuilder::resolveQName(const Element& context, std::string_view value) const
     {
@@ -22,7 +24,33 @@ namespace beresta::xsd::detail
 
         if (!parts.prefix.empty() && !uri.has_value())
             fail(context, i18n::format(i18n::Message::SCHEMA_PREFIX_UNDECLARED, {parts.prefix, collapsed}));
-        return QualifiedKey(uri.value_or(""), std::string(parts.localName));
+        std::string namespaceUri = uri.value_or("");
+        if (namespaceUri.empty())
+            namespaceUri = chameleonNamespace(context);
+        return QualifiedKey(namespaceUri, std::string(parts.localName));
+    }
+
+    /*
+    ** Пространство «хамелеона»: корень документа схемы без targetNamespace,
+    ** подключённого через include / redefine / override, получил
+    ** пространство включающей схемы. У обычных документов — пустая строка.
+    **
+    ** The namespace of a "chameleon": the root of a schema document without targetNamespace
+    ** included through include / redefine / override got the namespace of the
+    ** including schema. For ordinary documents — an empty string.
+    */
+    std::string SchemaBuilder::chameleonNamespace(const Element& context) const
+    {
+        const Node* root = &context;
+
+        while (root->getParent() != nullptr && root->getParent()->getType() == NodeType::ELEMENT)
+            root = root->getParent();
+        for (const SchemaSource& source : _sources)
+        {
+            if (source.root == root && !source.root->hasAttribute("targetNamespace"))
+                return source.targetNamespace;
+        }
+        return std::string();
     }
 
     /*

@@ -45,6 +45,7 @@ namespace beresta::capi
         options.validateDtd = hasFlag(flags, BERESTA_PARSE_VALIDATE_DTD);
         options.namespaceAware = !hasFlag(flags, BERESTA_PARSE_NO_NAMESPACES);
         options.processXInclude = hasFlag(flags, BERESTA_PARSE_XINCLUDE);
+        options.trackLocations = hasFlag(flags, BERESTA_PARSE_TRACK_LOCATIONS);
         if (schema != nullptr)
             options.schema = requireHandle<SchemaHandle>(schema, "schema").schema;
         return options;

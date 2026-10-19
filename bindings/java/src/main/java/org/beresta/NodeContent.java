@@ -2,6 +2,7 @@ package org.beresta;
 
 import java.lang.foreign.Arena;
 
+import org.beresta.internal.NodeCalls;
 import org.beresta.internal.NativeCalls;
 import org.beresta.internal.NativeStrings;
 import org.beresta.internal.NativeMemory;
@@ -12,7 +13,7 @@ public interface NodeContent extends NodeBase
 {
     default NodeType type()
     {
-        int code = (int) NativeCalls.invoke(NodeFunctions.TYPE, handle());
+        int code = NodeCalls.type(handle());
 
         if (code < 0)
             throw NativeCalls.lastError();

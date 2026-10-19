@@ -52,6 +52,10 @@ public final class SelfTest
         run("XPath: значения", Check.XPATH_VALUES);
         run("XPath: выборка", Check.XPATH_SELECT);
         run("XML Schema", Check.SCHEMA);
+        run("XSD поток: совпадает с деревом", Check.STREAM_MATCHES_TREE);
+        run("XSD поток: файлы и ошибки", Check.STREAM_FILE);
+        run("50 000 переносов и реестр обёрток", Check.BULK_MOVE);
+        run("8 потоков на общих схеме и XPath", Check.PARALLEL_SHARED);
         run("языки сообщений / message languages", Check.LANGUAGES);
         run("неизвестный язык / unknown language", Check.UNKNOWN_LANGUAGE);
         System.out.println("Итого упало: " + failures);

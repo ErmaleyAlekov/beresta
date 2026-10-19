@@ -5,6 +5,7 @@ import java.lang.foreign.MemorySegment;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.beresta.internal.NodeCalls;
 import org.beresta.internal.NativeCalls;
 import org.beresta.internal.NativeStrings;
 import org.beresta.internal.NativeMemory;
@@ -54,7 +55,7 @@ final class NodeSets
             long size = (long) NativeCalls.invoke(XPathFunctions.NODESET_SIZE, set);
             for (long index = 0; index < size; ++index)
             {
-                XmlNode node = NodeFactory.wrap(NativeCalls.invoke(XPathFunctions.NODESET_NODE, set, index), context.document());
+                XmlNode node = NodeFactory.wrap(NodeCalls.indexed(XPathFunctions.NODESET_NODE, set, index), context.document());
                 if (node != null)
                     result.add(node);
             }

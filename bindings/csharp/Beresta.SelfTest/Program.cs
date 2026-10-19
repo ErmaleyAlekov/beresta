@@ -44,6 +44,10 @@ namespace Beresta.SelfTest
             Run("XPath: значения", XPathSchemaChecks.XPathValues);
             Run("XPath: выборка", XPathSchemaChecks.XPathSelect);
             Run("XML Schema", XPathSchemaChecks.Schema);
+            Run("XSD поток: совпадает с деревом", StreamingChecks.StreamMatchesTree);
+            Run("XSD поток: файлы и ошибки", StreamingChecks.StreamFile);
+            Run("50 000 переносов и реестр обёрток", LoadChecks.BulkMove);
+            Run("8 потоков на общих схеме и XPath", LoadChecks.ParallelShared);
             Run("языки сообщений / message languages", LanguageChecks.Languages);
             Console.WriteLine("Итого упало: " + failures);
             return Math.Min(failures, 1);

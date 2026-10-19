@@ -1,11 +1,13 @@
-"""Примесь XPath: результат как строка, число или логическое значение.
-XPath mixin: the result as a string, a number or a boolean."""
+"""Примесь XPath: результат как строка, число, логическое значение или
+список строковых значений (select_values).
+XPath mixin: the result as a string, a number, a boolean or a list of string
+values (select_values)."""
 
 from __future__ import annotations
 
 from ctypes import byref, c_double
 
-from ._native import LIB
+from ._native import LIB, out_handle
 from .errors import check, take_text
 
 
@@ -28,3 +30,23 @@ class XPathScalarsMixin:
         if result < 0:
             check(LIB.beresta_last_error_code())
         return result == 1
+
+    def select_values(self, node) -> list:
+        """
+        Строковые значения найденных узлов (текст элемента, значение
+        атрибута) без создания объектов-обёртки — самый быстрый способ
+        читать данные из Python: значения собираются внутри ядра, а
+        границу ctypes пересекает только по одной строке на узел.
+
+        The string values of the found nodes (the text of an element, the value
+        of an attribute) without creating wrapper objects — the fastest way to
+        read data from Python: the values are assembled inside the core, and only
+        one string per node crosses the ctypes boundary.
+        """
+        result = out_handle()
+        check(LIB.beresta_xpath_select(self.handle, node.handle, result))
+        try:
+            return [take_text(LIB.beresta_nodeset_value(result, index))
+                    for index in range(LIB.beresta_nodeset_size(result))]
+        finally:
+            LIB.beresta_nodeset_free(result)

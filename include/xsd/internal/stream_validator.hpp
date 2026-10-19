@@ -154,7 +154,7 @@ namespace beresta::xsd::detail
         // ---- Начало проверки элемента (stream_begin.cpp) ----
         // ---- The start of an element check (stream_begin.cpp) ----
         void beginValidation(const SaxElement& element, const ElementDecl& declaration);
-        bool applyXsiType(const XsiValues& xsi, TypeRef& type);
+        bool applyXsiType(const XsiValues& xsi, const ElementDecl& declaration, TypeRef& type);
         bool isNil(const XsiValues& xsi, const ElementDecl& declaration);
         void beginSimple(const SaxElement& element, const SimpleType& type);
         void beginComplex(const SaxElement& element, const ComplexType& type);

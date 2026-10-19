@@ -18,11 +18,10 @@ namespace beresta::xsd::detail
     {
         bool extension = false;
         const Element& derivation = derivationOf(simpleContent, extension);
-        TypeRef base;
-        const ComplexType* complexBase = completeBase(derivation, base);
+        const ComplexType* complexBase = completeBase(derivation, extension, type);
 
         type.content = ContentType::SIMPLE_CONTENT;
-        type.simpleContent = base.simple;
+        type.simpleContent = type.baseType.simple;
         if (complexBase != nullptr)
         {
             type.simpleContent = complexBase->simpleContent;
@@ -33,9 +32,14 @@ namespace beresta::xsd::detail
             type.simpleContent = builtinType("anySimpleType");
         if (!extension)
         {
+            // Тип текста — ограничение прежнего: база запоминается для проверки наследования
+            // The text type is a restriction of the former one: the base is remembered for derivation checks
             _schema._simpleTypes.push_back(*type.simpleContent);
-            applyFacets(_schema._simpleTypes.back(), derivation);
-            type.simpleContent = &_schema._simpleTypes.back();
+            SimpleType& restricted = _schema._simpleTypes.back();
+            restricted.baseType = type.simpleContent;
+            restricted.finalSet = 0;
+            applyFacets(restricted, derivation);
+            type.simpleContent = &restricted;
         }
         buildAttributes(derivation, source, type, 0);
     }
@@ -54,8 +58,7 @@ namespace beresta::xsd::detail
     {
         bool extension = false;
         const Element& derivation = derivationOf(complexContent, extension);
-        TypeRef base;
-        const ComplexType* complexBase = completeBase(derivation, base);
+        const ComplexType* complexBase = completeBase(derivation, extension, type);
         std::optional<std::string> ownMixed = complexContent.getAttribute("mixed");
 
         if (ownMixed.has_value())

@@ -43,7 +43,7 @@ namespace beresta::xsd::detail
         std::size_t depth)
     {
         std::string name = attributeOr(reference, "ref", "");
-        const Definition* named = findDefinition("group", resolveQName(reference, name));
+        const Definition* named = referencedDefinition(reference, "group", resolveQName(reference, name));
         std::vector<const Element*> model;
 
         if (named != nullptr)
@@ -55,8 +55,15 @@ namespace beresta::xsd::detail
         return group;
     }
 
-    // Элемент модели: локальное объявление или ссылка ref на глобальное
-    // A model element: a local declaration or a ref reference to a global one
+    /*
+    ** Элемент модели: локальное объявление или ссылка ref на глобальное.
+    ** Ссылка получает указатель на группу замены глобального элемента:
+    ** сама группа ещё пуста и будет заполнена после загрузки схемы.
+    **
+    ** A model element: a local declaration or a ref reference to a global one.
+    ** A reference gets a pointer to the substitution group of the global element:
+    ** the group itself is still empty and will be filled after the schema is loaded.
+    */
     content::Particle SchemaBuilder::buildElementParticle(const Element& definition,
         const SchemaSource& source, ComplexType& owner)
     {
@@ -65,7 +72,10 @@ namespace beresta::xsd::detail
         content::Particle particle;
 
         if (reference.has_value())
+        {
             declaration = globalElement(resolveQName(definition, reference.value()));
+            particle.substitutes = &declaration->substitutes;
+        }
         else
             declaration = buildElement(definition, source, false);
         particle.kind = content::ParticleKind::ELEMENT;

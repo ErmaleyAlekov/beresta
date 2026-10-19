@@ -106,6 +106,8 @@ SIGNATURES = (
     ("beresta_schema_load_file", c_int, (c_char_p, _OUT_HANDLE)),
     ("beresta_schema_free", None, (_HANDLE,)),
     ("beresta_schema_validate", c_int, (_HANDLE, _HANDLE, _OUT_HANDLE)),
+    ("beresta_schema_validate_bytes", c_int, (c_char_p, c_int64, c_uint32, _HANDLE, _OUT_HANDLE)),
+    ("beresta_schema_validate_file", c_int, (c_char_p, c_uint32, _HANDLE, _OUT_HANDLE)),
     ("beresta_diagnostics_count", c_int64, (_HANDLE,)),
     ("beresta_diagnostics_message", _OWNED_TEXT, (_HANDLE, c_int64)),
     ("beresta_diagnostics_line", c_int64, (_HANDLE, c_int64)),

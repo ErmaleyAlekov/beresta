@@ -7,6 +7,7 @@
 #include "xsd/simple_type.hpp"
 #include "xpath/xpath.hpp"
 
+#include <cstdint>
 #include <deque>
 #include <filesystem>
 #include <map>
@@ -35,6 +36,22 @@ namespace beresta::xsd
         const SimpleType* simple = nullptr;
         const ComplexType* complex = nullptr;
     };
+
+    /*
+    ** Набор способов наследования — битовые флаги для атрибутов final и
+    ** block (и их значений по умолчанию finalDefault / blockDefault).
+    ** У типа derivationMethod — ровно один флаг: как он получен из базового.
+    **
+    ** A set of derivation methods — bit flags for the final and block
+    ** attributes (and their defaults finalDefault / blockDefault).
+    ** A type's derivationMethod is exactly one flag: how it was obtained from its base.
+    */
+    using DerivationSet = std::uint8_t;
+    inline constexpr DerivationSet DERIVATION_EXTENSION = 1;
+    inline constexpr DerivationSet DERIVATION_RESTRICTION = 2;
+    inline constexpr DerivationSet DERIVATION_LIST = 4;
+    inline constexpr DerivationSet DERIVATION_UNION = 8;
+    inline constexpr DerivationSet DERIVATION_SUBSTITUTION = 16;
 
     // Режим проверки содержимого, допущенного шаблоном xs:any / xs:anyAttribute
     // The validation mode of content admitted by the xs:any / xs:anyAttribute wildcard
@@ -69,12 +86,26 @@ namespace beresta::xsd
         std::optional<std::string> fixedValue;
     };
 
-    // Составной тип: модель содержимого и атрибуты
-    // A complex type: the content model and the attributes
+    /*
+    ** Составной тип: модель содержимого и атрибуты. baseType и
+    ** derivationMethod описывают шаг наследования (у типа без
+    ** complexContent / simpleContent — ограничение xs:anyType); по ним
+    ** проверяется, выведен ли тип из xsi:type из объявленного.
+    **
+    ** A complex type: the content model and the attributes. baseType and
+    ** derivationMethod describe the derivation step (a type without
+    ** complexContent / simpleContent is a restriction of xs:anyType); they are used
+    ** to check whether the xsi:type type is derived from the declared one.
+    */
     struct ComplexType
     {
         std::string name;
         std::string namespaceUri;
+        TypeRef baseType;
+        DerivationSet derivationMethod = DERIVATION_RESTRICTION;
+        DerivationSet finalSet = 0;
+        DerivationSet blockSet = 0;
+        bool isAbstract = false;
         ContentType content = ContentType::EMPTY_CONTENT;
         const SimpleType* simpleContent = nullptr;
         content::Particle particle;
@@ -126,8 +157,19 @@ namespace beresta::xsd
         const IdentityConstraint* referenced = nullptr;
     };
 
-    // Объявление элемента
-    // An element declaration
+    /*
+    ** Объявление элемента. substitutionHead — голова группы замены
+    ** (атрибут substitutionGroup), substitutes — все глобальные элементы,
+    ** которые допустимо поставить в документ вместо этого (транзитивно,
+    ** без абстрактных и заблокированных block); вычисляется после
+    ** загрузки всей схемы.
+    **
+    ** An element declaration. substitutionHead is the substitution group head
+    ** (the substitutionGroup attribute), substitutes are all the global elements
+    ** that may be put into a document instead of this one (transitively,
+    ** without abstract ones and the ones blocked by block); it is computed after
+    ** the whole schema is loaded.
+    */
     struct ElementDecl
     {
         std::string name;
@@ -135,6 +177,10 @@ namespace beresta::xsd
         TypeRef type;
         bool nillable = false;
         bool isAbstract = false;
+        DerivationSet finalSet = 0;
+        DerivationSet blockSet = 0;
+        const ElementDecl* substitutionHead = nullptr;
+        content::SubstitutionGroup substitutes;
         std::optional<std::string> defaultValue;
         std::optional<std::string> fixedValue;
         std::vector<const IdentityConstraint*> identityConstraints;

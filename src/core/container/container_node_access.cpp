@@ -30,15 +30,27 @@ namespace beresta
         return _children[index].get();
     }
 
-    // Линейный поиск ребёнка по адресу
-    // A linear search for a child by address
+    /*
+    ** Индекс ребёнка за O(1): узел сам хранит свой номер среди соседей
+    ** (его же использует getNextSibling). Раньше здесь был перебор
+    ** списка, и перенос N детей с конца (beresta_node_move_to из обёрток,
+    ** removeChild) стоил O(N²). Номер сверяется со списком: чужой узел
+    ** или узел без родителя дают npos, а не ложный индекс.
+    **
+    ** The index of a child in O(1): the node itself stores its number among
+    ** its siblings (getNextSibling uses it too). There used to be a list scan
+    ** here, and moving N children from the end (beresta_node_move_to from the
+    ** wrappers, removeChild) cost O(N²). The number is checked against the list:
+    ** a foreign node or a node without a parent gives npos, not a false index.
+    */
     std::size_t ContainerNode::indexOf(const Node* child) const noexcept
     {
-        for (std::size_t index = 0; index < _children.size(); ++index)
-        {
-            if (_children[index].get() == child)
-                return index;
-        }
+        if (child == nullptr || child->_parent != this)
+            return npos;
+        std::size_t index = child->_siblingIndex;
+
+        if (index < _children.size() && _children[index].get() == child)
+            return index;
         return npos;
     }
 
