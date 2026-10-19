@@ -55,6 +55,26 @@ namespace beresta::xsd::detail
         bool hasNil = false;
     };
 
+    // ---- Атрибуты xsi (stream_xsi.cpp) ----
+    // ---- The xsi attributes (stream_xsi.cpp) ----
+
+    // xsi:type и xsi:nil элемента без пробелов по краям (их пространства имён уже разрешены)
+    // xsi:type and xsi:nil of an element without spaces at the edges (their namespaces are already resolved)
+    XsiValues findXsi(const SaxElement& element) noexcept;
+
+    /*
+    ** Объявление-заглушка для элемента без объявления, но с xsi:type:
+    ** корень документа или ребёнок xs:any (strict / lax) проверяется по
+    ** типу из xsi:type (XSD 1.0, 3.3.4, Schema-Validity Assessment
+    ** (Element), п. 1.2). Без xsi:type — nullptr.
+    **
+    ** A stub declaration for an element without a declaration but with xsi:type:
+    ** the document root or an xs:any child (strict / lax) is validated against
+    ** the type from xsi:type (XSD 1.0, 3.3.4, Schema-Validity Assessment
+    ** (Element), item 1.2). Without xsi:type — nullptr.
+    */
+    const ElementDecl* typeOnlyDeclaration(const SaxElement& element) noexcept;
+
     // Ребёнок элемента с отложенной проверкой модели: где сообщить, если он окажется лишним
     // A child of an element with a deferred model check: where to report if it turns out to be extra
     struct BufferedChild
@@ -158,6 +178,7 @@ namespace beresta::xsd::detail
         void beginValidation(const SaxElement& element, const ElementDecl& declaration);
         bool applyXsiType(const XsiValues& xsi, const ElementDecl& declaration, TypeRef& type);
         bool isNil(const XsiValues& xsi, const ElementDecl& declaration);
+        void beginNil(const SaxElement& element, TypeRef type);
         void beginSimple(const SaxElement& element, const SimpleType& type);
         void beginComplex(const SaxElement& element, const ComplexType& type);
 
@@ -171,6 +192,7 @@ namespace beresta::xsd::detail
         // ---- Closing an element (stream_close.cpp) ----
         const SimpleType* closeSimple(ElementFrame& frame);
         const SimpleType* closeComplex(ElementFrame& frame);
+        void closeNil(const ElementFrame& frame);
         void finishModel(ElementFrame& frame);
         content::CursorPlan planFor(const content::Particle& particle);
 

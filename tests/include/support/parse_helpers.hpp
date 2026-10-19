@@ -4,6 +4,7 @@
 #include "beresta.hpp"
 
 #include <cstddef>
+#include <memory>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -25,6 +26,10 @@ namespace support
     // Ошибки проверки документа xml схемой xsd
     // The errors of validating the document xml against the schema xsd
     std::vector<beresta::Diagnostic> schemaErrors(const std::string& xsd, const std::string& xml);
+
+    // Схема из тела body внутри <xs:schema> (префикс xs — пространство XSD)
+    // A schema from the body body inside <xs:schema> (the xs prefix is the XSD namespace)
+    std::shared_ptr<const beresta::xsd::Schema> schemaFromBody(const std::string& body);
 }
 
 #endif

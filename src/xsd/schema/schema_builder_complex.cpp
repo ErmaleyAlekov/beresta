@@ -23,7 +23,7 @@ namespace beresta::xsd::detail
         ComplexType& type = _schema._complexTypes.back();
         const Element* simpleContent = firstSchemaChild(definition, "simpleContent");
         const Element* complexContent = firstSchemaChild(definition, "complexContent");
-        bool mixed = attributeOr(definition, "mixed", "false") == "true";
+        bool mixed = booleanAttribute(definition, "mixed", false);
 
         type.name = name.second;
         type.namespaceUri = name.first;
@@ -125,7 +125,7 @@ namespace beresta::xsd::detail
     void SchemaBuilder::readTypeFlags(const Element& definition, const SchemaSource& source,
         ComplexType& type) const
     {
-        type.isAbstract = attributeOr(definition, "abstract", "false") == "true";
+        type.isAbstract = booleanAttribute(definition, "abstract", false);
         type.blockSet = derivationAttribute(definition, "block", source.blockDefault, COMPLEX_DERIVATIONS_ALL);
         type.finalSet = derivationAttribute(definition, "final", source.finalDefault, COMPLEX_DERIVATIONS_ALL);
     }

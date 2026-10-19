@@ -39,11 +39,11 @@ namespace beresta::xsd::detail
             for (const Element* component : components)
                 overrideDefinition(*component, source);
         }
-        loadReferenced(directive, source);
+        std::string targetUri = loadReferenced(directive, source);
         if (redefine)
         {
             for (const Element* component : components)
-                redefineDefinition(*component, source);
+                redefineDefinition(*component, source, targetUri);
         }
     }
 
@@ -51,12 +51,25 @@ namespace beresta::xsd::detail
     ** Подмена через xs:redefine: прежнее определение обязано существовать
     ** в подключённой схеме, а тип — наследоваться от самого себя. Прежнее
     ** определение сохраняется — на него ведёт ссылка нового на своё имя.
+    ** Если имя уже занято переопределением, оно обязано принадлежать
+    ** самому подключаемому документу (цепочка: A переопределяет B, который
+    ** переопределил C) или документу, загруженному изнутри текущего
+    ** (A включает B, оба переопределяют C: A уточняет версию B). Иначе это
+    ** второе переопределение того же компонента (два соседних xs:redefine
+    ** одного C или два одноимённых компонента в одном xs:redefine): ошибка.
     **
     ** A replacement through xs:redefine: the former definition must exist
     ** in the included schema, and a type must derive from itself. The former
     ** definition is kept — the new one's reference to its own name leads to it.
+    ** If the name is already taken by a redefinition, it must belong to the
+    ** included document itself (a chain: A redefines B, which
+    ** redefined C) or to a document loaded from inside the current one
+    ** (A includes B, both redefine C: A refines B's version). Otherwise it is
+    ** a second redefinition of the same component (two sibling xs:redefine
+    ** of one C or two components of the same name in one xs:redefine): an error.
     */
-    void SchemaBuilder::redefineDefinition(const Element& child, const SchemaSource& source)
+    void SchemaBuilder::redefineDefinition(const Element& child, const SchemaSource& source,
+        const std::string& targetUri)
     {
         std::string kind(child.getLocalName());
         std::map<QualifiedKey, Definition>* registry = registryFor(kind);
@@ -68,7 +81,12 @@ namespace beresta::xsd::detail
         auto found = registry->find(key);
         if (found == registry->end())
             fail(child, i18n::format(i18n::Message::SCHEMA_REDEFINE_MISSING, {kind, name}));
+        const std::string& owner = found->second.source->baseUri;
+        bool nested = owner == targetUri || (owner != source.baseUri && loadedWithin(owner, source.baseUri));
+        if (_redefinitions.count(found->second.element) != 0 && !nested)
+            fail(child, i18n::format(i18n::Message::SCHEMA_REDEFINE_TWICE, {kind, name}));
         checkSelfDerivation(child, key);
+        checkSelfReferences(child, key);
         _redefinitions[&child] = Redefinition{kind, key, found->second};
         found->second = Definition{&child, &source};
     }

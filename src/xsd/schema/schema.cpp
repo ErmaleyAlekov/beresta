@@ -61,8 +61,10 @@ namespace beresta::xsd
         parserOptions.trackLocations = true;
         Document document = XmlParser(parserOptions).parseFile(path);
 
+        // Абсолютный нормализованный путь — в том же виде URI отдаёт FileResourceResolver
+        // An absolute normalized path — FileResourceResolver gives URIs in the same form
         if (options.baseUri.empty())
-            options.baseUri = path.u8string();
+            options.baseUri = std::filesystem::absolute(path).lexically_normal().u8string();
         return fromDocuments({&document}, options);
     }
 

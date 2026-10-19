@@ -52,6 +52,7 @@ beresta/
 ├── examples/                     демо на C++ (src/) и на C (capi/)
 └── tests/                        модульные тесты C++ (собственный мини-фреймворк)
     ├── conformance/              прогонщик W3C XML Conformance Test Suite и отчёт
+    ├── xsts/                     прогонщик W3C XML Schema Test Suite, список ограничений и отчёт
     └── fuzz/                     цели libFuzzer, словарь, сборщик корпуса
 ```
 
@@ -102,6 +103,7 @@ make test
 
 ```bash
 cd tests/conformance && make fetch && make run      # W3C XML Conformance Test Suite -> conformance_report.md
+cd tests/xsts && make fetch && make run             # W3C XML Schema Test Suite -> xsts_report.md
 cd tests/fuzz && make -j && make corpus && make -j3 fuzz FUZZ_TIME=600 FUZZ_JOBS=3   # libFuzzer, только Clang
 ```
 

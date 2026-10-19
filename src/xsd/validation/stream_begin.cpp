@@ -5,30 +5,6 @@
 
 namespace beresta::xsd::detail
 {
-    // xsi:type и xsi:nil — одним проходом по атрибутам (их пространства имён уже разрешены)
-    // xsi:type and xsi:nil — in one pass over the attributes (their namespaces are already resolved)
-    static XsiValues findXsi(const SaxElement& element) noexcept
-    {
-        XsiValues xsi;
-
-        for (const SaxAttribute& attribute : element.attributes)
-        {
-            if (attribute.namespaceUri.size() != XSI_NAMESPACE_URI.size() || attribute.namespaceUri != XSI_NAMESPACE_URI)
-                continue;
-            if (!xsi.hasType && attribute.localName == "type")
-            {
-                xsi.type = attribute.value;
-                xsi.hasType = true;
-            }
-            else if (!xsi.hasNil && attribute.localName == "nil")
-            {
-                xsi.nil = attribute.value;
-                xsi.hasNil = true;
-            }
-        }
-        return xsi;
-    }
-
     /*
     ** Проверка элемента с объявлением — в том же порядке, что у обхода
     ** дерева: область ключей, xsi:type (ошибка — дальше не проверяется),
@@ -60,7 +36,7 @@ namespace beresta::xsd::detail
         if (declaration.isAbstract)
             report(_depth - 1, CheckPhase::ABSTRACT, i18n::format(i18n::Message::XSD_ABSTRACT_ELEMENT));
         if (isNil(xsi, declaration))
-            frame.mode = FrameMode::NIL;
+            beginNil(element, type);
         else if (type.simple != nullptr)
             beginSimple(element, *type.simple);
         else if (type.complex != nullptr)
@@ -122,6 +98,29 @@ namespace beresta::xsd::detail
             return false;
         }
         return true;
+    }
+
+    /*
+    ** Принятый xsi:nil="true": содержимое обязано быть пустым, но атрибуты
+    ** проверяются как обычно (cvc-elt.3 не отменяет cvc-type): у
+    ** составного типа — сразу, у простого — откладываются до закрытия,
+    ** где о каждом не-xsi атрибуте сообщит closeNil.
+    **
+    ** An accepted xsi:nil="true": the content must be empty, but the attributes
+    ** are validated as usual (cvc-elt.3 does not cancel cvc-type): for a
+    ** complex type — at once, for a simple one — they are deferred until closing,
+    ** where closeNil reports every non-xsi attribute.
+    */
+    void StreamValidator::beginNil(const SaxElement& element, TypeRef type)
+    {
+        ElementFrame& frame = _frames[_depth - 1];
+
+        if (type.simple != nullptr)
+            beginSimple(element, *type.simple);
+        else if (type.complex != nullptr)
+            validateAttributes(element, *type.complex);
+        frame.mode = FrameMode::NIL;
+        frame.collectText = false;
     }
 
     // Составной тип: атрибуты сразу, затем — простое содержимое (текст копится) или курсор модели

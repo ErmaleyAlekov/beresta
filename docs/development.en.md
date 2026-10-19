@@ -52,6 +52,7 @@ beresta/
 ├── examples/                     demos in C++ (src/) and in C (capi/)
 └── tests/                        C++ unit tests (an own mini framework)
     ├── conformance/              the W3C XML Conformance Test Suite runner and report
+    ├── xsts/                     the W3C XML Schema Test Suite runner, the limitation list and report
     └── fuzz/                     libFuzzer targets, a dictionary, a corpus builder
 ```
 
@@ -102,6 +103,7 @@ Standard conformance and resistance to hostile input are checked separately:
 
 ```bash
 cd tests/conformance && make fetch && make run      # W3C XML Conformance Test Suite -> conformance_report.md
+cd tests/xsts && make fetch && make run             # W3C XML Schema Test Suite -> xsts_report.md
 cd tests/fuzz && make -j && make corpus && make -j3 fuzz FUZZ_TIME=600 FUZZ_JOBS=3   # libFuzzer, Clang only
 ```
 

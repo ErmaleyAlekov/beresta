@@ -4,49 +4,71 @@
 
 namespace beresta::xsd::detail
 {
-    /*
-    ** Значение block / final: "#all" или список слов extension,
-    ** restriction, list, union, substitution. Слова, неприменимые к
-    ** компоненту, отбрасываются маской all (так же, как #all раскрывается
-    ** только в применимые способы).
-    **
-    ** A block / final value: "#all" or a list of the words extension,
-    ** restriction, list, union, substitution. Words not applicable to the
-    ** component are dropped by the all mask (just as #all expands
-    ** only into the applicable methods).
-    */
-    static DerivationSet parseDerivationSet(std::string_view text, DerivationSet all)
+    // Флаг способа наследования по ключевому слову; 0 — не ключевое слово
+    // The derivation method flag by its keyword; 0 — not a keyword
+    static DerivationSet methodFlag(std::string_view token) noexcept
     {
-        DerivationSet result = 0;
+        if (token == "extension")
+            return DERIVATION_EXTENSION;
+        if (token == "restriction")
+            return DERIVATION_RESTRICTION;
+        if (token == "list")
+            return DERIVATION_LIST;
+        if (token == "union")
+            return DERIVATION_UNION;
+        if (token == "substitution")
+            return DERIVATION_SUBSTITUTION;
+        return 0;
+    }
 
-        for (std::string_view token : utils::splitTokens(text))
+    /*
+    ** Значение block / final по схеме для схем: либо "#all" целиком,
+    ** либо список слов, допустимых для компонента (маска all): у элемента
+    ** в block — extension, restriction, substitution; у составного типа и
+    ** в final элемента — extension, restriction; у простого типа — list,
+    ** union, restriction. Регистр значим, "#all" в списке с другими
+    ** словами недопустим. false — значение не по грамматике.
+    **
+    ** A block / final value by the schema for schemas: either "#all" alone
+    ** or a list of the words allowed for the component (the all mask): for an element
+    ** in block — extension, restriction, substitution; for a complex type and
+    ** in an element's final — extension, restriction; for a simple type — list,
+    ** union, restriction. Case matters, "#all" in a list with other
+    ** words is not allowed. false — the value does not match the grammar.
+    */
+    static bool parseDerivationSet(std::string_view text, DerivationSet all, DerivationSet& result)
+    {
+        std::vector<std::string_view> tokens = utils::splitTokens(text);
+
+        result = 0;
+        if (tokens.size() == 1 && tokens.front() == "#all")
         {
-            if (token == "#all")
-                result = all;
-            else if (token == "extension")
-                result |= DERIVATION_EXTENSION;
-            else if (token == "restriction")
-                result |= DERIVATION_RESTRICTION;
-            else if (token == "list")
-                result |= DERIVATION_LIST;
-            else if (token == "union")
-                result |= DERIVATION_UNION;
-            else if (token == "substitution")
-                result |= DERIVATION_SUBSTITUTION;
+            result = all;
+            return true;
         }
-        return result & all;
+        for (std::string_view token : tokens)
+        {
+            DerivationSet method = methodFlag(token);
+            if ((method & all) == 0)
+                return false;
+            result |= method;
+        }
+        return true;
     }
 
     // Собственный атрибут компонента важнее значения по умолчанию из xs:schema
     // The component's own attribute takes precedence over the default from xs:schema
-    DerivationSet derivationAttribute(const Element& definition, std::string_view attribute,
-        DerivationSet fallback, DerivationSet all)
+    DerivationSet SchemaBuilder::derivationAttribute(const Element& definition, std::string_view attribute,
+        DerivationSet fallback, DerivationSet all) const
     {
         std::optional<std::string> value = definition.getAttribute(attribute);
+        DerivationSet result = 0;
 
         if (!value.has_value())
             return fallback & all;
-        return parseDerivationSet(value.value(), all);
+        if (!parseDerivationSet(value.value(), all, result))
+            fail(definition, i18n::format(i18n::Message::SCHEMA_ATTRIBUTE_VALUE_INVALID, {attribute, value.value()}));
+        return result;
     }
 
     // Ключевое слово XSD для способа наследования (подставляется в сообщение как есть)

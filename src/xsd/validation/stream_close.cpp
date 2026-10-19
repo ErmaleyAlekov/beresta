@@ -25,6 +25,22 @@ namespace beresta::xsd::detail
     }
 
     /*
+    ** Закрытие элемента с xsi:nil="true": содержимое обязано быть пустым,
+    ** а отложенные атрибуты простого типа недопустимы, как и без nil.
+    **
+    ** Closing an element with xsi:nil="true": the content must be empty,
+    ** and the deferred attributes of a simple type are not allowed, just as without nil.
+    */
+    void StreamValidator::closeNil(const ElementFrame& frame)
+    {
+        if (frame.hasChildNode)
+            report(_depth - 1, CheckPhase::NIL, i18n::format(i18n::Message::XSD_NIL_NOT_EMPTY));
+        for (std::size_t index = 0; index < frame.pendingCount; ++index)
+            report(_depth - 1, CheckPhase::ATTRIBUTES, i18n::format(i18n::Message::XSD_SIMPLE_WITH_ATTRIBUTE,
+                {frame.pendingAttributes[index]}));
+    }
+
+    /*
     ** Закрытие составного типа. Простое содержимое — значение текста (если
     ** детей-элементов не было). Иначе — текст там, где он запрещён, и
     ** завершение модели: не хватает ли обязательных детей.

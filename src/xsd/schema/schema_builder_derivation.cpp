@@ -62,10 +62,8 @@ namespace beresta::xsd::detail
         bool extension = false;
         const Element& derivation = derivationOf(complexContent, extension);
         const ComplexType* complexBase = completeBase(derivation, extension, type);
-        std::optional<std::string> ownMixed = complexContent.getAttribute("mixed");
 
-        if (ownMixed.has_value())
-            mixed = ownMixed.value() == "true";
+        mixed = booleanAttribute(complexContent, "mixed", mixed);
         if (complexBase != nullptr)
         {
             type.attributes = complexBase->attributes;
