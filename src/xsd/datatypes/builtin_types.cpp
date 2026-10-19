@@ -4,8 +4,8 @@
 
 namespace beresta::xsd
 {
-    // Описание встроенного типа: имя, примитив, форма, пробелы, границы, тип элементов списка
-    // A built-in type description: the name, the primitive, the form, whitespace, bounds, the list item type
+    // Описание встроенного типа: имя, примитив, форма, пробелы, границы, тип элементов списка, базовый тип
+    // A built-in type description: the name, the primitive, the form, whitespace, bounds, the list item type, the base type
     struct BuiltinEntry
     {
         const char* name;
@@ -15,69 +15,74 @@ namespace beresta::xsd
         const char* minInclusive;
         const char* maxInclusive;
         const char* listItem;
+        const char* base;
     };
 
     /*
     ** Иерархия встроенных типов XSD 1.0 (часть 2 спецификации) в виде таблицы:
     ** производные целые задаются границами minInclusive / maxInclusive,
     ** списковые (NMTOKENS, IDREFS, ENTITIES) — типом элемента списка.
+    ** Последний столбец — базовый тип: по цепочке баз проверяется, выведен
+    ** ли тип из xsi:type из объявленного (xs:int -> xs:long -> ... -> xs:decimal).
     **
     ** The hierarchy of the XSD 1.0 built-in types (part 2 of the specification) as a table:
     ** derived integers are defined by the minInclusive / maxInclusive bounds,
     ** list types (NMTOKENS, IDREFS, ENTITIES) by the list item type.
+    ** The last column is the base type: the chain of bases is used to check whether
+    ** the xsi:type type is derived from the declared one (xs:int -> xs:long -> ... -> xs:decimal).
     */
     static const BuiltinEntry BUILTINS[] = {
-        {"anySimpleType", Primitive::ANY_SIMPLE, LexicalForm::FREE, WhiteSpace::PRESERVE, "", "", ""},
-        {"string", Primitive::STRING, LexicalForm::FREE, WhiteSpace::PRESERVE, "", "", ""},
-        {"normalizedString", Primitive::STRING, LexicalForm::FREE, WhiteSpace::REPLACE, "", "", ""},
-        {"token", Primitive::STRING, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", ""},
-        {"language", Primitive::STRING, LexicalForm::LANGUAGE, WhiteSpace::COLLAPSE, "", "", ""},
-        {"Name", Primitive::STRING, LexicalForm::NAME, WhiteSpace::COLLAPSE, "", "", ""},
-        {"NCName", Primitive::STRING, LexicalForm::NCNAME, WhiteSpace::COLLAPSE, "", "", ""},
-        {"NMTOKEN", Primitive::STRING, LexicalForm::NMTOKEN, WhiteSpace::COLLAPSE, "", "", ""},
-        {"ID", Primitive::STRING, LexicalForm::ID, WhiteSpace::COLLAPSE, "", "", ""},
-        {"IDREF", Primitive::STRING, LexicalForm::IDREF, WhiteSpace::COLLAPSE, "", "", ""},
-        {"ENTITY", Primitive::STRING, LexicalForm::ENTITY, WhiteSpace::COLLAPSE, "", "", ""},
-        {"NMTOKENS", Primitive::STRING, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", "NMTOKEN"},
-        {"IDREFS", Primitive::STRING, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", "IDREF"},
-        {"ENTITIES", Primitive::STRING, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", "ENTITY"},
-        {"boolean", Primitive::BOOLEAN, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", ""},
-        {"decimal", Primitive::DECIMAL, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", ""},
-        {"integer", Primitive::DECIMAL, LexicalForm::INTEGER, WhiteSpace::COLLAPSE, "", "", ""},
-        {"nonPositiveInteger", Primitive::DECIMAL, LexicalForm::INTEGER, WhiteSpace::COLLAPSE, "", "0", ""},
-        {"negativeInteger", Primitive::DECIMAL, LexicalForm::INTEGER, WhiteSpace::COLLAPSE, "", "-1", ""},
-        {"nonNegativeInteger", Primitive::DECIMAL, LexicalForm::INTEGER, WhiteSpace::COLLAPSE, "0", "", ""},
-        {"positiveInteger", Primitive::DECIMAL, LexicalForm::INTEGER, WhiteSpace::COLLAPSE, "1", "", ""},
+        {"anySimpleType", Primitive::ANY_SIMPLE, LexicalForm::FREE, WhiteSpace::PRESERVE, "", "", "", ""},
+        {"string", Primitive::STRING, LexicalForm::FREE, WhiteSpace::PRESERVE, "", "", "", "anySimpleType"},
+        {"normalizedString", Primitive::STRING, LexicalForm::FREE, WhiteSpace::REPLACE, "", "", "", "string"},
+        {"token", Primitive::STRING, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", "", "normalizedString"},
+        {"language", Primitive::STRING, LexicalForm::LANGUAGE, WhiteSpace::COLLAPSE, "", "", "", "token"},
+        {"Name", Primitive::STRING, LexicalForm::NAME, WhiteSpace::COLLAPSE, "", "", "", "token"},
+        {"NCName", Primitive::STRING, LexicalForm::NCNAME, WhiteSpace::COLLAPSE, "", "", "", "Name"},
+        {"NMTOKEN", Primitive::STRING, LexicalForm::NMTOKEN, WhiteSpace::COLLAPSE, "", "", "", "token"},
+        {"ID", Primitive::STRING, LexicalForm::ID, WhiteSpace::COLLAPSE, "", "", "", "NCName"},
+        {"IDREF", Primitive::STRING, LexicalForm::IDREF, WhiteSpace::COLLAPSE, "", "", "", "NCName"},
+        {"ENTITY", Primitive::STRING, LexicalForm::ENTITY, WhiteSpace::COLLAPSE, "", "", "", "NCName"},
+        {"NMTOKENS", Primitive::STRING, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", "NMTOKEN", "anySimpleType"},
+        {"IDREFS", Primitive::STRING, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", "IDREF", "anySimpleType"},
+        {"ENTITIES", Primitive::STRING, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", "ENTITY", "anySimpleType"},
+        {"boolean", Primitive::BOOLEAN, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", "", "anySimpleType"},
+        {"decimal", Primitive::DECIMAL, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", "", "anySimpleType"},
+        {"integer", Primitive::DECIMAL, LexicalForm::INTEGER, WhiteSpace::COLLAPSE, "", "", "", "decimal"},
+        {"nonPositiveInteger", Primitive::DECIMAL, LexicalForm::INTEGER, WhiteSpace::COLLAPSE, "", "0", "", "integer"},
+        {"negativeInteger", Primitive::DECIMAL, LexicalForm::INTEGER, WhiteSpace::COLLAPSE, "", "-1", "", "nonPositiveInteger"},
+        {"nonNegativeInteger", Primitive::DECIMAL, LexicalForm::INTEGER, WhiteSpace::COLLAPSE, "0", "", "", "integer"},
+        {"positiveInteger", Primitive::DECIMAL, LexicalForm::INTEGER, WhiteSpace::COLLAPSE, "1", "", "", "nonNegativeInteger"},
         {"long", Primitive::DECIMAL, LexicalForm::INTEGER, WhiteSpace::COLLAPSE,
-            "-9223372036854775808", "9223372036854775807", ""},
-        {"int", Primitive::DECIMAL, LexicalForm::INTEGER, WhiteSpace::COLLAPSE, "-2147483648", "2147483647", ""},
-        {"short", Primitive::DECIMAL, LexicalForm::INTEGER, WhiteSpace::COLLAPSE, "-32768", "32767", ""},
-        {"byte", Primitive::DECIMAL, LexicalForm::INTEGER, WhiteSpace::COLLAPSE, "-128", "127", ""},
+            "-9223372036854775808", "9223372036854775807", "", "integer"},
+        {"int", Primitive::DECIMAL, LexicalForm::INTEGER, WhiteSpace::COLLAPSE, "-2147483648", "2147483647", "", "long"},
+        {"short", Primitive::DECIMAL, LexicalForm::INTEGER, WhiteSpace::COLLAPSE, "-32768", "32767", "", "int"},
+        {"byte", Primitive::DECIMAL, LexicalForm::INTEGER, WhiteSpace::COLLAPSE, "-128", "127", "", "short"},
         {"unsignedLong", Primitive::DECIMAL, LexicalForm::INTEGER, WhiteSpace::COLLAPSE,
-            "0", "18446744073709551615", ""},
-        {"unsignedInt", Primitive::DECIMAL, LexicalForm::INTEGER, WhiteSpace::COLLAPSE, "0", "4294967295", ""},
-        {"unsignedShort", Primitive::DECIMAL, LexicalForm::INTEGER, WhiteSpace::COLLAPSE, "0", "65535", ""},
-        {"unsignedByte", Primitive::DECIMAL, LexicalForm::INTEGER, WhiteSpace::COLLAPSE, "0", "255", ""},
-        {"float", Primitive::FLOAT, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", ""},
-        {"double", Primitive::DOUBLE, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", ""},
-        {"duration", Primitive::DURATION, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", ""},
-        {"dateTime", Primitive::DATE_TIME, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", ""},
-        {"time", Primitive::TIME, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", ""},
-        {"date", Primitive::DATE, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", ""},
-        {"gYearMonth", Primitive::G_YEAR_MONTH, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", ""},
-        {"gYear", Primitive::G_YEAR, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", ""},
-        {"gMonthDay", Primitive::G_MONTH_DAY, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", ""},
-        {"gDay", Primitive::G_DAY, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", ""},
-        {"gMonth", Primitive::G_MONTH, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", ""},
-        {"hexBinary", Primitive::HEX_BINARY, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", ""},
-        {"base64Binary", Primitive::BASE64_BINARY, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", ""},
-        {"anyURI", Primitive::ANY_URI, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", ""},
-        {"QName", Primitive::QNAME, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", ""},
-        {"NOTATION", Primitive::NOTATION_TYPE, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", ""}
+            "0", "18446744073709551615", "", "nonNegativeInteger"},
+        {"unsignedInt", Primitive::DECIMAL, LexicalForm::INTEGER, WhiteSpace::COLLAPSE, "0", "4294967295", "", "unsignedLong"},
+        {"unsignedShort", Primitive::DECIMAL, LexicalForm::INTEGER, WhiteSpace::COLLAPSE, "0", "65535", "", "unsignedInt"},
+        {"unsignedByte", Primitive::DECIMAL, LexicalForm::INTEGER, WhiteSpace::COLLAPSE, "0", "255", "", "unsignedShort"},
+        {"float", Primitive::FLOAT, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", "", "anySimpleType"},
+        {"double", Primitive::DOUBLE, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", "", "anySimpleType"},
+        {"duration", Primitive::DURATION, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", "", "anySimpleType"},
+        {"dateTime", Primitive::DATE_TIME, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", "", "anySimpleType"},
+        {"time", Primitive::TIME, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", "", "anySimpleType"},
+        {"date", Primitive::DATE, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", "", "anySimpleType"},
+        {"gYearMonth", Primitive::G_YEAR_MONTH, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", "", "anySimpleType"},
+        {"gYear", Primitive::G_YEAR, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", "", "anySimpleType"},
+        {"gMonthDay", Primitive::G_MONTH_DAY, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", "", "anySimpleType"},
+        {"gDay", Primitive::G_DAY, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", "", "anySimpleType"},
+        {"gMonth", Primitive::G_MONTH, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", "", "anySimpleType"},
+        {"hexBinary", Primitive::HEX_BINARY, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", "", "anySimpleType"},
+        {"base64Binary", Primitive::BASE64_BINARY, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", "", "anySimpleType"},
+        {"anyURI", Primitive::ANY_URI, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", "", "anySimpleType"},
+        {"QName", Primitive::QNAME, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", "", "anySimpleType"},
+        {"NOTATION", Primitive::NOTATION_TYPE, LexicalForm::FREE, WhiteSpace::COLLAPSE, "", "", "", "anySimpleType"}
     };
 
-    // Тип элементов списка ищется среди уже созданных (он стоит в таблице раньше)
-    // The list item type is looked up among the already created ones (it is earlier in the table)
+    // Тип элементов списка и базовый тип ищутся среди уже созданных (они стоят в таблице раньше)
+    // The list item type and the base type are looked up among the already created ones (they are earlier in the table)
     static const SimpleType* findBuilt(const std::deque<SimpleType>& built, std::string_view name)
     {
         for (const SimpleType& type : built)
@@ -110,6 +115,7 @@ namespace beresta::xsd
             type.itemType = findBuilt(built, item);
             type.facets.minLength = 1;
         }
+        type.baseType = findBuilt(built, entry.base);
         return type;
     }
 

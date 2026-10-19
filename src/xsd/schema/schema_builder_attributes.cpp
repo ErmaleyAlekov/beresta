@@ -31,7 +31,8 @@ namespace beresta::xsd::detail
             else if (kind == "attributeGroup")
             {
                 std::string name = attributeOr(*child, "ref", "");
-                const Definition* group = findDefinition("attributeGroup", resolveQName(*child, name));
+                const Definition* group = referencedDefinition(*child, "attributeGroup",
+                    resolveQName(*child, name));
                 if (group == nullptr)
                     fail(*child, i18n::format(i18n::Message::SCHEMA_ATTRIBUTE_GROUP_MISSING, {name}));
                 buildAttributes(*group->element, *group->source, owner, depth + 1);

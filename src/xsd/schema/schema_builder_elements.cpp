@@ -31,6 +31,7 @@ namespace beresta::xsd::detail
     {
         _schema._elements.emplace_back();
         ElementDecl& declaration = _schema._elements.back();
+        std::optional<std::string> head = definition.getAttribute("substitutionGroup");
 
         declaration.name = attributeOr(definition, "name", "");
         if (declaration.name.empty())
@@ -43,27 +44,44 @@ namespace beresta::xsd::detail
             _builtElements[key] = &declaration;
             _schema._globalElements[key] = &declaration;
         }
-        declaration.nillable = attributeOr(definition, "nillable", "false") == "true";
-        declaration.isAbstract = attributeOr(definition, "abstract", "false") == "true";
+        readElementFlags(definition, source, declaration);
         readValueConstraints(definition, declaration.defaultValue, declaration.fixedValue);
-        declaration.type = elementType(definition, source);
+        if (global && head.has_value())
+            declaration.substitutionHead = globalElement(resolveQName(definition, head.value()));
+        declaration.type = elementType(definition, source, declaration);
         readIdentityConstraints(definition, source, declaration);
         return &declaration;
     }
 
+    // nillable, abstract и запреты block / final (по умолчанию — blockDefault / finalDefault схемы)
+    // nillable, abstract and the block / final prohibitions (by default — the schema's blockDefault / finalDefault)
+    void SchemaBuilder::readElementFlags(const Element& definition, const SchemaSource& source,
+        ElementDecl& declaration) const
+    {
+        declaration.nillable = attributeOr(definition, "nillable", "false") == "true";
+        declaration.isAbstract = attributeOr(definition, "abstract", "false") == "true";
+        declaration.blockSet = derivationAttribute(definition, "block", source.blockDefault, ELEMENT_BLOCK_ALL);
+        declaration.finalSet = derivationAttribute(definition, "final", source.finalDefault,
+            COMPLEX_DERIVATIONS_ALL);
+    }
+
     /*
     ** Тип элемента: атрибут type, анонимный xs:simpleType / xs:complexType,
-    ** тип головы группы замены (substitutionGroup) или xs:anyType.
+    ** тип головы группы замены (substitutionGroup) или xs:anyType. Голова
+    ** может ещё строиться (её тип ссылается на этот элемент), поэтому тип,
+    ** взятый у головы, уточняется после загрузки схемы (inheritHeadTypes).
     **
     ** The element type: the type attribute, an anonymous xs:simpleType / xs:complexType,
-    ** the type of the substitution group head (substitutionGroup) or xs:anyType.
+    ** the type of the substitution group head (substitutionGroup) or xs:anyType. The head
+    ** may still be under construction (its type refers to this element), so the type
+    ** taken from the head is refined after the schema is loaded (inheritHeadTypes).
     */
-    TypeRef SchemaBuilder::elementType(const Element& definition, const SchemaSource& source)
+    TypeRef SchemaBuilder::elementType(const Element& definition, const SchemaSource& source,
+        ElementDecl& declaration)
     {
         std::optional<std::string> typeName = definition.getAttribute("type");
         const Element* simple = firstSchemaChild(definition, "simpleType");
         const Element* complex = firstSchemaChild(definition, "complexType");
-        std::optional<std::string> head = definition.getAttribute("substitutionGroup");
 
         if (typeName.has_value())
             return resolveType(resolveQName(definition, typeName.value()));
@@ -71,9 +89,10 @@ namespace beresta::xsd::detail
             return TypeRef{buildSimpleType(*simple, source, QualifiedKey()), nullptr};
         if (complex != nullptr)
             return TypeRef{nullptr, buildComplexType(*complex, source, QualifiedKey())};
-        if (head.has_value())
-            return globalElement(resolveQName(definition, head.value()))->type;
-        return TypeRef();
+        if (declaration.substitutionHead == nullptr)
+            return TypeRef();
+        _headTyped.insert(&declaration);
+        return declaration.substitutionHead->type;
     }
 
     // Ограничения значения: default и fixed (взаимоисключающие по спецификации)

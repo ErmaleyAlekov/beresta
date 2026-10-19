@@ -124,12 +124,18 @@ namespace beresta::xsd::detail
 
     /*
     ** Объявление ребёнка: из модели типа по паре (пространство имён,
-    ** локальное имя), иначе — для xs:any с lax / strict — глобальное.
-    ** Ненайденное при strict — ошибка у ребёнка.
+    ** локальное имя); затем — член группы замены одного из элементов
+    ** модели: у него своё глобальное объявление (свой тип), а не головы;
+    ** иначе — для xs:any с lax / strict — глобальное. Ненайденное при
+    ** strict — ошибка у ребёнка. Второй проход идёт, только если имя не
+    ** нашлось в модели, и смотрит лишь на головы с непустыми группами.
     **
     ** The child's declaration: from the type model by the pair (namespace,
-    ** local name), otherwise — for xs:any with lax / strict — a global one.
-    ** One not found with strict is an error at the child.
+    ** local name); then — a member of the substitution group of one of the model's
+    ** elements: it has its own global declaration (its own type), not the head's;
+    ** otherwise — for xs:any with lax / strict — a global one. One not found with
+    ** strict is an error at the child. The second pass runs only if the name was not
+    ** found in the model, and looks only at heads with non-empty groups.
     */
     const ElementDecl* StreamValidator::childDeclaration(const ComplexType& type, const SaxElement& element)
     {
@@ -137,6 +143,12 @@ namespace beresta::xsd::detail
         {
             if (declaration->name == element.localName && declaration->namespaceUri == element.namespaceUri)
                 return declaration;
+        }
+        content::ChildKey key{element.name, element.localName, element.namespaceUri};
+        for (const ElementDecl* declaration : type.elements)
+        {
+            if (!declaration->substitutes.empty() && content::isSubstitute(declaration->substitutes, key))
+                return _schema.findElement(element.namespaceUri, element.localName);
         }
         const ElementDecl* global = nullptr;
         if (type.hasElementWildcard && type.elementWildcard != ProcessContents::SKIP_CHECK)

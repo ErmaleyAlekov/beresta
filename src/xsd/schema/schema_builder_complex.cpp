@@ -7,13 +7,17 @@ namespace beresta::xsd::detail
     ** xs:complexType. Объект регистрируется до построения содержимого
     ** (рекурсивные модели), но помечается незавершённым: наследоваться
     ** от незавершённого типа нельзя — это циклическое наследование.
+    ** publish = false — прежнее определение, заменённое xs:redefine: оно
+    ** сохраняет имя, но под ним не регистрируется (имя занято новым).
     **
     ** xs:complexType. The object is registered before its content is built
     ** (recursive models), but marked incomplete: deriving from an
     ** incomplete type is not allowed — it is circular derivation.
+    ** publish = false — the former definition replaced by xs:redefine: it keeps
+    ** its name but is not registered under it (the name belongs to the new one).
     */
     const ComplexType* SchemaBuilder::buildComplexType(const Element& definition,
-        const SchemaSource& source, const QualifiedKey& name)
+        const SchemaSource& source, const QualifiedKey& name, bool publish)
     {
         _schema._complexTypes.emplace_back();
         ComplexType& type = _schema._complexTypes.back();
@@ -23,7 +27,8 @@ namespace beresta::xsd::detail
 
         type.name = name.second;
         type.namespaceUri = name.first;
-        if (!name.second.empty())
+        readTypeFlags(definition, source, type);
+        if (publish && !name.second.empty())
         {
             _builtTypes[name] = TypeRef{nullptr, &type};
             _schema._globalTypes[name] = TypeRef{nullptr, &type};
@@ -81,17 +86,42 @@ namespace beresta::xsd::detail
         return *derivation;
     }
 
-    // Базовый тип (по умолчанию xs:anyType); от незавершённого типа наследоваться нельзя
-    // The base type (xs:anyType by default); deriving from an incomplete type is not allowed
-    const ComplexType* SchemaBuilder::completeBase(const Element& derivation, TypeRef& base)
+    /*
+    ** Базовый тип (по умолчанию xs:anyType) и способ наследования
+    ** запоминаются в типе — по ним проверяется xsi:type. От незавершённого
+    ** типа наследоваться нельзя (цикл), от типа с этим способом в final —
+    ** тоже. Ссылка на собственное имя в xs:redefine ведёт к прежнему типу.
+    **
+    ** The base type (xs:anyType by default) and the derivation method
+    ** are remembered in the type — xsi:type is checked by them. Deriving from an
+    ** incomplete type is not allowed (a cycle), nor from a type with this method in
+    ** final. A reference to its own name in xs:redefine leads to the former type.
+    */
+    const ComplexType* SchemaBuilder::completeBase(const Element& derivation, bool extension, ComplexType& type)
     {
         std::optional<std::string> name = derivation.getAttribute("base");
 
-        base = TypeRef();
+        type.baseType = TypeRef();
+        type.derivationMethod = DERIVATION_RESTRICTION;
+        if (extension)
+            type.derivationMethod = DERIVATION_EXTENSION;
         if (name.has_value())
-            base = resolveType(resolveQName(derivation, name.value()));
-        if (base.complex != nullptr && _incomplete.count(base.complex) != 0)
+            type.baseType = referencedType(derivation, name.value());
+        const ComplexType* base = type.baseType.complex;
+        if (base != nullptr && _incomplete.count(base) != 0)
             fail(derivation, i18n::format(i18n::Message::SCHEMA_CYCLIC_DERIVATION));
-        return base.complex;
+        if (base != nullptr)
+            checkFinal(derivation, base->finalSet, base->name, type.derivationMethod);
+        return base;
+    }
+
+    // abstract и запреты block / final составного типа (по умолчанию — из xs:schema)
+    // abstract and the block / final prohibitions of a complex type (by default — from xs:schema)
+    void SchemaBuilder::readTypeFlags(const Element& definition, const SchemaSource& source,
+        ComplexType& type) const
+    {
+        type.isAbstract = attributeOr(definition, "abstract", "false") == "true";
+        type.blockSet = derivationAttribute(definition, "block", source.blockDefault, COMPLEX_DERIVATIONS_ALL);
+        type.finalSet = derivationAttribute(definition, "final", source.finalDefault, COMPLEX_DERIVATIONS_ALL);
     }
 }

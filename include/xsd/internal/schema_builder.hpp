@@ -19,8 +19,8 @@ namespace beresta::xsd::detail
     // The name of a schema component: (namespace, local name)
     using QualifiedKey = std::pair<std::string, std::string>;
 
-    // Один документ схемы и его настройки по умолчанию
-    // One schema document and its default settings
+    // Один документ схемы и его настройки по умолчанию (включая blockDefault / finalDefault)
+    // One schema document and its default settings (including blockDefault / finalDefault)
     struct SchemaSource
     {
         const Element* root;
@@ -28,6 +28,8 @@ namespace beresta::xsd::detail
         bool qualifiedElements;
         bool qualifiedAttributes;
         std::string baseUri;
+        DerivationSet blockDefault;
+        DerivationSet finalDefault;
     };
 
     // Ещё не построенное глобальное определение: XML-элемент и его документ
@@ -39,21 +41,51 @@ namespace beresta::xsd::detail
     };
 
     /*
+    ** Компонент, переопределённый через xs:redefine: вид, полное имя и
+    ** прежнее определение. Ссылка на собственное имя внутри нового
+    ** определения (base у типа, ref у группы) ведёт к прежнему, все
+    ** остальные ссылки во всей схеме — к новому.
+    **
+    ** A component redefined through xs:redefine: the kind, the full name and
+    ** the former definition. A reference to its own name inside the new
+    ** definition (base of a type, ref of a group) leads to the former one, all
+    ** the other references in the whole schema lead to the new one.
+    */
+    struct Redefinition
+    {
+        std::string kind;
+        QualifiedKey key;
+        Definition original;
+    };
+
+    // Все способы наследования для #all: у элемента в block, у элемента и составного типа в final, у простого типа
+    // All derivation methods for #all: of an element in block, of an element and a complex type in final, of a simple type
+    inline constexpr DerivationSet ELEMENT_BLOCK_ALL = DERIVATION_EXTENSION | DERIVATION_RESTRICTION
+        | DERIVATION_SUBSTITUTION;
+    inline constexpr DerivationSet COMPLEX_DERIVATIONS_ALL = DERIVATION_EXTENSION | DERIVATION_RESTRICTION;
+    inline constexpr DerivationSet SIMPLE_FINAL_ALL = DERIVATION_RESTRICTION | DERIVATION_LIST | DERIVATION_UNION;
+    inline constexpr DerivationSet SCHEMA_FINAL_ALL = COMPLEX_DERIVATIONS_ALL | SIMPLE_FINAL_ALL;
+
+    /*
     ** SchemaBuilder — загрузчик схемы (паттерн Builder) в два прохода:
     ** 1) регистрация всех глобальных определений всех документов схемы
-    **    (с xs:include / xs:import) по их полным именам;
+    **    (с xs:include / xs:import) по их полным именам; xs:redefine и
+    **    xs:override здесь же подменяют определения в реестре;
     ** 2) ленивое построение компонентов по требованию с запоминанием.
     ** Ленивость решает ссылки «вперёд» и рекурсивные типы (элемент,
     ** содержащий элементы своего же типа): объект типа регистрируется
     ** ДО построения содержимого, поэтому ссылка на него уже существует.
+    ** Завершает загрузку вычисление групп замены (нужны все элементы).
     **
     ** SchemaBuilder — the schema loader (the Builder pattern) in two passes:
     ** 1) registering all global definitions of all schema documents
-    **    (with xs:include / xs:import) by their full names;
+    **    (with xs:include / xs:import) by their full names; xs:redefine and
+    **    xs:override replace definitions in the registry right here;
     ** 2) lazy on-demand construction of components with memoization.
     ** Laziness resolves forward references and recursive types (an element
     ** containing elements of its own type): the type object is registered
     ** BEFORE its content is built, so a reference to it already exists.
+    ** Loading ends with computing the substitution groups (all elements are needed).
     */
     class SchemaBuilder
     {
@@ -76,9 +108,31 @@ namespace beresta::xsd::detail
         std::map<QualifiedKey, Definition>* registryFor(std::string_view kind);
         const Definition* findDefinition(std::string_view kind, const QualifiedKey& key);
 
+        // ---- xs:redefine и xs:override (schema_builder_redefine.cpp, schema_builder_original.cpp) ----
+        // ---- xs:redefine and xs:override (schema_builder_redefine.cpp, schema_builder_original.cpp) ----
+        void loadRedefinition(const Element& directive, const SchemaSource& source);
+        void redefineDefinition(const Element& child, const SchemaSource& source);
+        void overrideDefinition(const Element& child, const SchemaSource& source);
+        void checkSelfDerivation(const Element& child, const QualifiedKey& key) const;
+        const Definition* originalFor(const Element& reference, std::string_view kind,
+            const QualifiedKey& key) const;
+        const Definition* referencedDefinition(const Element& reference, std::string_view kind,
+            const QualifiedKey& key);
+        TypeRef referencedType(const Element& context, std::string_view value);
+
+        // ---- final, block и группы замены (schema_builder_final.cpp, schema_builder_substitution.cpp) ----
+        // ---- final, block and substitution groups (schema_builder_final.cpp, schema_builder_substitution.cpp) ----
+        void checkFinal(const Element& where, DerivationSet finalSet, const std::string& baseName,
+            DerivationSet method) const;
+        void buildSubstitutionGroups();
+        void inheritHeadTypes();
+        void checkSubstitutionFinal(const ElementDecl& member);
+        void addSubstitute(const ElementDecl& member);
+
         // ---- Имена (schema_builder_names.cpp) ----
         // ---- Names (schema_builder_names.cpp) ----
         QualifiedKey resolveQName(const Element& context, std::string_view value) const;
+        std::string chameleonNamespace(const Element& context) const;
         TypeRef resolveType(const QualifiedKey& key);
         std::string localNamespace(const Element& definition, const SchemaSource& source,
             bool attribute) const;
@@ -88,7 +142,9 @@ namespace beresta::xsd::detail
         // ---- Elements (schema_builder_elements.cpp) ----
         const ElementDecl* globalElement(const QualifiedKey& key);
         ElementDecl* buildElement(const Element& definition, const SchemaSource& source, bool global);
-        TypeRef elementType(const Element& definition, const SchemaSource& source);
+        void readElementFlags(const Element& definition, const SchemaSource& source,
+            ElementDecl& declaration) const;
+        TypeRef elementType(const Element& definition, const SchemaSource& source, ElementDecl& declaration);
         void readValueConstraints(const Element& definition, std::optional<std::string>& defaultValue,
             std::optional<std::string>& fixedValue) const;
 
@@ -105,7 +161,8 @@ namespace beresta::xsd::detail
         // ---- Простые типы (schema_builder_simple.cpp, schema_builder_facets.cpp) ----
         // ---- Simple types (schema_builder_simple.cpp, schema_builder_facets.cpp) ----
         const SimpleType* buildSimpleType(const Element& definition, const SchemaSource& source,
-            const QualifiedKey& name);
+            const QualifiedKey& name, bool publish = true);
+        void buildSimpleBody(SimpleType& type, const Element& definition, const SchemaSource& source);
         const SimpleType* simpleTypeReference(const Element& owner, std::string_view attribute,
             const SchemaSource& source);
         void buildRestriction(SimpleType& type, const Element& restriction, const SchemaSource& source);
@@ -115,11 +172,12 @@ namespace beresta::xsd::detail
         // ---- Составные типы (schema_builder_complex.cpp) ----
         // ---- Complex types (schema_builder_complex.cpp) ----
         const ComplexType* buildComplexType(const Element& definition, const SchemaSource& source,
-            const QualifiedKey& name);
+            const QualifiedKey& name, bool publish = true);
+        void readTypeFlags(const Element& definition, const SchemaSource& source, ComplexType& type) const;
         void buildTypeBody(ComplexType& type, const Element& body, const SchemaSource& source,
             bool mixed);
         const Element& derivationOf(const Element& content, bool& extension) const;
-        const ComplexType* completeBase(const Element& derivation, TypeRef& base);
+        const ComplexType* completeBase(const Element& derivation, bool extension, ComplexType& type);
 
         // ---- Наследование (schema_builder_derivation.cpp) ----
         // ---- Derivation (schema_builder_derivation.cpp) ----
@@ -158,9 +216,18 @@ namespace beresta::xsd::detail
         std::map<std::string, std::map<QualifiedKey, Definition>> _definitions;
         std::map<QualifiedKey, ElementDecl*> _builtElements;
         std::map<QualifiedKey, TypeRef> _builtTypes;
-        std::set<const ComplexType*> _incomplete;
+        std::set<const void*> _incomplete;
         std::map<const Element*, IdentityConstraint*> _builtIdentities;
+        std::map<const Element*, Redefinition> _redefinitions;
+        std::map<const Element*, TypeRef> _builtOriginals;
+        std::set<std::pair<std::string, QualifiedKey>> _overridden;
+        std::set<const ElementDecl*> _headTyped;
     };
+
+    // Набор способов наследования из атрибута (block / final) или значение по умолчанию (schema_builder_final.cpp)
+    // A set of derivation methods from an attribute (block / final) or the default value (schema_builder_final.cpp)
+    DerivationSet derivationAttribute(const Element& definition, std::string_view attribute,
+        DerivationSet fallback, DerivationSet all);
 
     // ---- Обход XML схемы (schema_xml_helpers.cpp) ----
     // ---- Traversing the schema XML (schema_xml_helpers.cpp) ----

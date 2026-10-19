@@ -26,6 +26,8 @@ namespace
         suites::registerXPathNameTests,
         suites::registerXsdDatatypeTests, suites::registerXsdSchemaTests, suites::registerXsdAdvancedTests, suites::registerXsdIdentityTests, suites::registerXsdIdentityScopeTests, suites::registerXsdPathTests,
         suites::registerXsdStreamTests, suites::registerXsdStreamIdentityTests,
+        suites::registerXsdSubstitutionTests, suites::registerXsdDerivationTests, suites::registerXsdFinalTests,
+        suites::registerXsdRedefineTests,
         suites::registerContentCursorTests, suites::registerContentPlanTests, suites::registerXIncludeTests,
         suites::registerCapiTests, suites::registerCapiMoveTests, suites::registerI18nTests
     };

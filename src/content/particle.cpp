@@ -41,8 +41,15 @@ namespace beresta::content
         return false;
     }
 
-    // Элемент: по полному имени (DTD) или по паре «пространство + локальное имя» (XSD)
-    // An element: by the qualified name (DTD) or by the pair "namespace + local name" (XSD)
+    /*
+    ** Элемент: по полному имени (DTD) или по паре «пространство + локальное
+    ** имя» (XSD). Не совпавшее имя ещё может принадлежать члену группы
+    ** замены — эта проверка идёт последней и только при наличии группы.
+    **
+    ** An element: by the qualified name (DTD) or by the pair "namespace + local
+    ** name" (XSD). A name that did not match may still belong to a member of the
+    ** substitution group — this check goes last and only when there is a group.
+    */
     bool particleAccepts(const Particle& particle, const ChildKey& child) noexcept
     {
         if (particle.kind == ParticleKind::WILDCARD)
@@ -51,7 +58,9 @@ namespace beresta::content
             return false;
         if (particle.byQualifiedName)
             return particle.name == child.qualifiedName;
-        return particle.name == child.localName && particle.namespaceUri == child.namespaceUri;
+        if (particle.name == child.localName && particle.namespaceUri == child.namespaceUri)
+            return true;
+        return particle.substitutes != nullptr && isSubstitute(*particle.substitutes, child);
     }
 
     // Суффикс повторений в нотации DTD: ?, *, + или {min,max}

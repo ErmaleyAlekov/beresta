@@ -39,6 +39,10 @@ namespace support
     // Список одной строкой для сообщения о несовпадении
     // The list as one string for a mismatch message
     std::string describeDiagnostics(const std::vector<beresta::Diagnostic>& diagnostics);
+
+    // Ошибки, одинаковые во всех трёх режимах (иначе тест падает): список проверки дерева
+    // The errors equal in all three modes (otherwise the test fails): the tree validation list
+    std::vector<beresta::Diagnostic> agreedSchemaErrors(const std::string& xsd, const std::string& xml);
 }
 
 #endif

@@ -1,4 +1,5 @@
 #include "support/schema_helpers.hpp"
+#include "framework/test_framework.hpp"
 
 namespace support
 {
@@ -86,5 +87,23 @@ namespace support
             text += std::to_string(diagnostic.position.line) + ":" + std::to_string(diagnostic.position.column)
                 + " " + diagnostic.message + "\n";
         return text;
+    }
+
+    /*
+    ** Ошибки документа, обязанные совпасть во всех трёх режимах проверки:
+    ** расхождение — провал теста. Возвращается список проверки дерева
+    ** (без приставки позиции), удобный для поиска текста сообщения.
+    **
+    ** The document errors that must match in all three validation modes:
+    ** a mismatch fails the test. The tree validation list is returned
+    ** (without the position prefix), convenient for searching a message text.
+    */
+    std::vector<beresta::Diagnostic> agreedSchemaErrors(const std::string& xsd, const std::string& xml)
+    {
+        SchemaRuns runs = runSchemaModes(xsd, xml);
+
+        TEST_ASSERT_EQ(describeDiagnostics(runs.sax), describeDiagnostics(runs.parsed));
+        TEST_ASSERT(sameDiagnostics(runs.sax, runs.tree));
+        return runs.tree;
     }
 }

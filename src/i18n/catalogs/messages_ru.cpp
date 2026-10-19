@@ -272,7 +272,12 @@ namespace beresta::i18n
 
         // ---- XML Schema: загрузка схемы / XML Schema loading ----
         {Message::SCHEMA_ROOT_INVALID, "корневой элемент схемы должен быть xs:schema из {0}"},
-        {Message::SCHEMA_REDEFINE, "xs:redefine и xs:override не поддерживаются"},
+        {Message::SCHEMA_REDEFINE_UNEXPECTED, "xs:{0} не может содержать xs:{1}"},
+        {Message::SCHEMA_REDEFINE_MISSING, "xs:redefine: в подключаемой схеме нет xs:{0} \"{1}\""},
+        {Message::SCHEMA_REDEFINE_NOT_SELF, "xs:redefine: тип \"{0}\" должен наследоваться от прежнего определения с тем же именем"},
+        {Message::SCHEMA_FINAL_DERIVATION, "тип \"{0}\" запрещает наследование способом {1} (атрибут final)"},
+        {Message::SCHEMA_SUBSTITUTION_FINAL, "элемент \"{0}\" не может входить в группу замены \"{1}\": его тип не выведен из типа головы или такое наследование запрещено атрибутом final"},
+        {Message::SCHEMA_SUBSTITUTION_CYCLE, "циклическая группа замены у элемента \"{0}\""},
         {Message::SCHEMA_ATTRIBUTE_GROUPS_TOO_DEEP, "слишком глубокая вложенность групп атрибутов"},
         {Message::SCHEMA_ATTRIBUTE_GROUP_MISSING, "группа атрибутов \"{0}\" не найдена"},
         {Message::SCHEMA_ATTRIBUTE_UNDECLARED, "атрибут \"{0}\" не объявлен"},
@@ -332,6 +337,8 @@ namespace beresta::i18n
         {Message::XSD_ROOT_UNDECLARED, "корневой элемент {{0}}{1} не объявлен в схеме"},
         {Message::XSD_ABSTRACT_ELEMENT, "абстрактный элемент нельзя использовать в документе"},
         {Message::XSD_XSI_TYPE_NOT_FOUND, "тип xsi:type=\"{0}\" не найден в схеме"},
+        {Message::XSD_XSI_TYPE_NOT_DERIVED, "тип xsi:type=\"{0}\" не выведен из объявленного типа элемента или такое наследование запрещено атрибутом block"},
+        {Message::XSD_ABSTRACT_TYPE, "абстрактный тип \"{0}\" нельзя использовать для элемента документа: укажите производный тип через xsi:type"},
         {Message::XSD_NOT_NILLABLE, "элемент не допускает xsi:nil (нет nillable=\"true\")"},
         {Message::XSD_NIL_NOT_EMPTY, "элемент с xsi:nil=\"true\" должен быть пустым"},
         {Message::XSD_SIMPLE_WITH_CHILDREN, "элемент простого типа {0} не может содержать элементы"},

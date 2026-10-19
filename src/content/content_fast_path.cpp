@@ -9,14 +9,18 @@ namespace beresta::content
 
     /*
     ** Подходит ли модель для жадного прохода: последовательность ровно
-    ** один раз, все её частицы — элементы (не группы и не xs:any), и
-    ** имена всех элементов попарно различны. Тогда каждый ребёнок может
-    ** подойти только к одной частице, и выбора «где закончить повтор» нет.
+    ** один раз, все её частицы — элементы (не группы, не xs:any и не
+    ** головы групп замены), и имена всех элементов попарно различны.
+    ** Тогда каждый ребёнок может подойти только к одной частице, и выбора
+    ** «где закончить повтор» нет. Признак группы замены проверяется здесь,
+    ** один раз на модель, а не на каждом ребёнке.
     **
     ** Whether the model fits the greedy pass: a sequence exactly
-    ** once, all its particles are elements (not groups and not xs:any), and
-    ** the names of all elements are pairwise distinct. Then every child can
-    ** fit only one particle, and there is no choice of "where to end a repetition".
+    ** once, all its particles are elements (not groups, not xs:any and not
+    ** substitution group heads), and the names of all elements are pairwise distinct.
+    ** Then every child can fit only one particle, and there is no choice of
+    ** "where to end a repetition". The substitution group flag is checked here,
+    ** once per model, not on every child.
     */
     bool isGreedySequence(const Particle& model) noexcept
     {
@@ -27,7 +31,7 @@ namespace beresta::content
             return false;
         for (std::size_t index = 0; index < leaves.size(); ++index)
         {
-            if (leaves[index].kind != ParticleKind::ELEMENT)
+            if (leaves[index].kind != ParticleKind::ELEMENT || hasSubstitutes(leaves[index]))
                 return false;
             for (std::size_t other = 0; other < index; ++other)
             {

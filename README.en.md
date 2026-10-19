@@ -68,7 +68,7 @@ std::cout << doc.toString();                                      // <greeting l
 4. **Standalone nodes.** A node is created without a document, moved between documents without `importNode`/`adoptNode` and outlives the document it was taken from. Almost no C++ library has this (see the [comparison](#comparison-with-other-libraries)).
 5. **Secure by default.** Entity bombs are always limited, external resources are not loaded without explicit permission, XSD regular expressions run in linear time, and hash tables keyed by document data are protected with a secret key against collision attacks (hash flooding).
 6. **No recursion at all.** Parsing, copying, comparison, output, XSD validation and the destructor walk the tree with an explicit stack — a deep document will not crash the process.
-7. **Well tested.** 136 unit tests, 100 % of the applicable cases of the W3C XML Conformance Test Suite, the ASan/UBSan/LSan sanitizers, libFuzzer fuzzing.
+7. **Well tested.** 146 unit tests, 100 % of the applicable cases of the W3C XML Conformance Test Suite, the ASan/UBSan/LSan sanitizers, libFuzzer fuzzing.
 8. **Six languages from one binary, plus WebAssembly.** C++, C, Java (Panama), C# (P/Invoke), Python (ctypes) and Node.js (Node-API) — all included, without JNI, node-gyp or packages from the network. The same API for browsers and Cloudflare Workers is the `beresta-wasm` package.
 9. **Ready packages for all platforms.** `npm install beresta`, `pip install beresta`, `dotnet add package Beresta`: the binaries for Windows and Linux (x64, arm64) and a universal one for macOS (Intel and Apple Silicon) are already inside — nothing needs to be compiled.
 10. **Messages in Russian and English.** The language is chosen at build time and changed at run time; a new language is added with one file.
@@ -95,7 +95,7 @@ std::cout << doc.toString();                                      // <greeting l
 - **Namespaces in XML:** checked while parsing, with "live" URIs in the DOM.
 - **Eight encodings:** UTF-8, UTF-16 LE/BE, ISO-8859-1, US-ASCII, windows-1251, windows-1252, KOI8-R, IBM866. The encoding is detected by the BOM and the declaration. All tables are written from scratch, without iconv or ICU.
 - **DTD:** internal and external subsets, parameter entities, conditional sections, default attributes, full validity checking, `getElementById`.
-- **XML Schema 1.0:** 45 built-in types, facets, `restriction`/`extension`, `list`/`union`, `sequence`/`choice`/`all`, groups, `xs:any`, `xsi:type`, `xsi:nil`, ID/IDREF, the identity constraints `xs:key`/`xs:unique`/`xs:keyref`, `include`/`import`.
+- **XML Schema 1.0:** 45 built-in types, facets, `restriction`/`extension`, `list`/`union`, `sequence`/`choice`/`all`, groups, `xs:any`, substitution groups, `xsi:type` with derivation checks, `block`/`final`, abstract elements and types, `xsi:nil`, ID/IDREF, the identity constraints `xs:key`/`xs:unique`/`xs:keyref`, `include`/`import`/`redefine`/`override`.
 - **All of XPath 1.0:** all 13 axes, including `namespace`, all 27 functions of the core library, variables and prefixes.
 - **XInclude 1.0:** `parse="xml|text"`, `xi:fallback`, XPointer `element()` and by ID, cycle protection.
 - **DOM Traversal:** `TreeWalker` and `NodeIterator` with filters — the algorithms strictly follow the W3C specification.
@@ -144,7 +144,7 @@ What popular XML libraries for C and C++ can do "out of the box" (versions as in
 | Strings in the API | `std::string` (UTF-8) | `xmlChar*` (UTF-8), manual `xmlFree` | `XMLCh*` (UTF-16), `transcode`/`release` | `char*` or `wchar_t*` | `const char*` | `char*` |
 | Namespaces | yes, "live" URIs | yes | yes | no (the prefix is part of the name) | no | no |
 | DTD validation | yes | yes | yes | no | no | no |
-| XML Schema | 1.0, with keys | 1.0, partial | 1.0, the most complete | no | no | no |
+| XML Schema | 1.0: keys, substitution groups, `redefine` | 1.0, partial | 1.0, the most complete | no | no | no |
 | XPath 1.0 | all of it, with the `namespace` axis | yes | only for XSD keys | yes, prefixes are part of the name | no | no |
 | XInclude | yes | yes | yes | no | no | no |
 | Encodings without external libraries | 8, including windows-1251, KOI8-R, IBM866 | UTF-8/16, Latin-1; the rest through iconv | many built in, the rest through ICU | UTF-8/16/32, Latin-1 | UTF-8 | UTF-8 |
@@ -165,7 +165,7 @@ What popular XML libraries for C and C++ can do "out of the box" (versions as in
 - **pugixml, tinyxml2, RapidXML** allocate nodes from the pool of their document: a node does not exist without a document, and it can be moved into another document only by copying.
 - A similar model exists in other languages: **LINQ to XML** (`XElement` in .NET), **JDOM** in Java and **ElementTree** in Python. In C++ Beresta gives the same, but with ownership through `std::unique_ptr`: whoever holds the pointer owns the node.
 
-**What to choose.** If you need only fast parsing of trusted XML without namespaces and checks, pugixml or RapidXML are 10–15 times faster. If you need complete XML Schema 1.0 with `xs:redefine` and substitution groups (large industry schemas), take Xerces-C++ or libxml2. Beresta is for everything in between: full-featured XML with namespaces, DTD, XSD and XPath, secure by default, without dependencies, with a convenient C++ API and wrappers for five languages and WebAssembly.
+**What to choose.** If you need only fast parsing of trusted XML without namespaces and checks, pugixml or RapidXML are 10–15 times faster. If you need strict checking of the schema itself against all the XSD 1.0 constraints (the validity of `restriction` for content models, an unambiguous model — UPA), take Xerces-C++. Large industry schemas with `xs:redefine` and substitution groups are loaded and validated by Beresta itself. Beresta is for everything in between: full-featured XML with namespaces, DTD, XSD and XPath, secure by default, without dependencies, with a convenient C++ API and wrappers for five languages and WebAssembly.
 
 ---
 
@@ -913,12 +913,29 @@ std::vector<beresta::Diagnostic> errors = validator.takeDiagnostics();
 - `xs:group`, `xs:attributeGroup`, `xs:any` (`##any`, `##other`, `##local`, `##targetNamespace`, a list; `strict`/`lax`/`skip`), `xs:anyAttribute`;
 - attributes: `use="required|optional|prohibited"`, `default`, `fixed`;
 - elements: `default`, `fixed`, `nillable` + `xsi:nil`, `abstract`, `xsi:type`;
+- substitution groups `substitutionGroup`: members (including transitive ones) stand in place of the head and are checked by their own declaration; abstract members and the ones blocked by `block` are not in the group;
+- derivation: the `xsi:type` type must be derived from the declared one (built-in type chains, `extension`/`restriction`, `union` members), `block`/`blockDefault` on the element and the type prohibit substitution methods, `final`/`finalDefault` prohibit derivation when the schema is loaded; an abstract type without a derived `xsi:type` is an error;
 - `simpleType` `restriction`/`list`/`union`;
 - the facets `length`, `minLength`, `maxLength`, `pattern`, `enumeration`, `whiteSpace`, `minInclusive`, `maxInclusive`, `minExclusive`, `maxExclusive`, `totalDigits`, `fractionDigits`;
 - all **45 built-in types** of XSD 1.0 (strings, integers with exact bounds, `decimal`, `float`/`double`, dates and times with time zones, `duration`, `hexBinary`, `base64Binary`, `QName`, ID/IDREF(S), NMTOKEN(S), ENTITY(IES) and so on);
 - `ID` uniqueness and the existence of `IDREF` targets;
 - the identity constraints `xs:unique`, `xs:key`, `xs:keyref` (details below);
-- `xs:include` (including "chameleon" schemas) and `xs:import`.
+- `xs:include` (including "chameleon" schemas), `xs:import`, `xs:redefine` and `xs:override` (from XSD 1.1: replacing a component entirely).
+
+**Substitution groups and `xs:redefine` do not slow validation down.** Replacing components through `xs:redefine` / `xs:override` happens in the definition registry before the models are built — the validated document does not know about it. The set of admissible substitutes of every head is computed once when the schema is loaded (transitively, taking `abstract`, `block` and `final` into account) and kept ordered: a child's name is looked up by a binary search only if it did not match the particle itself. The group flag sits on the model particle, so models without substitution groups still take the fast greedy path.
+
+```xml
+<!-- v2.xsd: a new version of an industry schema without editing the original -->
+<xs:redefine schemaLocation="v1.xsd">
+    <xs:complexType name="Party">
+        <xs:complexContent>
+            <xs:extension base="Party">          <!-- base is the former Party from v1.xsd -->
+                <xs:sequence><xs:element name="inn" type="xs:string"/></xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+</xs:redefine>
+```
 
 ### Identity constraints: xs:key, xs:unique, xs:keyref
 
@@ -1487,9 +1504,8 @@ How it works:
 Deliberate limitations (KISS / YAGNI):
 
 - **XML Schema** is a subset of XSD 1.0:
-  - `xs:redefine` and `xs:override` are not supported;
-  - `substitutionGroup` sets the type, but membership in a substitution group is not taken into account when the model is checked;
-  - the derivation validity of `xsi:type` and `restriction` is not checked;
+  - when the schema is loaded, the validity of a content model restriction under `restriction` (cos-particle-restrict) and the unambiguity of a model (UPA) are not checked: an ambiguous model is accepted and checked exactly, without picking the first branch;
+  - from XSD 1.1 there is only `xs:override`; `xs:assert`, `xs:alternative` and open content are not supported;
   - default values from the schema are not added to the DOM;
   - `duration` has no order for the bound facets;
   - Unicode categories in `pattern` (`\p{L}` and the like) cover the main scripts (Latin, Cyrillic, Greek, Hebrew, Arabic, CJK), not the whole Unicode table.
@@ -1584,11 +1600,11 @@ A node wrapper is a native handle plus a reference to the owner document: while 
 make test
 ```
 
-**136 C++ tests in 43 suites:**
+**146 C++ tests in 47 suites:**
 - the core: copying, hierarchy, elements, navigation, namespaces, serialization, trees 100,000 levels deep;
 - the parser: formats, content, errors, limits, SAX (including PIs from the DTD), encodings, protection from complexity attacks (repeated attributes beyond the loop threshold, the keyed hash);
 - DTD: entities, validity checking, external resources;
-- the serializer, tree traversal, XPath (paths, axes, functions, the `namespace` axis, names), XSD (types, schemas, advanced features, `xs:key`/`xs:unique`/`xs:keyref`, paths in error messages, whitespace rules; streaming validation: SAX, DOM and a ready tree give the same errors, streaming keys, a deep document), the content model (the step-by-step cursor against the general algorithm on thousands of random models), XInclude;
+- the serializer, tree traversal, XPath (paths, axes, functions, the `namespace` axis, names), XSD (types, schemas, advanced features, `xs:key`/`xs:unique`/`xs:keyref`, paths in error messages, whitespace rules, substitution groups, `xsi:type` with `block`/`final`/`abstract`, `xs:redefine`/`xs:override`; streaming validation: SAX, DOM and a ready tree give the same errors, streaming keys, a deep document), the content model (the step-by-step cursor against the general algorithm on thousands of random models), XInclude;
 - the C interface: error codes, building and changing the tree, moving nodes between documents (with freeing the source document and rolling back a rejected move), XPath, XML Schema;
 - message languages: catalog completeness (every message has a translation with the same `{N}` markers), changing the language at run time, argument substitution;
 - regressions: differences from the W3C suite (syntax, entities, validity, encodings) and fuzzing findings.
