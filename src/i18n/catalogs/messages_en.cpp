@@ -5,12 +5,12 @@ namespace beresta::i18n
     /*
     ** Английский каталог сообщений — запасной: если в каталоге другого
     ** языка нет перевода, берётся текст отсюда. Новый язык удобно
-    ** начинать с копии этого файла (см. README, раздел о языках).
+    ** начинать с копии этого файла (см. docs/guide.md, раздел «Языки сообщений»).
     **
     ** The English message catalog is the fallback: if another language
     ** catalog has no translation, the text is taken from here. A new
-    ** language is easiest to start from a copy of this file (see README,
-    ** the languages section).
+    ** language is easiest to start from a copy of this file (see
+    ** docs/guide.en.md, the "Message languages" section).
     */
     static const MessageText TEXTS[] = {
         // ---- Ядро DOM / DOM core ----

@@ -100,11 +100,11 @@ namespace beresta::i18n
     /*
     ** Все каталоги библиотеки. Чтобы добавить язык: создать файл
     ** src/i18n/catalogs/messages_<код>.cpp с таблицей и добавить одну
-    ** строку в реестр в i18n_registry.cpp (см. README, раздел о языках).
+    ** строку в реестр в i18n_registry.cpp (см. docs/guide.md, раздел «Языки сообщений»).
     **
     ** All library catalogs. To add a language: create the file
     ** src/i18n/catalogs/messages_<code>.cpp with a table and add one line to
-    ** the registry in i18n_registry.cpp (see README, the languages section).
+    ** the registry in i18n_registry.cpp (see docs/guide.en.md, the "Message languages" section).
     */
     const std::vector<const Catalog*>& catalogs();
 

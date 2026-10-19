@@ -1,6 +1,6 @@
 {
   "name": "beresta",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Берёста — быстрая XML-библиотека на C++17: DOM, XPath 1.0, XML Schema, DTD, восемь кодировок. Без зависимостей и без node-gyp.",
   "keywords": ["xml", "dom", "xpath", "xsd", "xml-schema", "dtd", "parser", "native", "node-api"],
   "license": "MIT",

@@ -37,7 +37,7 @@
         libraries into the same directory as the assemblies
     -->
     <AssemblyName>Beresta.NET</AssemblyName>
-    <Version>2.1.0</Version>
+    <Version>2.1.1</Version>
     <PackageId>Beresta</PackageId>
     <Description>Берёста — DOM-библиотека XML на C++17: DOM, XPath 1.0, XML Schema, DTD (обёртка P/Invoke)</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
