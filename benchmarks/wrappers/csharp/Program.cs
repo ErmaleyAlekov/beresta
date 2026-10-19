@@ -42,6 +42,13 @@ namespace WrapperBench
                 Console.WriteLine(MemoryProbe.Measure(engines[int.Parse(args[2], CultureInfo.InvariantCulture)], xml));
                 return;
             }
+            // Режим --stream: потоковая проверка без дерева (StreamBench)
+            // The --stream mode: streaming validation without a tree (StreamBench)
+            if (args.Length > 1 && args[1] == "--stream")
+            {
+                StreamBench.Run(xml, xsd);
+                return;
+            }
             Console.WriteLine("### .NET " + Environment.Version + ", " + (xml.Length / 1000000) + " MB\n");
             Console.WriteLine("| Библиотека / Library | Разбор / Parse, MB/s | Обход / Walk, ms | XPath, ms | Разбор + XSD / Parse + XSD, MB/s | Элементы / Elements | XPath: узлы / nodes | Ошибки XSD / XSD errors |");
             Console.WriteLine("|---|---|---|---|---|---|---|---|");

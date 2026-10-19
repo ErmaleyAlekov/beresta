@@ -3,6 +3,7 @@ package org.beresta.internal;
 import static org.beresta.internal.Layouts.INT;
 import static org.beresta.internal.Layouts.INT64;
 import static org.beresta.internal.Layouts.POINTER;
+import static org.beresta.internal.Layouts.UINT32;
 
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.invoke.MethodHandle;
@@ -21,6 +22,10 @@ public final class SchemaFunctions
         FunctionDescriptor.ofVoid(POINTER));
     public static final MethodHandle VALIDATE = NativeLibrary.function("beresta_schema_validate",
         FunctionDescriptor.of(INT, POINTER, POINTER, POINTER));
+    public static final MethodHandle VALIDATE_BYTES = NativeLibrary.function("beresta_schema_validate_bytes",
+        FunctionDescriptor.of(INT, POINTER, INT64, UINT32, POINTER, POINTER));
+    public static final MethodHandle VALIDATE_FILE = NativeLibrary.function("beresta_schema_validate_file",
+        FunctionDescriptor.of(INT, POINTER, UINT32, POINTER, POINTER));
 
     public static final MethodHandle DIAGNOSTICS_COUNT = NativeLibrary.function("beresta_diagnostics_count",
         FunctionDescriptor.of(INT64, POINTER));

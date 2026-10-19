@@ -12,11 +12,15 @@ class NodeContentMixin:
 
     @property
     def type(self) -> NodeType:
-        """Тип узла (NodeType). / The node type (NodeType)."""
-        code = LIB.beresta_node_type(self.handle)
-        if code < 0:
-            check(LIB.beresta_last_error_code())
-        return NodeType(code)
+        """Тип узла (NodeType); запоминается при первом запросе или фабрикой.
+        The node type (NodeType); remembered on the first request or by the factory."""
+        handle = self.handle
+        if self._kind is None:
+            code = LIB.beresta_node_type(handle)
+            if code < 0:
+                check(LIB.beresta_last_error_code())
+            self._kind = code
+        return NodeType(self._kind)
 
     @property
     def name(self) -> str:

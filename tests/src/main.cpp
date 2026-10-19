@@ -16,6 +16,7 @@ namespace
         suites::registerNavigationTests, suites::registerNamespaceTests, suites::registerDeepTreeTests,
         suites::registerFormatTests, suites::registerContentTests,
         suites::registerErrorTests, suites::registerLimitTests, suites::registerFloodTests,
+        suites::registerAttributeScaleTests, suites::registerMappedFileTests,
         suites::registerSaxTests, suites::registerSaxDtdTests, suites::registerEncodingTests,
         suites::registerDtdEntityTests, suites::registerDtdValidationTests,
         suites::registerExternalResourceTests,
@@ -27,9 +28,10 @@ namespace
         suites::registerXsdDatatypeTests, suites::registerXsdSchemaTests, suites::registerXsdAdvancedTests, suites::registerXsdIdentityTests, suites::registerXsdIdentityScopeTests, suites::registerXsdPathTests,
         suites::registerXsdStreamTests, suites::registerXsdStreamIdentityTests,
         suites::registerXsdSubstitutionTests, suites::registerXsdDerivationTests, suites::registerXsdFinalTests,
-        suites::registerXsdRedefineTests,
+        suites::registerXsdRedefineTests, suites::registerXsdDeepTests,
         suites::registerContentCursorTests, suites::registerContentPlanTests, suites::registerXIncludeTests,
-        suites::registerCapiTests, suites::registerCapiMoveTests, suites::registerI18nTests
+        suites::registerCapiTests, suites::registerCapiMoveTests, suites::registerCapiStreamTests,
+        suites::registerCapiParallelTests, suites::registerCapiBulkMoveTests, suites::registerI18nTests
     };
 }
 

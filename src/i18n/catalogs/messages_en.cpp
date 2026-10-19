@@ -354,6 +354,7 @@ namespace beresta::i18n
         {Message::BINDING_NATIVE_CALL_FAILED, "a native call failed"},
         {Message::BINDING_UNKNOWN_NODE_TYPE, "an unknown node type {0}"},
         {Message::BINDING_INVALID_ARGUMENT, "invalid argument #{0} of {1}: {2} expected"},
+        {Message::BINDING_NO_FILE_SYSTEM, "WebAssembly has no file system: {0} is unavailable, pass a string or bytes"},
         {Message::LANGUAGE_UNKNOWN, "an unknown message language \"{0}\"; available: {1}"},
     };
 

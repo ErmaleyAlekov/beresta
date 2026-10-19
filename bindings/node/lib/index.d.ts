@@ -24,6 +24,7 @@ export declare const ParseFlags: {
     readonly NO_NAMESPACES: 16;
     readonly XINCLUDE: 32;
     readonly FILE_RESOURCES: 64;
+    readonly TRACK_LOCATIONS: 128;
 };
 
 /** Флаги вывода; по умолчанию — ни одного лишнего пробела. / Output flags; by default — not a single extra space. */
@@ -200,6 +201,11 @@ export declare class Schema implements Disposable {
     readonly handle: Handle;
     readonly closed: boolean;
     validate(document: XmlDocument): Diagnostic[];
+    /** Потоковая проверка без дерева: память O(глубины), синтаксическая ошибка — исключение.
+     *  Streaming validation without a tree: O(depth) memory, a syntax error is an exception. */
+    validateBytes(input: XmlInput, options?: { flags?: number }): Diagnostic[];
+    /** Потоковая проверка файла (файл отображается в память). / Streaming validation of a file (the file is mapped into memory). */
+    validateFile(path: string, options?: { flags?: number }): Diagnostic[];
     close(): void;
     [Symbol.dispose](): void;
 }

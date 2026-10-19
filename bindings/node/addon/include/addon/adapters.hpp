@@ -9,7 +9,7 @@
 ** Переходники (паттерн Adapter) между вызовом из JavaScript и функцией
 ** Си-интерфейса. Переходник знает СИГНАТУРУ, но не конкретную функцию:
 ** он читает аргументы из кадра, вызывает функцию из описания Binding и
-** превращает результат в значение JavaScript. Поэтому 69 функций
+** превращает результат в значение JavaScript. Поэтому 71 функцию
 ** Си-интерфейса обслуживают всего 31 переходник.
 ** Имя переходника читается как «что возвращает» + «что принимает»:
 ** adaptOwnedOfHandleIndex — char* (владение у вызывающего) от (дескриптор, индекс).
@@ -18,7 +18,7 @@
 ** interface function. An adapter knows the SIGNATURE, not a specific function:
 ** it reads the arguments from the frame, calls the function from the Binding
 ** description and turns the result into a JavaScript value. That is why the
-** 69 C interface functions are served by only 31 adapters.
+** 71 C interface functions are served by only 31 adapters.
 ** An adapter name reads as "what it returns" + "what it takes":
 ** adaptOwnedOfHandleIndex — a char* (owned by the caller) of (handle, index).
 */

@@ -361,6 +361,7 @@ namespace beresta::i18n
         BINDING_NATIVE_CALL_FAILED,
         BINDING_UNKNOWN_NODE_TYPE,
         BINDING_INVALID_ARGUMENT,
+        BINDING_NO_FILE_SYSTEM,
         LANGUAGE_UNKNOWN,
 
         // Число сообщений (не сообщение) / The number of messages (not a message)

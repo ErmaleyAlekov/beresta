@@ -231,6 +231,15 @@ typedef enum beresta_node_kind
                                                        из каталога разбираемого файла       */
                                                     /* allow external DTDs/entities/XInclude
                                                        from the directory of the parsed file */
+#define BERESTA_PARSE_TRACK_LOCATIONS     (1u << 7) /* запоминать строку и столбец узлов: тогда
+                                                       beresta_schema_validate даёт места нарушений
+                                                       (разбор ~8 % медленнее; потоковой проверке
+                                                       флаг не нужен — места известны и так) */
+                                                    /* remember the line and column of nodes: then
+                                                       beresta_schema_validate gives the places of
+                                                       violations (parsing is ~8 % slower; streaming
+                                                       validation does not need the flag — the
+                                                       places are known anyway) */
 
 /* ---- Флаги вывода ----------------------------------------------------------- */
 /* ---- Output flags ----------------------------------------------------------- */
@@ -293,7 +302,8 @@ typedef enum beresta_message
     BERESTA_MESSAGE_SCHEMA_CLOSED     = 3, /* схема закрыта / the schema is closed            */
     BERESTA_MESSAGE_NATIVE_CALL_FAILED = 4, /* сбой вызова / a native call failed             */
     BERESTA_MESSAGE_UNKNOWN_NODE_TYPE = 5, /* неизвестный тип узла {0} / unknown node type {0} */
-    BERESTA_MESSAGE_INVALID_ARGUMENT  = 6  /* неверный аргумент №{0} функции {1} / invalid argument #{0} of {1} */
+    BERESTA_MESSAGE_INVALID_ARGUMENT  = 6, /* неверный аргумент №{0} функции {1} / invalid argument #{0} of {1} */
+    BERESTA_MESSAGE_NO_FILE_SYSTEM    = 7  /* нет файловой системы для {0} / no file system for {0} */
 } beresta_message;
 
 /* Текст сообщения на текущем языке (заимствованная строка; {0} — место аргумента)
@@ -498,6 +508,23 @@ BERESTA_API void beresta_schema_free(beresta_schema schema);
 /* Validates the document: all violations are collected in one pass into out */
 BERESTA_API int beresta_schema_validate(beresta_schema schema, beresta_document document,
     beresta_diagnostics* out);
+
+/* Потоковая проверка без дерева (SAX + XSD): аргументы те же, что у
+   beresta_document_parse / beresta_document_parse_file, но вместо документа
+   в out — список нарушений. Память — O(глубины документа) плюс значения ID
+   и таблицы ключей; файл отображается в память, а не копируется, поэтому
+   так проверяются выгрузки в гигабайты. Нарушение схемы — не ошибка вызова
+   (BERESTA_OK, нарушения в out); синтаксическая ошибка XML — BERESTA_PARSE_ERROR.
+   Streaming validation without a tree (SAX + XSD): the arguments are the same as
+   for beresta_document_parse / beresta_document_parse_file, but out receives a
+   list of violations instead of a document. The memory is O(document depth) plus
+   ID values and key tables; the file is mapped into memory, not copied, so
+   exports of gigabytes are validated this way. A schema violation is not a call
+   error (BERESTA_OK, the violations are in out); an XML syntax error is BERESTA_PARSE_ERROR. */
+BERESTA_API int beresta_schema_validate_bytes(const void* data, int64_t size, uint32_t flags,
+    beresta_schema schema, beresta_diagnostics* out);
+BERESTA_API int beresta_schema_validate_file(const char* path, uint32_t flags,
+    beresta_schema schema, beresta_diagnostics* out);
 
 /* Список нарушений: число, текст, строка и столбец в исходнике (0 — неизвестно) */
 /* The list of violations: the count, the text, the line and column in the source (0 — unknown) */

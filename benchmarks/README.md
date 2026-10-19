@@ -55,6 +55,8 @@ PYTHONPATH=../../bindings/python python3 python/bench.py data
 
 lxml необязательна (`pip install lxml`): без неё её строка пропускается.
 
+Потоковая проверка по XSD без дерева сравнивается отдельными программами на тех же данных: `bench.StreamBench` (Java: «Берёста» против `javax.xml.validation.Validator`), `WrapperBench` с ключом `--stream` (.NET: против проверяющего `XmlReader`) и `python/stream_bench.py` (Python: против lxml `iterparse` со схемой). Запуск — как у основных программ, например `java ... bench.StreamBench data` или `dotnet run -c Release --project csharp/WrapperBench.csproj -- data --stream`.
+
 Результаты и выводы — в разделе «Производительность» README.md в корне репозитория.
 
 ---
@@ -72,6 +74,6 @@ The `beresta_bench` program compares Beresta with other XML libraries on the sam
 
 The compared libraries are included only if pkg-config found them (RapidXML — by its header). Beresta itself does not depend on them: this is only a comparison tool.
 
-`wrappers/` compares the Java, .NET and Python wrappers with the XML libraries of their languages: the JDK DOM (`javax.xml`), `XmlDocument` and `XDocument`, lxml and `xml.etree`. All programs read the same files from `wrappers/data` (`node make_data.js`), and the memory of every library is measured in a separate process (`--memory N`, Linux). The commands are given above.
+`wrappers/` compares the Java, .NET and Python wrappers with the XML libraries of their languages: the JDK DOM (`javax.xml`), `XmlDocument` and `XDocument`, lxml and `xml.etree`. All programs read the same files from `wrappers/data` (`node make_data.js`), and the memory of every library is measured in a separate process (`--memory N`, Linux). The commands are given above. Streaming XSD validation without a tree is compared by separate programs on the same data: `bench.StreamBench` (Java: Beresta against `javax.xml.validation.Validator`), `WrapperBench` with the `--stream` switch (.NET: against a validating `XmlReader`) and `python/stream_bench.py` (Python: against lxml `iterparse` with a schema).
 
 See the "Performance" section of the root README.md (README.en.md) for the results.

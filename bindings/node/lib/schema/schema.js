@@ -9,15 +9,18 @@ const { BerestaClosedError } = require('../errors.js');
 const { messageText, Messages } = require('../languages.js');
 const { readDiagnostics } = require('./diagnostics.js');
 const { SchemaLifecycle } = require('./schema_lifecycle.js');
+const { SchemaStreaming } = require('./schema_streaming.js');
 
 /**
  * Загруженная XML Schema. Неизменяема после загрузки: одну схему можно
  * использовать для множества документов — и при разборе (parse с
- * options.schema), и отдельной проверкой validate.
+ * options.schema), и отдельной проверкой validate. Потоковая проверка без
+ * дерева — validateBytes / validateFile (schema_streaming.js).
  *
  * A loaded XML Schema. Immutable after loading: one schema can be used for
  * many documents — both during parsing (parse with options.schema) and
- * as a separate validate check.
+ * as a separate validate check. Streaming validation without a tree is
+ * validateBytes / validateFile (schema_streaming.js).
  */
 class Schema
 {
@@ -58,6 +61,6 @@ class Schema
     }
 }
 
-applyMixins(Schema, SchemaLifecycle);
+applyMixins(Schema, SchemaLifecycle, SchemaStreaming);
 
 module.exports = { Schema };

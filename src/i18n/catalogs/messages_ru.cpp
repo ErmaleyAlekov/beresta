@@ -353,6 +353,7 @@ namespace beresta::i18n
         {Message::BINDING_NATIVE_CALL_FAILED, "сбой нативного вызова"},
         {Message::BINDING_UNKNOWN_NODE_TYPE, "неизвестный тип узла {0}"},
         {Message::BINDING_INVALID_ARGUMENT, "неверный аргумент №{0} функции {1}: ожидается {2}"},
+        {Message::BINDING_NO_FILE_SYSTEM, "в WebAssembly нет файловой системы: {0} недоступна, передайте строку или байты"},
         {Message::LANGUAGE_UNKNOWN, "неизвестный язык сообщений \"{0}\"; доступны: {1}"},
     };
 

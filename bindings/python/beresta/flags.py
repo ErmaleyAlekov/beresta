@@ -25,6 +25,9 @@ class ParseFlags(IntFlag):
     NO_NAMESPACES = 1 << 4
     XINCLUDE = 1 << 5
     FILE_RESOURCES = 1 << 6
+    # Строка и столбец узлов: места нарушений в Schema.validate(document)
+    # The line and column of nodes: the places of violations in Schema.validate(document)
+    TRACK_LOCATIONS = 1 << 7
 
 
 class WriteFlags(IntFlag):

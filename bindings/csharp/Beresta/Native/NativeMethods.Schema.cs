@@ -20,6 +20,14 @@ namespace Beresta.Native
         internal static extern int beresta_schema_validate(IntPtr schema, IntPtr document, out IntPtr diagnostics);
 
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        internal static extern int beresta_schema_validate_bytes(byte[] data, long size, uint flags,
+            IntPtr schema, out IntPtr diagnostics);
+
+        [DllImport(Library, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        internal static extern int beresta_schema_validate_file([MarshalAs(UnmanagedType.LPUTF8Str)] string path,
+            uint flags, IntPtr schema, out IntPtr diagnostics);
+
+        [DllImport(Library, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         internal static extern long beresta_diagnostics_count(IntPtr diagnostics);
 
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]

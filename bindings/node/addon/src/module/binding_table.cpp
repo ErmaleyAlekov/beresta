@@ -94,6 +94,8 @@ namespace beresta::node
         BERESTA_BIND(schema_load_file, adaptOutOfString),
         BERESTA_BIND(schema_free, adaptVoidOfHandle),
         BERESTA_BIND(schema_validate, adaptOutOfHandles),
+        BERESTA_BIND(schema_validate_bytes, adaptParse),
+        BERESTA_BIND(schema_validate_file, adaptParseFile),
         BERESTA_BIND(diagnostics_count, adaptCountOfHandle),
         BERESTA_BIND(diagnostics_message, adaptOwnedOfHandleIndex),
         BERESTA_BIND(diagnostics_line, adaptCountOfHandleIndex),

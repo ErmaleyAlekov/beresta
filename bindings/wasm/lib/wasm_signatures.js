@@ -112,7 +112,8 @@ const BINDINGS = Object.freeze([
     ['nodeset_size', 'countOfHandle'], ['nodeset_node', 'handleOfHandleIndex'],
     ['nodeset_value', 'ownedOfHandleIndex'], ['nodeset_free', 'voidOfHandle'],
     ['schema_load', 'loadSchema'], ['schema_load_file', 'outOfString'], ['schema_free', 'voidOfHandle'],
-    ['schema_validate', 'outOfHandles'], ['diagnostics_count', 'countOfHandle'],
+    ['schema_validate', 'outOfHandles'], ['schema_validate_bytes', 'parse'],
+    ['schema_validate_file', 'parseFile'], ['diagnostics_count', 'countOfHandle'],
     ['diagnostics_message', 'ownedOfHandleIndex'], ['diagnostics_line', 'countOfHandleIndex'],
     ['diagnostics_column', 'countOfHandleIndex'], ['diagnostics_free', 'voidOfHandle']
 ]);

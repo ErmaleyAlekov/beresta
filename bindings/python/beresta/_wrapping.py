@@ -13,7 +13,8 @@ Node для остальных узлов. Импорт классов внут�
 до переноса, проверяла бы «жив ли документ» по старому документу и после
 закрытия нового обратилась бы к освобождённой памяти. Запись об удалённом
 узле может пережить его (адрес достанется новому узлу), поэтому при
-поиске сверяется вид обёртки: элемент или нет.
+поиске сверяется тип узла, запомненный в обёртке (текст, комментарий,
+элемент...). Тот же тип обёртка отдаёт из .type без нового вызова ctypes.
 
 The factory of wrapper objects for node handles (the Factory Method pattern).
 The C interface returns a "bare" pointer; the Python class is chosen by its
@@ -27,8 +28,9 @@ another document (move_to): ALL wrappers already handed out for the node and its
 descendants must change their owner document. Otherwise a wrapper obtained before
 the move would check "is the document alive" against the old document and, after
 the new one is closed, would access freed memory. The entry of a removed node may
-outlive it (the address goes to a new node), so the lookup compares the wrapper
-kind: an element or not.
+outlive it (the address goes to a new node), so the lookup compares the node type
+remembered in the wrapper (a text, a comment, an element...). The wrapper returns
+the same type from .type without a new ctypes call.
 """
 
 from __future__ import annotations
@@ -39,26 +41,46 @@ from ._native import LIB
 from .errors import check_handle
 from .flags import NodeType
 
+# Код типа «элемент» как обычное int: сравнение без перечисления на каждый узел
+# The "element" type code as a plain int: a comparison without the enum for every node
+_ELEMENT = int(NodeType.ELEMENT)
+
+# Классы обёрток (Element, Node); заполняется один раз в _wrapper_classes
+# The wrapper classes (Element, Node); filled once in _wrapper_classes
+_CLASSES: list = []
+
+
+def _wrapper_classes() -> list:
+    """Импорт внутри функции разрывает циклическую зависимость модулей, а
+    список-кеш выполняет его один раз: раньше import стоял на каждый узел
+    и отнимал около десятой части времени обхода.
+    The import inside the function breaks the circular dependency of the modules,
+    and the cache list runs it once: the import used to run for every node and
+    took about a tenth of the walk time."""
+    if not _CLASSES:
+        from .element import Element
+        from .node import Node
+        _CLASSES.extend((Element, Node))
+    return _CLASSES
+
 
 def wrap_node(pointer: Optional[int], document):
     """Обёртка для дескриптора узла документа document (None -> None).
     A wrapper for a node handle of the document document (None -> None)."""
-    from .element import Element
-    from .node import Node
-
     check_handle(pointer)
     if pointer is None:
         return None
     if pointer == document.raw_handle:
         return document
-    element = LIB.beresta_node_type(pointer) == NodeType.ELEMENT
+    kind = LIB.beresta_node_type(pointer)
     known = document._wrappers.get(pointer)
-    if known is not None and isinstance(known, Element) == element:
+    if known is not None and known._kind == kind:
         return known
-    if element:
-        node = Element(pointer, document)
+    element_class, node_class = _wrapper_classes()
+    if kind == _ELEMENT:
+        node = element_class(pointer, document, kind)
     else:
-        node = Node(pointer, document)
+        node = node_class(pointer, document, kind)
     document._wrappers[pointer] = node
     return node
 

@@ -5,11 +5,8 @@ import java.lang.foreign.MemorySegment;
 import java.lang.ref.Cleaner;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.beresta.internal.NativeCalls;
-import org.beresta.internal.NativeStrings;
 import org.beresta.internal.NativeMemory;
 import org.beresta.internal.NativeRelease;
 import org.beresta.internal.SchemaFunctions;
@@ -17,11 +14,17 @@ import org.beresta.internal.SchemaFunctions;
 /**
  * Загруженная XML Schema. После загрузки неизменяема: одну схему можно
  * использовать для множества документов, в том числе из разных потоков.
+ * Методы проверки — в примеси {@link SchemaValidation}: готовое дерево
+ * ({@code validate(document)}) или поток без дерева ({@code validate(bytes, flags)},
+ * {@code validateFile(path)}).
  *
  * <p>A loaded XML Schema. Immutable after loading: one schema can be used
  * for many documents, including from different threads.
+ * The validation methods are in the {@link SchemaValidation} mixin: a ready tree
+ * ({@code validate(document)}) or a stream without a tree ({@code validate(bytes, flags)},
+ * {@code validateFile(path)}).
  */
-public final class XmlSchema implements AutoCloseable
+public final class XmlSchema implements SchemaValidation, AutoCloseable
 {
     final MemorySegment pointer;
     private final Cleaner.Cleanable cleanable;
@@ -65,33 +68,11 @@ public final class XmlSchema implements AutoCloseable
         }
     }
 
-    /**
-     * Все нарушения за один проход; пустой список — документ корректен.
-     * <p>All violations in one pass; an empty list means the document is valid.
-     */
-    public List<Diagnostic> validate(XmlDocument document)
+    /** Нативный дескриптор схемы. / The native handle of the schema. */
+    @Override
+    public MemorySegment handle()
     {
-        try (Arena arena = Arena.ofConfined())
-        {
-            MemorySegment out = NativeMemory.outPointer(arena);
-            NativeCalls.check(NativeCalls.invoke(SchemaFunctions.VALIDATE, pointer, document.handle(), out));
-            MemorySegment list = NativeMemory.readPointer(out);
-            List<Diagnostic> result = new ArrayList<>();
-            try
-            {
-                long count = (long) NativeCalls.invoke(SchemaFunctions.DIAGNOSTICS_COUNT, list);
-                for (long index = 0; index < count; ++index)
-                    result.add(new Diagnostic(
-                        NativeStrings.take(NativeCalls.invoke(SchemaFunctions.DIAGNOSTICS_MESSAGE, list, index)),
-                        (long) NativeCalls.invoke(SchemaFunctions.DIAGNOSTICS_LINE, list, index),
-                        (long) NativeCalls.invoke(SchemaFunctions.DIAGNOSTICS_COLUMN, list, index)));
-                return result;
-            }
-            finally
-            {
-                NativeCalls.invoke(SchemaFunctions.DIAGNOSTICS_FREE, list);
-            }
-        }
+        return pointer;
     }
 
     @Override

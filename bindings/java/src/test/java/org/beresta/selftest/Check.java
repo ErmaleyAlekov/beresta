@@ -22,6 +22,10 @@ enum Check
     XPATH_VALUES,
     XPATH_SELECT,
     SCHEMA,
+    STREAM_MATCHES_TREE,
+    STREAM_FILE,
+    BULK_MOVE,
+    PARALLEL_SHARED,
     LANGUAGES,
     UNKNOWN_LANGUAGE;
 
@@ -41,6 +45,10 @@ enum Check
             case XPATH_VALUES -> XPathSchemaChecks.xpathValues();
             case XPATH_SELECT -> XPathSchemaChecks.xpathSelect();
             case SCHEMA -> XPathSchemaChecks.schema();
+            case STREAM_MATCHES_TREE -> StreamingChecks.streamMatchesTree();
+            case STREAM_FILE -> StreamingChecks.streamFile();
+            case BULK_MOVE -> LoadChecks.bulkMove();
+            case PARALLEL_SHARED -> LoadChecks.parallelShared();
             case LANGUAGES -> LanguageChecks.languages();
             case UNKNOWN_LANGUAGE -> LanguageChecks.unknownLanguage();
         }
