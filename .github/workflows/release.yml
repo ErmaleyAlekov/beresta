@@ -254,7 +254,10 @@ jobs:
           else
             gh release create "${GITHUB_REF_NAME}" dist/* --title "Берёста ${VERSION}" --generate-notes
           fi
-      # Версию, уже лежащую в npm, второй раз не публикуем / A version already in npm is not published again
+      # Версию, уже лежащую в npm, второй раз не публикуем. Путь начинается с ./: иначе npm
+      # принимает dist/имя.tgz за ссылку на GitHub-репозиторий «владелец/имя» и идёт в git
+      # A version already in npm is not published again. The path starts with ./: otherwise npm
+      # takes dist/name.tgz for a GitHub repository reference "owner/name" and goes to git
       - name: npm publish
         if: github.ref_type == 'tag' && env.NPM_TOKEN != ''
         env:
@@ -264,7 +267,7 @@ jobs:
             if npm view "${package}@${VERSION}" version > /dev/null 2>&1; then
               echo "${package}@${VERSION} уже в npm / already in npm"
             else
-              npm publish "dist/${package}-${VERSION}.tgz" --provenance --access public
+              npm publish "./dist/${package}-${VERSION}.tgz" --provenance --access public
             fi
           done
       - name: PyPI
