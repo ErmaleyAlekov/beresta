@@ -19,13 +19,13 @@ namespace
         return xml + "/>";
     }
 
-    // Лучшее из трёх времён разбора в секундах (меньше всего шума планировщика)
-    // The best of three parse times in seconds (the least scheduler noise)
+    // Лучшее из пяти времён разбора в секундах (меньше всего шума планировщика)
+    // The best of five parse times in seconds (the least scheduler noise)
     double parseSeconds(const std::string& xml)
     {
         double best = 1e9;
 
-        for (int run = 0; run < 3; ++run)
+        for (int run = 0; run < 5; ++run)
         {
             std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
             beresta::Document document = beresta::XmlParser().parse(xml);
@@ -40,22 +40,24 @@ namespace
     ** хеш-таблица с SipHash-1-3 и секретным ключом процесса. Атакующий не
     ** может подобрать коллизии, поэтому время разбора растёт линейно.
     ** Сравнивается не абсолютное время (оно зависит от машины и санитайзеров),
-    ** а рост: вчетверо больше атрибутов — линейно ~4 раза, квадратично ~16.
-    ** Порог 9 отделяет одно от другого с запасом на шум.
+    ** а рост: в восемь раз больше атрибутов — линейно ~8 раз, квадратично ~64.
+    ** Порог 24 оставляет тройной запас на шум общих машин CI (macOS под
+    ** Rosetta, санитайзеры) и всё равно ловит квадратичный рост.
     **
     ** The check for repeated attributes during parsing: up to the threshold — a scan,
     ** beyond it — a hash table with SipHash-1-3 and a secret process key. An attacker
     ** cannot pick collisions, so the parse time grows linearly.
     ** Not the absolute time is compared (it depends on the machine and the sanitizers),
-    ** but the growth: four times more attributes — linearly ~4 times, quadratically ~16.
-    ** The threshold 9 separates one from the other with a margin for noise.
+    ** but the growth: eight times more attributes — linearly ~8 times, quadratically ~64.
+    ** The threshold 24 leaves a threefold margin for the noise of shared CI machines
+    ** (macOS under Rosetta, sanitizers) and still catches a quadratic growth.
     */
     void testAttributeParsingIsLinear()
     {
-        double small = parseSeconds(tagWith(50000));
+        double small = parseSeconds(tagWith(25000));
         double large = parseSeconds(tagWith(200000));
 
-        TEST_ASSERT(large < 9.0 * std::max(small, 0.002));
+        TEST_ASSERT(large < 24.0 * std::max(small, 0.002));
     }
 
     /*
@@ -100,7 +102,7 @@ namespace suites
     // Registers the attribute scalability tests
     void registerAttributeScaleTests(test::TestRunner& runner)
     {
-        runner.add("Разбор: 50 000 и 200 000 атрибутов — линейный рост", testAttributeParsingIsLinear);
+        runner.add("Разбор: 25 000 и 200 000 атрибутов — линейный рост", testAttributeParsingIsLinear);
         runner.add("Разбор: доступ к 50 000 атрибутам", testAttributeAccessAtScale);
     }
 }
