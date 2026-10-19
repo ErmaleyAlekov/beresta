@@ -444,15 +444,27 @@ The user does not need to compile the core: the packages already contain the bin
 | Browsers, Workers | `npm install beresta-wasm` | `beresta_core.wasm` + an ES module with TypeScript types |
 | Python | `pip install beresta` | one `py3-none-any` wheel with the libraries of all platforms |
 | .NET | `dotnet add package Beresta` | `runtimes/<rid>/native` for `win-x64`, `win-arm64`, `linux-x64`, `linux-arm64`, `osx-x64`, `osx-arm64` |
-| Java | the jar from the [GitHub release](https://github.com/ErmaleyAlekov/beresta/releases) | `natives/<os>-<arch>/` of all platforms, the loader extracts the right one |
+| Java | Maven Central: `io.github.ermaleyalekov:beresta` (the dependency below) or the jar from the [GitHub release](https://github.com/ErmaleyAlekov/beresta/releases) | `natives/<os>-<arch>/` of all platforms, the loader extracts the right one |
 | C and C++ | the SDK archive `beresta-<version>-<platform>.zip` from the release | `include/`, the shared and static libraries, `LICENSE` |
 
 The Linux binaries are built on Ubuntu 22.04 and work with glibc 2.35 and newer.
 
+The Maven dependency (the Java package stays `org.beresta`):
+
+```xml
+<dependency>
+    <groupId>io.github.ermaleyalekov</groupId>
+    <artifactId>beresta</artifactId>
+    <version>2.1.0</version>
+</dependency>
+```
+
+Gradle: `implementation("io.github.ermaleyalekov:beresta:2.1.0")`.
+
 ### CI/CD in GitHub Actions
 
 - **`.github/workflows/ci.yml`** — on every push and pull request: Linux x64 and arm64 (the Makefile with GCC, CMake with Clang, all wrappers), Windows x64 and arm64 (MSVC, `ctest`), macOS (`make universal`, a `lipo` check, the C++ tests for arm64 and for x86_64 through Rosetta), WebAssembly (the official `emscripten/emsdk` image), the ASan/UBSan/LSan sanitizers and the W3C XML Conformance Test Suite (the run fails if even one applicable case does not pass).
-- **`.github/workflows/release.yml`** — on a `vX.Y.Z` tag: checks that the tag version matches the versions in `CMakeLists.txt`, `package.json` and `pyproject.toml`; builds the native binaries on five platforms; merges them into one tree; builds the npm packages (`beresta`, `beresta-wasm`), the Python wheel, NuGet, the jar and the SDK archives; installs the wheel and the npm package into a clean environment and checks that they work; creates a GitHub Release with all files.
+- **`.github/workflows/release.yml`** — on a `vX.Y.Z` tag: checks that the tag version matches the versions in `CMakeLists.txt`, `package.json` and `pyproject.toml`; builds the native binaries on five platforms; merges them into one tree; builds the npm packages (`beresta`, `beresta-wasm`), the Python wheel, NuGet, the jar (with sources, javadoc and a GPG signature for Maven Central) and the SDK archives; installs the wheel and the npm package into a clean environment and checks that they work; creates a GitHub Release with all files.
 
 Publishing to the registries is enabled by repository secrets (Settings → Secrets and variables → Actions). While a secret is missing, the step is skipped, and the packages still lie in the GitHub Release:
 
@@ -461,6 +473,8 @@ Publishing to the registries is enabled by repository secrets (Settings → Secr
 | `NPM_TOKEN` | npm (`beresta`, `beresta-wasm`, with provenance) |
 | `PYPI_API_TOKEN` | PyPI (`beresta`) |
 | `NUGET_API_KEY` | NuGet (`Beresta`) |
+| `MAVEN_CENTRAL_USERNAME`, `MAVEN_CENTRAL_PASSWORD` | Maven Central (`io.github.ermaleyalekov:beresta`): a Central Portal user token |
+| `MAVEN_GPG_PRIVATE_KEY`, `MAVEN_GPG_PASSPHRASE` | signing the Maven artifacts: a GPG private key (ASCII armor) and its passphrase |
 
 Releasing a version: bump the version in `CMakeLists.txt`, `include/capi/beresta_c.h`, `bindings/*/package.json`, `bindings/python/pyproject.toml`, `bindings/java/pom.xml` and `bindings/csharp/Beresta/Beresta.csproj`, then:
 

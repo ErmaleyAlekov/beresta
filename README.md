@@ -444,15 +444,27 @@ g++ -std=c++17 -Ipath/to/beresta/include main.cpp path/to/beresta/bin/libberesta
 | Браузер, Workers | `npm install beresta-wasm` | `beresta_core.wasm` + ES-модуль с типами TypeScript |
 | Python | `pip install beresta` | одно колесо `py3-none-any` с библиотеками всех платформ |
 | .NET | `dotnet add package Beresta` | `runtimes/<rid>/native` для `win-x64`, `win-arm64`, `linux-x64`, `linux-arm64`, `osx-x64`, `osx-arm64` |
-| Java | jar из [релиза на GitHub](https://github.com/ErmaleyAlekov/beresta/releases) | `natives/<os>-<arch>/` всех платформ, загрузчик извлекает нужную |
+| Java | Maven Central: `io.github.ermaleyalekov:beresta` (зависимость ниже) или jar из [релиза на GitHub](https://github.com/ErmaleyAlekov/beresta/releases) | `natives/<os>-<arch>/` всех платформ, загрузчик извлекает нужную |
 | C и C++ | архив SDK `beresta-<версия>-<платформа>.zip` из релиза | `include/`, динамическая и статическая библиотеки, `LICENSE` |
 
 Linux-бинарники собираются на Ubuntu 22.04 и работают с glibc 2.35 и новее.
 
+Зависимость Maven (Java-пакет остаётся `org.beresta`):
+
+```xml
+<dependency>
+    <groupId>io.github.ermaleyalekov</groupId>
+    <artifactId>beresta</artifactId>
+    <version>2.1.0</version>
+</dependency>
+```
+
+Gradle: `implementation("io.github.ermaleyalekov:beresta:2.1.0")`.
+
 ### CI/CD в GitHub Actions
 
 - **`.github/workflows/ci.yml`** — на каждый push и pull request: Linux x64 и arm64 (Makefile с GCC, CMake с Clang, все обёртки), Windows x64 и arm64 (MSVC, `ctest`), macOS (`make universal`, проверка `lipo`, тесты C++ для arm64 и для x86_64 через Rosetta), WebAssembly (официальный образ `emscripten/emsdk`), санитайзеры ASan/UBSan/LSan и W3C XML Conformance Test Suite (прогон падает, если хотя бы один применимый случай не прошёл).
-- **`.github/workflows/release.yml`** — по тегу `vX.Y.Z`: проверяет, что версия тега совпадает с версиями в `CMakeLists.txt`, `package.json` и `pyproject.toml`; собирает нативные бинарники на пяти платформах; сводит их в одно дерево; собирает пакеты npm (`beresta`, `beresta-wasm`), колесо Python, NuGet, jar и архивы SDK; ставит колесо и пакет npm в чистое окружение и проверяет, что они работают; создаёт GitHub Release со всеми файлами.
+- **`.github/workflows/release.yml`** — по тегу `vX.Y.Z`: проверяет, что версия тега совпадает с версиями в `CMakeLists.txt`, `package.json` и `pyproject.toml`; собирает нативные бинарники на пяти платформах; сводит их в одно дерево; собирает пакеты npm (`beresta`, `beresta-wasm`), колесо Python, NuGet, jar (с исходниками, javadoc и подписью GPG для Maven Central) и архивы SDK; ставит колесо и пакет npm в чистое окружение и проверяет, что они работают; создаёт GitHub Release со всеми файлами.
 
 Публикация в реестры включается секретами репозитория (Settings → Secrets and variables → Actions). Пока секрета нет, шаг пропускается, а пакеты всё равно лежат в GitHub Release:
 
@@ -461,6 +473,8 @@ Linux-бинарники собираются на Ubuntu 22.04 и работа�
 | `NPM_TOKEN` | npm (`beresta`, `beresta-wasm`, с provenance) |
 | `PYPI_API_TOKEN` | PyPI (`beresta`) |
 | `NUGET_API_KEY` | NuGet (`Beresta`) |
+| `MAVEN_CENTRAL_USERNAME`, `MAVEN_CENTRAL_PASSWORD` | Maven Central (`io.github.ermaleyalekov:beresta`): токен пользователя Central Portal |
+| `MAVEN_GPG_PRIVATE_KEY`, `MAVEN_GPG_PASSPHRASE` | подпись артефактов Maven: закрытый ключ GPG (ASCII armor) и его пароль |
 
 Выпуск версии: поднимите версию в `CMakeLists.txt`, `include/capi/beresta_c.h`, `bindings/*/package.json`, `bindings/python/pyproject.toml`, `bindings/java/pom.xml` и `bindings/csharp/Beresta/Beresta.csproj`, затем:
 

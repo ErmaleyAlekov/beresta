@@ -8,6 +8,8 @@
         make JAVA=1
         или CMake с опцией -DBERESTA_BUILD_JAVA=ON (затем обычная сборка build)
     После этого:  mvn -f bindings/java/pom.xml package
+    Публикация в Maven Central (её делает release.yml по тегу):
+        mvn -f bindings/java/pom.xml -P central deploy
     Чтобы получить один jar для всех платформ, соберите ядро на каждой ОС
     (или в CI-матрице) — каждая сборка добавит свою папку natives/<os>-<arch>.
 
@@ -23,6 +25,8 @@
         make JAVA=1
         or CMake with -DBERESTA_BUILD_JAVA=ON (then an ordinary build)
     After that:  mvn -f bindings/java/pom.xml package
+    Publishing to Maven Central (release.yml does it from a tag):
+        mvn -f bindings/java/pom.xml -P central deploy
     To get one jar for all platforms, build the core on each OS
     (or in a CI matrix) — each build adds its own natives/<os>-<arch> folder.
 
@@ -35,13 +39,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.beresta</groupId>
+    <!-- Namespace io.github.<логин> Maven Central подтверждает по входу через GitHub;
+         Java-пакет и имя модуля остаются org.beresta
+         The io.github.<login> namespace is verified by Maven Central through the GitHub sign-in;
+         the Java package and the module name stay org.beresta -->
+    <groupId>io.github.ermaleyalekov</groupId>
     <artifactId>beresta</artifactId>
     <version>2.1.0</version>
     <packaging>jar</packaging>
 
     <name>Beresta</name>
-    <description>Берёста — DOM-библиотека XML на C++17: DOM, XPath 1.0, XML Schema, DTD (обёртка Project Panama)</description>
+    <description>Beresta: a C++17 XML library (DOM, XPath 1.0, XML Schema, DTD) for Java through Project Panama. Берёста: XML-библиотека на C++17 для Java через Project Panama.</description>
+    <url>https://github.com/ErmaleyAlekov/beresta</url>
 
     <licenses>
         <license>
@@ -50,6 +59,21 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
+
+    <!-- Разработчики и исходники обязательны для Maven Central / Developers and sources are required by Maven Central -->
+    <developers>
+        <developer>
+            <id>ermaleyalekov</id>
+            <name>Ermaley Alekov</name>
+            <url>https://github.com/ErmaleyAlekov</url>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/ErmaleyAlekov/beresta.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/ErmaleyAlekov/beresta.git</developerConnection>
+        <url>https://github.com/ErmaleyAlekov/beresta</url>
+    </scm>
 
     <properties>
         <maven.compiler.release>22</maven.compiler.release>
@@ -128,4 +152,101 @@
             </plugin>
         </plugins>
     </build>
+
+    <!--
+        Профиль central — публикация в Maven Central: jar с исходниками и
+        javadoc, подпись GPG всех файлов и выгрузка через Central Portal.
+        Обычная сборка (mvn package) его не включает и ключ GPG не требует.
+        Логин и пароль — токен пользователя Central Portal (server id
+        "central" в settings.xml), пароль ключа GPG — переменная окружения
+        MAVEN_GPG_PASSPHRASE; release.yml берёт всё это из секретов.
+
+        The central profile is publishing to Maven Central: the sources and
+        javadoc jars, a GPG signature of all files and the upload through the
+        Central Portal. An ordinary build (mvn package) does not enable it and
+        needs no GPG key. The login and password are a Central Portal user token
+        (server id "central" in settings.xml), the GPG key passphrase is the
+        MAVEN_GPG_PASSPHRASE environment variable; release.yml takes all of it from secrets.
+    -->
+    <profiles>
+        <profile>
+            <id>central</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.3.1</version>
+                        <!-- Нативные бинарники — не исходники: в jar исходников только .java
+                             Native binaries are not sources: the sources jar holds only .java -->
+                        <configuration>
+                            <excludeResources>true</excludeResources>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- doclint выключен: двуязычные комментарии — обычный текст, а не строгий HTML
+                         doclint is off: bilingual comments are plain text, not strict HTML -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.11.2</version>
+                        <configuration>
+                            <doclint>none</doclint>
+                            <quiet>true</quiet>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- loopback: пароль ключа берётся из переменной, без окна ввода
+                         loopback: the key passphrase is taken from the variable, without a prompt window -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>3.2.7</version>
+                        <configuration>
+                            <gpgArguments>
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                            </gpgArguments>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- autoPublish: после проверки Central публикует сам, без ручной кнопки
+                         autoPublish: after validation Central publishes by itself, without a manual button -->
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.7.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>true</autoPublish>
+                            <waitUntil>validated</waitUntil>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
