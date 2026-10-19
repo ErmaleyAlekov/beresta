@@ -1,0 +1,12 @@
+# Набор W3C XML Schema Test Suite скачивается make fetch и в репозиторий
+# не кладётся (около 40 тысяч чужих файлов со своей лицензией W3C)
+# The W3C XML Schema Test Suite is downloaded by make fetch and is not put
+# into the repository (about 40 thousand third-party files with their own W3C license)
+/xmlschema2006-11-06/
+/xsts-*.tar.gz
+
+# Результаты сборки прогонщика / Runner build results
+/obj/
+/dep/
+/bin/
+/build/

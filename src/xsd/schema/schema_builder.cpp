@@ -6,8 +6,8 @@ namespace beresta::xsd::detail
     // Строитель заполняет переданную схему
     // The builder fills the given schema
     SchemaBuilder::SchemaBuilder(Schema& schema, const SchemaLoadOptions& options)
-        : _schema(schema), _options(options), _sources(), _loaded(), _loadedUris(),
-          _definitions(), _builtElements(), _builtTypes(), _incomplete(), _builtIdentities(),
+        : _schema(schema), _options(options), _sources(), _loaded(), _loadedUris(), _loadedBy(),
+          _definitions(), _builtElements(), _builtLocals(), _builtTypes(), _incomplete(), _builtIdentities(),
           _redefinitions(), _builtOriginals(), _overridden(), _headTyped()
     {
     }
@@ -19,7 +19,9 @@ namespace beresta::xsd::detail
     ** определения. «Хамелеонная» схема без targetNamespace, подключённая
     ** через include / redefine / override, получает пространство имён
     ** включающей схемы. Документ, чей xs:schema исключён vc:minVersion /
-    ** vc:maxVersion, ничего не добавляет.
+    ** vc:maxVersion, ничего не добавляет. URI документа запоминается сразу:
+    ** include / redefine, ведущий обратно к корневому документу (цикл
+    ** через другой файл), не загрузит его второй раз.
     **
     ** Registering a document: the defaults from xs:schema, then the
     ** include/import directives (they load other documents),
@@ -27,7 +29,9 @@ namespace beresta::xsd::detail
     ** definitions. A "chameleon" schema without targetNamespace included
     ** through include / redefine / override gets the namespace of the
     ** including schema. A document whose xs:schema is excluded by
-    ** vc:minVersion / vc:maxVersion contributes nothing.
+    ** vc:minVersion / vc:maxVersion contributes nothing. The document URI is
+    ** remembered at once: an include / redefine leading back to the root document
+    ** (a cycle through another file) does not load it a second time.
     */
     void SchemaBuilder::addDocument(const Element& root, const std::string& baseUri,
         const std::string& chameleon)
@@ -38,6 +42,8 @@ namespace beresta::xsd::detail
             derivationAttribute(root, "blockDefault", 0, ELEMENT_BLOCK_ALL),
             derivationAttribute(root, "finalDefault", 0, SCHEMA_FINAL_ALL)});
         const SchemaSource& source = _sources.back();
+        if (!baseUri.empty())
+            _loadedUris.insert(baseUri);
         if (!versionAccepted(root))
             return;
         for (const Element* child : schemaChildren(root))
@@ -52,14 +58,14 @@ namespace beresta::xsd::detail
     }
 
     /*
-    ** Все глобальные элементы и типы строятся сразу, чтобы ошибки схемы
-    ** проявились при загрузке. Группы замены вычисляются, когда построены
+    ** Все глобальные элементы, типы и группы строятся сразу, чтобы ошибки
+    ** схемы проявились при загрузке. Группы замены вычисляются, когда построены
     ** все элементы (член группы может быть объявлен где угодно). Ссылки
     ** keyref связываются последними: ключ, на который ссылается keyref,
     ** может быть объявлен в любом месте схемы.
     **
-    ** All global elements and types are built at once so that schema errors
-    ** show up at loading. Substitution groups are computed when all the
+    ** All global elements, types and groups are built at once so that schema
+    ** errors show up at loading. Substitution groups are computed when all the
     ** elements are built (a group member may be declared anywhere). keyref
     ** references are bound last: the key a keyref refers to may be declared
     ** anywhere in the schema.
@@ -79,6 +85,7 @@ namespace beresta::xsd::detail
             globalElement(key);
         for (const QualifiedKey& key : types)
             resolveType(key);
+        buildNamedGroups();
         buildSubstitutionGroups();
         resolveKeyReferences();
     }

@@ -67,6 +67,20 @@ namespace beresta::xsd::detail
     inline constexpr DerivationSet SCHEMA_FINAL_ALL = COMPLEX_DERIVATIONS_ALL | SIMPLE_FINAL_ALL;
 
     /*
+    ** Место объявления xs:element — от него зависит, какие атрибуты
+    ** допустимы (схема для схем: topLevelElement, localElement и ссылка ref).
+    **
+    ** The place of an xs:element declaration — it decides which attributes
+    ** are allowed (the schema for schemas: topLevelElement, localElement and a ref reference).
+    */
+    enum class ElementPlace
+    {
+        GLOBAL_ELEMENT,     // прямой ребёнок xs:schema / a direct child of xs:schema
+        LOCAL_ELEMENT,      // объявление внутри модели содержимого / a declaration inside a content model
+        ELEMENT_REFERENCE   // <xs:element ref="..."/> внутри модели / inside a model
+    };
+
+    /*
     ** SchemaBuilder — загрузчик схемы (паттерн Builder) в два прохода:
     ** 1) регистрация всех глобальных определений всех документов схемы
     **    (с xs:include / xs:import) по их полным именам; xs:redefine и
@@ -104,14 +118,19 @@ namespace beresta::xsd::detail
         // ---- Регистрация (schema_builder_register.cpp) ----
         // ---- Registration (schema_builder_register.cpp) ----
         void registerDefinition(const Element& child, const SchemaSource& source);
-        void loadReferenced(const Element& directive, const SchemaSource& source);
+        std::string loadReferenced(const Element& directive, const SchemaSource& source);
         std::map<QualifiedKey, Definition>* registryFor(std::string_view kind);
         const Definition* findDefinition(std::string_view kind, const QualifiedKey& key);
 
         // ---- xs:redefine и xs:override (schema_builder_redefine.cpp, schema_builder_original.cpp) ----
         // ---- xs:redefine and xs:override (schema_builder_redefine.cpp, schema_builder_original.cpp) ----
         void loadRedefinition(const Element& directive, const SchemaSource& source);
-        void redefineDefinition(const Element& child, const SchemaSource& source);
+        void redefineDefinition(const Element& child, const SchemaSource& source, const std::string& targetUri);
+        void checkSelfReferences(const Element& child, const QualifiedKey& key) const;
+        std::vector<const Element*> selfReferences(const Element& component, const QualifiedKey& key) const;
+        bool loadedWithin(const std::string& uri, const std::string& ancestor) const;
+        void buildNamedGroups();
+        void checkNamedGroup(const Element& group) const;
         void overrideDefinition(const Element& child, const SchemaSource& source);
         void checkSelfDerivation(const Element& child, const QualifiedKey& key) const;
         const Definition* originalFor(const Element& reference, std::string_view kind,
@@ -122,12 +141,19 @@ namespace beresta::xsd::detail
 
         // ---- final, block и группы замены (schema_builder_final.cpp, schema_builder_substitution.cpp) ----
         // ---- final, block and substitution groups (schema_builder_final.cpp, schema_builder_substitution.cpp) ----
+        DerivationSet derivationAttribute(const Element& definition, std::string_view attribute,
+            DerivationSet fallback, DerivationSet all) const;
         void checkFinal(const Element& where, DerivationSet finalSet, const std::string& baseName,
             DerivationSet method) const;
         void buildSubstitutionGroups();
         void inheritHeadTypes();
         void checkSubstitutionFinal(const ElementDecl& member);
         void addSubstitute(const ElementDecl& member);
+
+        // ---- Лексика атрибутов схемы (schema_builder_lexical.cpp) ----
+        // ---- The lexical form of schema attributes (schema_builder_lexical.cpp) ----
+        bool booleanAttribute(const Element& definition, std::string_view name, bool fallback) const;
+        void checkElementAttributes(const Element& definition, ElementPlace place) const;
 
         // ---- Имена (schema_builder_names.cpp) ----
         // ---- Names (schema_builder_names.cpp) ----
@@ -220,8 +246,10 @@ namespace beresta::xsd::detail
         std::deque<SchemaSource> _sources;
         std::vector<std::unique_ptr<Document>> _loaded;
         std::set<std::string> _loadedUris;
+        std::map<std::string, std::string> _loadedBy;
         std::map<std::string, std::map<QualifiedKey, Definition>> _definitions;
         std::map<QualifiedKey, ElementDecl*> _builtElements;
+        std::map<const Element*, ElementDecl*> _builtLocals;
         std::map<QualifiedKey, TypeRef> _builtTypes;
         std::set<const void*> _incomplete;
         std::map<const Element*, IdentityConstraint*> _builtIdentities;
@@ -230,11 +258,6 @@ namespace beresta::xsd::detail
         std::set<std::pair<std::string, QualifiedKey>> _overridden;
         std::set<const ElementDecl*> _headTyped;
     };
-
-    // Набор способов наследования из атрибута (block / final) или значение по умолчанию (schema_builder_final.cpp)
-    // A set of derivation methods from an attribute (block / final) or the default value (schema_builder_final.cpp)
-    DerivationSet derivationAttribute(const Element& definition, std::string_view attribute,
-        DerivationSet fallback, DerivationSet all);
 
     // ---- Обход XML схемы (schema_xml_helpers.cpp) ----
     // ---- Traversing the schema XML (schema_xml_helpers.cpp) ----

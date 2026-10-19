@@ -58,8 +58,8 @@ namespace beresta::xsd::detail
             valueType = closeSimple(frame);
         else if (frame.mode == FrameMode::COMPLEX)
             valueType = closeComplex(frame);
-        else if (frame.mode == FrameMode::NIL && frame.hasChildNode)
-            report(_depth - 1, CheckPhase::NIL, i18n::format(i18n::Message::XSD_NIL_NOT_EMPTY));
+        else if (frame.mode == FrameMode::NIL)
+            closeNil(frame);
         if (recordingAssertions())
             notifyAssertionEnd(frame, valueType);
         if (_identity != nullptr)

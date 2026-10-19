@@ -1,0 +1,410 @@
+# ============================================================================
+#  Сознательные ограничения «Берёсты» и спорные случаи W3C XSTS
+#  Строка: «ключ набор/группа[/случай]». Ключи описаны в
+#  src/limitations/limitations_loader.cpp и в README.md рядом. Случай из
+#  списка всё равно прогоняется: прошёл — считается прошедшим, провал —
+#  графа «ограничение», в процент не входит.
+#  Списки ключей upa и particle-restrict собраны по описаниям групп
+#  (Particle Derivation OK, NameAndTypeOK, non-deterministic…) только из
+#  провалов вида «ошибочная схема принята»; остальные — разбором вручную.
+# ============================================================================
+#  Deliberate limitations of Beresta and disputed W3C XSTS cases
+#  A line: "key set/group[/case]". The keys are described in
+#  src/limitations/limitations_loader.cpp and in the README.md next to it. A listed
+#  case is still run: if it passed it counts as passed, a failure goes into the
+#  "limitation" column and is not included in the percentage.
+#  The upa and particle-restrict lists are collected by the group descriptions
+#  (Particle Derivation OK, NameAndTypeOK, non-deterministic…) only from
+#  failures of the kind "an invalid schema accepted"; the rest — by manual analysis.
+# ============================================================================
+
+# ---- upa (17) ----
+# Однозначность модели (UPA, cos-nonambig) не проверяется: неоднозначная модель принимается и проверяется точно.
+# The model unambiguity (UPA, cos-nonambig) is not checked: an ambiguous model is accepted and validated exactly.
+upa MS-Schema2006-07-15/schN10
+upa MS-Additional2006-07-15/addB113/addB113
+upa MS-Additional2006-07-15/addB121/addB121
+upa MS-Additional2006-07-15/addB153/addB153
+upa MS-ModelGroups2006-07-15/mgQ021/mgQ021
+upa MS-Particles2006-07-15/particlesFb003/particlesFb003
+upa MS-Particles2006-07-15/particlesFb005/particlesFb005
+upa MS-Particles2006-07-15/particlesFb006/particlesFb006
+upa MS-Particles2006-07-15/particlesZ022/particlesZ022
+upa MS-Particles2006-07-15/particlesZ033_e/particlesZ033_e
+upa MS-Particles2006-07-15/particlesZ033_f/particlesZ033_f
+upa MS-Particles2006-07-15/particlesZ033_g/particlesZ033_g
+upa MS-Particles2006-07-15/particlesZ037/particlesZ037
+upa MS-Wildcards2006-07-15/wildI009/wildI009
+upa MS-Wildcards2006-07-15/wildI010/wildI010
+upa MS-Wildcards2006-07-15/wildI013/wildI013
+upa MS-Wildcards2006-07-15/wildI014/wildI014
+
+# ---- particle-restrict (260) ----
+# Корректность ограничения модели (cos-particle-restrict, в т.ч. с группами замены) не проверяется.
+# The validity of a model restriction (cos-particle-restrict, including with substitution groups) is not checked.
+particle-restrict MS-Element2006-07-15/elemZ026
+particle-restrict MS-Element2006-07-15/elemZ027_c
+particle-restrict MS-Element2006-07-15/elemZ028b
+particle-restrict MS-Element2006-07-15/elemZ028e
+particle-restrict MS-Additional2006-07-15/addB118/addB118
+particle-restrict MS-Particles2006-07-15/particlesHa021/particlesHa021
+particle-restrict MS-Particles2006-07-15/particlesHa052/particlesHa052
+particle-restrict MS-Particles2006-07-15/particlesHa071/particlesHa071
+particle-restrict MS-Particles2006-07-15/particlesHa081/particlesHa081
+particle-restrict MS-Particles2006-07-15/particlesHa082/particlesHa082
+particle-restrict MS-Particles2006-07-15/particlesHa083/particlesHa083
+particle-restrict MS-Particles2006-07-15/particlesHa101/particlesHa101
+particle-restrict MS-Particles2006-07-15/particlesHa102/particlesHa102
+particle-restrict MS-Particles2006-07-15/particlesHa103/particlesHa103
+particle-restrict MS-Particles2006-07-15/particlesHa121/particlesHa121
+particle-restrict MS-Particles2006-07-15/particlesHa123/particlesHa123
+particle-restrict MS-Particles2006-07-15/particlesHa140/particlesHa140
+particle-restrict MS-Particles2006-07-15/particlesHa143/particlesHa143
+particle-restrict MS-Particles2006-07-15/particlesHa144/particlesHa144
+particle-restrict MS-Particles2006-07-15/particlesHa145/particlesHa145
+particle-restrict MS-Particles2006-07-15/particlesHa147/particlesHa147
+particle-restrict MS-Particles2006-07-15/particlesHa161/particlesHa161
+particle-restrict MS-Particles2006-07-15/particlesHa162/particlesHa162
+particle-restrict MS-Particles2006-07-15/particlesHa163/particlesHa163
+particle-restrict MS-Particles2006-07-15/particlesHa164/particlesHa164
+particle-restrict MS-Particles2006-07-15/particlesHa166/particlesHa166
+particle-restrict MS-Particles2006-07-15/particlesHa168/particlesHa168
+particle-restrict MS-Particles2006-07-15/particlesHa169/particlesHa169
+particle-restrict MS-Particles2006-07-15/particlesHa181/particlesHa181
+particle-restrict MS-Particles2006-07-15/particlesHa182/particlesHa182
+particle-restrict MS-Particles2006-07-15/particlesHa183/particlesHa183
+particle-restrict MS-Particles2006-07-15/particlesHa184/particlesHa184
+particle-restrict MS-Particles2006-07-15/particlesHa187/particlesHa187
+particle-restrict MS-Particles2006-07-15/particlesHa189/particlesHa189
+particle-restrict MS-Particles2006-07-15/particlesHb001/particlesHb001
+particle-restrict MS-Particles2006-07-15/particlesHb002/particlesHb002
+particle-restrict MS-Particles2006-07-15/particlesHb003/particlesHb003
+particle-restrict MS-Particles2006-07-15/particlesHb004/particlesHb004
+particle-restrict MS-Particles2006-07-15/particlesHb006/particlesHb006
+particle-restrict MS-Particles2006-07-15/particlesHb007/particlesHb007
+particle-restrict MS-Particles2006-07-15/particlesHb008/particlesHb008
+particle-restrict MS-Particles2006-07-15/particlesHb009/particlesHb009
+particle-restrict MS-Particles2006-07-15/particlesHb011/particlesHb011
+particle-restrict MS-Particles2006-07-15/particlesIa006/particlesIa006
+particle-restrict MS-Particles2006-07-15/particlesIa008/particlesIa008
+particle-restrict MS-Particles2006-07-15/particlesIb002/particlesIb002
+particle-restrict MS-Particles2006-07-15/particlesIb004/particlesIb004
+particle-restrict MS-Particles2006-07-15/particlesIb006/particlesIb006
+particle-restrict MS-Particles2006-07-15/particlesIb007/particlesIb007
+particle-restrict MS-Particles2006-07-15/particlesIc002/particlesIc002
+particle-restrict MS-Particles2006-07-15/particlesIc004/particlesIc004
+particle-restrict MS-Particles2006-07-15/particlesId003/particlesId003
+particle-restrict MS-Particles2006-07-15/particlesId006/particlesId006
+particle-restrict MS-Particles2006-07-15/particlesId012/particlesId012
+particle-restrict MS-Particles2006-07-15/particlesIe006/particlesIe006
+particle-restrict MS-Particles2006-07-15/particlesIe009/particlesIe009
+particle-restrict MS-Particles2006-07-15/particlesIe012/particlesIe012
+particle-restrict MS-Particles2006-07-15/particlesIe014/particlesIe014
+particle-restrict MS-Particles2006-07-15/particlesIf007/particlesIf007
+particle-restrict MS-Particles2006-07-15/particlesIf008/particlesIf008
+particle-restrict MS-Particles2006-07-15/particlesIf009/particlesIf009
+particle-restrict MS-Particles2006-07-15/particlesIg004/particlesIg004
+particle-restrict MS-Particles2006-07-15/particlesIg006/particlesIg006
+particle-restrict MS-Particles2006-07-15/particlesIg007/particlesIg007
+particle-restrict MS-Particles2006-07-15/particlesIg008/particlesIg008
+particle-restrict MS-Particles2006-07-15/particlesIg009/particlesIg009
+particle-restrict MS-Particles2006-07-15/particlesIg010/particlesIg010
+particle-restrict MS-Particles2006-07-15/particlesIg013/particlesIg013
+particle-restrict MS-Particles2006-07-15/particlesIg016/particlesIg016
+particle-restrict MS-Particles2006-07-15/particlesIj003/particlesIj003
+particle-restrict MS-Particles2006-07-15/particlesIj004/particlesIj004
+particle-restrict MS-Particles2006-07-15/particlesIj007/particlesIj007
+particle-restrict MS-Particles2006-07-15/particlesIj008/particlesIj008
+particle-restrict MS-Particles2006-07-15/particlesIj009/particlesIj009
+particle-restrict MS-Particles2006-07-15/particlesIj010/particlesIj010
+particle-restrict MS-Particles2006-07-15/particlesIj011/particlesIj011
+particle-restrict MS-Particles2006-07-15/particlesIj012/particlesIj012
+particle-restrict MS-Particles2006-07-15/particlesIj013/particlesIj013
+particle-restrict MS-Particles2006-07-15/particlesIj015/particlesIj015
+particle-restrict MS-Particles2006-07-15/particlesIj016/particlesIj016
+particle-restrict MS-Particles2006-07-15/particlesIk002/particlesIk002
+particle-restrict MS-Particles2006-07-15/particlesIk003/particlesIk003
+particle-restrict MS-Particles2006-07-15/particlesIk005/particlesIk005
+particle-restrict MS-Particles2006-07-15/particlesIk006/particlesIk006
+particle-restrict MS-Particles2006-07-15/particlesIk007/particlesIk007
+particle-restrict MS-Particles2006-07-15/particlesIk008/particlesIk008
+particle-restrict MS-Particles2006-07-15/particlesIk009/particlesIk009
+particle-restrict MS-Particles2006-07-15/particlesIk010/particlesIk010
+particle-restrict MS-Particles2006-07-15/particlesIk011/particlesIk011
+particle-restrict MS-Particles2006-07-15/particlesIk013/particlesIk013
+particle-restrict MS-Particles2006-07-15/particlesIk015/particlesIk015
+particle-restrict MS-Particles2006-07-15/particlesIk016/particlesIk016
+particle-restrict MS-Particles2006-07-15/particlesIk019/particlesIk019
+particle-restrict MS-Particles2006-07-15/particlesIk020/particlesIk020
+particle-restrict MS-Particles2006-07-15/particlesIk021/particlesIk021
+particle-restrict MS-Particles2006-07-15/particlesIk022/particlesIk022
+particle-restrict MS-Particles2006-07-15/particlesIk024/particlesIk024
+particle-restrict MS-Particles2006-07-15/particlesIk025/particlesIk025
+particle-restrict MS-Particles2006-07-15/particlesIk027/particlesIk027
+particle-restrict MS-Particles2006-07-15/particlesJa003/particlesJa003
+particle-restrict MS-Particles2006-07-15/particlesJa006/particlesJa006
+particle-restrict MS-Particles2006-07-15/particlesJa012/particlesJa012
+particle-restrict MS-Particles2006-07-15/particlesJb006/particlesJb006
+particle-restrict MS-Particles2006-07-15/particlesJb009/particlesJb009
+particle-restrict MS-Particles2006-07-15/particlesJb012/particlesJb012
+particle-restrict MS-Particles2006-07-15/particlesJb014/particlesJb014
+particle-restrict MS-Particles2006-07-15/particlesJc003/particlesJc003
+particle-restrict MS-Particles2006-07-15/particlesJc006/particlesJc006
+particle-restrict MS-Particles2006-07-15/particlesJc012/particlesJc012
+particle-restrict MS-Particles2006-07-15/particlesJd006/particlesJd006
+particle-restrict MS-Particles2006-07-15/particlesJd009/particlesJd009
+particle-restrict MS-Particles2006-07-15/particlesJd012/particlesJd012
+particle-restrict MS-Particles2006-07-15/particlesJd014/particlesJd014
+particle-restrict MS-Particles2006-07-15/particlesJe003/particlesJe003
+particle-restrict MS-Particles2006-07-15/particlesJe006/particlesJe006
+particle-restrict MS-Particles2006-07-15/particlesJe012/particlesJe012
+particle-restrict MS-Particles2006-07-15/particlesJf006/particlesJf006
+particle-restrict MS-Particles2006-07-15/particlesJf009/particlesJf009
+particle-restrict MS-Particles2006-07-15/particlesJf012/particlesJf012
+particle-restrict MS-Particles2006-07-15/particlesJf014/particlesJf014
+particle-restrict MS-Particles2006-07-15/particlesJg001/particlesJg001
+particle-restrict MS-Particles2006-07-15/particlesJh001/particlesJh001
+particle-restrict MS-Particles2006-07-15/particlesJj003/particlesJj003
+particle-restrict MS-Particles2006-07-15/particlesJj006/particlesJj006
+particle-restrict MS-Particles2006-07-15/particlesJj012/particlesJj012
+particle-restrict MS-Particles2006-07-15/particlesJk006/particlesJk006
+particle-restrict MS-Particles2006-07-15/particlesJk009/particlesJk009
+particle-restrict MS-Particles2006-07-15/particlesJk012/particlesJk012
+particle-restrict MS-Particles2006-07-15/particlesJk014/particlesJk014
+particle-restrict MS-Particles2006-07-15/particlesJl002/particlesJl002
+particle-restrict MS-Particles2006-07-15/particlesJl003/particlesJl003
+particle-restrict MS-Particles2006-07-15/particlesJm003/particlesJm003
+particle-restrict MS-Particles2006-07-15/particlesJn009/particlesJn009
+particle-restrict MS-Particles2006-07-15/particlesJr002/particlesJr002
+particle-restrict MS-Particles2006-07-15/particlesJp003/particlesJp003
+particle-restrict MS-Particles2006-07-15/particlesJq009/particlesJq009
+particle-restrict MS-Particles2006-07-15/particlesJs002/particlesJs002
+particle-restrict MS-Particles2006-07-15/particlesJs003/particlesJs003
+particle-restrict MS-Particles2006-07-15/particlesJs004/particlesJs004
+particle-restrict MS-Particles2006-07-15/particlesK004/particlesK004
+particle-restrict MS-Particles2006-07-15/particlesK006/particlesK006
+particle-restrict MS-Particles2006-07-15/particlesL001/particlesL001
+particle-restrict MS-Particles2006-07-15/particlesL002/particlesL002
+particle-restrict MS-Particles2006-07-15/particlesL004/particlesL004
+particle-restrict MS-Particles2006-07-15/particlesL005/particlesL005
+particle-restrict MS-Particles2006-07-15/particlesL008/particlesL008
+particle-restrict MS-Particles2006-07-15/particlesL009/particlesL009
+particle-restrict MS-Particles2006-07-15/particlesL010/particlesL010
+particle-restrict MS-Particles2006-07-15/particlesL011/particlesL011
+particle-restrict MS-Particles2006-07-15/particlesL014/particlesL014
+particle-restrict MS-Particles2006-07-15/particlesL015/particlesL015
+particle-restrict MS-Particles2006-07-15/particlesL016/particlesL016
+particle-restrict MS-Particles2006-07-15/particlesL019/particlesL019
+particle-restrict MS-Particles2006-07-15/particlesL020/particlesL020
+particle-restrict MS-Particles2006-07-15/particlesL022/particlesL022
+particle-restrict MS-Particles2006-07-15/particlesL024/particlesL024
+particle-restrict MS-Particles2006-07-15/particlesL026/particlesL026
+particle-restrict MS-Particles2006-07-15/particlesL027/particlesL027
+particle-restrict MS-Particles2006-07-15/particlesL030/particlesL030
+particle-restrict MS-Particles2006-07-15/particlesL031/particlesL031
+particle-restrict MS-Particles2006-07-15/particlesL032/particlesL032
+particle-restrict MS-Particles2006-07-15/particlesM001/particlesM001
+particle-restrict MS-Particles2006-07-15/particlesM033/particlesM033
+particle-restrict MS-Particles2006-07-15/particlesM034/particlesM034
+particle-restrict MS-Particles2006-07-15/particlesOa002/particlesOa002
+particle-restrict MS-Particles2006-07-15/particlesOa007/particlesOa007
+particle-restrict MS-Particles2006-07-15/particlesOa009/particlesOa009
+particle-restrict MS-Particles2006-07-15/particlesOa010/particlesOa010
+particle-restrict MS-Particles2006-07-15/particlesOa015/particlesOa015
+particle-restrict MS-Particles2006-07-15/particlesOb010/particlesOb010
+particle-restrict MS-Particles2006-07-15/particlesOb011/particlesOb011
+particle-restrict MS-Particles2006-07-15/particlesOb014/particlesOb014
+particle-restrict MS-Particles2006-07-15/particlesOb016/particlesOb016
+particle-restrict MS-Particles2006-07-15/particlesOb017/particlesOb017
+particle-restrict MS-Particles2006-07-15/particlesOb019/particlesOb019
+particle-restrict MS-Particles2006-07-15/particlesOb020/particlesOb020
+particle-restrict MS-Particles2006-07-15/particlesOb021/particlesOb021
+particle-restrict MS-Particles2006-07-15/particlesOb023/particlesOb023
+particle-restrict MS-Particles2006-07-15/particlesOb024/particlesOb024
+particle-restrict MS-Particles2006-07-15/particlesOb025/particlesOb025
+particle-restrict MS-Particles2006-07-15/particlesOb026/particlesOb026
+particle-restrict MS-Particles2006-07-15/particlesOb027/particlesOb027
+particle-restrict MS-Particles2006-07-15/particlesOb028/particlesOb028
+particle-restrict MS-Particles2006-07-15/particlesOb029/particlesOb029
+particle-restrict MS-Particles2006-07-15/particlesOb030/particlesOb030
+particle-restrict MS-Particles2006-07-15/particlesOb031/particlesOb031
+particle-restrict MS-Particles2006-07-15/particlesOb033/particlesOb033
+particle-restrict MS-Particles2006-07-15/particlesOb034/particlesOb034
+particle-restrict MS-Particles2006-07-15/particlesOb035/particlesOb035
+particle-restrict MS-Particles2006-07-15/particlesOb036/particlesOb036
+particle-restrict MS-Particles2006-07-15/particlesOb037/particlesOb037
+particle-restrict MS-Particles2006-07-15/particlesOb038/particlesOb038
+particle-restrict MS-Particles2006-07-15/particlesOb039/particlesOb039
+particle-restrict MS-Particles2006-07-15/particlesOb040/particlesOb040
+particle-restrict MS-Particles2006-07-15/particlesOb041/particlesOb041
+particle-restrict MS-Particles2006-07-15/particlesOb043/particlesOb043
+particle-restrict MS-Particles2006-07-15/particlesOb044/particlesOb044
+particle-restrict MS-Particles2006-07-15/particlesOb045/particlesOb045
+particle-restrict MS-Particles2006-07-15/particlesOb046/particlesOb046
+particle-restrict MS-Particles2006-07-15/particlesOb049/particlesOb049
+particle-restrict MS-Particles2006-07-15/particlesOb050/particlesOb050
+particle-restrict MS-Particles2006-07-15/particlesOb051/particlesOb051
+particle-restrict MS-Particles2006-07-15/particlesOb058/particlesOb058
+particle-restrict MS-Particles2006-07-15/particlesS002/particlesS002
+particle-restrict MS-Particles2006-07-15/particlesS005/particlesS005
+particle-restrict MS-Particles2006-07-15/particlesS006/particlesS006
+particle-restrict MS-Particles2006-07-15/particlesS008/particlesS008
+particle-restrict MS-Particles2006-07-15/particlesS009/particlesS009
+particle-restrict MS-Particles2006-07-15/particlesS010/particlesS010
+particle-restrict MS-Particles2006-07-15/particlesR006/particlesR006
+particle-restrict MS-Particles2006-07-15/particlesR010/particlesR010
+particle-restrict MS-Particles2006-07-15/particlesR014/particlesR014
+particle-restrict MS-Particles2006-07-15/particlesR018/particlesR018
+particle-restrict MS-Particles2006-07-15/particlesR019/particlesR019
+particle-restrict MS-Particles2006-07-15/particlesR021/particlesR021
+particle-restrict MS-Particles2006-07-15/particlesR023/particlesR023
+particle-restrict MS-Particles2006-07-15/particlesR025/particlesR025
+particle-restrict MS-Particles2006-07-15/particlesR026/particlesR026
+particle-restrict MS-Particles2006-07-15/particlesR027/particlesR027
+particle-restrict MS-Particles2006-07-15/particlesR028/particlesR028
+particle-restrict MS-Particles2006-07-15/particlesR031/particlesR031
+particle-restrict MS-Particles2006-07-15/particlesT002/particlesT002
+particle-restrict MS-Particles2006-07-15/particlesT008/particlesT008
+particle-restrict MS-Particles2006-07-15/particlesT009/particlesT009
+particle-restrict MS-Particles2006-07-15/particlesT010/particlesT010
+particle-restrict MS-Particles2006-07-15/particlesT011/particlesT011
+particle-restrict MS-Particles2006-07-15/particlesQ006/particlesQ006
+particle-restrict MS-Particles2006-07-15/particlesQ008/particlesQ008
+particle-restrict MS-Particles2006-07-15/particlesQ012/particlesQ012
+particle-restrict MS-Particles2006-07-15/particlesQ018/particlesQ018
+particle-restrict MS-Particles2006-07-15/particlesQ019/particlesQ019
+particle-restrict MS-Particles2006-07-15/particlesQ021/particlesQ021
+particle-restrict MS-Particles2006-07-15/particlesQ023/particlesQ023
+particle-restrict MS-Particles2006-07-15/particlesQ025/particlesQ025
+particle-restrict MS-Particles2006-07-15/particlesQ026/particlesQ026
+particle-restrict MS-Particles2006-07-15/particlesQ027/particlesQ027
+particle-restrict MS-Particles2006-07-15/particlesQ028/particlesQ028
+particle-restrict MS-Particles2006-07-15/particlesQ031/particlesQ031
+particle-restrict MS-Particles2006-07-15/particlesU001/particlesU001
+particle-restrict MS-Particles2006-07-15/particlesU002/particlesU002
+particle-restrict MS-Particles2006-07-15/particlesU006/particlesU006
+particle-restrict MS-Particles2006-07-15/particlesU008/particlesU008
+particle-restrict MS-Particles2006-07-15/particlesU009/particlesU009
+particle-restrict MS-Particles2006-07-15/particlesV002/particlesV002
+particle-restrict MS-Particles2006-07-15/particlesV005/particlesV005
+particle-restrict MS-Particles2006-07-15/particlesV016/particlesV016
+particle-restrict MS-Particles2006-07-15/particlesV017/particlesV017
+particle-restrict MS-Particles2006-07-15/particlesV018/particlesV018
+particle-restrict MS-Particles2006-07-15/particlesV020/particlesV020
+particle-restrict MS-Particles2006-07-15/particlesW002/particlesW002
+particle-restrict MS-Particles2006-07-15/particlesW005/particlesW005
+particle-restrict MS-Particles2006-07-15/particlesW007/particlesW007
+particle-restrict MS-Particles2006-07-15/particlesW010/particlesW010
+particle-restrict MS-Particles2006-07-15/particlesW012/particlesW012
+particle-restrict MS-Particles2006-07-15/particlesW013/particlesW013
+particle-restrict MS-Particles2006-07-15/particlesW014/particlesW014
+particle-restrict MS-Particles2006-07-15/particlesW015/particlesW015
+particle-restrict MS-Particles2006-07-15/particlesZ023/particlesZ023
+particle-restrict MS-Particles2006-07-15/particlesZ024/particlesZ024
+particle-restrict MS-Particles2006-07-15/particlesZ028/particlesZ028
+
+# ---- redefine-restrict (14) ----
+# xs:redefine без ссылки на себя: новая группа (группа атрибутов) не проверяется как ограничение прежней (src-redefine.6.2, 7.2).
+# xs:redefine without a self-reference: the new group (attribute group) is not checked as a restriction of the former one (src-redefine.6.2, 7.2).
+redefine-restrict MS-Schema2006-07-15/schL1
+redefine-restrict MS-Schema2006-07-15/schL3
+redefine-restrict MS-Schema2006-07-15/schL5
+redefine-restrict MS-Schema2006-07-15/schL6
+redefine-restrict MS-Schema2006-07-15/schL8
+redefine-restrict MS-Schema2006-07-15/schL10
+redefine-restrict MS-Schema2006-07-15/schM3
+redefine-restrict MS-Schema2006-07-15/schM4
+redefine-restrict MS-Schema2006-07-15/schM5
+redefine-restrict MS-Schema2006-07-15/schM10
+redefine-restrict MS-Schema2006-07-15/schO2
+redefine-restrict MS-Schema2006-07-15/schR5
+redefine-restrict MS-AttributeGroup2006-07-15/attgZ002
+redefine-restrict MS-AttributeGroup2006-07-15/attgZ003
+
+# ---- duration-order (13) ----
+# У duration нет порядка для фасетов-границ (min/maxInclusive, min/maxExclusive).
+# duration has no order for the bound facets (min/maxInclusive, min/maxExclusive).
+duration-order MS-DataTypes2006-07-15/duration_maxExclusive001_1111
+duration-order MS-DataTypes2006-07-15/duration_maxExclusive001_88
+duration-order MS-DataTypes2006-07-15/duration_maxExclusive002_1112
+duration-order MS-DataTypes2006-07-15/duration_maxInclusive001_85
+duration-order MS-DataTypes2006-07-15/duration_maxInclusive002_1109
+duration-order MS-DataTypes2006-07-15/duration_maxInclusive003_87
+duration-order MS-DataTypes2006-07-15/duration_minExclusive001_1119
+duration-order MS-DataTypes2006-07-15/duration_minExclusive001_94
+duration-order MS-DataTypes2006-07-15/duration_minExclusive002_1120
+duration-order MS-DataTypes2006-07-15/duration_minExclusive003_96
+duration-order MS-DataTypes2006-07-15/duration_minInclusive001_90
+duration-order MS-DataTypes2006-07-15/duration_minInclusive002_1115
+duration-order MS-DataTypes2006-07-15/duration_minInclusive003_92
+
+# ---- unresolved-location (13) ----
+# Недоступный schemaLocation в include / import / redefine — ошибка загрузки (спецификация разрешает пропустить его).
+# An unavailable schemaLocation in include / import / redefine is a loading error (the specification allows skipping it).
+unresolved-location MS-Annotations2006-07-15/annotA013
+unresolved-location MS-Annotations2006-07-15/annotA014
+unresolved-location MS-DataTypes2006-07-15/anyURI_a002_1337
+unresolved-location MS-DataTypes2006-07-15/anyURI_a004_1339
+unresolved-location MS-DataTypes2006-07-15/anyURI_a006_1341
+unresolved-location MS-DataTypes2006-07-15/anyURI_a008_1343
+unresolved-location MS-DataTypes2006-07-15/anyURI_a009_1344
+unresolved-location MS-Schema2006-07-15/schB8
+unresolved-location MS-Schema2006-07-15/schD7
+unresolved-location MS-Schema2006-07-15/schD8
+unresolved-location MS-Schema2006-07-15/schE9
+unresolved-location MS-Schema2006-07-15/schG8
+unresolved-location MS-Schema2006-07-15/schH9
+
+# ---- s4s-namespace (3) ----
+# Схемы с targetNamespace самого XML Schema (схема для схем) не загружаются: имена этого пространства — встроенные типы.
+# Schemas with the targetNamespace of XML Schema itself (the schema for schemas) are not loaded: the names of this namespace are built-in types.
+s4s-namespace MS-Additional2006-07-15/addB064
+s4s-namespace MS-Additional2006-07-15/addD003
+s4s-namespace MS-Additional2006-07-15/addB071
+
+# ---- redefine-cycle (3) ----
+# Циклы через xs:redefine (A переопределяет B, а B переопределяет или включает A) не поддерживаются.
+# Cycles through xs:redefine (A redefines B, and B redefines or includes A) are not supported.
+redefine-cycle MS-Schema2006-07-15/schU1
+redefine-cycle MS-Schema2006-07-15/schU4/schU4.i
+redefine-cycle MS-Schema2006-07-15/schU5/schU5.i
+
+# ---- nested-derivation (1) ----
+# Тип, выведенный из составного типа внутри модели этого же типа, считается циклическим наследованием.
+# A type derived from a complex type inside the model of that same type is taken as circular derivation.
+nested-derivation MS-Particles2006-07-15/particlesEb041
+
+# ---- disputed (29) ----
+# Ожидание набора расходится со спецификацией XSD 1.0 2-й редакции или зависит от необязательного поведения процессора (разбор — в README.md).
+# The expectation of the suite disagrees with the XSD 1.0 2nd edition specification or depends on optional processor behavior (analysis in README.md).
+disputed MS-SimpleType2006-07-15/ste110
+disputed MS-Element2006-07-15/elemE002
+disputed MS-Element2006-07-15/elemE003
+disputed MS-Element2006-07-15/elemE004
+disputed MS-Element2006-07-15/elemE005
+disputed MS-SimpleType2006-07-15/stZ043
+disputed MS-ModelGroups2006-07-15/mgO013
+disputed MS-Additional2006-07-15/isDefault060_2
+disputed MS-Schema2006-07-15/schA7
+disputed MS-Particles2006-07-15/particlesIg003/particlesIg003.v
+# gMonth в записи 1-й редакции (--MM--); 2-я редакция исправила её на --MM (часть 2, раздел 3.2.14)
+# gMonth in the 1st edition notation (--MM--); the 2nd edition corrected it to --MM (part 2, section 3.2.14)
+disputed MS-DataTypes2006-07-15/gMonth_pattern001_1274/gMonth_pattern001_1274.v
+disputed MS-DataTypes2006-07-15/gMonth_enumeration002_1276/gMonth_enumeration002_1276.v
+disputed MS-DataTypes2006-07-15/gMonth_enumeration004_1278/gMonth_enumeration004_1278.v
+disputed MS-DataTypes2006-07-15/gMonth_maxInclusive001_1279/gMonth_maxInclusive001_1279.v
+disputed MS-DataTypes2006-07-15/gMonth_maxInclusive003_1281/gMonth_maxInclusive003_1281.v
+disputed MS-DataTypes2006-07-15/gMonth_maxExclusive003_1284/gMonth_maxExclusive003_1284.v
+disputed MS-DataTypes2006-07-15/gMonth_minInclusive001_1285/gMonth_minInclusive001_1285.v
+disputed MS-DataTypes2006-07-15/gMonth_minInclusive003_1287/gMonth_minInclusive003_1287.v
+disputed MS-DataTypes2006-07-15/gMonth_minInclusive004_1288/gMonth_minInclusive004_1288.v
+disputed MS-DataTypes2006-07-15/gMonth_minInclusive005_1289/gMonth_minInclusive005_1289.v
+disputed MS-DataTypes2006-07-15/gMonth_minExclusive003_1292/gMonth_minExclusive003_1292.v
+disputed MS-DataTypes2006-07-15/gMonth_minExclusive004_1293/gMonth_minExclusive004_1293.v
+disputed MS-DataTypes2006-07-15/gMonth_minExclusive005_1294/gMonth_minExclusive005_1294.v
+disputed MS-DataTypes2006-07-15/gMonth002_2061/gMonth002_2061.v
+disputed MS-DataTypes2006-07-15/gMonth004_2063/gMonth004_2063.v
+disputed MS-Errata102006-07-15/errE006/errE006.v
+disputed MS-Regex2006-07-15/reDG7/reDG7.v
+disputed MS-SimpleType2006-07-15/stE096/stE096.v
+disputed SType/st_facets00119m/ST_facets00119m1_p

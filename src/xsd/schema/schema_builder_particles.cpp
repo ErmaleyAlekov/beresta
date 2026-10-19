@@ -59,10 +59,16 @@ namespace beresta::xsd::detail
     ** Элемент модели: локальное объявление или ссылка ref на глобальное.
     ** Ссылка получает указатель на группу замены глобального элемента:
     ** сама группа ещё пуста и будет заполнена после загрузки схемы.
+    ** Локальное объявление строится один раз на узел XML (повторная
+    ** подстановка именованной группы берёт готовое) — проверка его
+    ** атрибутов тоже выполняется один раз.
     **
     ** A model element: a local declaration or a ref reference to a global one.
     ** A reference gets a pointer to the substitution group of the global element:
     ** the group itself is still empty and will be filled after the schema is loaded.
+    ** A local declaration is built once per XML node (a repeated
+    ** substitution of a named group takes the ready one) — the check of its
+    ** attributes is also done once.
     */
     content::Particle SchemaBuilder::buildElementParticle(const Element& definition,
         const SchemaSource& source, ComplexType& owner)
@@ -73,11 +79,17 @@ namespace beresta::xsd::detail
 
         if (reference.has_value())
         {
+            checkElementAttributes(definition, ElementPlace::ELEMENT_REFERENCE);
             declaration = globalElement(resolveQName(definition, reference.value()));
             particle.substitutes = &declaration->substitutes;
         }
+        else if (_builtLocals.count(&definition) != 0)
+            declaration = _builtLocals[&definition];
         else
+        {
+            checkElementAttributes(definition, ElementPlace::LOCAL_ELEMENT);
             declaration = buildElement(definition, source, false);
+        }
         particle.kind = content::ParticleKind::ELEMENT;
         particle.name = declaration->name;
         particle.namespaceUri = declaration->namespaceUri;

@@ -48,4 +48,12 @@ namespace support
 
         return beresta::xsd::SchemaValidator(schema).validate(document);
     }
+
+    // Тело оборачивается в xs:schema — так короче тесты загрузки схем
+    // The body is wrapped into xs:schema — this makes the schema loading tests shorter
+    std::shared_ptr<const beresta::xsd::Schema> schemaFromBody(const std::string& body)
+    {
+        return beresta::xsd::Schema::fromString("<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">"
+            + body + "</xs:schema>");
+    }
 }

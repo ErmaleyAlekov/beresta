@@ -38,6 +38,8 @@ namespace beresta::xsd::detail
     ** себя как include (в том числе «хамелеонные» схемы).
     ** xs:import без schemaLocation допустим: схема того пространства имён
     ** должна быть передана в Schema::fromDocuments отдельным документом.
+    ** Результат — URI документа (пусто у import без адреса): по нему
+    ** xs:redefine проверяет, чьи компоненты он переопределяет.
     **
     ** xs:include / xs:import / xs:redefine / xs:override: a document is
     ** loaded through the resolver once (protection against circular
@@ -45,14 +47,16 @@ namespace beresta::xsd::detail
     ** like include (including "chameleon" schemas).
     ** xs:import without schemaLocation is allowed: the schema of that namespace
     ** must be passed to Schema::fromDocuments as a separate document.
+    ** The result is the URI of the document (empty for an import without a location):
+    ** xs:redefine checks by it whom its components belong to.
     */
-    void SchemaBuilder::loadReferenced(const Element& directive, const SchemaSource& source)
+    std::string SchemaBuilder::loadReferenced(const Element& directive, const SchemaSource& source)
     {
         std::string location = attributeOr(directive, "schemaLocation", "");
         bool include = !isSchemaElement(directive, "import");
 
         if (location.empty() && !include)
-            return;
+            return std::string();
         if (location.empty() || _options.resolver == nullptr)
             fail(directive, i18n::format(i18n::Message::SCHEMA_LOAD_NEEDS_RESOLVER, {location}));
         std::optional<Resource> resource = _options.resolver->resolve(
@@ -60,7 +64,8 @@ namespace beresta::xsd::detail
         if (!resource.has_value())
             fail(directive, i18n::format(i18n::Message::SCHEMA_LOAD_FAILED, {location}));
         if (!_loadedUris.insert(resource->uri).second)
-            return;
+            return resource->uri;
+        _loadedBy[resource->uri] = source.baseUri;
         ParserOptions parserOptions;
         parserOptions.trackLocations = true;
         _loaded.push_back(std::make_unique<Document>(XmlParser(parserOptions).parse(resource->content)));
@@ -71,6 +76,7 @@ namespace beresta::xsd::detail
         if (include)
             chameleon = source.targetNamespace;
         addDocument(*root, resource->uri, chameleon);
+        return resource->uri;
     }
 
     // Реестры глобальных определений по видам компонентов

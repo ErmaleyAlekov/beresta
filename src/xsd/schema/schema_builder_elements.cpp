@@ -14,17 +14,24 @@ namespace beresta::xsd::detail
         const Definition* definition = findDefinition("element", key);
         if (definition == nullptr)
             fail(*_sources.front().root, i18n::format(i18n::Message::SCHEMA_ELEMENT_UNDECLARED, {key.first, key.second}));
+        checkElementAttributes(*definition->element, ElementPlace::GLOBAL_ELEMENT);
         return buildElement(*definition->element, *definition->source, true);
     }
 
     /*
-    ** Объявление элемента. Глобальное регистрируется ДО построения типа:
-    ** рекурсивные модели (элемент внутри элемента своего же типа) получают
-    ** указатель на уже существующее объявление.
+    ** Объявление элемента. Регистрируется ДО построения типа: рекурсивные
+    ** модели получают указатель на уже существующее объявление. Глобальное —
+    ** по имени, локальное — по узлу XML: локальный элемент именованной
+    ** группы — один компонент, сколько бы раз группа ни подставлялась.
+    ** Иначе группа, чей локальный элемент имеет анонимный тип со ссылкой
+    ** на ту же группу, разворачивалась бы бесконечно.
     **
-    ** An element declaration. A global one is registered BEFORE its type is built:
-    ** recursive models (an element inside an element of its own type) get
-    ** a pointer to an already existing declaration.
+    ** An element declaration. It is registered BEFORE its type is built: recursive
+    ** models get a pointer to an already existing declaration. A global one is
+    ** registered by name, a local one by the XML node: a local element of a named
+    ** group is one component, however many times the group is substituted.
+    ** Otherwise a group whose local element has an anonymous type referring
+    ** to the same group would be expanded endlessly.
     */
     ElementDecl* SchemaBuilder::buildElement(const Element& definition, const SchemaSource& source,
         bool global)
@@ -44,6 +51,8 @@ namespace beresta::xsd::detail
             _builtElements[key] = &declaration;
             _schema._globalElements[key] = &declaration;
         }
+        else
+            _builtLocals[&definition] = &declaration;
         readElementFlags(definition, source, declaration);
         readValueConstraints(definition, declaration.defaultValue, declaration.fixedValue);
         if (global && head.has_value())
@@ -58,8 +67,8 @@ namespace beresta::xsd::detail
     void SchemaBuilder::readElementFlags(const Element& definition, const SchemaSource& source,
         ElementDecl& declaration) const
     {
-        declaration.nillable = attributeOr(definition, "nillable", "false") == "true";
-        declaration.isAbstract = attributeOr(definition, "abstract", "false") == "true";
+        declaration.nillable = booleanAttribute(definition, "nillable", false);
+        declaration.isAbstract = booleanAttribute(definition, "abstract", false);
         declaration.blockSet = derivationAttribute(definition, "block", source.blockDefault, ELEMENT_BLOCK_ALL);
         declaration.finalSet = derivationAttribute(definition, "final", source.finalDefault,
             COMPLEX_DERIVATIONS_ALL);
