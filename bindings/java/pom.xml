@@ -232,12 +232,16 @@
                             </execution>
                         </executions>
                     </plugin>
-                    <!-- autoPublish: после проверки Central публикует сам, без ручной кнопки
-                         autoPublish: after validation Central publishes by itself, without a manual button -->
+                    <!-- autoPublish: после проверки Central публикует сам, без ручной кнопки.
+                         Не ниже 0.12.0: старые версии кладут в бандл maven-metadata-local.xml от Maven 3.10,
+                         и Central отвергает бандл ("content that does NOT have a .pom file")
+                         autoPublish: after validation Central publishes by itself, without a manual button.
+                         At least 0.12.0: older versions put maven-metadata-local.xml from Maven 3.10 into
+                         the bundle, and Central rejects it ("content that does NOT have a .pom file") -->
                     <plugin>
                         <groupId>org.sonatype.central</groupId>
                         <artifactId>central-publishing-maven-plugin</artifactId>
-                        <version>0.7.0</version>
+                        <version>0.12.0</version>
                         <extensions>true</extensions>
                         <configuration>
                             <publishingServerId>central</publishingServerId>
