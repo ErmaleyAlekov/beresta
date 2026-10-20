@@ -151,7 +151,7 @@ ctest --test-dir build -C Release --output-on-failure
 | Браузер, Web Workers | `npm install beresta-wasm` |
 | Python | `pip install beresta` |
 | .NET | `dotnet add package Beresta` |
-| Java | зависимость Maven `io.github.ermaleyalekov:beresta` (Gradle: `implementation("io.github.ermaleyalekov:beresta:2.1.3")`) |
+| Java | зависимость Maven `io.github.ermaleyalekov:beresta` (Gradle: `implementation("io.github.ermaleyalekov:beresta:2.1.4")`) |
 
 ## Подключение к своему проекту
 

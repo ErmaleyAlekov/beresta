@@ -5,6 +5,22 @@
 Версии следуют [семантическому версионированию](https://semver.org/lang/ru/). Раздел версии
 целиком попадает в описание релиза на GitHub и Gitverse.
 
+## 2.1.4 — 2026-10-20
+
+### Лицензия
+
+- Правообладатель в `LICENSE` (и его копиях в пакетах) — Ермаков Алексей Александрович.
+
+### Выпуск на Gitverse
+
+- SDK для Linux x86_64 и aarch64 собираются на Gitverse в Astra Linux SE 1.7 (GCC 8.3, glibc 2.28):
+  библиотека требует glibc 2.17 и работает на Astra Linux SE 1.7, РЕД ОС 7.3, ALT p10 и новее;
+  модульные тесты проходят на обеих архитектурах (aarch64 — в qemu).
+- SDK для Windows x86_64 собирается на Gitverse компилятором MinGW-w64 (`*-windows-x86_64-mingw.zip`:
+  `beresta.dll`, библиотеки импорта и статическая библиотека MinGW, `beresta.def` для MSVC).
+- Из релиза GitHub берутся только SDK для macOS и Windows ARM64 и пакеты npm, PyPI, NuGet, Maven, WebAssembly.
+- Контакты и сайт продукта: <https://ermaleyalekov.gitverse.site/beresta>.
+
 ## 2.1.3 — 2026-10-20
 
 Сборка из исходного текста на российских ОС и проверочный стенд для эксперта.

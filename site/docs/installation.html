@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Руководство по установке и развёртыванию — «Берёста» 2.1.3</title>
+<title>Руководство по установке и развёртыванию — «Берёста» 2.1.4</title>
 <style>
 /* Стили документов реестра: одни для экрана (site/docs/*.html) и для печати в PDF (A4) */
 /* The registry document styles: the same for the screen (site/docs/*.html) and for PDF printing (A4) */
@@ -72,7 +72,7 @@ blockquote { margin: 10px 0; padding: 4px 12px; border-left: 3px solid var(--acc
 </head>
 <body>
 <header class="doc-head">
-<p class="doc-product">Программа для ЭВМ «XML-библиотека „Берёста“ (beresta)», версия 2.1.3</p>
+<p class="doc-product">Программа для ЭВМ «XML-библиотека „Берёста“ (beresta)», версия 2.1.4</p>
 <p class="doc-nav"><a href="../index.html">Сайт продукта</a> · <a href="../documentation.html">Документация</a></p>
 </header>
 <main>
@@ -122,7 +122,7 @@ blockquote { margin: 10px 0; padding: 4px 12px; border-left: 3px solid var(--acc
 <h2 id="установка-готовой-сборки">Установка готовой сборки</h2>
 <ol><li>Скачайте архив SDK для своей платформы со страницы релиза (Gitverse или GitHub).</li><li>Распакуйте его в каталог проекта, например <code>third_party/beresta</code>.</li><li>Заголовки лежат в <code>include/</code>, библиотеки — в каталоге архива для своей платформы. Динамическую библиотеку положите рядом с исполняемым файлом программы или в каталог, где её ищет загрузчик ОС (<code>PATH</code> в Windows, <code>LD_LIBRARY_PATH</code> или <code>rpath</code> в Linux).</li></ol>
 <p>Для других языков сборка не нужна — пакеты уже содержат бинарники всех платформ:</p>
-<table><thead><tr><th>Язык</th><th>Установка</th></tr></thead><tbody><tr><td>Node.js</td><td><code>npm install beresta</code></td></tr><tr><td>Браузер, Web Workers</td><td><code>npm install beresta-wasm</code></td></tr><tr><td>Python</td><td><code>pip install beresta</code></td></tr><tr><td>.NET</td><td><code>dotnet add package Beresta</code></td></tr><tr><td>Java</td><td>зависимость Maven <code>io.github.ermaleyalekov:beresta</code> (Gradle: <code>implementation("io.github.ermaleyalekov:beresta:2.1.3")</code>)</td></tr></tbody></table>
+<table><thead><tr><th>Язык</th><th>Установка</th></tr></thead><tbody><tr><td>Node.js</td><td><code>npm install beresta</code></td></tr><tr><td>Браузер, Web Workers</td><td><code>npm install beresta-wasm</code></td></tr><tr><td>Python</td><td><code>pip install beresta</code></td></tr><tr><td>.NET</td><td><code>dotnet add package Beresta</code></td></tr><tr><td>Java</td><td>зависимость Maven <code>io.github.ermaleyalekov:beresta</code> (Gradle: <code>implementation("io.github.ermaleyalekov:beresta:2.1.4")</code>)</td></tr></tbody></table>
 <h2 id="подключение-к-своему-проекту">Подключение к своему проекту</h2>
 <p>Программа на C++ через CMake (исходный текст библиотеки — в подкаталоге проекта):</p>
 <pre><code class="language-cmake">set(BERESTA_BUILD_STATIC ON CACHE BOOL "" FORCE)

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Описание процессов жизненного цикла — «Берёста» 2.1.3</title>
+<title>Описание процессов жизненного цикла — «Берёста» 2.1.4</title>
 <style>
 /* Стили документов реестра: одни для экрана (site/docs/*.html) и для печати в PDF (A4) */
 /* The registry document styles: the same for the screen (site/docs/*.html) and for PDF printing (A4) */
@@ -72,7 +72,7 @@ blockquote { margin: 10px 0; padding: 4px 12px; border-left: 3px solid var(--acc
 </head>
 <body>
 <header class="doc-head">
-<p class="doc-product">Программа для ЭВМ «XML-библиотека „Берёста“ (beresta)», версия 2.1.3</p>
+<p class="doc-product">Программа для ЭВМ «XML-библиотека „Берёста“ (beresta)», версия 2.1.4</p>
 <p class="doc-nav"><a href="../index.html">Сайт продукта</a> · <a href="../documentation.html">Документация</a></p>
 </header>
 <main>
@@ -91,7 +91,7 @@ blockquote { margin: 10px 0; padding: 4px 12px; border-left: 3px solid var(--acc
 <p>Порядок выпуска версии:</p>
 <ol><li>Версия поднимается во всех файлах сборки и пакетов, в <code>CHANGELOG.md</code> добавляется раздел версии.</li><li>Выполняются модульные тесты (<code>make test</code>) — все должны пройти; для изменений парсера и XML Schema дополнительно прогоняются наборы W3C, процент прошедших случаев не должен уменьшаться.</li><li>Изменения отправляются в репозитории Gitverse и GitHub; CI на обеих площадках должен завершиться успешно.</li><li>Ставится тег <code>vX.Y.Z</code>; CI собирает бинарники для всех платформ, пакеты (npm, PyPI, NuGet, Maven Central) и архивы SDK, проверяет их в чистом окружении и публикует релиз.</li><li>Тот же релиз с теми же файлами публикуется на Gitverse.</li></ol>
 <p>История выпусков:</p>
-<table><thead><tr><th>Версия</th><th>Дата</th><th>Содержание</th></tr></thead><tbody><tr><td>2.1.3</td><td>2026-10-20</td><td>сборка из исходного текста на GCC 8 и glibc &lt; 2.34 (Astra Linux SE 1.7, РЕД ОС 7.3); проверочный стенд <code>tools/stand/</code></td></tr><tr><td>2.1.2</td><td>2026-10-20</td><td>проверка XML Schema по W3C XML Schema Test Suite: 93,6 % → 96,2 % применимых случаев; релизы на Gitverse</td></tr><tr><td>2.1.1</td><td>2026-10-19</td><td>см. описание релиза</td></tr><tr><td>2.1.0</td><td>2026-10-19</td><td>см. описание релиза</td></tr></tbody></table>
+<table><thead><tr><th>Версия</th><th>Дата</th><th>Содержание</th></tr></thead><tbody><tr><td>2.1.4</td><td>2026-10-20</td><td>лицензия на имя правообладателя; SDK для Linux и Windows x86_64 собираются на Gitverse (Linux — в Astra Linux SE 1.7)</td></tr><tr><td>2.1.3</td><td>2026-10-20</td><td>сборка из исходного текста на GCC 8 и glibc &lt; 2.34 (Astra Linux SE 1.7, РЕД ОС 7.3); проверочный стенд <code>tools/stand/</code></td></tr><tr><td>2.1.2</td><td>2026-10-20</td><td>проверка XML Schema по W3C XML Schema Test Suite: 93,6 % → 96,2 % применимых случаев; релизы на Gitverse</td></tr><tr><td>2.1.1</td><td>2026-10-19</td><td>см. описание релиза</td></tr><tr><td>2.1.0</td><td>2026-10-19</td><td>см. описание релиза</td></tr></tbody></table>
 <p>Подробное содержание каждой версии — в <code>CHANGELOG.md</code>.</p>
 <p>Частота выпусков: исправления (<code>PATCH</code>) выходят по мере устранения ошибок, как правило не позднее 30 дней после подтверждения ошибки; версии с новыми возможностями (<code>MINOR</code>) — по мере готовности, ориентировочно 2 раза в год.</p>
 <h2 id="поддерживаемые-версии">Поддерживаемые версии</h2>
