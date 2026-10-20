@@ -1,0 +1,50 @@
+# ============================================================================
+#  CI «Берёсты» на Gitverse
+#
+#  Gitverse читает .gitverse/workflows, если в настройках репозитория выбрано
+#  «Использовать конфигурацию из .gitverse/workflows»; GitHub эту папку не видит.
+#  Облачный раннер Gitverse один — ubuntu-latest (контейнер Linux x86_64, без
+#  docker.sock, 30 минут на задачу), поэтому здесь только сборка Makefile и
+#  тесты C++. Полная матрица (Windows, macOS, arm64, WASM, санитайзеры) идёт
+#  в .github/workflows/ci.yml на GitHub.
+# ============================================================================
+#  The Beresta CI on Gitverse
+#
+#  Gitverse reads .gitverse/workflows if the repository settings select
+#  "Use the configuration from .gitverse/workflows"; GitHub does not see this folder.
+#  Gitverse has one cloud runner — ubuntu-latest (a Linux x86_64 container, without
+#  docker.sock, 30 minutes per job), so here are only the Makefile build and
+#  the C++ tests. The full matrix (Windows, macOS, arm64, WASM, sanitizers) runs
+#  in .github/workflows/ci.yml on GitHub.
+# ============================================================================
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  linux:
+    name: Linux x86_64 (make + тесты / tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Образ раннера может не содержать компилятора: ставим его, если нет
+      # The runner image may lack a compiler: install it if missing
+      - name: Инструменты сборки / Build tools
+        shell: bash
+        run: |
+          if ! command -v g++ > /dev/null || ! command -v make > /dev/null; then
+            sudo=""
+            if [ "$(id -u)" != "0" ]; then sudo="sudo"; fi
+            $sudo apt-get update -qq
+            $sudo apt-get install -y -qq g++ make
+          fi
+          g++ --version | head -1
+      - name: make + make test
+        shell: bash
+        run: |
+          make -j"$(nproc)" all
+          make test

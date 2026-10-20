@@ -146,7 +146,7 @@ mvn -f bindings/java/pom.xml package
 Running an application:
 
 ```bash
-java --enable-native-access=ALL-UNNAMED -cp beresta-2.1.1.jar:app.jar com.example.App
+java --enable-native-access=ALL-UNNAMED -cp beresta-2.1.2.jar:app.jar com.example.App
 ```
 
 How it works:

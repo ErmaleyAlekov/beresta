@@ -17,8 +17,9 @@
 
 ```
 beresta/
-├── CMakeLists.txt  Makefile  README.md  README.en.md
-├── .github/workflows/            ci.yml (build and tests), release.yml (packages and release)
+├── CMakeLists.txt  Makefile  README.md  README.en.md  CHANGELOG.md  CHANGELOG.en.md
+├── .github/workflows/            ci.yml (build and tests), release.yml (packages, registries and the GitHub release)
+├── .gitverse/workflows/          ci.yml and release.yml for Gitverse (Linux, a release without registries)
 ├── cmake/                        platform detection, wrappers, WebAssembly, the Java self-test
 ├── include/                      declarations only
 │   ├── beresta.hpp               the common C++ header
@@ -50,6 +51,7 @@ beresta/
 │   └── wasm/                     the beresta-wasm package: lib/ (the Wasm backend), tools/ (the bundler), test/, examples/
 ├── benchmarks/                   measurements against libxml2, Xerces, pugixml, tinyxml2, RapidXML; node/ — against JS libraries
 ├── examples/                     demos in C++ (src/) and in C (capi/)
+├── tools/                        release/ — release notes and mirroring releases (GitHub → Gitverse); unicode/ — the table generator
 └── tests/                        C++ unit tests (an own mini framework)
     ├── conformance/              the W3C XML Conformance Test Suite runner and report
     ├── xsts/                     the W3C XML Schema Test Suite runner, the limitation list and report

@@ -169,11 +169,11 @@ Linux-бинарники собираются на Ubuntu 22.04 и работа�
 <dependency>
     <groupId>io.github.ermaleyalekov</groupId>
     <artifactId>beresta</artifactId>
-    <version>2.1.1</version>
+    <version>2.1.2</version>
 </dependency>
 ```
 
-Gradle: `implementation("io.github.ermaleyalekov:beresta:2.1.1")`.
+Gradle: `implementation("io.github.ermaleyalekov:beresta:2.1.2")`.
 
 ### CI/CD в GitHub Actions
 
@@ -190,11 +190,44 @@ Gradle: `implementation("io.github.ermaleyalekov:beresta:2.1.1")`.
 | `MAVEN_CENTRAL_USERNAME`, `MAVEN_CENTRAL_PASSWORD` | Maven Central (`io.github.ermaleyalekov:beresta`): токен пользователя Central Portal |
 | `MAVEN_GPG_PRIVATE_KEY`, `MAVEN_GPG_PASSPHRASE` | подпись артефактов Maven: закрытый ключ GPG (ASCII armor) и его пароль |
 
-Выпуск версии: поднимите версию в `CMakeLists.txt`, `include/capi/beresta_c.h`, `bindings/*/package.json`, `bindings/python/pyproject.toml`, `bindings/java/pom.xml` и `bindings/csharp/Beresta/Beresta.csproj`, затем:
+### CI/CD на Gitverse
+
+Репозиторий зеркалируется на [Gitverse](https://gitverse.ru/ermaleyalekov/beresta). Gitverse читает свои workflow из `.gitverse/workflows` (в настройках репозитория: CI/CD → «Использовать конфигурацию из .gitverse/workflows»), GitHub эту папку не видит. Облачный раннер Gitverse один — `ubuntu-latest` (Linux x86_64, 30 минут на задачу), поэтому:
+
+- **`.gitverse/workflows/ci.yml`** — на каждый push и merge request: `make` и `make test` на Linux x86_64. Полная матрица платформ проверяется на GitHub.
+- **`.gitverse/workflows/release.yml`** — по тегу `vX.Y.Z`: сборка и тесты на Linux x86_64, затем ожидание релиза того же тега на GitHub (до 20 минут), скачивание всех его файлов (`tools/release/github_assets.sh`) и создание релиза Gitverse через публичный API (`tools/release/gitverse_release.sh`). Если релиз GitHub не готов, прикрепляется только SDK Linux x86_64; повторный запуск вручную (Actions → Release, параметр `tag`) заменяет файлы. **В реестры этот workflow ничего не публикует.**
+
+Секрет Gitverse (Настройки репозитория → Секреты и переменные): `GV_API_TOKEN` — токен со страницы gitverse.ru/settings/tokens с правом «Репозитории → Запись». Префикс `GITVERSE_` в именах секретов Gitverse запрещён.
+
+### Выпуск версии
+
+Пакеты в реестрах (npm, PyPI, NuGet, Maven Central) публикуются **только из GitHub**: шаги публикации в `.github/workflows/release.yml` дополнительно проверяют `github.server_url == 'https://github.com'`. Релиз с файлами выходит на обеих платформах; описание обоих — раздел версии из [CHANGELOG.md](../CHANGELOG.md) и [CHANGELOG.en.md](../CHANGELOG.en.md) (`tools/release/release_notes.sh`).
+
+Удалённые репозитории: `origin` — GitHub (`https://github.com/ErmaleyAlekov/beresta.git`), `gitverse` — Gitverse (`git@gitverse.ru:ermaleyalekov/beresta.git`). Добавить второй:
 
 ```bash
-git tag v2.1.1
+git remote add gitverse git@gitverse.ru:ermaleyalekov/beresta.git
+```
+
+Порядок:
+
+1. Поднимите версию в `CMakeLists.txt`, `include/capi/beresta_c.h`, `bindings/*/package.json`, `bindings/python/pyproject.toml`, `bindings/python/tests/test_xpath_schema.py`, `bindings/java/pom.xml`, `bindings/csharp/Beresta/Beresta.csproj` и в примерах зависимостей (`docs/building*.md`, `docs/bindings*.md`, `bindings/java/README.md`); добавьте раздел версии в оба `CHANGELOG`.
+2. `make test` — зелёный; закоммитьте и отправьте `main` на оба удалённых репозитория, дождитесь зелёного CI на обоих.
+3. Тег — сначала на GitHub, там соберутся пакеты и релиз (около 20–30 минут):
+
+```bash
+git tag v2.1.2
 ```
 ```bash
-git push origin v2.1.1
+git push origin main v2.1.2
 ```
+
+4. Когда релиз GitHub готов — тот же тег на Gitverse, его workflow заберёт файлы релиза GitHub:
+
+```bash
+git push gitverse main v2.1.2
+```
+
+5. Проверка: [релизы GitHub](https://github.com/ErmaleyAlekov/beresta/releases) и [Actions](https://github.com/ErmaleyAlekov/beresta/actions), [релизы Gitverse](https://gitverse.ru/ermaleyalekov/beresta/releases) и раздел CI/CD репозитория на Gitverse; пакеты — на npm, PyPI, NuGet, Maven Central (если заданы секреты GitHub).
+
+Без токена Gitverse релиз создаётся вручную: Релизы → «Создать релиз», тег `vX.Y.Z`, название «Берёста X.Y.Z», описание — вывод `bash tools/release/release_notes.sh X.Y.Z notes.md`, файлы — из релиза GitHub (`bash tools/release/github_assets.sh vX.Y.Z dist 0`; в Windows — с `PYTHON=python`). С токеном то же самое делает `GV_API_TOKEN=… bash tools/release/gitverse_release.sh vX.Y.Z notes.md dist/*`.

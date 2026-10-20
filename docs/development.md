@@ -17,8 +17,9 @@
 
 ```
 beresta/
-├── CMakeLists.txt  Makefile  README.md  README.en.md
-├── .github/workflows/            ci.yml (сборка и тесты), release.yml (пакеты и релиз)
+├── CMakeLists.txt  Makefile  README.md  README.en.md  CHANGELOG.md  CHANGELOG.en.md
+├── .github/workflows/            ci.yml (сборка и тесты), release.yml (пакеты, реестры и релиз GitHub)
+├── .gitverse/workflows/          ci.yml и release.yml для Gitverse (Linux, релиз без реестров)
 ├── cmake/                        определение платформы, обёртки, WebAssembly, самопроверка Java
 ├── include/                      только объявления
 │   ├── beresta.hpp               общий заголовок C++
@@ -50,6 +51,7 @@ beresta/
 │   └── wasm/                     пакет beresta-wasm: lib/ (бэкенд Wasm), tools/ (сборщик), test/, examples/
 ├── benchmarks/                   замеры против libxml2, Xerces, pugixml, tinyxml2, RapidXML; node/ — против JS-библиотек
 ├── examples/                     демо на C++ (src/) и на C (capi/)
+├── tools/                        release/ — описание и зеркалирование релизов (GitHub → Gitverse); unicode/ — генератор таблиц
 └── tests/                        модульные тесты C++ (собственный мини-фреймворк)
     ├── conformance/              прогонщик W3C XML Conformance Test Suite и отчёт
     ├── xsts/                     прогонщик W3C XML Schema Test Suite, список ограничений и отчёт

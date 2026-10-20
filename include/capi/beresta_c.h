@@ -115,7 +115,7 @@
 
 /* Версия библиотеки (та же, что в project() файла CMakeLists.txt) */
 /* The library version (the same as in project() of CMakeLists.txt) */
-#define BERESTA_VERSION_STRING "2.1.1"
+#define BERESTA_VERSION_STRING "2.1.2"
 
 /*
 ** ---- Видимость символов ------------------------------------------------------

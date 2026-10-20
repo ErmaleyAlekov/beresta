@@ -1,6 +1,6 @@
 {
   "name": "beresta-wasm",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Берёста в WebAssembly: DOM, XPath 1.0, XML Schema и DTD в браузере, Web Workers, Cloudflare Workers и Node.js. Без зависимостей.",
   "keywords": ["xml", "dom", "xpath", "xsd", "xml-schema", "dtd", "parser", "wasm", "webassembly", "browser", "workers"],
   "license": "MIT",

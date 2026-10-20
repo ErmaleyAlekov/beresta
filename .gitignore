@@ -15,6 +15,10 @@
 # Exception: the GitHub Actions workflows (CI and releases) must go into the repository
 !/.github/
 
+# Исключение: workflow Gitverse CI/CD (сборка и релиз на gitverse.ru)
+# Exception: the Gitverse CI/CD workflows (the build and the release on gitverse.ru)
+!/.gitverse/
+
 # ---- Результаты сборки Makefile / Makefile build results --------------------
 /obj/
 /dep/

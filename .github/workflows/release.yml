@@ -11,13 +11,15 @@
 #       dotnet add package Beresta, jar для Maven.
 #     Пользователю ничего не нужно компилировать.
 #  4. Публикация: GitHub Release всегда; npm, PyPI, NuGet и Maven Central —
-#     только если в настройках репозитория заданы их секреты (NPM_TOKEN,
+#     только на github.com и только если в настройках репозитория заданы их секреты (NPM_TOKEN,
 #     PYPI_API_TOKEN, NUGET_API_KEY, MAVEN_CENTRAL_*, MAVEN_GPG_*); без них
 #     шаг пропускается, а пакеты лежат в релизе. Каждый шаг пропускает уже
 #     опубликованное, поэтому упавший релиз можно просто перезапустить.
 #
 #  Linux собирается на Ubuntu 22.04: бинарники работают с glibc 2.35+
 #  (Ubuntu 22.04+, Debian 12+, RHEL/Astra/РЕД ОС с glibc того же уровня).
+#  Релиз на Gitverse делает .gitverse/workflows/release.yml: он забирает файлы
+#  этого релиза и в реестры ничего не публикует.
 # ============================================================================
 #  The Beresta release by the vX.Y.Z tag
 #
@@ -31,13 +33,15 @@
 #       dotnet add package Beresta, a jar for Maven.
 #     The user does not need to compile anything.
 #  4. Publishing: a GitHub Release always; npm, PyPI, NuGet and Maven Central
-#     only if the repository settings define their secrets (NPM_TOKEN,
+#     only on github.com and only if the repository settings define their secrets (NPM_TOKEN,
 #     PYPI_API_TOKEN, NUGET_API_KEY, MAVEN_CENTRAL_*, MAVEN_GPG_*); without them
 #     the step is skipped, and the packages lie in the release. Every step skips what is
 #     already published, so a failed release can simply be re-run.
 #
 #  Linux is built on Ubuntu 22.04: the binaries work with glibc 2.35+
 #  (Ubuntu 22.04+, Debian 12+, RHEL/Astra/RED OS with a glibc of the same level).
+#  The Gitverse release is made by .gitverse/workflows/release.yml: it takes the files
+#  of this release and publishes nothing to registries.
 # ============================================================================
 name: Release
 
@@ -128,7 +132,7 @@ jobs:
           sdk="beresta-${{ needs.version.outputs.version }}-${{ matrix.platform }}"
           mkdir -p "sdk/$sdk/lib"
           cp -R include "sdk/$sdk/"
-          cp -R LICENSE README.md README.en.md docs "sdk/$sdk/"
+          cp -R LICENSE README.md README.en.md CHANGELOG.md CHANGELOG.en.md docs "sdk/$sdk/"
           for file in bin/libberesta.a bin/libberesta.so bin/libberesta.dylib \
                       build/Release/beresta.dll build/Release/beresta.lib build/Release/beresta_static.lib; do
             if [ -f "$file" ]; then cp "$file" "sdk/$sdk/lib/"; fi
@@ -180,6 +184,11 @@ jobs:
       id-token: write
     env:
       VERSION: ${{ needs.version.outputs.version }}
+      # Реестры — только с github.com: на Gitverse (или другом сервере с этим же файлом)
+      # шаги публикации пропускаются, даже если там заданы те же секреты
+      # Registries — only from github.com: on Gitverse (or another server with this same file)
+      # the publishing steps are skipped, even if the same secrets are set there
+      ON_GITHUB: ${{ github.server_url == 'https://github.com' }}
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
@@ -248,18 +257,21 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         # Релиз уже есть (перезапуск) — файлы заменяются / The release exists (a re-run) — the files are replaced
+        # Описание — раздел версии из CHANGELOG.md и CHANGELOG.en.md, за ним — список изменений GitHub
+        # The notes — the version section from CHANGELOG.md and CHANGELOG.en.md, then the GitHub list of changes
         run: |
           if gh release view "${GITHUB_REF_NAME}" > /dev/null 2>&1; then
             gh release upload "${GITHUB_REF_NAME}" dist/* --clobber
           else
-            gh release create "${GITHUB_REF_NAME}" dist/* --title "Берёста ${VERSION}" --generate-notes
+            bash tools/release/release_notes.sh "${VERSION}" "${RUNNER_TEMP}/notes.md"
+            gh release create "${GITHUB_REF_NAME}" dist/* --title "Берёста ${VERSION}" --notes-file "${RUNNER_TEMP}/notes.md" --generate-notes
           fi
       # Версию, уже лежащую в npm, второй раз не публикуем. Путь начинается с ./: иначе npm
       # принимает dist/имя.tgz за ссылку на GitHub-репозиторий «владелец/имя» и идёт в git
       # A version already in npm is not published again. The path starts with ./: otherwise npm
       # takes dist/name.tgz for a GitHub repository reference "owner/name" and goes to git
       - name: npm publish
-        if: github.ref_type == 'tag' && env.NPM_TOKEN != ''
+        if: github.ref_type == 'tag' && env.ON_GITHUB == 'true' && env.NPM_TOKEN != ''
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
@@ -271,17 +283,17 @@ jobs:
             fi
           done
       - name: PyPI
-        if: github.ref_type == 'tag' && env.PYPI_API_TOKEN != ''
+        if: github.ref_type == 'tag' && env.ON_GITHUB == 'true' && env.PYPI_API_TOKEN != ''
         run: |
           python -m pip install twine
           python -m twine upload --skip-existing -u __token__ -p "$PYPI_API_TOKEN" dist/*.whl
       - name: NuGet
-        if: github.ref_type == 'tag' && env.NUGET_API_KEY != ''
+        if: github.ref_type == 'tag' && env.ON_GITHUB == 'true' && env.NUGET_API_KEY != ''
         run: dotnet nuget push "dist/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
       # Тот же jar с бинарниками всех платформ, плюс исходники, javadoc и подписи GPG
       # The same jar with the binaries of all platforms, plus sources, javadoc and GPG signatures
       - name: Maven Central
-        if: github.ref_type == 'tag' && env.MAVEN_CENTRAL_USERNAME != ''
+        if: github.ref_type == 'tag' && env.ON_GITHUB == 'true' && env.MAVEN_CENTRAL_USERNAME != ''
         # pom версии уже в Central — публикация была / The version pom is already in Central — it was published
         run: |
           if curl -sfI "https://repo1.maven.org/maven2/io/github/ermaleyalekov/beresta/${VERSION}/beresta-${VERSION}.pom" > /dev/null; then

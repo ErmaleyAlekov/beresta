@@ -169,11 +169,11 @@ The Maven dependency (the Java package stays `org.beresta`):
 <dependency>
     <groupId>io.github.ermaleyalekov</groupId>
     <artifactId>beresta</artifactId>
-    <version>2.1.1</version>
+    <version>2.1.2</version>
 </dependency>
 ```
 
-Gradle: `implementation("io.github.ermaleyalekov:beresta:2.1.1")`.
+Gradle: `implementation("io.github.ermaleyalekov:beresta:2.1.2")`.
 
 ### CI/CD in GitHub Actions
 
@@ -190,11 +190,44 @@ Publishing to the registries is enabled by repository secrets (Settings → Secr
 | `MAVEN_CENTRAL_USERNAME`, `MAVEN_CENTRAL_PASSWORD` | Maven Central (`io.github.ermaleyalekov:beresta`): a Central Portal user token |
 | `MAVEN_GPG_PRIVATE_KEY`, `MAVEN_GPG_PASSPHRASE` | signing the Maven artifacts: a GPG private key (ASCII armor) and its passphrase |
 
-Releasing a version: bump the version in `CMakeLists.txt`, `include/capi/beresta_c.h`, `bindings/*/package.json`, `bindings/python/pyproject.toml`, `bindings/java/pom.xml` and `bindings/csharp/Beresta/Beresta.csproj`, then:
+### CI/CD on Gitverse
+
+The repository is mirrored on [Gitverse](https://gitverse.ru/ermaleyalekov/beresta). Gitverse reads its workflows from `.gitverse/workflows` (in the repository settings: CI/CD → "Use the configuration from .gitverse/workflows"); GitHub does not see this folder. Gitverse has one cloud runner — `ubuntu-latest` (Linux x86_64, 30 minutes per job), so:
+
+- **`.gitverse/workflows/ci.yml`** — on every push and merge request: `make` and `make test` on Linux x86_64. The full platform matrix is checked on GitHub.
+- **`.gitverse/workflows/release.yml`** — on a `vX.Y.Z` tag: the build and tests on Linux x86_64, then waiting for the release of the same tag on GitHub (up to 20 minutes), downloading all its files (`tools/release/github_assets.sh`) and creating the Gitverse release through the public API (`tools/release/gitverse_release.sh`). If the GitHub release is not ready, only the Linux x86_64 SDK is attached; a manual re-run (Actions → Release, the `tag` parameter) replaces the files. **This workflow publishes nothing to registries.**
+
+The Gitverse secret (Repository settings → Secrets and variables): `GV_API_TOKEN` — a token from gitverse.ru/settings/tokens with the "Repositories → Write" right. The `GITVERSE_` prefix is forbidden in Gitverse secret names.
+
+### Releasing a version
+
+Packages in the registries (npm, PyPI, NuGet, Maven Central) are published **only from GitHub**: the publishing steps in `.github/workflows/release.yml` additionally check `github.server_url == 'https://github.com'`. A release with files comes out on both platforms; the notes of both are the version section from [CHANGELOG.md](../CHANGELOG.md) and [CHANGELOG.en.md](../CHANGELOG.en.md) (`tools/release/release_notes.sh`).
+
+Remotes: `origin` — GitHub (`https://github.com/ErmaleyAlekov/beresta.git`), `gitverse` — Gitverse (`git@gitverse.ru:ermaleyalekov/beresta.git`). Adding the second one:
 
 ```bash
-git tag v2.1.1
+git remote add gitverse git@gitverse.ru:ermaleyalekov/beresta.git
+```
+
+The order:
+
+1. Bump the version in `CMakeLists.txt`, `include/capi/beresta_c.h`, `bindings/*/package.json`, `bindings/python/pyproject.toml`, `bindings/python/tests/test_xpath_schema.py`, `bindings/java/pom.xml`, `bindings/csharp/Beresta/Beresta.csproj` and in the dependency examples (`docs/building*.md`, `docs/bindings*.md`, `bindings/java/README.md`); add the version section to both `CHANGELOG` files.
+2. `make test` is green; commit and push `main` to both remotes, wait for a green CI on both.
+3. The tag goes to GitHub first; the packages and the release are built there (about 20–30 minutes):
+
+```bash
+git tag v2.1.2
 ```
 ```bash
-git push origin v2.1.1
+git push origin main v2.1.2
 ```
+
+4. When the GitHub release is ready — the same tag to Gitverse; its workflow takes the files of the GitHub release:
+
+```bash
+git push gitverse main v2.1.2
+```
+
+5. Checking: [GitHub releases](https://github.com/ErmaleyAlekov/beresta/releases) and [Actions](https://github.com/ErmaleyAlekov/beresta/actions), [Gitverse releases](https://gitverse.ru/ermaleyalekov/beresta/releases) and the CI/CD section of the repository on Gitverse; the packages — on npm, PyPI, NuGet, Maven Central (if the GitHub secrets are set).
+
+Without a Gitverse token the release is created by hand: Releases → "Create release", the tag `vX.Y.Z`, the title "Берёста X.Y.Z", the notes — the output of `bash tools/release/release_notes.sh X.Y.Z notes.md`, the files — from the GitHub release (`bash tools/release/github_assets.sh vX.Y.Z dist 0`; on Windows — with `PYTHON=python`). With a token `GV_API_TOKEN=… bash tools/release/gitverse_release.sh vX.Y.Z notes.md dist/*` does the same.
