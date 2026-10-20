@@ -18,6 +18,7 @@
 ```
 beresta/
 ├── CMakeLists.txt  Makefile  README.md  README.en.md  CHANGELOG.md  CHANGELOG.en.md
+│   CONTRIBUTING.md  CODE_OF_CONDUCT.md  SECURITY.md (and *.en.md)
 ├── .github/workflows/            ci.yml (build and tests), release.yml (packages, registries and the GitHub release)
 ├── .gitverse/workflows/          ci.yml and release.yml for Gitverse (Linux, a release without registries)
 ├── cmake/                        platform detection, wrappers, WebAssembly, the Java self-test

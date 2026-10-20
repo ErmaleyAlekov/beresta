@@ -26,6 +26,8 @@ std::cout << doc.toString();                                      // <greeting l
 - [The C++ guide and examples](docs/guide.en.md)
 - [The C interface and the wrappers for other languages](docs/bindings.en.md)
 - [Project structure, tests and extending](docs/development.en.md)
+- [Changelog](CHANGELOG.en.md)
+- [Contributing](CONTRIBUTING.en.md) · [Code of conduct](CODE_OF_CONDUCT.en.md) · [Security policy](SECURITY.en.md)
 
 ---
 
