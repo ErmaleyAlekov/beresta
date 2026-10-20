@@ -56,6 +56,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ env.TAG }}
+      # Скрипты релиза — из ветки запуска (при ручном запуске это main), а не из тега:
+      # исправления скриптов работают и для уже выпущенного тега
+      # The release scripts come from the run branch (main for a manual run), not from the tag:
+      # script fixes work for an already released tag too
+      - uses: actions/checkout@v4
+        with:
+          path: .release-tools
       # Без токена релиз не создать: падаем сразу, а не после сборки
       # A release cannot be created without the token: fail at once, not after the build
       - name: Секрет GV_API_TOKEN / The GV_API_TOKEN secret
@@ -98,9 +105,9 @@ jobs:
         shell: bash
         run: |
           files=mirror
-          if ! bash tools/release/github_assets.sh "$TAG" mirror 15; then
+          if ! bash .release-tools/tools/release/github_assets.sh "$TAG" mirror 15; then
             echo "Прикрепляю только SDK Linux x86_64 / Attaching only the Linux x86_64 SDK"
             files=fallback
           fi
-          bash tools/release/release_notes.sh "${TAG#v}" notes.md
-          bash tools/release/gitverse_release.sh "$TAG" notes.md "$files"/*
+          bash .release-tools/tools/release/release_notes.sh "${TAG#v}" notes.md
+          bash .release-tools/tools/release/gitverse_release.sh "$TAG" notes.md "$files"/*
