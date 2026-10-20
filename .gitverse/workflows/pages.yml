@@ -27,8 +27,10 @@ jobs:
       - name: Check site
         run: test -f site/index.html && test -f site/docs/operation.pdf
 
+      # Экшены — как в официальном шаблоне Gitverse (actions/starter-workflows, pages/html_js.yaml)
+      # The actions are as in the official Gitverse template (actions/starter-workflows, pages/html_js.yaml)
       - name: Upload pages artifact
-        uses: gitverse/upload-pages-artifact@v1.0.0
+        uses: actions/upload-pages-artifact@v1
         with:
           path: site
 
@@ -36,5 +38,17 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      # Go нужен экшену deploy-pages / deploy-pages needs Go
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '>=1.23'
+
       - name: Deploy
-        uses: gitverse/deploy-pages@v1.0.0
+        id: deployment
+        uses: actions/deploy-pages@v1
+        with:
+          artifact_name: gitverse-pages
+
+      - name: Page URL
+        run: echo "page_url = ${{ steps.deployment.outputs.page_url }}"
