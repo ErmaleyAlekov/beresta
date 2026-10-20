@@ -9,13 +9,15 @@ namespace beresta::xsd::detail
     ** Проверка элемента с объявлением — в том же порядке, что у обхода
     ** дерева: область ключей, xsi:type (ошибка — дальше не проверяется),
     ** abstract, xsi:nil (принятый — содержимое не проверяется), затем
-    ** простой или составной тип. xs:anyType допускает что угодно. Типы
+    ** простой или составной тип. xs:anyType проверяется как составной тип
+    ** Schema::anyTypeDefinition (любые дети и атрибуты, lax). Типы
     ** атрибутов запоминаются для ключей и утверждений (аналог PSVI).
     **
     ** Checking an element with a declaration — in the same order as the tree
     ** traversal: the key scope, xsi:type (an error — no further checks),
     ** abstract, xsi:nil (an accepted one — the content is not checked), then
-    ** a simple or a complex type. xs:anyType allows anything. The attribute
+    ** a simple or a complex type. xs:anyType is validated as the complex type
+    ** Schema::anyTypeDefinition (any children and attributes, lax). The attribute
     ** types are remembered for keys and assertions (an analog of the PSVI).
     */
     void StreamValidator::beginValidation(const SaxElement& element, const ElementDecl& declaration)
@@ -41,6 +43,8 @@ namespace beresta::xsd::detail
             beginSimple(element, *type.simple);
         else if (type.complex != nullptr)
             beginComplex(element, *type.complex);
+        else
+            beginComplex(element, Schema::anyTypeDefinition());
     }
 
     /*
@@ -86,17 +90,29 @@ namespace beresta::xsd::detail
         return false;
     }
 
-    // xsi:nil="true" допустим только у nillable-элементов; пустоту содержимого проверит закрытие
-    // xsi:nil="true" is allowed only for nillable elements; the emptiness of the content is checked on closing
+    /*
+    ** Атрибут xsi:nil (с любым значением, даже "false") допустим только у
+    ** nillable-элементов (cvc-elt.3.1); при xsi:nil="true" у объявления не
+    ** должно быть fixed (cvc-elt.3.2.2). Пустоту содержимого проверит закрытие.
+    **
+    ** The xsi:nil attribute (with any value, even "false") is allowed only for
+    ** nillable elements (cvc-elt.3.1); with xsi:nil="true" the declaration must not
+    ** have fixed (cvc-elt.3.2.2). The emptiness of the content is checked on closing.
+    */
     bool StreamValidator::isNil(const XsiValues& xsi, const ElementDecl& declaration)
     {
-        if (!xsi.hasNil || (xsi.nil != "true" && xsi.nil != "1"))
+        if (!xsi.hasNil)
             return false;
         if (!declaration.nillable)
         {
             report(_depth - 1, CheckPhase::NIL, i18n::format(i18n::Message::XSD_NOT_NILLABLE));
             return false;
         }
+        if (xsi.nil != "true" && xsi.nil != "1")
+            return false;
+        if (declaration.fixedValue.has_value())
+            report(_depth - 1, CheckPhase::NIL, i18n::format(i18n::Message::XSD_NIL_WITH_FIXED,
+                {declaration.fixedValue.value()}));
         return true;
     }
 
@@ -119,6 +135,8 @@ namespace beresta::xsd::detail
             beginSimple(element, *type.simple);
         else if (type.complex != nullptr)
             validateAttributes(element, *type.complex);
+        else
+            validateAttributes(element, Schema::anyTypeDefinition());
         frame.mode = FrameMode::NIL;
         frame.collectText = false;
     }
@@ -132,6 +150,8 @@ namespace beresta::xsd::detail
         frame.mode = FrameMode::COMPLEX;
         frame.complex = &type;
         validateAttributes(element, type);
+        if (type.content == ContentType::MIXED_CONTENT && frame.declaration != nullptr)
+            frame.collectText = frame.declaration->fixedValue.has_value();
         if (type.content == ContentType::SIMPLE_CONTENT)
         {
             frame.valueType = type.simpleContent;

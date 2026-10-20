@@ -106,3 +106,6 @@ desktop.ini
 
 # Сборка WebAssembly (make wasm) / The WebAssembly build (make wasm)
 /bindings/wasm/dist/
+
+# ---- Контекст для сессий Claude (локальный) / Context for Claude sessions (local)
+/project_context.md

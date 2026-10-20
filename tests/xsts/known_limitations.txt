@@ -321,23 +321,6 @@ redefine-restrict MS-Schema2006-07-15/schR5
 redefine-restrict MS-AttributeGroup2006-07-15/attgZ002
 redefine-restrict MS-AttributeGroup2006-07-15/attgZ003
 
-# ---- duration-order (13) ----
-# У duration нет порядка для фасетов-границ (min/maxInclusive, min/maxExclusive).
-# duration has no order for the bound facets (min/maxInclusive, min/maxExclusive).
-duration-order MS-DataTypes2006-07-15/duration_maxExclusive001_1111
-duration-order MS-DataTypes2006-07-15/duration_maxExclusive001_88
-duration-order MS-DataTypes2006-07-15/duration_maxExclusive002_1112
-duration-order MS-DataTypes2006-07-15/duration_maxInclusive001_85
-duration-order MS-DataTypes2006-07-15/duration_maxInclusive002_1109
-duration-order MS-DataTypes2006-07-15/duration_maxInclusive003_87
-duration-order MS-DataTypes2006-07-15/duration_minExclusive001_1119
-duration-order MS-DataTypes2006-07-15/duration_minExclusive001_94
-duration-order MS-DataTypes2006-07-15/duration_minExclusive002_1120
-duration-order MS-DataTypes2006-07-15/duration_minExclusive003_96
-duration-order MS-DataTypes2006-07-15/duration_minInclusive001_90
-duration-order MS-DataTypes2006-07-15/duration_minInclusive002_1115
-duration-order MS-DataTypes2006-07-15/duration_minInclusive003_92
-
 # ---- unresolved-location (13) ----
 # Недоступный schemaLocation в include / import / redefine — ошибка загрузки (спецификация разрешает пропустить его).
 # An unavailable schemaLocation in include / import / redefine is a loading error (the specification allows skipping it).
@@ -374,7 +357,7 @@ redefine-cycle MS-Schema2006-07-15/schU5/schU5.i
 # A type derived from a complex type inside the model of that same type is taken as circular derivation.
 nested-derivation MS-Particles2006-07-15/particlesEb041
 
-# ---- disputed (30) ----
+# ---- disputed (42) ----
 # Ожидание набора расходится со спецификацией XSD 1.0 2-й редакции или зависит от необязательного поведения процессора (разбор — в README.md).
 # The expectation of the suite disagrees with the XSD 1.0 2nd edition specification or depends on optional processor behavior (analysis in README.md).
 disputed MS-SimpleType2006-07-15/ste110
@@ -411,3 +394,23 @@ disputed MS-Regex2006-07-15/reDG7/reDG7.v
 disputed MS-Regex2006-07-15/reZ003v/reZ003v.v
 disputed MS-SimpleType2006-07-15/stE096/stE096.v
 disputed SType/st_facets00119m/ST_facets00119m1_p
+# Схема объявлена валидной (queried), но у типа ID есть fixed (e-props-correct.4, a-props-correct.3): по самой схеме экземпляр валиден.
+# The schema is declared valid (queried), but an ID type has fixed (e-props-correct.4, a-props-correct.3): by the schema itself the instance is valid.
+disputed MS-Additional2006-07-15/addB078/addB078.i
+disputed MS-DataTypes2006-07-15/dtZ107447_a_2245/dtZ107447_a_2245.i
+# Ограничение ослабляет processContents шаблона (strict -> lax), схема объявлена валидной (queried, Bugzilla 4070): по ней экземпляр валиден.
+# The restriction weakens the wildcard's processContents (strict -> lax), the schema is declared valid (queried, Bugzilla 4070): by it the instance is valid.
+disputed MS-Particles2006-07-15/particlesOb001/particlesOb001.i
+disputed MS-Particles2006-07-15/particlesOb002/particlesOb002.i
+disputed MS-Particles2006-07-15/particlesOb004/particlesOb004.i
+disputed MS-Particles2006-07-15/particlesOb008/particlesOb008.i
+disputed MS-Particles2006-07-15/particlesOb009/particlesOb009.i
+disputed MS-Particles2006-07-15/particlesOb013/particlesOb013.i
+disputed MS-Particles2006-07-15/particlesOb018/particlesOb018.i
+# Экземпляр соответствует и производному типу, и базовому (RecurseAsIfGroup, «правило неоднозначно»).
+# The instance matches both the derived type and the base type (RecurseAsIfGroup, "the rule is ambiguous").
+disputed MS-Particles2006-07-15/particlesZ001/particlesZ001.i
+# Ожидание — особенность System.Xml (maxOccurs > 4096 проверяется как xs:any), схема queried (Bugzilla 4075).
+# The expectation is a System.Xml peculiarity (maxOccurs > 4096 is validated as xs:any), the schema is queried (Bugzilla 4075).
+disputed MS-Particles2006-07-15/particlesZ036_b1/particlesZ036_b1.i
+disputed MS-Particles2006-07-15/particlesZ036_b2/particlesZ036_b2.i

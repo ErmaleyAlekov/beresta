@@ -26,4 +26,15 @@ namespace beresta::xsd::detail
         }
         return result;
     }
+
+    // Тот же поиск, что у lookup, но строка копируется: ключ переживёт закрытие элемента
+    // The same lookup as in lookup, but the string is copied: the key outlives closing the element
+    std::optional<std::string> PrefixBindings::namespaceOf(std::string_view prefix) const
+    {
+        std::optional<std::string_view> found = lookup(prefix);
+
+        if (!found.has_value())
+            return std::nullopt;
+        return std::string(found.value());
+    }
 }

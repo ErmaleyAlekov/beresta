@@ -26,13 +26,16 @@ namespace beresta::xsd::detail
     /*
     ** Каждый атрибут экземпляра должен быть объявлен в типе (или допущен
     ** xs:anyAttribute). Объявления xmlns и атрибуты xsi:* — служебные.
+    ** wildIds — сколько атрибутов из шаблона оказались типа ID (cvc-complex-type.5).
     **
     ** Every instance attribute must be declared in the type (or admitted by
     ** xs:anyAttribute). xmlns declarations and xsi:* attributes are service ones.
+    ** wildIds — how many attributes from the wildcard turned out to be of the ID type (cvc-complex-type.5).
     */
     void StreamValidator::validateAttributes(const SaxElement& element, const ComplexType& type)
     {
         std::uint64_t seen = 0;
+        std::size_t wildIds = 0;
         bool declares = _frames[_depth - 1].declaresNamespaces;
 
         for (std::size_t position = 0; position < element.attributes.size(); ++position)
@@ -46,15 +49,15 @@ namespace beresta::xsd::detail
                 use = &type.attributes[index];
             if (use != nullptr && index < USE_MASK_BITS)
                 seen |= std::uint64_t(1) << index;
-            if (use == nullptr && !type.anyAttribute)
-                report(_depth - 1, CheckPhase::ATTRIBUTES, i18n::format(i18n::Message::XSD_ATTRIBUTE_UNDECLARED,
-                    {attribute.name}));
-            else if (use != nullptr && use->prohibited)
+            if (use == nullptr)
+                wildIds += checkWildcardAttribute(type, attribute, position);
+            else if (use->prohibited)
                 report(_depth - 1, CheckPhase::ATTRIBUTES, i18n::format(i18n::Message::XSD_ATTRIBUTE_PROHIBITED,
                     {attribute.name}));
-            else if (use != nullptr)
+            else
                 checkAttribute(*use, attribute, position);
         }
+        checkWildcardIds(type, wildIds);
         checkRequiredAttributes(element, type, seen);
     }
 
@@ -80,11 +83,13 @@ namespace beresta::xsd::detail
     }
 
     /*
-    ** Обязательные атрибуты (use="required"). Встреченные объявления
+    ** Отсутствующие атрибуты: обязательные (use="required") и со значением
+    ** по умолчанию (absentAttribute). Встреченные объявления
     ** отмечены битами seen; объявления дальше 64-го (такое бывает разве что
     ** в сгенерированных схемах) ищутся перебором атрибутов.
     **
-    ** Required attributes (use="required"). The met declarations
+    ** Absent attributes: required ones (use="required") and ones with a default
+    ** value (absentAttribute). The met declarations
     ** are marked with the bits of seen; declarations past the 64th (this happens
     ** perhaps only in generated schemas) are searched by a loop over the attributes.
     */
@@ -96,7 +101,8 @@ namespace beresta::xsd::detail
             const AttributeUse& use = type.attributes[index];
             bool present = false;
 
-            if (!use.required)
+            bool valued = use.defaultValue.has_value() || use.fixedValue.has_value();
+            if (use.prohibited || (!use.required && !valued))
                 continue;
             if (index < USE_MASK_BITS)
                 present = ((seen >> index) & 1u) != 0;
@@ -107,8 +113,7 @@ namespace beresta::xsd::detail
                     present = true;
             }
             if (!present)
-                report(_depth - 1, CheckPhase::ATTRIBUTES, i18n::format(i18n::Message::ATTRIBUTE_REQUIRED_MISSING,
-                    {use.name}));
+                absentAttribute(use);
         }
     }
 

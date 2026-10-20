@@ -96,6 +96,8 @@ namespace beresta::xsd::detail
             return utils::compareDecimalText(left, right);
         if (primitive == Primitive::FLOAT || primitive == Primitive::DOUBLE)
             return compareLongDoubles(parseFloatValue(left), parseFloatValue(right));
+        if (primitive == Primitive::DURATION)
+            return compareDurations(left, right);
         DateTimeValue a;
         DateTimeValue b;
         if (!parseDateTimeValue(primitive, left, a) || !parseDateTimeValue(primitive, right, b))

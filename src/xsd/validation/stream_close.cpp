@@ -61,6 +61,8 @@ namespace beresta::xsd::detail
         }
         if (type.content != ContentType::MIXED_CONTENT && frame.significantText)
             report(_depth - 1, CheckPhase::VALUE, i18n::format(i18n::Message::XSD_TEXT_NOT_ALLOWED));
+        if (type.content == ContentType::MIXED_CONTENT && frame.collectText)
+            checkMixedFixed(frame);
         if (type.hasParticle && !frame.modelFailed)
             finishModel(frame);
         return nullptr;

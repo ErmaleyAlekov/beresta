@@ -5,6 +5,7 @@
 #include "core/source_location.hpp"
 #include "sax/sax_types.hpp"
 #include "xsd/internal/diagnostic_log.hpp"
+#include "xsd/internal/identity_values.hpp"
 #include "xsd/schema.hpp"
 
 #include <cstddef>
@@ -17,10 +18,20 @@ namespace beresta::xsd::detail
     ** Начало элемента для ограничений идентичности. attributeTypes —
     ** типы атрибутов по их номерам (аналог PSVI): nullptr, если атрибут не
     ** проверялся или его значение ошибочно (тогда ключ сравнивается строкой).
+    ** untypedAttributes — номера атрибутов, допущенных шаблоном без
+    ** проверки (skip, lax без объявления): типа у них нет, полем ключа они
+    ** быть не могут. defaultAttributes — объявления отсутствующих атрибутов
+    ** со значением default / fixed: в PSVI они есть, и поля их видят.
+    ** namespaces — префиксы элемента для значений QName.
     **
     ** The start of an element for identity constraints. attributeTypes are
     ** the attribute types by their numbers (an analog of the PSVI): nullptr if the attribute was not
     ** validated or its value is invalid (then the key is compared as a string).
+    ** untypedAttributes are the numbers of attributes admitted by a wildcard without
+    ** validation (skip, lax without a declaration): they have no type and cannot
+    ** be a key field. defaultAttributes are the declarations of absent attributes
+    ** with a default / fixed value: they are in the PSVI, and fields see them.
+    ** namespaces are the prefixes of the element for QName values.
     */
     struct IdentityStart
     {
@@ -30,10 +41,20 @@ namespace beresta::xsd::detail
         const EventPosition& position;
         bool validated;
         const std::vector<const SimpleType*>& attributeTypes;
+        const std::vector<std::size_t>& untypedAttributes;
+        const std::vector<const AttributeUse*>& defaultAttributes;
+        const NamespaceLookup& namespaces;
     };
 
-    // Конец элемента: тип и текст простого значения (если оно было проверено успешно)
-    // The end of an element: the type and the text of the simple value (if it was validated successfully)
+    /*
+    ** Конец элемента: тип и текст простого значения (если оно было проверено
+    ** успешно). complexContent — элемент проверен по составному типу без
+    ** простого содержимого (даже пустой): полем ключа он быть не может.
+    **
+    ** The end of an element: the type and the text of the simple value (if it was validated
+    ** successfully). complexContent — the element was validated against a complex type without
+    ** simple content (even an empty one): it cannot be a key field.
+    */
     struct IdentityEnd
     {
         std::size_t level;
@@ -41,6 +62,8 @@ namespace beresta::xsd::detail
         const SimpleType* valueType;
         std::string_view text;
         bool hasChildElement;
+        bool complexContent;
+        const NamespaceLookup& namespaces;
     };
 
     /*

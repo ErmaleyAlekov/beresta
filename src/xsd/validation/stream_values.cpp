@@ -78,4 +78,26 @@ namespace beresta::xsd::detail
         }
         _references.clear();
     }
+
+    /*
+    ** fixed у смешанного содержимого (cvc-elt.5.2.2): детей-элементов быть не
+    ** должно, а непустой текст обязан совпасть с фиксированным значением как
+    ** строка (тип у смешанного содержимого не задан). Пустой элемент получает
+    ** fixed как значение по умолчанию и ошибкой не является (cvc-elt.5.1).
+    **
+    ** fixed of mixed content (cvc-elt.5.2.2): there must be no child
+    ** elements, and a non-empty text must match the fixed value as a
+    ** string (mixed content has no type). An empty element gets
+    ** fixed as the default value and is not an error (cvc-elt.5.1).
+    */
+    void StreamValidator::checkMixedFixed(const ElementFrame& frame)
+    {
+        if (frame.declaration == nullptr || !frame.declaration->fixedValue.has_value())
+            return;
+        const std::string& fixed = frame.declaration->fixedValue.value();
+        if (frame.hasChildElement)
+            report(_depth - 1, CheckPhase::VALUE, i18n::format(i18n::Message::XSD_FIXED_WITH_CHILDREN, {fixed}));
+        else if (!_text.empty() && _text != fixed)
+            report(_depth - 1, CheckPhase::VALUE, i18n::format(i18n::Message::XSD_ELEMENT_FIXED, {fixed}));
+    }
 }

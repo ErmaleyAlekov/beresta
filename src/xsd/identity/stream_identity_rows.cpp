@@ -6,13 +6,17 @@
 namespace beresta::xsd::detail
 {
     /*
-    ** Закрылся элемент, выбранный полем: его значение — накопленный текст
-    ** и тип корректного простого значения. Элемент с детьми-элементами
-    ** простым не является — такое поле ошибочно.
+    ** Закрылся элемент, выбранный полем: его значение — накопленный текст,
+    ** канонический вид — по типу корректного простого значения (префиксы
+    ** QName элемента ещё действуют). Элемент с детьми-элементами или
+    ** составного типа без простого содержимого простым не является — такое
+    ** поле ошибочно (cvc-identity-constraint.3).
     **
-    ** An element selected by a field has closed: its value is the accumulated text
-    ** and the type of a valid simple value. An element with child elements
-    ** is not simple — such a field is erroneous.
+    ** An element selected by a field has closed: its value is the accumulated text,
+    ** the canonical form — by the type of a valid simple value (the QName prefixes
+    ** of the element are still in effect). An element with child elements or
+    ** of a complex type without simple content is not simple — such a
+    ** field is erroneous (cvc-identity-constraint.3).
     */
     void StreamIdentity::captureElement(const IdentityEnd& end)
     {
@@ -22,9 +26,12 @@ namespace beresta::xsd::detail
             {
                 if (!field.fromElement || field.elementOrdinal != end.ordinal)
                     continue;
-                field.complex = end.hasChildElement;
+                const SimpleType* type = end.valueType;
+                if (type == nullptr)
+                    type = builtinType("string");
+                field.complex = end.hasChildElement || end.complexContent;
                 field.value.assign(end.text.data(), end.text.size());
-                field.type = end.valueType;
+                field.canonical = identityValue(*type, end.text, end.namespaces);
             }
         }
     }
@@ -53,13 +60,13 @@ namespace beresta::xsd::detail
     }
 
     /*
-    ** Значение одного поля: не больше одного узла, и это атрибут или
-    ** простой элемент. Значение приводится к каноническому виду своего
-    ** типа ("1.0" и "1" для decimal — один ключ); тип неизвестен — строка.
+    ** Значение одного поля: не больше одного узла, и это атрибут с типом
+    ** или простой элемент. Канонический вид значения посчитан при захвате
+    ** ("1.0" и "1" для decimal — один ключ).
     **
-    ** The value of one field: at most one node, and it is an attribute or
-    ** a simple element. The value is converted to the canonical form of its
-    ** type ("1.0" and "1" for decimal are one key); the type is unknown — a string.
+    ** The value of one field: at most one node, and it is an attribute with a type
+    ** or a simple element. The canonical form of the value was computed on capture
+    ** ("1.0" and "1" for decimal are one key).
     */
     bool StreamIdentity::fieldRowValue(const ActiveTarget& target, std::size_t index, StreamRow& row)
     {
@@ -78,10 +85,12 @@ namespace beresta::xsd::detail
             reportTarget(target, 0, i18n::format(i18n::Message::KEY_FIELD_COMPLEX, {constraint.name}));
             return false;
         }
-        const SimpleType* type = field.type;
-        if (type == nullptr)
-            type = builtinType("string");
-        row.canonical.push_back(canonicalValue(*type, field.value));
+        if (!field.fromElement && field.untyped)
+        {
+            reportTarget(target, 0, i18n::format(i18n::Message::KEY_FIELD_UNTYPED, {constraint.name}));
+            return false;
+        }
+        row.canonical.push_back(field.canonical);
         row.shown.push_back(normalizeWhiteSpace(field.value, WhiteSpace::COLLAPSE));
         return true;
     }

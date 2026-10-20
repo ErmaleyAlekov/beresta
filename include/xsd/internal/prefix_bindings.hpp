@@ -2,6 +2,7 @@
 #define XSD_PREFIX_BINDINGS_HPP
 
 #include "sax/sax_types.hpp"
+#include "xsd/internal/identity_values.hpp"
 #include "xsd/prefix_resolver.hpp"
 
 #include <cstddef>
@@ -35,7 +36,7 @@ namespace beresta::xsd::detail
     ** in a tree; xmlns:p="" cancels a declaration. Declaration objects
     ** are reused, and an element without xmlns costs one mark record.
     */
-    class PrefixBindings : public PrefixResolver
+    class PrefixBindings : public PrefixResolver, public NamespaceLookup
     {
     public:
         PrefixBindings();
@@ -57,6 +58,10 @@ namespace beresta::xsd::detail
         // Действующие объявления (ближайшее для каждого префикса; prefix_bindings_scope.cpp)
         // The declarations in effect (the nearest one for each prefix; prefix_bindings_scope.cpp)
         std::vector<PrefixBinding> inScope() const;
+
+        // URI префикса для ключей QName (копия lookup; prefix_bindings_scope.cpp)
+        // The URI of a prefix for QName keys (a copy of lookup; prefix_bindings_scope.cpp)
+        std::optional<std::string> namespaceOf(std::string_view prefix) const override;
 
     private:
         std::vector<PrefixBinding> _bindings;

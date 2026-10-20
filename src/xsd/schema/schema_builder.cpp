@@ -1,6 +1,8 @@
 #include "xsd/internal/schema_builder.hpp"
 #include "i18n/i18n.hpp"
 
+#include <utility>
+
 namespace beresta::xsd::detail
 {
     // Строитель заполняет переданную схему
@@ -85,8 +87,27 @@ namespace beresta::xsd::detail
             globalElement(key);
         for (const QualifiedKey& key : types)
             resolveType(key);
+        buildGlobalAttributes();
         buildNamedGroups();
         buildSubstitutionGroups();
         resolveKeyReferences();
+    }
+
+    /*
+    ** Глобальные объявления атрибутов (тип, default, fixed) копируются в
+    ** схему: по ним xs:anyAttribute с lax / strict проверяет атрибуты,
+    ** не объявленные в типе (cvc-wildcard, cvc-assess-attr).
+    **
+    ** Global attribute declarations (the type, default, fixed) are copied into
+    ** the schema: by them xs:anyAttribute with lax / strict validates attributes
+    ** not declared in the type (cvc-wildcard, cvc-assess-attr).
+    */
+    void SchemaBuilder::buildGlobalAttributes()
+    {
+        for (const auto& entry : _definitions["attribute"])
+        {
+            AttributeUse use = buildAttributeUse(*entry.second.element, *entry.second.source, true);
+            _schema._globalAttributes[entry.first] = std::move(use);
+        }
     }
 }

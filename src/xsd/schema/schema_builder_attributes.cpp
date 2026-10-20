@@ -8,14 +8,21 @@ namespace beresta::xsd::detail
 {
     /*
     ** Атрибуты типа: xs:attribute, ссылки xs:attributeGroup (раскрываются
-    ** рекурсивно) и xs:anyAttribute (допускает любые другие атрибуты).
+    ** рекурсивно) и xs:anyAttribute. Возвращается «полный» локальный шаблон
+    ** атрибутов (3.4.2): собственный xs:anyAttribute, пересечённый с шаблонами
+    ** групп; без собственного — пересечение шаблонов групп; nullopt — шаблона нет.
     **
     ** The attributes of a type: xs:attribute, xs:attributeGroup references (expanded
-    ** recursively) and xs:anyAttribute (allows any other attributes).
+    ** recursively) and xs:anyAttribute. The "complete" local attribute wildcard is
+    ** returned (3.4.2): the own xs:anyAttribute intersected with the wildcards
+    ** of the groups; without an own one — the intersection of the group wildcards; nullopt — no wildcard.
     */
-    void SchemaBuilder::buildAttributes(const Element& parent, const SchemaSource& source,
-        ComplexType& owner, std::size_t depth)
+    std::optional<AttributeWildcard> SchemaBuilder::buildAttributes(const Element& parent,
+        const SchemaSource& source, ComplexType& owner, std::size_t depth)
     {
+        std::optional<AttributeWildcard> own;
+        std::optional<AttributeWildcard> groups;
+
         if (depth > 32)
             fail(parent, i18n::format(i18n::Message::SCHEMA_ATTRIBUTE_GROUPS_TOO_DEEP));
         for (const Element* child : schemaChildren(parent))
@@ -24,20 +31,28 @@ namespace beresta::xsd::detail
             if (kind == "attribute")
                 addAttribute(owner, buildAttributeUse(*child, source, false));
             else if (kind == "anyAttribute")
-            {
-                owner.anyAttribute = true;
-                owner.attributeWildcard = parseProcessContents(*child);
-            }
+                own = readAttributeWildcard(*child, source);
             else if (kind == "attributeGroup")
-            {
-                std::string name = attributeOr(*child, "ref", "");
-                const Definition* group = referencedDefinition(*child, "attributeGroup",
-                    resolveQName(*child, name));
-                if (group == nullptr)
-                    fail(*child, i18n::format(i18n::Message::SCHEMA_ATTRIBUTE_GROUP_MISSING, {name}));
-                buildAttributes(*group->element, *group->source, owner, depth + 1);
-            }
+                mergeGroupWildcard(groups, attributeGroupWildcard(*child, owner, depth), *child);
         }
+        if (!own.has_value())
+            return groups;
+        mergeGroupWildcard(own, groups, parent);
+        return own;
+    }
+
+    // Ссылка xs:attributeGroup ref="...": атрибуты группы — в owner, её шаблон — результат
+    // An xs:attributeGroup ref="..." reference: the group's attributes go into owner, its wildcard is the result
+    std::optional<AttributeWildcard> SchemaBuilder::attributeGroupWildcard(const Element& reference,
+        ComplexType& owner, std::size_t depth)
+    {
+        std::string name = attributeOr(reference, "ref", "");
+        const Definition* group = referencedDefinition(reference, "attributeGroup",
+            resolveQName(reference, name));
+
+        if (group == nullptr)
+            fail(reference, i18n::format(i18n::Message::SCHEMA_ATTRIBUTE_GROUP_MISSING, {name}));
+        return buildAttributes(*group->element, *group->source, owner, depth + 1);
     }
 
     /*

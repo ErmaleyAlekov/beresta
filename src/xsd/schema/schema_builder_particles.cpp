@@ -1,6 +1,7 @@
 #include "xsd/internal/schema_builder.hpp"
 #include "i18n/i18n.hpp"
-#include "utils/xml_tokens.hpp"
+
+#include <utility>
 
 namespace beresta::xsd::detail
 {
@@ -32,7 +33,17 @@ namespace beresta::xsd::detail
         if (kind == "all")
             group.kind = content::ParticleKind::ALL;
         for (const Element* child : schemaChildren(definition))
-            group.children.push_back(buildParticle(*child, source, owner, depth + 1));
+        {
+            // Частица с maxOccurs="0" не порождает компонента (3.9.2), но ошибки в ней проверены.
+            // В xs:all любой ребёнок допускается один раз, поэтому такую частицу надо убрать;
+            // в sequence / choice её и так нельзя повторить ни разу.
+            // A particle with maxOccurs="0" yields no component (3.9.2), but its errors are checked.
+            // In xs:all any child is allowed once, so such a particle must be removed;
+            // in sequence / choice it cannot be repeated even once anyway.
+            content::Particle part = buildParticle(*child, source, owner, depth + 1);
+            if (part.maxOccurs != 0 || group.kind != content::ParticleKind::ALL)
+                group.children.push_back(std::move(part));
+        }
         readOccurs(definition, group);
         return group;
     }
@@ -109,23 +120,11 @@ namespace beresta::xsd::detail
         ComplexType& owner)
     {
         content::Particle particle;
-        std::string namespaces = attributeOr(definition, "namespace", "##any");
 
         particle.kind = content::ParticleKind::WILDCARD;
         particle.namespaceUri = source.targetNamespace;
-        if (namespaces == "##other")
-            particle.wildcardMode = content::WildcardMode::OTHER_NAMESPACE;
-        else if (namespaces != "##any")
-            particle.wildcardMode = content::WildcardMode::NAMESPACE_LIST;
-        for (std::string_view token : utils::splitTokens(namespaces))
-        {
-            std::string uri(token);
-            if (token == "##targetNamespace")
-                uri = source.targetNamespace;
-            if (token == "##local")
-                uri.clear();
-            particle.wildcardNamespaces.push_back(uri);
-        }
+        readNamespaceConstraint(definition, source.targetNamespace, particle.wildcardMode,
+            particle.wildcardNamespaces);
         owner.hasElementWildcard = true;
         owner.elementWildcard = parseProcessContents(definition);
         readOccurs(definition, particle);

@@ -46,17 +46,34 @@ namespace beresta::xsd::detail
     }
 
     /*
-    ** Заглушка общая и неизменяемая (тип — xs:anyType, ни nillable, ни
-    ** ограничений): действующий тип элементу даст applyXsiType, а любой
-    ** тип выведен из xs:anyType. Разделение между потоками безопасно.
+    ** Заглушка без ограничений (тип — xs:anyType, nillable): объявления нет,
+    ** и проверка идёт только по типу (3.3.4, п. 1.2), поэтому xsi:nil не
+    ** запрещён — его запрет (cvc-elt.3.1) относится к объявлению элемента.
     **
-    ** The stub is shared and immutable (the type is xs:anyType, neither nillable nor
-    ** constraints): applyXsiType gives the element its effective type, and any
-    ** type is derived from xs:anyType. Sharing it between threads is safe.
+    ** A stub without constraints (the type is xs:anyType, nillable): there is no declaration,
+    ** and the check goes by the type only (3.3.4, item 1.2), so xsi:nil is not
+    ** forbidden — its prohibition (cvc-elt.3.1) belongs to an element declaration.
+    */
+    static ElementDecl buildTypeOnlyStub()
+    {
+        ElementDecl stub;
+
+        stub.nillable = true;
+        return stub;
+    }
+
+    /*
+    ** Заглушка общая и неизменяемая: действующий тип элементу даст
+    ** applyXsiType, а любой тип выведен из xs:anyType. Разделение между
+    ** потоками безопасно (инициализация локальной static — однократная).
+    **
+    ** The stub is shared and immutable: applyXsiType gives the element its
+    ** effective type, and any type is derived from xs:anyType. Sharing between
+    ** threads is safe (a local static is initialized once).
     */
     const ElementDecl* typeOnlyDeclaration(const SaxElement& element) noexcept
     {
-        static const ElementDecl TYPE_ONLY;
+        static const ElementDecl TYPE_ONLY = buildTypeOnlyStub();
 
         if (!findXsi(element).hasType)
             return nullptr;

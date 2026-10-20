@@ -115,6 +115,10 @@ namespace beresta::xsd::detail
         void buildAll();
 
     private:
+        // Глобальные объявления атрибутов — в схему, для xs:anyAttribute (schema_builder.cpp)
+        // Global attribute declarations — into the schema, for xs:anyAttribute (schema_builder.cpp)
+        void buildGlobalAttributes();
+
         // ---- Регистрация (schema_builder_register.cpp) ----
         // ---- Registration (schema_builder_register.cpp) ----
         void registerDefinition(const Element& child, const SchemaSource& source);
@@ -233,13 +237,23 @@ namespace beresta::xsd::detail
 
         // ---- Атрибуты (schema_builder_attributes.cpp) ----
         // ---- Attributes (schema_builder_attributes.cpp) ----
-        void buildAttributes(const Element& parent, const SchemaSource& source, ComplexType& owner,
+        std::optional<AttributeWildcard> buildAttributes(const Element& parent, const SchemaSource& source,
+            ComplexType& owner, std::size_t depth);
+        std::optional<AttributeWildcard> attributeGroupWildcard(const Element& reference, ComplexType& owner,
             std::size_t depth);
         AttributeUse buildAttributeUse(const Element& definition, const SchemaSource& source,
             bool global);
         const Element& resolveAttributeReference(const Element& definition, AttributeUse& use,
             const SchemaSource*& typeSource);
         void addAttribute(ComplexType& owner, AttributeUse use) const;
+
+        // ---- Подстановочные атрибуты (schema_builder_wildcards.cpp) ----
+        // ---- Attribute wildcards (schema_builder_wildcards.cpp) ----
+        AttributeWildcard readAttributeWildcard(const Element& definition, const SchemaSource& source) const;
+        void mergeGroupWildcard(std::optional<AttributeWildcard>& total,
+            const std::optional<AttributeWildcard>& next, const Element& where) const;
+        void applyAttributeWildcard(ComplexType& type, std::optional<AttributeWildcard> local) const;
+        void inheritAttributeWildcard(ComplexType& type, const ComplexType& base, const Element& where) const;
 
         Schema& _schema;
         SchemaLoadOptions _options;
@@ -281,6 +295,18 @@ namespace beresta::xsd::detail
     // Режим processContents у xs:any / xs:anyAttribute (по умолчанию strict)
     // The processContents mode of xs:any / xs:anyAttribute (strict by default)
     ProcessContents parseProcessContents(const Element& wildcard);
+
+    /*
+    ** Атрибут namespace у xs:any / xs:anyAttribute: ##any, ##other или
+    ** перечень (##targetNamespace — целевое пространство, ##local — пустая
+    ** строка). Реализация — schema_builder_wildcards.cpp.
+    **
+    ** The namespace attribute of xs:any / xs:anyAttribute: ##any, ##other or
+    ** a list (##targetNamespace — the target namespace, ##local — an empty
+    ** string). The implementation is in schema_builder_wildcards.cpp.
+    */
+    void readNamespaceConstraint(const Element& wildcard, const std::string& targetNamespace,
+        content::WildcardMode& mode, std::vector<std::string>& namespaces);
 
     // Префиксы, объявленные на элементе схемы и его предках (для XPath селекторов)
     // The prefixes declared on the schema element and its ancestors (for XPath selectors)

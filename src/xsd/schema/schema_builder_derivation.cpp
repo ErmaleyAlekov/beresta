@@ -28,7 +28,6 @@ namespace beresta::xsd::detail
         {
             type.simpleContent = complexBase->simpleContent;
             type.attributes = complexBase->attributes;
-            type.anyAttribute = complexBase->anyAttribute;
         }
         if (type.simpleContent == nullptr)
             type.simpleContent = builtinType("anySimpleType");
@@ -43,7 +42,9 @@ namespace beresta::xsd::detail
             applyFacets(restricted, derivation, source);
             type.simpleContent = &restricted;
         }
-        buildAttributes(derivation, source, type, 0);
+        applyAttributeWildcard(type, buildAttributes(derivation, source, type, 0));
+        if (extension && complexBase != nullptr)
+            inheritAttributeWildcard(type, *complexBase, derivation);
         readAssertions(derivation, source, type);
     }
 
@@ -67,11 +68,12 @@ namespace beresta::xsd::detail
         if (complexBase != nullptr)
         {
             type.attributes = complexBase->attributes;
-            type.anyAttribute = complexBase->anyAttribute;
             if (extension)
                 type.elements = complexBase->elements;
         }
         buildTypeBody(type, derivation, source, mixed);
+        if (extension && complexBase != nullptr)
+            inheritAttributeWildcard(type, *complexBase, derivation);
         if (extension && complexBase != nullptr && complexBase->hasParticle)
             prependBaseParticle(type, *complexBase);
     }

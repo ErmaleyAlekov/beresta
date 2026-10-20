@@ -35,6 +35,8 @@ namespace beresta::xsd::detail
         frame.collectText = frame.modelFailed = frame.reportedChildren = false;
         frame.childCount = frame.pendingCount = frame.bufferedCount = 0;
         frame.attributeTypes.clear();
+        frame.untypedAttributes.clear();
+        frame.defaultAttributes.clear();
         _paths.open(element.name);
         frame.declaresNamespaces = _prefixes.push(element.attributes);
         _text.clear();

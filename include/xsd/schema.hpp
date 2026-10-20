@@ -88,6 +88,29 @@ namespace beresta::xsd
     };
 
     /*
+    ** Подстановочный атрибут типа (xs:anyAttribute) — «полный» шаблон
+    ** (3.4.2): собственный, пересечённый с шаблонами групп атрибутов, а при
+    ** расширении — объединённый с шаблоном базового типа (3.10.6).
+    ** Ограничение пространств имён: любое (##any); «не excluded и не
+    ** пустое» (##other, excluded пусто — любое непустое); перечень namespaces
+    ** (пустая строка в нём — атрибут без пространства имён).
+    **
+    ** The attribute wildcard of a type (xs:anyAttribute) — the "complete" wildcard
+    ** (3.4.2): the own one, intersected with the wildcards of the attribute groups, and on
+    ** extension — united with the wildcard of the base type (3.10.6).
+    ** The namespace constraint: any (##any); "not excluded and not
+    ** empty" (##other, an empty excluded means any non-empty one); the list namespaces
+    ** (an empty string in it is an attribute without a namespace).
+    */
+    struct AttributeWildcard
+    {
+        content::WildcardMode mode = content::WildcardMode::ANY_NAMESPACE;
+        std::string excluded;
+        std::vector<std::string> namespaces;
+        ProcessContents process = ProcessContents::STRICT_CHECK;
+    };
+
+    /*
     ** Составной тип: модель содержимого и атрибуты. baseType и
     ** derivationMethod описывают шаг наследования (у типа без
     ** complexContent / simpleContent — ограничение xs:anyType); по ним
@@ -118,7 +141,7 @@ namespace beresta::xsd
         std::vector<const ElementDecl*> elements;
         std::vector<AttributeUse> attributes;
         bool anyAttribute = false;
-        ProcessContents attributeWildcard = ProcessContents::STRICT_CHECK;
+        AttributeWildcard attributeWildcard;
         bool hasElementWildcard = false;
         ProcessContents elementWildcard = ProcessContents::STRICT_CHECK;
         std::vector<std::shared_ptr<const Assertion>> assertions;
@@ -239,6 +262,28 @@ namespace beresta::xsd
         // A global type by name (for xsi:type); found = false — the type is not found
         TypeRef findType(std::string_view namespaceUri, std::string_view localName, bool& found) const;
 
+        /*
+        ** Глобальное объявление атрибута или nullptr (для xs:anyAttribute с
+        ** lax / strict). Атрибуты пространства xml: (xml:lang и т. п.) без
+        ** объявления в схеме считаются объявленными с типом anySimpleType —
+        ** так же, как ссылка ref="xml:lang" при загрузке схемы.
+        **
+        ** A global attribute declaration or nullptr (for xs:anyAttribute with
+        ** lax / strict). Attributes of the xml: namespace (xml:lang and so on) without
+        ** a declaration in the schema count as declared with the anySimpleType type —
+        ** just like a ref="xml:lang" reference when the schema is loaded.
+        */
+        const AttributeUse* findAttribute(std::string_view namespaceUri, std::string_view localName) const;
+
+        /*
+        ** Составной тип xs:anyType (3.4.7): смешанное содержимое из любых
+        ** элементов и любые атрибуты, оба шаблона — lax. Один на программу.
+        **
+        ** The xs:anyType complex type (3.4.7): mixed content of any
+        ** elements and any attributes, both wildcards are lax. One per program.
+        */
+        static const ComplexType& anyTypeDefinition();
+
     private:
         friend class detail::SchemaBuilder;
 
@@ -250,6 +295,7 @@ namespace beresta::xsd
         std::deque<IdentityConstraint> _identityConstraints;
         std::map<Key, const IdentityConstraint*> _identityByName;
         std::map<Key, const ElementDecl*> _globalElements;
+        std::map<Key, AttributeUse> _globalAttributes;
         std::map<Key, TypeRef> _globalTypes;
     };
 }

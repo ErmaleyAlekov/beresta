@@ -67,12 +67,11 @@ cmake --build build-xsts --config Release --target xsts_run
 | `particle-restrict` | корректность ограничения модели (cos-particle-restrict) не проверяется — сознательное ограничение из README | 260 |
 | `upa` | однозначность модели (UPA) не проверяется — сознательное ограничение | 17 |
 | `redefine-restrict` | `xs:redefine` без ссылки на себя не проверяется как ограничение прежней группы (src-redefine.6.2, 7.2) — следствие того же ограничения | 14 |
-| `duration-order` | у `duration` нет порядка для фасетов-границ — сознательное ограничение | 13 |
 | `unresolved-location` | недоступный `schemaLocation` — ошибка загрузки (спецификация разрешает пропуск) | 13 |
 | `s4s-namespace` | схемы с `targetNamespace` самого XML Schema (схема для схем) не загружаются | 3 |
 | `redefine-cycle` | циклы через `xs:redefine` (A переопределяет B, а B переопределяет или включает A) | 3 |
 | `nested-derivation` | тип, выведенный из составного типа внутри его же модели, считается циклическим | 1 |
-| `disputed` | ожидание набора расходится со спецификацией или зависит от процессора (ниже) | 30 |
+| `disputed` | ожидание набора расходится со спецификацией или зависит от процессора (ниже) | 42 |
 
 Списки `particle-restrict` и `upa` собраны по описаниям групп
 («Particle Derivation OK», «NameAndTypeOK», «non-deterministic» и т. п.) только
@@ -90,6 +89,10 @@ cmake --build build-xsts --config Release --target xsts_run
 | `mgO013` | схема валидна, экземпляр с `e1` — нет | переопределение без ссылки на себя не является ограничением прежней группы (`maxOccurs="0"`), а с действующей группой экземпляр валиден |
 | `schA7.i` | подсказка `xsi:schemaLocation` для нового пространства имён игнорируется | учитывать ли подсказки — на усмотрение процессора; Sun (`ST_targetNS…`) ждёт обратного |
 | `reZ003v.v` | U+0220, U+0363…U+0369, U+0500…, U+1700… входят в `\w` | это буквы и метки Unicode 3.2; XSD 1.0 ссылается на Unicode 3.1, где они не назначены (`\p{Cn}`) и в `\w` не входят |
+| `addB078.i`, `dtZ107447_a_2245.i` | экземпляр невалиден при валидной схеме (schemaTest queried, Bugzilla 4054, 4077) | по самой схеме экземпляр валиден; невалидной её делает `fixed` у типа ID (e-props-correct.4, a-props-correct.3), а схема объявлена валидной |
+| `particlesOb001`…`particlesOb018` (7 `.i`) | экземпляр невалиден при валидной схеме (queried, Bugzilla 4070) | ограничение заменяет strict-шаблон базового типа на lax; по такому типу экземпляр валиден, а по 2-й редакции (NSSubset) ослабить processContents нельзя — ошибочна схема |
+| `particlesZ001.i` | экземпляр невалиден | он соответствует и производному типу, и базовому (RecurseAsIfGroup, «правило неоднозначно») |
+| `particlesZ036_b1.i`, `particlesZ036_b2.i` | экземпляр невалиден (queried, Bugzilla 4075) | особенность System.Xml: модель с maxOccurs > 4096 проверяется как `xs:any`; по XSD 1.0 экземпляр соответствует модели |
 
 ## Результаты
 
@@ -99,15 +102,20 @@ cmake --build build-xsts --config Release --target xsts_run
 | Категория | Прошло | Провал | Ограничение | Пропуск | Процент |
 |---|---:|---:|---:|---:|---:|
 | schemaTest valid | 10 975 | 12 | 23 | 588 | 99,9 % |
-| schemaTest invalid | 1 011 | 1 415 | 298 | 6 | 41,7 % |
-| instanceTest valid | 13 805 | 18 | 26 | 121 | 99,9 % |
-| instanceTest invalid | 10 737 | 212 | 13 | 160 | 98,1 % |
-| **Итого** | 36 528 | 1 657 | 360 | 875 | **95,7 %** |
+| schemaTest invalid | 1 016 | 1 417 | 291 | 6 | 41,8 % |
+| instanceTest valid | 13 806 | 17 | 26 | 121 | 99,9 % |
+| instanceTest invalid | 10 926 | 17 | 19 | 160 | 99,8 % |
+| **Итого** | 36 723 | 1 463 | 359 | 875 | **96,2 %** |
 
 Первый прогон (до исправлений, без списка ограничений): **92,3 %**, 2 971 расхождение
 и падение процесса на `addB077` (переполнение стека). До полных таблиц Unicode в
 регулярных выражениях — **93,6 %** (2 434 провала, из них 776 в MS-Regex); сейчас
-в MS-Regex провалов нет.
+в MS-Regex провалов нет. До исправлений группы «Значения» — **95,7 %** (212 провалов
+instanceTest invalid); сейчас в nistData/atomic провалов нет. Семь случаев бывшего
+ключа `duration-order` (фасеты-границы `duration` с пустым значением или min > max)
+теперь — обычные провалы проверки документа схемы: порядок `duration` есть.
+До исправления ограничений идентичности — **96,1 %** (25 провалов instanceTest
+invalid, 18 — valid); сейчас в MS-IdentityConstraint и suntest/identity провалов нет.
 
 ### Новые возможности: группы замены, xsi:type, block / final, xs:redefine
 
@@ -117,10 +125,10 @@ cmake --build build-xsts --config Release --target xsts_run
 | Возможность | Первый прогон | Сейчас (прошло / провал / ограничение) |
 |---|---:|---|
 | abstract | 72,4 % | 100 % (126 / 0 / 9) |
-| block / final | 86,1 % | 98,2 % (549 / 10 / 24) |
+| block / final | 86,1 % | 99,1 % (554 / 5 / 24) |
 | xs:redefine | 73,8 % | 95,1 % (136 / 7 / 25) |
 | substitutionGroup | 90,2 % | 99,7 % (353 / 1 / 16) |
-| xsi:type | 90,6 % | 99,6 % (262 / 1 / 2) |
+| xsi:type | 90,6 % | 100 % (263 / 0 / 2) |
 
 Каталоги в фокусе: `msData/element` 85,3 % → 94,8 %, `sunData/ElemDecl`
 88,8 % → 95,3 %, `msData/schema` (redefine, include/import) 65,5 % → 85,9 %,
@@ -128,13 +136,15 @@ cmake --build build-xsts --config Release --target xsts_run
 
 Оставшиеся провалы с этими метками — не в самих возможностях: уникальность
 `id` и набор атрибутов в документе схемы, ограничение подстановочных атрибутов
-(`ctO004`…), лексика дат и `duration`, `fixed` у смешанного содержимого.
+(`ctO004`…).
 
 ### Что нашёл прогон и что исправлено
 
 Регрессионные тесты: `tests/src/xsd/xsd_schema_lexical_tests.cpp`,
 `xsd_redefine_rules_tests.cpp`, `xsd_xsi_type_root_tests.cpp`,
-`xsd_regex_unicode_tests.cpp`, `xsd_regex_syntax_tests.cpp`.
+`xsd_regex_unicode_tests.cpp`, `xsd_regex_syntax_tests.cpp`, `xsd_duration_order_tests.cpp`,
+`xsd_attribute_wildcard_tests.cpp`, `xsd_value_constraint_tests.cpp`,
+`xsd_identity_field_tests.cpp`.
 
 | Расхождение | Случаи XSTS | Исправление |
 |---|---|---|
@@ -153,19 +163,33 @@ cmake --build build-xsts --config Release --target xsts_run
 | Блоки `\p{IsBasicLatin}`… и категории `\p{M}`, `\p{Mn}`, `\p{Mc}`, `\p{Me}` неизвестны (схема не загружалась), остальные категории покрывали лишь основные письменности, а `\p{Lt}` и т. п. подменялись целым классом `\p{L}` | reJ*, reK*, reL*…reN*, addB024 и др. (638 «неизвестное свойство») | полные таблицы Unicode 3.1 (категории и блоки, IsPrivateUse — только E000–F8FF, как во 2-й редакции): `unicode_category_table.cpp`, `unicode_block_table.cpp`, генератор `tools/unicode/generate_unicode_tables.py` |
 | `\d`, `\w`, `\i`, `\c` вне ASCII: не все цифры Nd, `\w` пропускал Cf, `\i`/`\c` строились из категорий | reS*, reT*, reU*, reV33, reZ004v…reZ006v | `\d` = Nd, `\w` = всё кроме P, Z, C по Unicode 3.1; `\i`/`\c` — по приложению B XML 1.0 (совпадает с перечнями набора): `name_char_table.cpp`, `multi_char_escapes.cpp` |
 | После `\` принимался любой символ (`\x41` = «x41»); обратный диапазон `[a-;]` молча переворачивался; `a[]b` и `[a[:xyz:]` принимались | RegexTest_*, reF57, reG34…reG46 | только экранирования XSD 1.0 (SingleCharEsc), диапазон с началом больше конца, пустой класс и `[` без экранирования — ошибки схемы: `xsd_regex_escapes.cpp`, `xsd_regex_classes.cpp` |
+| Фасеты-границы `duration` молча пропускались: порядка не было | NISTXML-SV-II-atomic-duration-* (92), duration_m*Inclusive/Exclusive | частичный порядок 3.2.6.2 по четырём опорным датам (несравнимые значения, как P1M и P30D, границу нарушают, как и NaN): `duration_order.cpp`, `breaksBound` |
+| `xs:anyAttribute` допускал атрибут из любого пространства имён и не проверял его по глобальному объявлению; при наследовании терялся processContents, при ограничении шаблон базового типа наследовался | wildO*, attgD*, ctL020, wildP002, wildZ011, wildZ013*, sunData/Wildcard, xsd021 (12), test007/008 (14) | ограничение пространств имён, пересечение с группами атрибутов и объединение при расширении (3.4.2, 3.10.6, 2-я редакция), lax / strict по глобальным атрибутам, не больше одного ID из шаблона (cvc-complex-type.5): `attribute_wildcards.cpp`, `schema_builder_wildcards.cpp`, `stream_attribute_rules.cpp` |
+| Содержимое `xs:anyType` не проверялось вовсе — в том числе атрибуты элементов `item` из MS-DataTypes (`P`, `P1Y2M3DT`, `+2001-07-11`, `--02-30` принимались) | duration028…030, dateTime013, gMonthDay006, isDefault070 | `xs:anyType` — встроенный составной тип (смешанное содержимое, дети и атрибуты lax): `Schema::anyTypeDefinition`, `schema_lookup.cpp` |
+| `fixed` у смешанного содержимого не проверялся | ctZ013c…e, isDefault077, valueconstraint00701m/00801m | cvc-elt.5.2.2: без детей-элементов, текст равен fixed: `checkMixedFixed` |
+| `xsi:nil="false"` у не-nillable элемента и `xsi:nil="true"` при `fixed` принимались | nillable00201m2_n, elemO011, addB065 | cvc-elt.3.1, 3.2.2: `isNil` |
+| ID / IDREF атрибутов со значением по умолчанию не учитывались | idZ011, idZ012 | `absentAttribute` |
+| В `xs:all` допускался элемент с `maxOccurs="0"` | addB092 | такая частица не порождает компонента (3.9.2): `buildParticle` |
+| Поля `xs:key` / `xs:unique` не видели атрибутов со значением `default` / `fixed`, которых нет в экземпляре | idF016, idF017, idG011, idG012, idZ011_a | такие атрибуты есть в PSVI (3.4.4): поток — `matchDefaults` (`stream_identity_fields.cpp`), дерево — объявления в `TreePsvi` и сверка поля по грамматике XSD (`tree_identity_defaults.cpp`) |
+| Поле, выбравшее пустой элемент составного типа или атрибут без типа (`xs:anyAttribute` skip / lax без объявления), не считалось ошибкой | idG006, idZ015 | cvc-identity-constraint.3: составной тип без простого содержимого (и `xs:anyType`) — `KEY_FIELD_COMPLEX`, атрибут без типа — `KEY_FIELD_UNTYPED` |
+| Значения `QName` / `NOTATION` в ключах сравнивались строкой | suntest identity 002 (test.2.v, test.3.n) | сравнение по паре «пространство имён + локальное имя»: `identityValue` (`identity_values.cpp`) |
 
 ## Остальные расхождения (вне новых возможностей)
 
 Это направления для дальнейшей работы; каждое видно в `xsts_report.md`.
 
-- **Проверка документа схемы по схеме для схем** (большая часть 1 415
+- **Проверка документа схемы по схеме для схем** (большая часть 1 417
   «ошибочная схема принята»): лексика и уникальность `id`, допустимые
   атрибуты и дети (`xs:redefine namespace=…`, `xs:notation` с содержимым),
   `form` / `elementFormDefault`, корректность значений `default` / `fixed` по
   типу, ограничения фасетов и простых типов, ограничение подстановочных атрибутов.
-- **Значения** (~210 «невалидный экземпляр принят»): лексика `duration`
-  (`P`, `PT`), `dateTime` со знаком `+`, `gMonthDay` `--02-30`, `fixed` у
-  смешанного и `anyType` содержимого, ограничения идентичности.
+- **Подсказки `xsi:schemaLocation`** (15): подсказка на вложенном элементе после
+  элементов того же пространства имён (addB156…addB167), выбор между схемой
+  группы и подсказкой (schA2, schA5); экземпляр с подсказкой на некорректную
+  схему (addB063, addB120, addB124, addB138, addB139) прогонщик считает
+  проваленным, хотя набор ждёт «невалиден».
+- **Одноимённые элементы модели** с разными `fixed` (addB149): объявление берётся
+  у первого, а не у совпавшей частицы.
 - **`minOccurs` / `maxOccurs` больше 2³¹** (15) отвергаются как некорректные.
 - **`processContents`** хранится один на тип: у модели с двумя `xs:any`
   (strict и lax) действует последний (wildI005…007).

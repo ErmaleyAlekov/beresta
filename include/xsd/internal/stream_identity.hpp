@@ -27,11 +27,15 @@ namespace beresta::xsd::detail
     /*
     ** Состояние поля у целевого элемента: сколько разных узлов выбрано
     ** (больше одного — ошибка), откуда значение (атрибут — сразу, элемент —
-    ** при его закрытии) и само значение с типом.
+    ** при его закрытии), само значение и его канонический вид (считается
+    ** сразу: префиксы QName действуют лишь внутри элемента). complex —
+    ** элемент не простого типа, untyped — атрибут без типа: оба ошибочны.
     **
     ** The state of a field at a target element: how many different nodes are selected
     ** (more than one is an error), where the value comes from (an attribute — at once, an element —
-    ** when it is closed) and the value itself with its type.
+    ** when it is closed), the value itself and its canonical form (computed
+    ** at once: QName prefixes are in effect only inside the element). complex —
+    ** an element not of a simple type, untyped — an attribute without a type: both are erroneous.
     */
     struct FieldState
     {
@@ -39,8 +43,9 @@ namespace beresta::xsd::detail
         bool fromElement = false;
         std::size_t elementOrdinal = 0;
         bool complex = false;
+        bool untyped = false;
         std::string value;
-        const SimpleType* type = nullptr;
+        std::string canonical;
     };
 
     // Целевой элемент селектора, у которого ещё собираются поля
@@ -131,7 +136,12 @@ namespace beresta::xsd::detail
         const CompiledConstraint& compile(const IdentityConstraint& constraint);
         void selectTargets(const IdentityStart& start);
         bool matchFields(ActiveTarget& target, const IdentityStart& start);
+
+        // ---- Атрибуты в полях (stream_identity_fields.cpp) ----
+        // ---- Attributes in fields (stream_identity_fields.cpp) ----
         void matchAttributes(FieldState& field, const std::vector<StreamPath>& paths,
+            const ActiveTarget& target, const IdentityStart& start);
+        void matchDefaults(FieldState& field, const std::vector<StreamPath>& paths,
             const ActiveTarget& target, const IdentityStart& start);
 
         // ---- Строки ключей (stream_identity_rows.cpp) ----

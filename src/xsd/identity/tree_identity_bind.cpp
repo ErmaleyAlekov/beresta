@@ -16,7 +16,8 @@ namespace beresta::xsd::detail
     // The check reads the recorded PSVI and writes errors into the common log
     TreeIdentityCheck::TreeIdentityCheck(const TreePsvi& psvi, DiagnosticLog& log)
         : _psvi(psvi), _log(log), _sequence(0), _nextScope(0), _scopes(), _tables(), _elementPaths(),
-          _elementLocations(), _elementTypes(), _attributeTypes()
+          _elementLocations(), _elementTypes(), _attributeTypes(), _complexElements(), _untypedAttributes(),
+          _defaultAttributes(), _fieldPaths()
     {
     }
 
@@ -49,14 +50,13 @@ namespace beresta::xsd::detail
             bindElement(*element, ordinal++);
     }
 
-    // Сведения одного элемента: шаг пути, тип значения, типы атрибутов и его области
-    // The information of one element: the path step, the value type, the attribute types and its scopes
+    // Сведения одного элемента: шаг пути, тип значения, составной тип, атрибуты и его области
+    // The information of one element: the path step, the value type, the complex type, the attributes and its scopes
     void TreeIdentityCheck::bindElement(const Element& element, std::size_t ordinal)
     {
         auto step = _psvi.steps.find(ordinal);
         auto type = _psvi.elementTypes.find(ordinal);
         auto location = _psvi.locations.find(ordinal);
-        const std::vector<Attribute>& attributes = element.getAttributes();
 
         if (step != _psvi.steps.end())
             _elementPaths.emplace(&element, step->second);
@@ -64,12 +64,9 @@ namespace beresta::xsd::detail
             _elementLocations.emplace(&element, location->second.location);
         if (type != _psvi.elementTypes.end())
             _elementTypes.emplace(&element, type->second);
-        for (std::size_t index = 0; index < attributes.size() && !_psvi.attributeTypes.empty(); ++index)
-        {
-            auto found = _psvi.attributeTypes.find(AttributeSlot{ordinal, index});
-            if (found != _psvi.attributeTypes.end())
-                _attributeTypes.emplace(&attributes[index], found->second);
-        }
+        if (_psvi.complexElements.count(ordinal) != 0)
+            _complexElements.insert(&element);
+        bindAttributes(element, ordinal);
         while (_nextScope < _psvi.scopes.size() && _psvi.scopes[_nextScope].ordinal == ordinal)
         {
             const ScopeRecord& scope = _psvi.scopes[_nextScope++];

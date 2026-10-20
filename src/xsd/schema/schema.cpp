@@ -9,7 +9,8 @@ namespace beresta::xsd
     // Пустая схема заполняется SchemaBuilder
     // An empty schema is filled by SchemaBuilder
     Schema::Schema()
-        : _simpleTypes(), _complexTypes(), _elements(), _globalElements(), _globalTypes()
+        : _simpleTypes(), _complexTypes(), _elements(), _globalElements(), _globalAttributes(),
+          _globalTypes()
     {
     }
 

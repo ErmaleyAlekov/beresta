@@ -35,12 +35,17 @@ namespace beresta::xsd::detail
         return i18n::format(i18n::Message::NOT_IN_ENUMERATION, {value, type.name});
     }
 
-    // Порядок 2 (несравнимы) границу не нарушает
-    // Order 2 (incomparable) does not violate a bound
+    /*
+    ** Порядок 2 (несравнимы: NaN, длительности вроде P1M и P30D) нарушает
+    ** любую границу: значение не «больше или равно» и не «меньше» её (4.3.7–4.3.10).
+    **
+    ** Order 2 (incomparable: NaN, durations like P1M and P30D) violates
+    ** any bound: the value is neither "greater or equal" nor "less" than it (4.3.7–4.3.10).
+    */
     bool breaksBound(int order, bool lower, bool inclusive) noexcept
     {
         if (order == 2)
-            return false;
+            return true;
         if (lower && inclusive)
             return order < 0;
         if (lower)

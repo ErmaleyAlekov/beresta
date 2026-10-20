@@ -81,7 +81,6 @@ namespace xsts
             {"upa", "однозначность модели (UPA, cos-nonambig) не проверяется"},
             {"particle-restrict", "корректность ограничения модели (cos-particle-restrict) не проверяется"},
             {"redefine-restrict", "xs:redefine без ссылки на себя не проверяется как ограничение (src-redefine.6.2, 7.2)"},
-            {"duration-order", "у duration нет порядка для фасетов-границ"},
             {"unresolved-location", "недоступный schemaLocation считается ошибкой загрузки, а не пропускается"},
             {"s4s-namespace", "схемы с targetNamespace XML Schema (схема для схем) не загружаются"},
             {"redefine-cycle", "циклы через xs:redefine (A переопределяет B, B переопределяет или включает A)"},

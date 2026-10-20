@@ -30,6 +30,8 @@ namespace
         suites::registerXsdSubstitutionTests, suites::registerXsdDerivationTests, suites::registerXsdFinalTests,
         suites::registerXsdRedefineTests, suites::registerXsdSchemaLexicalTests,
         suites::registerXsdRedefineRulesTests, suites::registerXsdXsiTypeRootTests, suites::registerXsdDeepTests,
+        suites::registerXsdDurationOrderTests, suites::registerXsdAttributeWildcardTests,
+        suites::registerXsdValueConstraintTests, suites::registerXsdIdentityFieldTests,
         suites::registerXsdAssertTests, suites::registerXsdAssertRulesTests,
         suites::registerXsdAssertXPathTests, suites::registerXsdAssertSchemaTests,
         suites::registerXsdAssertParallelTests, suites::registerXsdRegexUnicodeTests, suites::registerXsdRegexSyntaxTests, suites::registerXsdRegexTableTests,

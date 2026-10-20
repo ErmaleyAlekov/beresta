@@ -2,6 +2,7 @@
 #define XSD_TREE_IDENTITY_HPP
 
 #include "xsd/internal/diagnostic_log.hpp"
+#include "xsd/internal/identity_path.hpp"
 #include "xsd/internal/identity_tracker.hpp"
 #include "xsd/internal/path_tracker.hpp"
 #include "xpath/xpath.hpp"
@@ -10,6 +11,7 @@
 #include <set>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace beresta::xsd::detail
@@ -44,13 +46,19 @@ namespace beresta::xsd::detail
     /*
     ** Сведения проверки (аналог PSVI), нужные ключам по дереву: шаги путей
     ** типы элементов и атрибутов и позиции элементов (дерево может быть
-    ** построено без trackLocations). В потоке узлов дерева ещё нет, поэтому
+    ** построено без trackLocations), элементы составного типа без простого
+    ** содержимого, атрибуты без типа (шаблон skip / lax) и отсутствующие
+    ** атрибуты со значением по умолчанию — их в дереве нет, но поля ключей
+    ** обязаны их видеть. В потоке узлов дерева ещё нет, поэтому
     ** всё записано по порядковым номерам элементов в прямом порядке; после
     ** постройки дерева номера привязываются к узлам одним обходом.
     **
     ** Validation information (an analog of the PSVI) needed by the keys over a tree: path steps
     ** the types of elements and attributes and the element positions (the tree may be
-    ** built without trackLocations). In a stream there are no tree nodes yet, so
+    ** built without trackLocations), the elements of a complex type without simple
+    ** content, the attributes without a type (a skip / lax wildcard) and the absent
+    ** attributes with a default value — they are not in the tree, but key fields
+    ** must see them. In a stream there are no tree nodes yet, so
     ** everything is recorded by the ordinals of elements in document order; after
     ** the tree is built the numbers are bound to the nodes in one traversal.
     */
@@ -61,6 +69,9 @@ namespace beresta::xsd::detail
         std::unordered_map<std::size_t, EventPosition> locations;
         std::unordered_map<std::size_t, const SimpleType*> elementTypes;
         std::unordered_map<AttributeSlot, const SimpleType*, AttributeSlotHash> attributeTypes;
+        std::unordered_set<std::size_t> complexElements;
+        std::unordered_set<AttributeSlot, AttributeSlotHash> untypedAttributes;
+        std::unordered_map<std::size_t, std::vector<const AttributeUse*>> defaultAttributes;
     };
 
     /*
@@ -111,6 +122,15 @@ namespace beresta::xsd::detail
         std::vector<std::string> shown;
     };
 
+    // Атрибуты по умолчанию, выбранные полем: сколько их и первый из них с элементом-владельцем
+    // The default attributes selected by a field: how many there are and the first of them with the owner element
+    struct DefaultMatch
+    {
+        std::size_t count = 0;
+        const Element* owner = nullptr;
+        const AttributeUse* use = nullptr;
+    };
+
     // Таблица значений xs:key / xs:unique в одной области
     // The table of xs:key / xs:unique values in one scope
     struct KeyTable
@@ -153,7 +173,19 @@ namespace beresta::xsd::detail
         std::vector<KeyRow> selectRows(const IdentityScope& scope, const IdentityConstraint& constraint);
         bool fieldValue(const Element& target, const xpath::XPathExpression& field,
             const IdentityConstraint& constraint, KeyRow& row);
+        bool nodeValue(const Element& target, const xpath::XPathItem& item, const IdentityConstraint& constraint,
+            KeyRow& row);
         const SimpleType* typeOfItem(const xpath::XPathItem& item) const;
+
+        // ---- Атрибуты в PSVI и по умолчанию (tree_identity_defaults.cpp) ----
+        // ---- Attributes in the PSVI and by default (tree_identity_defaults.cpp) ----
+        void bindAttributes(const Element& element, std::size_t ordinal);
+        void matchDefaults(const Element& target, const xpath::XPathExpression& field,
+            const IdentityConstraint& constraint, DefaultMatch& match);
+        void matchDefaultsAt(const Element& target, const Element& element, const std::vector<StreamPath>& paths,
+            DefaultMatch& match) const;
+        const std::vector<StreamPath>& fieldPaths(const xpath::XPathExpression& field,
+            const IdentityConstraint& constraint);
 
         // ---- Таблицы и ссылки (tree_identity_tables.cpp) ----
         // ---- Tables and references (tree_identity_tables.cpp) ----
@@ -173,6 +205,10 @@ namespace beresta::xsd::detail
         std::unordered_map<const Element*, SourceLocation> _elementLocations;
         std::unordered_map<const Element*, const SimpleType*> _elementTypes;
         std::unordered_map<const Attribute*, const SimpleType*> _attributeTypes;
+        std::unordered_set<const Element*> _complexElements;
+        std::unordered_set<const Attribute*> _untypedAttributes;
+        std::unordered_map<const Element*, const std::vector<const AttributeUse*>*> _defaultAttributes;
+        std::unordered_map<const xpath::XPathExpression*, std::vector<StreamPath>> _fieldPaths;
     };
 }
 

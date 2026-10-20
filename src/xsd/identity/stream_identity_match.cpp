@@ -1,5 +1,4 @@
 #include "xsd/internal/stream_identity.hpp"
-#include "utils/qualified_name.hpp"
 
 namespace beresta::xsd::detail
 {
@@ -83,31 +82,8 @@ namespace beresta::xsd::detail
                 needText = true;
             }
             matchAttributes(field, compiled.fields[index], target, start);
+            matchDefaults(field, compiled.fields[index], target, start);
         }
         return needText;
-    }
-
-    // Атрибуты элемента, выбранные полем (объявления xmlns — не атрибуты, как в XPath)
-    // The element attributes selected by a field (xmlns declarations are not attributes, as in XPath)
-    void StreamIdentity::matchAttributes(FieldState& field, const std::vector<StreamPath>& paths,
-        const ActiveTarget& target, const IdentityStart& start)
-    {
-        for (std::size_t index = 0; index < start.element.attributes.size(); ++index)
-        {
-            const SaxAttribute& attribute = start.element.attributes[index];
-            bool reached = false;
-            if (utils::isNamespaceDeclaration(attribute.name))
-                continue;
-            for (const StreamPath& path : paths)
-                reached = reached || (path.attribute && nameMatches(path.attributeTest, attribute.namespaceUri,
-                    attribute.localName) && pathReaches(path, _names, target.level, start.level));
-            if (!reached || ++field.matches != 1)
-                continue;
-            field.fromElement = false;
-            field.value.assign(attribute.value.data(), attribute.value.size());
-            field.type = nullptr;
-            if (index < start.attributeTypes.size())
-                field.type = start.attributeTypes[index];
-        }
     }
 }

@@ -117,6 +117,8 @@ namespace beresta::xsd::detail
         std::vector<BufferedChild> bufferedChildren;
         std::size_t bufferedCount = 0;
         std::vector<const SimpleType*> attributeTypes;
+        std::vector<std::size_t> untypedAttributes;
+        std::vector<const AttributeUse*> defaultAttributes;
     };
 
     /*
@@ -188,6 +190,13 @@ namespace beresta::xsd::detail
         void checkAttribute(const AttributeUse& use, const SaxAttribute& attribute, std::size_t index);
         void checkRequiredAttributes(const SaxElement& element, const ComplexType& type, std::uint64_t seen);
 
+        // ---- xs:anyAttribute и отсутствующие атрибуты (stream_attribute_rules.cpp) ----
+        // ---- xs:anyAttribute and absent attributes (stream_attribute_rules.cpp) ----
+        std::size_t checkWildcardAttribute(const ComplexType& type, const SaxAttribute& attribute,
+            std::size_t index);
+        void checkWildcardIds(const ComplexType& type, std::size_t wildIds);
+        void absentAttribute(const AttributeUse& use);
+
         // ---- Закрытие элемента (stream_close.cpp) ----
         // ---- Closing an element (stream_close.cpp) ----
         const SimpleType* closeSimple(ElementFrame& frame);
@@ -201,6 +210,7 @@ namespace beresta::xsd::detail
         const SimpleType* checkValue(const SimpleType& type, std::string_view text, CheckPhase phase);
         void recordIdentity(const SimpleType& type, std::string_view value, CheckPhase phase);
         void finishReferences();
+        void checkMixedFixed(const ElementFrame& frame);
 
         // ---- Сообщения и ограничения идентичности (stream_report.cpp, stream_identity_bridge.cpp) ----
         // ---- Messages and identity constraints (stream_report.cpp, stream_identity_bridge.cpp) ----

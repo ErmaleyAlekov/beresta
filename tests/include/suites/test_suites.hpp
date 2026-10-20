@@ -75,6 +75,10 @@ namespace suites
     void registerXsdSchemaLexicalTests(test::TestRunner& runner);
     void registerXsdRedefineRulesTests(test::TestRunner& runner);
     void registerXsdXsiTypeRootTests(test::TestRunner& runner);
+    void registerXsdDurationOrderTests(test::TestRunner& runner);
+    void registerXsdAttributeWildcardTests(test::TestRunner& runner);
+    void registerXsdValueConstraintTests(test::TestRunner& runner);
+    void registerXsdIdentityFieldTests(test::TestRunner& runner);
     void registerXsdDeepTests(test::TestRunner& runner);
     void registerXsdAssertTests(test::TestRunner& runner);
     void registerXsdAssertRulesTests(test::TestRunner& runner);

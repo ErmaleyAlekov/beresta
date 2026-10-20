@@ -79,11 +79,11 @@ namespace beresta::xsd::detail
     };
 
     /*
-    ** Границы min/max Inclusive/Exclusive. Несравнимые значения (NaN, типы
-    ** без порядка) границы не нарушают — так ведёт себя частичный порядок XSD.
+    ** Границы min/max Inclusive/Exclusive. Несравнимое с границей значение
+    ** (NaN, длительность вне частичного порядка) её нарушает (breaksBound).
     **
-    ** The min/max Inclusive/Exclusive bounds. Incomparable values (NaN, types
-    ** without an order) do not violate the bounds — this is how the XSD partial order behaves.
+    ** The min/max Inclusive/Exclusive bounds. A value incomparable with the bound
+    ** (NaN, a duration outside the partial order) violates it (breaksBound).
     */
     std::optional<std::string> checkRangeFacets(const SimpleType& type, std::string_view value)
     {

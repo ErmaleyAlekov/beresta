@@ -69,7 +69,7 @@ namespace beresta::xsd::detail
             type.content = ContentType::ELEMENT_ONLY;
         if (mixed)
             type.content = ContentType::MIXED_CONTENT;
-        buildAttributes(body, source, type, 0);
+        applyAttributeWildcard(type, buildAttributes(body, source, type, 0));
         readAssertions(body, source, type);
     }
 

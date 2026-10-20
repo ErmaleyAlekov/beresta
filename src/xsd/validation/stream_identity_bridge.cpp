@@ -39,20 +39,30 @@ namespace beresta::xsd::detail
         if (frame.attributeTypes.size() != element.attributes.size())
             frame.attributeTypes.assign(element.attributes.size(), nullptr);
         IdentityStart start{_depth - 1, frame.ordinal, element, frame.position, frame.declaration != nullptr,
-            frame.attributeTypes};
+            frame.attributeTypes, frame.untypedAttributes, frame.defaultAttributes, _prefixes};
         if (_identity->elementStarted(start))
             frame.collectText = true;
     }
 
-    // Конец элемента для ключей: тип корректного простого значения и накопленный текст
-    // An element end for keys: the type of a valid simple value and the accumulated text
+    /*
+    ** Конец элемента для ключей: тип корректного простого значения,
+    ** накопленный текст и признак составного типа без простого содержимого
+    ** (xs:anyType тоже такой). Объявления xmlns элемента ещё действуют.
+    **
+    ** An element end for keys: the type of a valid simple value,
+    ** the accumulated text and the flag of a complex type without simple content
+    ** (xs:anyType is such too). The xmlns declarations of the element are still in effect.
+    */
     void StreamValidator::notifyIdentityEnd(const ElementFrame& frame, const SimpleType* valueType)
     {
         std::string_view content;
+        bool complexContent = frame.mode == FrameMode::COMPLEX && frame.complex != nullptr
+            && frame.complex->content != ContentType::SIMPLE_CONTENT;
 
         if (frame.collectText && !frame.hasChildElement)
             content = _text;
-        _identity->elementEnded(IdentityEnd{_depth - 1, frame.ordinal, valueType, content, frame.hasChildElement});
+        _identity->elementEnded(IdentityEnd{_depth - 1, frame.ordinal, valueType, content, frame.hasChildElement,
+            complexContent, _prefixes});
     }
 
     // ON_TREE: ключи проверяются прежним алгоритмом по готовому дереву
