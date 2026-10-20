@@ -17,7 +17,7 @@
 
 **Не открывайте публичную задачу (issue) и не пишите в обсуждения** — так уязвимость станет известна раньше исправления.
 
-Сообщите закрыто через GitHub: [Security → Report a vulnerability](https://github.com/ErmaleyAlekov/beresta/security/advisories/new). Если доступа к GitHub нет, создайте на [Gitverse](https://gitverse.ru/ermaleyalekov/beresta) задачу с заголовком «Безопасность: прошу контакт для закрытого сообщения» **без подробностей** — мы ответим и договоримся о закрытом канале.
+Сообщите закрыто через GitHub: [Security → Report a vulnerability](https://github.com/ErmaleyAlekov/beresta/security/advisories/new). Если доступа к GitHub нет — по электронной почте [ermaley.alekov@yandex.ru](mailto:ermaley.alekov@yandex.ru) с темой «Безопасность: beresta».
 
 В сообщении укажите:
 

@@ -196,6 +196,7 @@ Gradle: `implementation("io.github.ermaleyalekov:beresta:2.1.3")`.
 
 - **`.gitverse/workflows/ci.yml`** — на каждый push и merge request: `make` и `make test` на Linux x86_64. Полная матрица платформ проверяется на GitHub.
 - **`.gitverse/workflows/release.yml`** — по тегу `vX.Y.Z` одной задачей (артефакты между задачами на Gitverse не передаются): сборка и тесты на Linux x86_64, затем ожидание релиза того же тега на GitHub (до 15 минут), скачивание всех его файлов (`tools/release/github_assets.sh`) и создание релиза Gitverse через публичный API (`tools/release/gitverse_release.sh`). Если релиз GitHub не готов, прикрепляется только SDK Linux x86_64; повторный запуск вручную (CI/CD → Release, параметр `tag`) заменяет файлы. **В реестры этот workflow ничего не публикует.** Gitverse принимает в релиз только файлы из своего списка расширений (`.zip`, `.tgz`, `.whl`, `.jar` и др.), поэтому пакет NuGet лежит там в архиве `Beresta.X.Y.Z.nupkg.zip`.
+- **`.gitverse/workflows/pages.yml`** — при изменении `site/` в `main`: публикация сайта продукта на Gitverse Pages (<https://ermaleyalekov.gitverse.site/beresta>); в настройках «Страницы» источник — «Воркфлоу».
 
 Секрет Gitverse (Настройки репозитория → Секреты и переменные): `GV_API_TOKEN` — токен со страницы gitverse.ru/settings/tokens с правом «Репозитории → Запись». Префикс `GITVERSE_` в именах секретов Gitverse запрещён.
 

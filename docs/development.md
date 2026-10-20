@@ -41,7 +41,7 @@ beresta/
 │   ├── exception/                DomException, ParseException
 │   ├── i18n/                     каталог сообщений: Message, format, setLanguage
 │   └── utils/                    символы XML, UTF-8, экранирование, имена, хеш с секретным ключом
-├── src/                          реализация, зеркально include/ (≤ 5 функций в файле)
+├── src/                          реализация, зеркально include/
 │   ├── i18n/catalogs/            messages_ru.cpp, messages_en.cpp — тексты сообщений
 │   └── capi/                     Си-интерфейс: errors, handles, library, document, node, element, xpath, schema
 ├── bindings/

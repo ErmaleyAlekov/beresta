@@ -41,7 +41,7 @@ beresta/
 │   ├── exception/                DomException, ParseException
 │   ├── i18n/                     the message catalog: Message, format, setLanguage
 │   └── utils/                    XML characters, UTF-8, escaping, names, the keyed hash
-├── src/                          the implementation, mirroring include/ (≤ 5 functions per file)
+├── src/                          the implementation, mirroring include/
 │   ├── i18n/catalogs/            messages_ru.cpp, messages_en.cpp — the message texts
 │   └── capi/                     the C interface: errors, handles, library, document, node, element, xpath, schema
 ├── bindings/

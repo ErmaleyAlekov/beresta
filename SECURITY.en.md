@@ -17,7 +17,7 @@ Patches are released in the latest minor branch.
 
 **Do not open a public issue or post in discussions** — this will make the vulnerability known before it is fixed.
 
-Report privately through GitHub: [Security → Report a vulnerability](https://github.com/ErmaleyAlekov/beresta/security/advisories/new). If you do not have access to GitHub, create an issue on [Gitverse](https://gitverse.ru/ermaleyalekov/beresta) with the title "Security: requesting a contact for a private report" **without details** — we will respond and agree on a private channel.
+Report privately through GitHub: [Security → Report a vulnerability](https://github.com/ErmaleyAlekov/beresta/security/advisories/new). If you do not have access to GitHub — by email to [ermaley.alekov@yandex.ru](mailto:ermaley.alekov@yandex.ru) with the subject "Security: beresta".
 
 In your message, specify:
 

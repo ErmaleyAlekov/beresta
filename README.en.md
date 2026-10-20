@@ -108,7 +108,7 @@ std::cout << doc.toString();                                      // <greeting l
 - **Cross-platform:** Windows, Linux, macOS, WebAssembly. The compilers MSVC, MinGW, GCC, Clang, Emscripten. There are CMake and a Makefile with automatic dependencies, and the GitHub Actions CI builds and checks all of it on every push.
 - **The node type without `dynamic_cast` in the core:** the type is found through `getType()`, the cast is a `static_cast`. Only the C interface checks handles through `dynamic_cast`: a text node instead of an element gives the `INVALID_ARGUMENT` error, not undefined behavior.
 - **Messages in two languages:** all error texts live in the message catalog, Russian and English are included. The default language is chosen at build time, one function changes it at run time, and a new language is added with one file.
-- **Readable code:** functions no longer than 25 lines, no more than 5 functions per file, detailed bilingual comments (Russian and English), classic patterns (Composite, Template Method, Builder, Facade, Strategy, Interpreter, Observer, Factory Method, Adapter).
+- **Readable code:** short functions and small files, detailed bilingual comments (Russian and English), classic patterns (Composite, Template Method, Builder, Facade, Strategy, Interpreter, Observer, Factory Method, Adapter).
 
 ---
 

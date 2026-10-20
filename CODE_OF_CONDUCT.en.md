@@ -28,6 +28,6 @@ We want participation in the project to be welcoming and harassment-free for eve
 
 Project maintainers monitor adherence to the code of conduct and have the right to delete or edit comments, commits, code, issues and wiki pages that do not comply with it, as well as to temporarily or permanently limit participation.
 
-Report a violation to the maintainer: on GitHub — through a private message ([Security → Report a vulnerability](https://github.com/ErmaleyAlekov/beresta/security/advisories/new) is suitable for this as well), on Gitverse — with an issue titled "Code of conduct: requesting a contact" without details. Reports are handled confidentially, and the message author is protected from retaliation.
+Report a violation to the maintainer: on GitHub — through a private message ([Security → Report a vulnerability](https://github.com/ErmaleyAlekov/beresta/security/advisories/new) is suitable for this as well), or by email to [ermaley.alekov@yandex.ru](mailto:ermaley.alekov@yandex.ru). Reports are handled confidentially, and the message author is protected from retaliation.
 
 Consequences are proportional to the violation: warning → temporary participation restriction → permanent blocking.

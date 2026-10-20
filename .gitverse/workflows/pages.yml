@@ -1,20 +1,18 @@
 # ============================================================================
 #  Публикация сайта продукта (каталог site/) на Gitverse Pages
-#  Не подключён: чтобы включить, скопируйте в .gitverse/workflows/pages.yml и
-#  в настройках репозитория («Страницы») выберите источник «Воркфлоу».
-#  Адрес сайта: https://ermaleyalekov.gitverse.site/beresta
+#  Запускается при изменении site/ в main или вручную. Источник страниц в
+#  настройках репозитория — «Воркфлоу». Адрес: https://ermaleyalekov.gitverse.site/beresta
 # ============================================================================
 #  Publishing the product site (the site/ directory) to Gitverse Pages
-#  Not enabled: to turn it on, copy it to .gitverse/workflows/pages.yml and
-#  choose the "Workflow" source in the repository settings ("Pages").
-#  The site address: https://ermaleyalekov.gitverse.site/beresta
+#  Runs on changes of site/ in main or manually. The pages source in the
+#  repository settings is "Workflow". Address: https://ermaleyalekov.gitverse.site/beresta
 # ============================================================================
 name: Pages
 
 on:
   push:
     branches: [ "main" ]
-    paths: [ "site/**" ]
+    paths: [ "site/**", ".gitverse/workflows/pages.yml" ]
   workflow_dispatch:
 
 jobs:

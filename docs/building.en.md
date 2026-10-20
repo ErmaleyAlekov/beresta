@@ -196,6 +196,7 @@ The repository is mirrored on [Gitverse](https://gitverse.ru/ermaleyalekov/beres
 
 - **`.gitverse/workflows/ci.yml`** — on every push and merge request: `make` and `make test` on Linux x86_64. The full platform matrix is checked on GitHub.
 - **`.gitverse/workflows/release.yml`** — on a `vX.Y.Z` tag as one job (artifacts are not passed between jobs on Gitverse): the build and tests on Linux x86_64, then waiting for the release of the same tag on GitHub (up to 15 minutes), downloading all its files (`tools/release/github_assets.sh`) and creating the Gitverse release through the public API (`tools/release/gitverse_release.sh`). If the GitHub release is not ready, only the Linux x86_64 SDK is attached; a manual re-run (CI/CD → Release, the `tag` parameter) replaces the files. **This workflow publishes nothing to registries.** Gitverse accepts release files only from its list of extensions (`.zip`, `.tgz`, `.whl`, `.jar` and others), so the NuGet package lies there in the `Beresta.X.Y.Z.nupkg.zip` archive.
+- **`.gitverse/workflows/pages.yml`** — on changes of `site/` in `main`: publishes the product site to Gitverse Pages (<https://ermaleyalekov.gitverse.site/beresta>); the "Pages" settings source is "Workflow".
 
 The Gitverse secret (Repository settings → Secrets and variables): `GV_API_TOKEN` — a token from gitverse.ru/settings/tokens with the "Repositories → Write" right. The `GITVERSE_` prefix is forbidden in Gitverse secret names.
 

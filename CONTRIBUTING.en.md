@@ -29,16 +29,7 @@ make test
 
 ## Code rules
 
-The project follows a strict style close to Norminette (School 21 / Ecole 42):
-
-- **C++17, no third-party dependencies** — neither in the core, nor in the wrappers, nor in the tests. We write algorithms, tables and parsers ourselves.
-- **A function body has at most 25 lines of code**, **an implementation file has at most 5 functions**, **at most 5 parameters** (more — a parameter structure).
-- **Headers (`include/`) hold declarations only**; the implementation lives in `src/`, mirrored by module (core, parser, xsd, xpath, …).
-- **No ternary operator and no lambdas**, except where the code would get noticeably more complex without them.
-- **Comments are bilingual**: Russian first, then the same meaning in English.
-- **User-facing messages go only through the i18n catalog** (`src/i18n/catalogs/messages_{ru,en}.cpp`), translated into both languages; the code uses the message identifier.
-- **Own exceptions** from `include/exception/`, not the standard ones.
-- **Both Makefile and CMake**: new files must build with both on Windows, Linux and macOS.
+The project follows strict coding rules. Every pull request is reviewed by the maintainer personally.
 
 More about the project layout and how to add a node type, an XPath function or an XSD type — in [docs/development.en.md](docs/development.en.md#extending-the-library).
 

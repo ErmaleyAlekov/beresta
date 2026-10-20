@@ -111,7 +111,7 @@ desktop.ini
 # Сборка WebAssembly (make wasm) / The WebAssembly build (make wasm)
 /bindings/wasm/dist/
 
-# ---- Контекст для сессий Claude (локальный) / Context for Claude sessions (local)
+# ---- Локальные заметки (не публикуются) / Local notes (not published)
 /project_context.md
 
 # ---- Документы для Роспатента: депонируемые материалы и реферат (не публикуются)
