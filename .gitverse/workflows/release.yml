@@ -3,13 +3,14 @@
 #
 #  Пакеты в реестры (npm, PyPI, NuGet, Maven Central) здесь НЕ публикуются:
 #  это делает только .github/workflows/release.yml на GitHub. Gitverse получает
-#  тот же набор файлов, что и релиз GitHub:
-#    1. build — сборка и тесты на Linux x86_64 (проверка и запасной архив SDK);
-#    2. release — ждёт релиз того же тега на GitHub (до 20 минут), скачивает все
-#       его файлы (SDK пяти платформ, npm, колесо, NuGet, jar) и прикрепляет их
-#       к релизу Gitverse; не дождался — прикрепляет только SDK из шага build.
+#  тот же набор файлов, что и релиз GitHub. Всё идёт ОДНОЙ задачей: артефакты
+#  upload-artifact между задачами на Gitverse не доходят («Artifact not found»).
+#    1. сборка и тесты на Linux x86_64 (проверка и запасной архив SDK);
+#    2. ожидание релиза того же тега на GitHub (до 15 минут: лимит задачи — 30),
+#       скачивание всех его файлов (SDK пяти платформ, npm, колесо, NuGet, jar)
+#       и релиз Gitverse с ними; не дождался — прикрепляется только свой SDK.
 #  Порядок выпуска: тег сначала на GitHub, после готовности релиза — на Gitverse
-#  (docs/building.md, «Выпуск версии»). Повтор вручную: Actions → Release →
+#  (docs/building.md, «Выпуск версии»). Повтор вручную: CI/CD → Release →
 #  запустить с параметром tag — файлы заменяются.
 #  Нужен секрет репозитория GV_API_TOKEN: токен gitverse.ru с правом
 #  «Репозитории → Запись» (префикс GITVERSE_ у секретов запрещён).
@@ -18,13 +19,14 @@
 #
 #  Packages are NOT published to registries (npm, PyPI, NuGet, Maven Central) here:
 #  only .github/workflows/release.yml on GitHub does that. Gitverse gets
-#  the same set of files as the GitHub release:
-#    1. build — the build and tests on Linux x86_64 (a check and a fallback SDK archive);
-#    2. release — waits for the release of the same tag on GitHub (up to 20 minutes), downloads all
-#       its files (the SDK of five platforms, npm, the wheel, NuGet, the jar) and attaches them
-#       to the Gitverse release; not waited out — attaches only the SDK from the build step.
+#  the same set of files as the GitHub release. Everything runs as ONE job: upload-artifact
+#  artifacts do not reach other jobs on Gitverse ("Artifact not found").
+#    1. the build and tests on Linux x86_64 (a check and a fallback SDK archive);
+#    2. waiting for the release of the same tag on GitHub (up to 15 minutes: the job limit is 30),
+#       downloading all its files (the SDK of five platforms, npm, the wheel, NuGet, the jar)
+#       and the Gitverse release with them; not waited out — only the own SDK is attached.
 #  The release order: the tag goes to GitHub first, to Gitverse after the release is ready
-#  (docs/building.en.md, "Releasing a version"). A manual repeat: Actions → Release →
+#  (docs/building.en.md, "Releasing a version"). A manual repeat: CI/CD → Release →
 #  run with the tag parameter — the files are replaced.
 #  The GV_API_TOKEN repository secret is needed: a gitverse.ru token with the
 #  "Repositories → Write" right (the GITVERSE_ prefix is forbidden for secrets).
@@ -45,15 +47,23 @@ env:
   TAG: ${{ inputs.tag || gitverse.ref_name }}
 
 jobs:
-  # ---- Сборка, тесты и запасной архив SDK -------------------------------------
-  # ---- The build, the tests and the fallback SDK archive -------------------------------------
-  build:
-    name: Linux x86_64
+  release:
+    name: Gitverse Release
     runs-on: ubuntu-latest
+    env:
+      GV_API_TOKEN: ${{ secrets.GV_API_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ env.TAG }}
+      # Без токена релиз не создать: падаем сразу, а не после сборки
+      # A release cannot be created without the token: fail at once, not after the build
+      - name: Секрет GV_API_TOKEN / The GV_API_TOKEN secret
+        shell: bash
+        run: |
+          if [ -z "$GV_API_TOKEN" ]; then
+            echo "Нет секрета GV_API_TOKEN (Настройки → Секреты и переменные) / No GV_API_TOKEN secret"; exit 1
+          fi
       - name: Инструменты / Tools
         shell: bash
         run: |
@@ -74,54 +84,21 @@ jobs:
         run: |
           make -j"$(nproc)" all bin/libberesta.a
           make test
-      # Без $GITHUB_ENV: его наличие на Gitverse не описано, версия читается заново
-      # Without $GITHUB_ENV: its presence on Gitverse is not documented, the version is read again
       - name: SDK для C и C++ / The C and C++ SDK
         shell: bash
         run: |
           sdk="beresta-${TAG#v}-linux-x86_64"
-          mkdir -p "sdk/$sdk/lib"
+          mkdir -p "sdk/$sdk/lib" fallback
           cp -R include LICENSE README.md README.en.md CHANGELOG.md CHANGELOG.en.md docs "sdk/$sdk/"
           cp bin/libberesta.a bin/libberesta.so "sdk/$sdk/lib/"
-          cd sdk && zip -qr "$sdk.zip" "$sdk"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: sdk-linux-x86_64
-          path: sdk/*.zip
-
-  # ---- Релиз Gitverse с файлами релиза GitHub ------------------------------------
-  # ---- The Gitverse release with the files of the GitHub release ------------------------------------
-  release:
-    name: Gitverse Release
-    needs: build
-    runs-on: ubuntu-latest
-    env:
-      GV_API_TOKEN: ${{ secrets.GV_API_TOKEN }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ env.TAG }}
-      - name: Инструменты / Tools
-        shell: bash
-        run: |
-          sudo=""
-          if [ "$(id -u)" != "0" ]; then sudo="sudo"; fi
-          $sudo apt-get update -qq
-          $sudo apt-get install -y -qq curl python3
-      - uses: actions/download-artifact@v4
-        with:
-          name: sdk-linux-x86_64
-          path: fallback
+          (cd sdk && zip -qr "../fallback/$sdk.zip" "$sdk")
       # Файлы GitHub полнее (пять платформ, glibc 2.35), поэтому берутся они, если релиз готов
       # The GitHub files are more complete (five platforms, glibc 2.35), so they are taken if the release is ready
       - name: Релиз Gitverse / The Gitverse release
         shell: bash
         run: |
-          if [ -z "$GV_API_TOKEN" ]; then
-            echo "Нет секрета GV_API_TOKEN: релиз создайте вручную / No GV_API_TOKEN secret: create the release by hand"; exit 1
-          fi
           files=mirror
-          if ! bash tools/release/github_assets.sh "$TAG" mirror 20; then
+          if ! bash tools/release/github_assets.sh "$TAG" mirror 15; then
             echo "Прикрепляю только SDK Linux x86_64 / Attaching only the Linux x86_64 SDK"
             files=fallback
           fi
