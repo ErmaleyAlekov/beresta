@@ -81,6 +81,9 @@ namespace suites
     void registerXsdAssertXPathTests(test::TestRunner& runner);
     void registerXsdAssertSchemaTests(test::TestRunner& runner);
     void registerXsdAssertParallelTests(test::TestRunner& runner);
+    void registerXsdRegexUnicodeTests(test::TestRunner& runner);
+    void registerXsdRegexSyntaxTests(test::TestRunner& runner);
+    void registerXsdRegexTableTests(test::TestRunner& runner);
     void registerContentCursorTests(test::TestRunner& runner);
     void registerContentPlanTests(test::TestRunner& runner);
     void registerXIncludeTests(test::TestRunner& runner);

@@ -32,7 +32,7 @@ namespace
         suites::registerXsdRedefineRulesTests, suites::registerXsdXsiTypeRootTests, suites::registerXsdDeepTests,
         suites::registerXsdAssertTests, suites::registerXsdAssertRulesTests,
         suites::registerXsdAssertXPathTests, suites::registerXsdAssertSchemaTests,
-        suites::registerXsdAssertParallelTests,
+        suites::registerXsdAssertParallelTests, suites::registerXsdRegexUnicodeTests, suites::registerXsdRegexSyntaxTests, suites::registerXsdRegexTableTests,
         suites::registerContentCursorTests, suites::registerContentPlanTests, suites::registerXIncludeTests,
         suites::registerCapiTests, suites::registerCapiMoveTests, suites::registerCapiStreamTests,
         suites::registerCapiParallelTests, suites::registerCapiBulkMoveTests, suites::registerI18nTests

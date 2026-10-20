@@ -31,10 +31,18 @@ namespace beresta::xsd
             takeCode();
             negated = true;
         }
+        // Пустой класс [] или [^] грамматика запрещает: posCharGroup — хотя бы один элемент
+        // The grammar forbids an empty class [] or [^]: posCharGroup is at least one item
+        if (atEnd() || peekCode() == ']')
+            fail(i18n::format(i18n::Message::PATTERN_CLASS_EMPTY));
         while (!atEnd() && peekCode() != ']')
         {
             if (applySubtraction(set, negated))
                 return set;
+            // '[' внутри класса допустим только экранированным (XmlChar) или в вычитании "-["
+            // '[' inside a class is allowed only escaped (XmlChar) or in the subtraction "-["
+            if (peekCode() == '[')
+                fail(i18n::format(i18n::Message::PATTERN_UNEXPECTED_META));
             parseClassItem(set);
         }
         set.normalize();
@@ -87,21 +95,31 @@ namespace beresta::xsd
             return;
         }
         takeCode();
-        set.add(first, parseRangeEnd());
+        set.add(first, parseRangeEnd(first));
     }
 
-    // Конец диапазона: символ или одиночное экранирование (\- , \] и т.п.)
-    // The end of a range: a character or a single escape (\- , \] and so on)
-    std::uint32_t RegexParser::parseRangeEnd()
+    /*
+    ** Конец диапазона: символ или одиночное экранирование (\- , \] и т.п.).
+    ** Диапазон [z-a] спецификация запрещает (seRange: начало не больше конца);
+    ** раньше его молча переворачивали.
+    **
+    ** The end of a range: a character or a single escape (\- , \] and so on).
+    ** The specification forbids the range [z-a] (seRange: the start is not greater than the end);
+    ** it used to be silently reversed.
+    */
+    std::uint32_t RegexParser::parseRangeEnd(std::uint32_t first)
     {
         bool single = true;
         std::uint32_t last = 0;
 
         if (peekCode() != '\\')
-            return takeCode();
-        parseEscape(single, last);
+            last = takeCode();
+        else
+            parseEscape(single, last);
         if (!single)
             fail(i18n::format(i18n::Message::PATTERN_RANGE_END_CLASS));
+        if (last < first)
+            fail(i18n::format(i18n::Message::PATTERN_RANGE_REVERSED));
         return last;
     }
 }

@@ -374,7 +374,7 @@ redefine-cycle MS-Schema2006-07-15/schU5/schU5.i
 # A type derived from a complex type inside the model of that same type is taken as circular derivation.
 nested-derivation MS-Particles2006-07-15/particlesEb041
 
-# ---- disputed (29) ----
+# ---- disputed (30) ----
 # Ожидание набора расходится со спецификацией XSD 1.0 2-й редакции или зависит от необязательного поведения процессора (разбор — в README.md).
 # The expectation of the suite disagrees with the XSD 1.0 2nd edition specification or depends on optional processor behavior (analysis in README.md).
 disputed MS-SimpleType2006-07-15/ste110
@@ -406,5 +406,8 @@ disputed MS-DataTypes2006-07-15/gMonth002_2061/gMonth002_2061.v
 disputed MS-DataTypes2006-07-15/gMonth004_2063/gMonth004_2063.v
 disputed MS-Errata102006-07-15/errE006/errE006.v
 disputed MS-Regex2006-07-15/reDG7/reDG7.v
+# \w по Unicode 3.2+ (U+0220, U+0500, U+1700 — буквы); XSD 1.0 ссылается на Unicode 3.1, где они не назначены (Cn)
+# \w by Unicode 3.2+ (U+0220, U+0500, U+1700 are letters); XSD 1.0 refers to Unicode 3.1, where they are unassigned (Cn)
+disputed MS-Regex2006-07-15/reZ003v/reZ003v.v
 disputed MS-SimpleType2006-07-15/stE096/stE096.v
 disputed SType/st_facets00119m/ST_facets00119m1_p

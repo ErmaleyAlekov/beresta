@@ -151,7 +151,7 @@ namespace beresta::xsd
         CharSet parseClassGroup();
         bool applySubtraction(CharSet& set, bool negated);
         void parseClassItem(CharSet& set);
-        std::uint32_t parseRangeEnd();
+        std::uint32_t parseRangeEnd(std::uint32_t first);
 
         // ---- Экранирование (xsd_regex_escapes.cpp) ----
         // ---- Escapes (xsd_regex_escapes.cpp) ----
