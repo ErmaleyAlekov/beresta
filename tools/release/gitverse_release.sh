@@ -73,14 +73,25 @@ drop_asset() {
 # Прикрепляет один файл к релизу (multipart, поле attachment, имя — в ?name=)
 # Attaches one file to the release (multipart, the attachment field, the name in ?name=)
 upload_asset() {
-    local id="$1" file="$2" name code
+    local id="$1" file="$2" name code out
+    # Gitverse принимает только расширения из своего списка (zip, tgz, whl, jar, …), .nupkg
+    # в нём нет: такой файл кладётся в zip — Beresta.X.Y.Z.nupkg.zip
+    # Gitverse accepts only the extensions from its list (zip, tgz, whl, jar, …), .nupkg
+    # is not there: such a file is put into a zip — Beresta.X.Y.Z.nupkg.zip
+    case "$file" in
+        *.zip|*.tgz|*.gz|*.7z|*.whl|*.jar|*.md|*.txt|*.pdf) ;;
+        *) zip -qj "${file}.zip" "$file" && file="${file}.zip" ;;
+    esac
     name="$(basename "$file")"
     drop_asset "$id" "$name"
-    code=$(gv_api POST "/releases/${id}/assets?name=${name}" /dev/null -F "attachment=@${file}")
+    out="$(mktemp)"
+    code=$(gv_api POST "/releases/${id}/assets?name=${name}" "$out" -F "attachment=@${file}")
     if [ "$code" != "201" ]; then
-        echo "Файл ${name} не загружен, HTTP ${code} / The file was not uploaded" >&2
+        echo "Файл ${name} не загружен, HTTP ${code} / The file was not uploaded: $(head -c 300 "$out")" >&2
+        rm -f "$out"
         return 1
     fi
+    rm -f "$out"
     echo "↑ ${name}"
 }
 
