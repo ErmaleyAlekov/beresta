@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Руководство по установке и развёртыванию — «Берёста» 2.1.2</title>
+<title>Руководство по установке и развёртыванию — «Берёста» 2.1.3</title>
 <style>
 /* Стили документов реестра: одни для экрана (site/docs/*.html) и для печати в PDF (A4) */
 /* The registry document styles: the same for the screen (site/docs/*.html) and for PDF printing (A4) */
@@ -72,14 +72,14 @@ blockquote { margin: 10px 0; padding: 4px 12px; border-left: 3px solid var(--acc
 </head>
 <body>
 <header class="doc-head">
-<p class="doc-product">Программа для ЭВМ «XML-библиотека „Берёста“ (beresta)», версия 2.1.2</p>
+<p class="doc-product">Программа для ЭВМ «XML-библиотека „Берёста“ (beresta)», версия 2.1.3</p>
 <p class="doc-nav"><a href="../index.html">Сайт продукта</a> · <a href="../documentation.html">Документация</a></p>
 </header>
 <main>
 
 <h1 id="руководство-по-установке-и-развёртыванию">Руководство по установке и развёртыванию</h1>
 <p>Документ описывает, как получить программу для ЭВМ «XML-библиотека „Берёста“ (beresta)», собрать её из исходного текста, установить готовые сборки, подключить к своему проекту и проверить работоспособность. Сведения относятся к версии, указанной в шапке документа.</p>
-<p>Правообладатель: [ФИО правообладателя]. Сайт продукта: [адрес сайта продукта].</p>
+<p>Правообладатель: Ермаков Алексей Александрович. Сайт продукта: [адрес сайта продукта].</p>
 <nav class="doc-toc"><p>Содержание</p><ol><li><a href="#назначение-и-состав-продукта">Назначение и состав продукта</a></li><li><a href="#где-скачать">Где скачать</a></li><li><a href="#системные-требования">Системные требования</a></li><li><a href="#сборка-через-makefile">Сборка через Makefile</a></li><li><a href="#сборка-через-cmake">Сборка через CMake</a></li><li><a href="#установка-готовой-сборки">Установка готовой сборки</a></li><li><a href="#подключение-к-своему-проекту">Подключение к своему проекту</a></li><li><a href="#проверка-работоспособности">Проверка работоспособности</a></li><li><a href="#обновление-и-удаление">Обновление и удаление</a></li></ol></nav>
 <h2 id="назначение-и-состав-продукта">Назначение и состав продукта</h2>
 <p>«Берёста» — библиотека для обработки XML на языке C++17 без сторонних зависимостей: разбор XML 1.0, DOM, SAX, пространства имён, восемь кодировок, DTD, XML Schema 1.0 (с утверждениями <code>xs:assert</code> и <code>xs:override</code> из XSD 1.1), XPath 1.0, XInclude, запись XML. Ядро собирается в динамическую библиотеку с плоским Си-интерфейсом, через который библиотекой пользуются программы на C, Java, C#, Python, Node.js и WebAssembly.</p>
@@ -92,7 +92,7 @@ blockquote { margin: 10px 0; padding: 4px 12px; border-left: 3px solid var(--acc
 <p>Получить исходный текст через git:</p>
 <pre><code class="language-bash">git clone https://gitverse.ru/ermaleyalekov/beresta.git</code></pre>
 <h2 id="системные-требования">Системные требования</h2>
-<table><thead><tr><th>Параметр</th><th>Требование</th></tr></thead><tbody><tr><td>Процессор</td><td>x86_64 или ARM64 (aarch64); 32-битные платформы поддерживаются ядром, обёртки проверялись на 64-битных</td></tr><tr><td>ОС для сборки из исходного текста</td><td>Linux (в том числе Astra Linux, РЕД ОС, ALT), Windows 10 и новее, macOS 11 и новее</td></tr><tr><td>Готовые сборки Linux из релиза</td><td>glibc 2.35 и новее (собираются на Ubuntu 22.04). На системах со старой glibc (например, Astra Linux SE 1.7 — glibc 2.28) библиотеку нужно собрать из исходного текста</td></tr><tr><td>Компилятор</td><td>с поддержкой C++17: GCC, Clang, MinGW или MSVC. В CI проверяются GCC и Clang на Linux, MSVC на Windows, Apple Clang на macOS</td></tr><tr><td>Сборка</td><td>GNU Make (Makefile) или CMake</td></tr><tr><td>Сторонние библиотеки</td><td>не нужны: только стандартная библиотека C++17</td></tr><tr><td>Место на диске</td><td>около 100 МБ для исходного текста и результатов сборки (ориентировочно, без наборов тестов W3C)</td></tr><tr><td>Обёртки (по желанию)</td><td>Java 22+, .NET с поддержкой .NET Standard 2.1 (.NET Core 3.0 и новее), Python 3.8+, Node.js 18+ — только для соответствующих языков</td></tr></tbody></table>
+<table><thead><tr><th>Параметр</th><th>Требование</th></tr></thead><tbody><tr><td>Процессор</td><td>x86_64 или ARM64 (aarch64); 32-битные платформы поддерживаются ядром, обёртки проверялись на 64-битных</td></tr><tr><td>ОС для сборки из исходного текста</td><td>Linux (в том числе Astra Linux, РЕД ОС, ALT), Windows 10 и новее, macOS 11 и новее. Проверочным стендом проверены Astra Linux SE 1.7 и 1.8, ALT p10 и p11, РЕД ОС 7.3 и 8</td></tr><tr><td>Готовые сборки Linux из релиза</td><td>glibc 2.35 и новее (собираются на Ubuntu 22.04). На системах со старой glibc (например, Astra Linux SE 1.7 — glibc 2.28) библиотеку нужно собрать из исходного текста</td></tr><tr><td>Компилятор</td><td>с поддержкой C++17: GCC 8 и новее, Clang, MinGW или MSVC. В CI проверяются GCC и Clang на Linux, MSVC на Windows, Apple Clang на macOS</td></tr><tr><td>Сборка</td><td>GNU Make (Makefile) или CMake</td></tr><tr><td>Сторонние библиотеки</td><td>не нужны: только стандартная библиотека C++17</td></tr><tr><td>Место на диске</td><td>около 100 МБ для исходного текста и результатов сборки (ориентировочно, без наборов тестов W3C)</td></tr><tr><td>Обёртки (по желанию)</td><td>Java 22+, .NET с поддержкой .NET Standard 2.1 (.NET Core 3.0 и новее), Python 3.8+, Node.js 18+ — только для соответствующих языков</td></tr></tbody></table>
 <p>Для сборки динамической библиотеки на Linux нужна статическая версия стандартной библиотеки C++ (<code>libstdc++.a</code>): библиотека встраивает её, чтобы на машине пользователя не требовалась определённая версия <code>libstdc++</code>.</p>
 <h3 id="установка-инструментов-на-российских-ос">Установка инструментов на российских ОС</h3>
 <p>Astra Linux, Debian, Ubuntu:</p>
@@ -102,7 +102,7 @@ blockquote { margin: 10px 0; padding: 4px 12px; border-left: 3px solid var(--acc
 <p>ALT Linux (пакет статической <code>libstdc++</code> называется по версии компилятора, например <code>libstdc++12-devel-static</code>):</p>
 <pre><code class="language-bash">apt-get install gcc-c++ make</code></pre>
 <p>CMake устанавливается пакетом <code>cmake</code> во всех трёх системах и нужен только для сборки через CMake.</p>
-<blockquote><p>На GCC 8 (например, в Astra Linux SE 1.7) часть C++17 реализована не полностью: <code>std::filesystem</code> требует отдельной библиотеки <code>stdc++fs</code>. Сборка на GCC 8 не проверялась; рекомендуется GCC 9 и новее или Clang 9 и новее. Проверочный стенд (раздел «Проверка работоспособности») предупреждает о старом компиляторе.</p></blockquote>
+<blockquote><p>На GCC 8 (например, в Astra Linux SE 1.7) реализация <code>std::filesystem</code> находится в отдельной библиотеке <code>stdc++fs</code>: Makefile и CMake подключают её сами, если версия GCC ниже 9. Сборка и все модульные тесты проверены на Astra Linux SE 1.7 (GCC 8.3, glibc 2.28) через Makefile и через CMake.</p></blockquote>
 <h2 id="сборка-через-makefile">Сборка через Makefile</h2>
 <p>Из корня исходного текста:</p>
 <pre><code class="language-bash">make</code></pre>
@@ -122,7 +122,7 @@ blockquote { margin: 10px 0; padding: 4px 12px; border-left: 3px solid var(--acc
 <h2 id="установка-готовой-сборки">Установка готовой сборки</h2>
 <ol><li>Скачайте архив SDK для своей платформы со страницы релиза (Gitverse или GitHub).</li><li>Распакуйте его в каталог проекта, например <code>third_party/beresta</code>.</li><li>Заголовки лежат в <code>include/</code>, библиотеки — в каталоге архива для своей платформы. Динамическую библиотеку положите рядом с исполняемым файлом программы или в каталог, где её ищет загрузчик ОС (<code>PATH</code> в Windows, <code>LD_LIBRARY_PATH</code> или <code>rpath</code> в Linux).</li></ol>
 <p>Для других языков сборка не нужна — пакеты уже содержат бинарники всех платформ:</p>
-<table><thead><tr><th>Язык</th><th>Установка</th></tr></thead><tbody><tr><td>Node.js</td><td><code>npm install beresta</code></td></tr><tr><td>Браузер, Web Workers</td><td><code>npm install beresta-wasm</code></td></tr><tr><td>Python</td><td><code>pip install beresta</code></td></tr><tr><td>.NET</td><td><code>dotnet add package Beresta</code></td></tr><tr><td>Java</td><td>зависимость Maven <code>io.github.ermaleyalekov:beresta</code> (Gradle: <code>implementation("io.github.ermaleyalekov:beresta:2.1.2")</code>)</td></tr></tbody></table>
+<table><thead><tr><th>Язык</th><th>Установка</th></tr></thead><tbody><tr><td>Node.js</td><td><code>npm install beresta</code></td></tr><tr><td>Браузер, Web Workers</td><td><code>npm install beresta-wasm</code></td></tr><tr><td>Python</td><td><code>pip install beresta</code></td></tr><tr><td>.NET</td><td><code>dotnet add package Beresta</code></td></tr><tr><td>Java</td><td>зависимость Maven <code>io.github.ermaleyalekov:beresta</code> (Gradle: <code>implementation("io.github.ermaleyalekov:beresta:2.1.3")</code>)</td></tr></tbody></table>
 <h2 id="подключение-к-своему-проекту">Подключение к своему проекту</h2>
 <p>Программа на C++ через CMake (исходный текст библиотеки — в подкаталоге проекта):</p>
 <pre><code class="language-cmake">set(BERESTA_BUILD_STATIC ON CACHE BOOL "" FORCE)

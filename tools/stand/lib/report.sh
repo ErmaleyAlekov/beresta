@@ -76,3 +76,14 @@ report_finish() {
 
     return "$STAND_FAILED"
 }
+
+# Переносит в отчёт итог модульных тестов из журнала шага (строка «Итого:» у
+# make test, «tests passed» у ctest): протокол показывает число пройденных тестов
+# Copies the unit test summary from the step log into the report (the «Итого:» line
+# of make test, «tests passed» of ctest): the protocol shows the number of passed tests
+report_test_total() {
+    total="$(grep -E 'Итого:|tests passed' "$STAND_LOGS/test.log" 2>/dev/null | tail -n 1)"
+    if [ -n "$total" ]; then
+        report_line test_total "${total#Итого: }"
+    fi
+}

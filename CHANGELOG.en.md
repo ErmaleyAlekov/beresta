@@ -5,6 +5,28 @@
 Versions follow [semantic versioning](https://semver.org/). The entire version section
 is included in the release description on GitHub and Gitverse.
 
+## 2.1.3 — 2026-10-20
+
+Building from source on Russian operating systems and a test stand for the expert.
+
+### Build
+
+- GCC 8 (Astra Linux SE 1.7): `std::filesystem` is linked from `libstdc++fs` — the Makefile and CMake
+  add `-lstdc++fs` themselves when the GCC version is below 9.
+- glibc < 2.34 (Astra Linux SE 1.7, RED OS 7.3): the unit tests are linked with `-pthread`
+  (`Threads::Threads` in CMake).
+
+### Test stand
+
+- `sh tools/stand/run_stand.sh` builds the library from source with one command, runs the unit tests
+  and the demo programs and writes the `stand_report.txt` report (OS with version, glibc, compiler,
+  per-step result and the number of passed tests). See `tools/stand/README.md`.
+- The stand passed (211 of 211 tests) on Astra Linux SE 1.7 and 1.8, ALT p10 and p11, RED OS 7.3 and 8.
+
+### Documentation
+
+- Documents for the Russian software registry (`docs/registry/`, in Russian) and the product site (`site/`).
+
 ## 2.1.2 — 2026-10-20
 
 XML Schema validation against the W3C XML Schema Test Suite: **93.6% → 96.2%** of applicable cases.

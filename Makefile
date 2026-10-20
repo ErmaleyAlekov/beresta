@@ -268,6 +268,38 @@ ifneq ($(PLATFORM_OS),windows)
     RMFILE          = rm -f "$(1)"
 endif
 
+# ---- std::filesystem на GCC 8 -------------------------------------------------
+# В libstdc++ до GCC 9 реализация std::filesystem лежит в отдельной статической
+# библиотеке libstdc++fs.a (так в Astra Linux SE 1.7, Debian 10). FS_LIBS
+# добавляется в конец каждой компоновки с объектами ядра. Clang узнаётся по
+# слову clang в --version: его -dumpversion у старых версий печатает 4.2.1.
+# ---- std::filesystem on GCC 8 -------------------------------------------------
+# In libstdc++ before GCC 9 the std::filesystem implementation lives in a separate
+# static library libstdc++fs.a (as in Astra Linux SE 1.7, Debian 10). FS_LIBS
+# is appended to every link with the core objects. Clang is recognized by the
+# word clang in --version: its -dumpversion prints 4.2.1 in old versions.
+CXX_VERSION_TEXT := $(shell $(CXX) --version)
+CXX_MAJOR        := $(firstword $(subst ., ,$(shell $(CXX) -dumpversion)))
+FS_LIBS          :=
+ifeq ($(findstring clang,$(CXX_VERSION_TEXT)),)
+    ifneq ($(filter 5 6 7 8,$(CXX_MAJOR)),)
+        FS_LIBS := -lstdc++fs
+    endif
+endif
+
+# ---- Потоки в модульных тестах ------------------------------------------------
+# Тесты запускают std::thread. До glibc 2.34 (Astra Linux SE 1.7 — 2.28) функции
+# pthread лежат в отдельной libpthread, и без -pthread компоновка тестов падает;
+# на новых системах ключ безвреден. Сборка MinGW обходится без него.
+# ---- Threads in the unit tests ------------------------------------------------
+# The tests start std::thread. Before glibc 2.34 (Astra Linux SE 1.7 has 2.28) the
+# pthread functions live in a separate libpthread, and without -pthread the test link
+# fails; on new systems the flag is harmless. The MinGW build does without it.
+THREAD_LIBS      :=
+ifneq ($(PLATFORM_OS),windows)
+    THREAD_LIBS := -pthread
+endif
+
 # ---- Вспомогательные функции ------------------------------------------------
 # Рекурсивный поиск файлов средствами самого make (без внешней утилиты find)
 # ---- Helper functions ------------------------------------------------
@@ -405,12 +437,12 @@ $(LIB_BIN): $(LIB_OBJ) | $(BIN_DIR)
 # Динамическая библиотека: наружу экспортируется только Си-интерфейс
 # The shared library: only the C interface is exported
 $(SHARED_BIN): $(LIB_OBJ) | $(BIN_DIR)
-	$(CXX) $(CXXFLAGS) $(LIB_OBJ) $(SHARED_LDFLAGS) -o $@
+	$(CXX) $(CXXFLAGS) $(LIB_OBJ) $(SHARED_LDFLAGS) $(FS_LIBS) -o $@
 
 # Демонстрационная программа на C++ (статическая библиотека)
 # The C++ demo program (static library)
 $(DEMO_BIN): $(DEMO_OBJ) $(LIB_BIN) | $(BIN_DIR)
-	$(CXX) $(CXXFLAGS) $(DEMO_OBJ) $(LIB_BIN) -o $@
+	$(CXX) $(CXXFLAGS) $(DEMO_OBJ) $(LIB_BIN) $(FS_LIBS) -o $@
 
 # Демонстрационная программа на чистом C (динамическая библиотека)
 # The pure C demo program (shared library)
@@ -420,12 +452,12 @@ $(CAPI_BIN): $(CAPI_OBJ) $(SHARED_BIN) | $(BIN_DIR)
 # Модульные тесты
 # Unit tests
 $(TEST_BIN): $(TEST_OBJ) $(LIB_BIN) | $(BIN_DIR)
-	$(CXX) $(CXXFLAGS) $(TEST_OBJ) $(LIB_BIN) -o $@
+	$(CXX) $(CXXFLAGS) $(TEST_OBJ) $(LIB_BIN) $(FS_LIBS) $(THREAD_LIBS) -o $@
 
 # Аддон Node.js: переходники Node-API + объекты ядра в одном файле beresta.node
 # The Node.js addon: the Node-API adapters + the core objects in one beresta.node file
 $(ADDON_BIN): $(ADDON_OBJ) $(LIB_OBJ) | $(BIN_DIR)
-	$(CXX) $(CXXFLAGS) $(ADDON_OBJ) $(LIB_OBJ) $(ADDON_LDFLAGS) -o $@
+	$(CXX) $(CXXFLAGS) $(ADDON_OBJ) $(LIB_OBJ) $(ADDON_LDFLAGS) $(FS_LIBS) -o $@
 
 # ---- Копирование бинарника в обёртки (пересоздаётся при изменении) ------------
 # Правило есть для всех трёх обёрток (make java-test работает и без JAVA=1),

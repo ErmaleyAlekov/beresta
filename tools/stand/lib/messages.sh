@@ -36,6 +36,10 @@ stand_text() {
             ru='cmake'
             en='cmake'
             ;;
+        env_note)
+            ru='Примечание'
+            en='Note'
+            ;;
         not_found)
             ru='не найден'
             en='not found'
@@ -55,6 +59,10 @@ stand_text() {
         step_test)
             ru='Модульные тесты'
             en='Unit tests'
+            ;;
+        test_total)
+            ru='Итог тестов'
+            en='Test summary'
             ;;
         step_demo)
             ru='Демонстрационные программы'
@@ -81,8 +89,8 @@ stand_text() {
             en='Neither make nor cmake found: install make'
             ;;
         gcc_old)
-            ru='GCC старше 9: std::filesystem может потребовать -lstdc++fs, сборка не проверялась'
-            en='GCC older than 9: std::filesystem may require -lstdc++fs, build not verified'
+            ru='GCC до 9-й версии: std::filesystem подключается из libstdc++fs (-lstdc++fs)'
+            en='GCC older than 9: std::filesystem is linked from libstdc++fs (-lstdc++fs)'
             ;;
         static_hint)
             ru='Нет статической libstdc++: РЕД ОС — dnf install libstdc++-static, ALT — пакет libstdc++<версия GCC>-devel-static'

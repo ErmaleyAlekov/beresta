@@ -169,11 +169,11 @@ The Maven dependency (the Java package stays `org.beresta`):
 <dependency>
     <groupId>io.github.ermaleyalekov</groupId>
     <artifactId>beresta</artifactId>
-    <version>2.1.2</version>
+    <version>2.1.3</version>
 </dependency>
 ```
 
-Gradle: `implementation("io.github.ermaleyalekov:beresta:2.1.2")`.
+Gradle: `implementation("io.github.ermaleyalekov:beresta:2.1.3")`.
 
 ### CI/CD in GitHub Actions
 
@@ -216,16 +216,16 @@ The order:
 3. The tag goes to GitHub first; the packages and the release are built there (about 20–30 minutes):
 
 ```bash
-git tag v2.1.2
+git tag v2.1.3
 ```
 ```bash
-git push origin main v2.1.2
+git push origin main v2.1.3
 ```
 
 4. When the GitHub release is ready — the same tag to Gitverse; its workflow takes the files of the GitHub release:
 
 ```bash
-git push gitverse main v2.1.2
+git push gitverse main v2.1.3
 ```
 
 5. Checking: [GitHub releases](https://github.com/ErmaleyAlekov/beresta/releases) and [Actions](https://github.com/ErmaleyAlekov/beresta/actions), [Gitverse releases](https://gitverse.ru/ermaleyalekov/beresta/releases) and the CI/CD section of the repository on Gitverse; the packages — on npm, PyPI, NuGet, Maven Central (if the GitHub secrets are set).

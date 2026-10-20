@@ -19,11 +19,11 @@ try (XmlDocument document = Xml.parse("<shop><item code='A1'>Чай</item></shop
 <dependency>
     <groupId>io.github.ermaleyalekov</groupId>
     <artifactId>beresta</artifactId>
-    <version>2.1.2</version>
+    <version>2.1.3</version>
 </dependency>
 ```
 
-Gradle: `implementation("io.github.ermaleyalekov:beresta:2.1.2")`.
+Gradle: `implementation("io.github.ermaleyalekov:beresta:2.1.3")`.
 
 Тот же jar прикладывается к каждому [релизу на GitHub](https://github.com/ErmaleyAlekov/beresta/releases) и уже содержит библиотеку для Windows (x64, arm64), Linux (x64, arm64; glibc 2.35+) и macOS (универсальная); загрузчик сам извлечёт нужную. Запускайте приложение с ключом `--enable-native-access=ALL-UNNAMED`.
 Сборка из исходников: `make JAVA=1` или CMake с `-DBERESTA_BUILD_JAVA=ON` (библиотека попадёт в `src/main/resources/natives/<os>-<arch>/`), затем `mvn package`.
@@ -58,11 +58,11 @@ Getting it from Maven Central (the Java package is `org.beresta`):
 <dependency>
     <groupId>io.github.ermaleyalekov</groupId>
     <artifactId>beresta</artifactId>
-    <version>2.1.2</version>
+    <version>2.1.3</version>
 </dependency>
 ```
 
-Gradle: `implementation("io.github.ermaleyalekov:beresta:2.1.2")`.
+Gradle: `implementation("io.github.ermaleyalekov:beresta:2.1.3")`.
 
 The same jar is attached to every [GitHub release](https://github.com/ErmaleyAlekov/beresta/releases) and already contains the library for Windows (x64, arm64), Linux (x64, arm64; glibc 2.35+) and macOS (universal); the loader extracts the right one itself. Run the application with the `--enable-native-access=ALL-UNNAMED` flag.
 Building from source: `make JAVA=1` or CMake with `-DBERESTA_BUILD_JAVA=ON` (the library lands in `src/main/resources/natives/<os>-<arch>/`), then `mvn package`.

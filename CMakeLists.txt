@@ -57,7 +57,7 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Минимальная ве
 
 # Версия совпадает с BERESTA_VERSION_STRING в include/capi/beresta_c.h
 # The version matches BERESTA_VERSION_STRING in include/capi/beresta_c.h
-project(beresta VERSION 2.1.2 LANGUAGES CXX)
+project(beresta VERSION 2.1.3 LANGUAGES CXX)
 
 # ---- Тип сборки по умолчанию — Release ---------------------------------------
 # Без него однотипные генераторы (Make, Ninja) собирают без оптимизаций: ядро
@@ -167,6 +167,19 @@ function(beresta_apply_link_options target)
     endif()
 endfunction()
 
+# ---- std::filesystem на GCC 8 -------------------------------------------------
+# В libstdc++ до GCC 9 реализация std::filesystem лежит в отдельной статической
+# библиотеке libstdc++fs.a (так в Astra Linux SE 1.7, Debian 10). Её получают
+# все модули с объектами ядра; программы — через beresta_static (PUBLIC).
+# ---- std::filesystem on GCC 8 -------------------------------------------------
+# In libstdc++ before GCC 9 the std::filesystem implementation lives in a separate
+# static library libstdc++fs.a (as in Astra Linux SE 1.7, Debian 10). It is given to
+# all modules with the core objects; programs get it through beresta_static (PUBLIC).
+set(BERESTA_FS_LIBS "")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
+    set(BERESTA_FS_LIBS stdc++fs)
+endif()
+
 # ---- Объектные файлы ядра: компилируются ОДИН раз для обеих библиотек --------
 # PIC обязателен для .so; скрытая видимость оставляет в таблице экспорта
 # только функции с BERESTA_API (Си-интерфейс).
@@ -217,6 +230,7 @@ if(WIN32)
     set_target_properties(beresta PROPERTIES PREFIX "")
 endif()
 beresta_apply_link_options(beresta)
+target_link_libraries(beresta PRIVATE ${BERESTA_FS_LIBS})
 
 # ---- Статическая библиотека для программ на C++ --------------------------------
 # ---- The static library for C++ programs --------------------------------
@@ -224,6 +238,7 @@ if(BERESTA_BUILD_STATIC)
     add_library(beresta_static STATIC $<TARGET_OBJECTS:beresta_objects>)
     add_library(beresta::static ALIAS beresta_static)
     target_include_directories(beresta_static PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+    target_link_libraries(beresta_static PUBLIC ${BERESTA_FS_LIBS})
 endif()
 
 # ---- Обёртки для других языков (по флагам) -------------------------------------
@@ -272,6 +287,13 @@ if(BERESTA_BUILD_TESTS)
     add_executable(beresta_tests ${TEST_SOURCES})
     target_include_directories(beresta_tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests/include")
     target_link_libraries(beresta_tests PRIVATE beresta_static)
+
+    # Тесты запускают std::thread: до glibc 2.34 (Astra Linux SE 1.7) нужна
+    # отдельная libpthread, Threads::Threads подключает её там, где она нужна
+    # The tests start std::thread: before glibc 2.34 (Astra Linux SE 1.7) a separate
+    # libpthread is needed, Threads::Threads links it where it is needed
+    find_package(Threads REQUIRED)
+    target_link_libraries(beresta_tests PRIVATE Threads::Threads)
     beresta_apply_compile_options(beresta_tests)
     add_test(NAME beresta_tests COMMAND beresta_tests)
 endif()

@@ -2,7 +2,7 @@
 
 Документ описывает, как получить программу для ЭВМ «XML-библиотека „Берёста“ (beresta)», собрать её из исходного текста, установить готовые сборки, подключить к своему проекту и проверить работоспособность. Сведения относятся к версии, указанной в шапке документа.
 
-Правообладатель: [ФИО правообладателя]. Сайт продукта: [адрес сайта продукта].
+Правообладатель: Ермаков Алексей Александрович. Сайт продукта: [адрес сайта продукта].
 
 ## Назначение и состав продукта
 
@@ -42,9 +42,9 @@ git clone https://gitverse.ru/ermaleyalekov/beresta.git
 | Параметр | Требование |
 |---|---|
 | Процессор | x86_64 или ARM64 (aarch64); 32-битные платформы поддерживаются ядром, обёртки проверялись на 64-битных |
-| ОС для сборки из исходного текста | Linux (в том числе Astra Linux, РЕД ОС, ALT), Windows 10 и новее, macOS 11 и новее |
+| ОС для сборки из исходного текста | Linux (в том числе Astra Linux, РЕД ОС, ALT), Windows 10 и новее, macOS 11 и новее. Проверочным стендом проверены Astra Linux SE 1.7 и 1.8, ALT p10 и p11, РЕД ОС 7.3 и 8 |
 | Готовые сборки Linux из релиза | glibc 2.35 и новее (собираются на Ubuntu 22.04). На системах со старой glibc (например, Astra Linux SE 1.7 — glibc 2.28) библиотеку нужно собрать из исходного текста |
-| Компилятор | с поддержкой C++17: GCC, Clang, MinGW или MSVC. В CI проверяются GCC и Clang на Linux, MSVC на Windows, Apple Clang на macOS |
+| Компилятор | с поддержкой C++17: GCC 8 и новее, Clang, MinGW или MSVC. В CI проверяются GCC и Clang на Linux, MSVC на Windows, Apple Clang на macOS |
 | Сборка | GNU Make (Makefile) или CMake |
 | Сторонние библиотеки | не нужны: только стандартная библиотека C++17 |
 | Место на диске | около 100 МБ для исходного текста и результатов сборки (ориентировочно, без наборов тестов W3C) |
@@ -74,7 +74,7 @@ apt-get install gcc-c++ make
 
 CMake устанавливается пакетом `cmake` во всех трёх системах и нужен только для сборки через CMake.
 
-> На GCC 8 (например, в Astra Linux SE 1.7) часть C++17 реализована не полностью: `std::filesystem` требует отдельной библиотеки `stdc++fs`. Сборка на GCC 8 не проверялась; рекомендуется GCC 9 и новее или Clang 9 и новее. Проверочный стенд (раздел «Проверка работоспособности») предупреждает о старом компиляторе.
+> На GCC 8 (например, в Astra Linux SE 1.7) реализация `std::filesystem` находится в отдельной библиотеке `stdc++fs`: Makefile и CMake подключают её сами, если версия GCC ниже 9. Сборка и все модульные тесты проверены на Astra Linux SE 1.7 (GCC 8.3, glibc 2.28) через Makefile и через CMake.
 
 ## Сборка через Makefile
 
@@ -151,7 +151,7 @@ ctest --test-dir build -C Release --output-on-failure
 | Браузер, Web Workers | `npm install beresta-wasm` |
 | Python | `pip install beresta` |
 | .NET | `dotnet add package Beresta` |
-| Java | зависимость Maven `io.github.ermaleyalekov:beresta` (Gradle: `implementation("io.github.ermaleyalekov:beresta:2.1.2")`) |
+| Java | зависимость Maven `io.github.ermaleyalekov:beresta` (Gradle: `implementation("io.github.ermaleyalekov:beresta:2.1.3")`) |
 
 ## Подключение к своему проекту
 

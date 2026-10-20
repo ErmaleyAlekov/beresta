@@ -143,7 +143,7 @@ function(beresta_setup_node)
     file(GLOB_RECURSE addon_sources CONFIGURE_DEPENDS "${package_dir}/addon/src/*.cpp")
     add_library(beresta_node MODULE ${addon_sources} $<TARGET_OBJECTS:beresta_objects>)
     target_include_directories(beresta_node PRIVATE "${PROJECT_SOURCE_DIR}/include" "${package_dir}/addon/include")
-    target_link_libraries(beresta_node PRIVATE ${CMAKE_DL_LIBS})
+    target_link_libraries(beresta_node PRIVATE ${CMAKE_DL_LIBS} ${BERESTA_FS_LIBS})
     set_target_properties(beresta_node PROPERTIES
         OUTPUT_NAME beresta PREFIX "" SUFFIX ".node"
         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/node"

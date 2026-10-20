@@ -43,12 +43,7 @@ env_find_tools() {
 # Описывает текущее окружение: ОС, ядро, glibc, компиляторы, make, cmake
 # Describes the current environment: OS, kernel, glibc, compilers, make, cmake
 env_describe() {
-    # os-release читается в подоболочке, чтобы не менять переменные стенда
-    # os-release is read in a subshell so as not to change the stand variables
-    os_name="$( (. /etc/os-release && printf '%s' "$PRETTY_NAME") 2>/dev/null)"
-    if [ -z "$os_name" ]; then
-        os_name="$(uname -s)"
-    fi
+    os_name="$(env_os_name)"
     kernel_info="$(uname -srm)"
     glibc_version="$(getconf GNU_LIBC_VERSION 2>/dev/null)" || glibc_version="$(ldd --version 2>/dev/null | head -n 1)" || glibc_version="$(stand_text not_found)"
     compiler_version="$("$STAND_CXX" --version 2>/dev/null | head -n 1)"
@@ -72,7 +67,7 @@ env_describe() {
     # The GCC major version comes from -dumpversion (clang has the word clang in --version)
     major="$("$STAND_CXX" -dumpversion 2>/dev/null | cut -d'.' -f1)"
     if ! echo "$compiler_version" | grep -qi 'clang' && [ -n "$major" ] && [ "$major" -lt 9 ] 2>/dev/null; then
-        report_line env_compiler "$(stand_text gcc_old)"
+        report_line env_note "$(stand_text gcc_old)"
     fi
 }
 
@@ -99,8 +94,12 @@ int main() {
 }
 EOF
 
-    "$STAND_CXX" -std=c++17 "$temp_dir/probe.cpp" -o "$temp_dir/probe" 2>/dev/null
-    if [ $? -eq 0 ]; then
+    # На GCC 8 std::filesystem лежит в libstdc++fs: вторая попытка — с ней
+    # (так же поступают Makefile и CMakeLists.txt)
+    # On GCC 8 std::filesystem lives in libstdc++fs: the second attempt uses it
+    # (the Makefile and CMakeLists.txt do the same)
+    if "$STAND_CXX" -std=c++17 "$temp_dir/probe.cpp" -o "$temp_dir/probe" 2>/dev/null \
+        || "$STAND_CXX" -std=c++17 "$temp_dir/probe.cpp" -o "$temp_dir/probe" -lstdc++fs 2>/dev/null; then
         "$temp_dir/probe" 2>/dev/null
         result=$?
     else

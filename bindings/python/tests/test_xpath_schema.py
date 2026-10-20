@@ -51,7 +51,7 @@ class XPathSchemaTests(unittest.TestCase):
         self.assertEqual(caught.exception.name, "VALIDATION_ERROR")
 
     def test_version(self):
-        self.assertEqual(beresta.version(), "2.1.2")
+        self.assertEqual(beresta.version(), "2.1.3")
         self.assertRegex(beresta.platform_name(), r"^(windows|linux|macos)-")
 
 

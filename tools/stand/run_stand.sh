@@ -20,6 +20,7 @@ STAND_FAILED=0
 # Include libraries
 . "$STAND_DIR/lib/messages.sh"
 . "$STAND_DIR/lib/report.sh"
+. "$STAND_DIR/lib/os_info.sh"
 . "$STAND_DIR/lib/environment.sh"
 . "$STAND_DIR/lib/build.sh"
 
@@ -64,6 +65,7 @@ main() {
         exit 1
     fi
     run_step test build_run_tests step_test
+    report_test_total
     run_step demo build_run_demos step_demo
     report_finish
     exit $STAND_FAILED
