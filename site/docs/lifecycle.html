@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Описание процессов жизненного цикла — «Берёста» 2.1.2</title>
+<style>
+/* Стили документов реестра: одни для экрана (site/docs/*.html) и для печати в PDF (A4) */
+/* The registry document styles: the same for the screen (site/docs/*.html) and for PDF printing (A4) */
+:root {
+    --text: #1d1f22;
+    --muted: #5a6068;
+    --line: #d5d9de;
+    --accent: #8a4b16;
+    --code-bg: #f4f2ee;
+    --page: #ffffff;
+}
+@page {
+    size: A4;
+    margin: 18mm 15mm 20mm 20mm;
+    @bottom-center {
+        content: "Стр. " counter(page) " из " counter(pages);
+        font: 9pt "Segoe UI", "PT Sans", "DejaVu Sans", Arial, sans-serif;
+        color: #5a6068;
+    }
+}
+html { background: var(--page); }
+body {
+    margin: 0 auto;
+    max-width: 920px;
+    padding: 24px 16px 48px;
+    color: var(--text);
+    background: var(--page);
+    font: 11pt/1.5 "Segoe UI", "PT Sans", "DejaVu Sans", Arial, sans-serif;
+}
+.doc-head { border-bottom: 2px solid var(--accent); margin-bottom: 18px; }
+.doc-product { margin: 0; color: var(--muted); font-size: 10pt; }
+.doc-nav { margin: 2px 0 8px; font-size: 10pt; }
+h1 { font-size: 20pt; line-height: 1.25; margin: 10px 0 14px; color: var(--accent); }
+h2 { font-size: 15pt; margin: 26px 0 8px; border-bottom: 1px solid var(--line); padding-bottom: 3px; }
+h3 { font-size: 12.5pt; margin: 18px 0 6px; }
+h4 { font-size: 11pt; margin: 14px 0 4px; }
+h1, h2, h3, h4 { break-after: avoid; }
+a { color: #1f5fa8; }
+p, li { orphans: 2; widows: 2; }
+code { font-family: Consolas, "DejaVu Sans Mono", "Liberation Mono", monospace; font-size: 0.92em; background: var(--code-bg); padding: 0 3px; border-radius: 3px; overflow-wrap: anywhere; }
+pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px; white-space: pre-wrap; overflow-wrap: anywhere; break-inside: avoid; }
+pre code { background: none; padding: 0; font-size: 9pt; }
+table { border-collapse: collapse; width: 100%; margin: 8px 0 14px; font-size: 10pt; }
+th, td { border: 1px solid var(--line); padding: 4px 6px; text-align: left; vertical-align: top; }
+th { background: #efeae3; }
+tr { break-inside: avoid; }
+blockquote { margin: 10px 0; padding: 4px 12px; border-left: 3px solid var(--accent); color: var(--muted); }
+.doc-toc { border: 1px solid var(--line); border-radius: 4px; padding: 6px 14px; margin: 0 0 18px; break-inside: avoid; }
+.doc-toc p { margin: 4px 0; font-weight: 600; }
+.doc-toc ol { margin: 4px 0 6px; }
+@media print {
+    body { max-width: none; padding: 0; }
+    .doc-nav { display: none; }
+    a { color: inherit; text-decoration: none; }
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --text: #e4e6e9; --muted: #a3a9b1; --line: #3a3f45; --accent: #e0a060; --code-bg: #24282d; --page: #16191c; }
+    :root:not([data-theme="light"]) th { background: #262a2f; }
+    :root:not([data-theme="light"]) a { color: #7fb2ee; }
+}
+@media print and (prefers-color-scheme: dark) {
+    :root { --text: #1d1f22; --muted: #5a6068; --line: #d5d9de; --accent: #8a4b16; --code-bg: #f4f2ee; --page: #ffffff; }
+}
+
+</style>
+</head>
+<body>
+<header class="doc-head">
+<p class="doc-product">Программа для ЭВМ «XML-библиотека „Берёста“ (beresta)», версия 2.1.2</p>
+<p class="doc-nav"><a href="../index.html">Сайт продукта</a> · <a href="../documentation.html">Документация</a></p>
+</header>
+<main>
+
+<h1 id="описание-процессов-жизненного-цикла">Описание процессов жизненного цикла</h1>
+<p>Документ описывает, как сопровождается программа для ЭВМ «XML-библиотека „Берёста“ (beresta)»: где хранится и собирается исходный текст, как выпускаются версии, как принимаются и устраняются сообщения об ошибках и уязвимостях, какие версии поддерживаются и кто обеспечивает поддержку.</p>
+<p>Правообладатель: [ФИО правообладателя]. Контакт для вопросов о сопровождении: [адрес электронной почты].</p>
+<nav class="doc-toc"><p>Содержание</p><ol><li><a href="#общие-сведения">Общие сведения</a></li><li><a href="#хранение-исходного-текста-и-сборка">Хранение исходного текста и сборка</a></li><li><a href="#версии-и-выпуск">Версии и выпуск</a></li><li><a href="#поддерживаемые-версии">Поддерживаемые версии</a></li><li><a href="#сообщения-об-ошибках">Сообщения об ошибках</a></li><li><a href="#уязвимости">Уязвимости</a></li><li><a href="#контроль-качества">Контроль качества</a></li><li><a href="#совершенствование">Совершенствование</a></li><li><a href="#персонал-обеспечивающий-поддержку">Персонал, обеспечивающий поддержку</a></li></ol></nav>
+<h2 id="общие-сведения">Общие сведения</h2>
+<table><thead><tr><th>Параметр</th><th>Значение</th></tr></thead><tbody><tr><td>Вид продукта</td><td>библиотека для обработки XML (встраивается в прикладные программы)</td></tr><tr><td>Лицензия</td><td>MIT; программа предоставляется на безвозмездной основе</td></tr><tr><td>Язык разработки</td><td>C++17, без сторонних зависимостей</td></tr><tr><td>Репозиторий исходного текста в России</td><td>Gitverse: &lt;https://gitverse.ru/ermaleyalekov/beresta&gt;</td></tr><tr><td>Зеркало репозитория</td><td>GitHub: &lt;https://github.com/ErmaleyAlekov/beresta&gt;</td></tr><tr><td>Журнал изменений</td><td>файл <code>CHANGELOG.md</code> в корне репозитория</td></tr><tr><td>Средства активации и лицензионные ключи</td><td>не используются: библиотека не требует активации, ключей, регистрации и подключения к сети</td></tr><tr><td>Обновление</td><td>только по действию пользователя (новая версия скачивается и подключается разработчиком программы); принудительного или удалённого обновления нет</td></tr></tbody></table>
+<h2 id="хранение-исходного-текста-и-сборка">Хранение исходного текста и сборка</h2>
+<ul><li>Исходный текст хранится в системе контроля версий git. Основная ветка — <code>main</code>, каждая выпущенная версия отмечена тегом <code>vX.Y.Z</code>. История изменений доступна полностью.</li><li>Репозиторий размещён на площадке Gitverse (Россия) и зеркалируется на GitHub; изменения отправляются на обе площадки одновременно.</li><li>Сборка воспроизводима из исходного текста стандартными средствами (GNU Make или CMake и компилятор C++17), без загрузки чего-либо из сети. Проверочный стенд <code>tools/stand/run_stand.sh</code> выполняет полную сборку и проверку одной командой.</li><li>Непрерывная интеграция: на Gitverse (<code>.gitverse/workflows</code>) при каждом изменении выполняются сборка и модульные тесты на Linux x86_64; на GitHub (<code>.github/workflows</code>) — полная матрица платформ (Linux x64 и arm64, Windows x64 и arm64, macOS, WebAssembly), санитайзеры и W3C XML Conformance Test Suite.</li><li>Сборка выпусков: [указать, где выполняется сборка выпускаемых файлов для реестра — например, на Gitverse или на компьютере правообладателя в России].</li></ul>
+<h2 id="версии-и-выпуск">Версии и выпуск</h2>
+<p>Номер версии — <code>MAJOR.MINOR.PATCH</code> (семантическое версионирование):</p>
+<ul><li><code>PATCH</code> — исправления ошибок без изменения программного интерфейса;</li><li><code>MINOR</code> — новые возможности с сохранением совместимости;</li><li><code>MAJOR</code> — изменения, нарушающие совместимость (описываются в журнале изменений вместе со способом перехода).</li></ul>
+<p>Порядок выпуска версии:</p>
+<ol><li>Версия поднимается во всех файлах сборки и пакетов, в <code>CHANGELOG.md</code> добавляется раздел версии.</li><li>Выполняются модульные тесты (<code>make test</code>) — все должны пройти; для изменений парсера и XML Schema дополнительно прогоняются наборы W3C, процент прошедших случаев не должен уменьшаться.</li><li>Изменения отправляются в репозитории Gitverse и GitHub; CI на обеих площадках должен завершиться успешно.</li><li>Ставится тег <code>vX.Y.Z</code>; CI собирает бинарники для всех платформ, пакеты (npm, PyPI, NuGet, Maven Central) и архивы SDK, проверяет их в чистом окружении и публикует релиз.</li><li>Тот же релиз с теми же файлами публикуется на Gitverse.</li></ol>
+<p>История выпусков:</p>
+<table><thead><tr><th>Версия</th><th>Дата</th><th>Содержание</th></tr></thead><tbody><tr><td>2.1.2</td><td>2026-10-20</td><td>проверка XML Schema по W3C XML Schema Test Suite: 93,6 % → 96,2 % применимых случаев; релизы на Gitverse</td></tr><tr><td>2.1.1</td><td>2026-10-19</td><td>см. описание релиза</td></tr><tr><td>2.1.0</td><td>2026-10-19</td><td>см. описание релиза</td></tr></tbody></table>
+<p>Подробное содержание каждой версии — в <code>CHANGELOG.md</code>.</p>
+<p>Частота выпусков: исправления (<code>PATCH</code>) выходят по мере устранения ошибок, как правило не позднее [N] дней после подтверждения ошибки; версии с новыми возможностями (<code>MINOR</code>) — по мере готовности, ориентировочно [N] раз в год. [Правообладателю — уточнить сроки.]</p>
+<h2 id="поддерживаемые-версии">Поддерживаемые версии</h2>
+<table><thead><tr><th>Версия</th><th>Поддержка</th></tr></thead><tbody><tr><td>2.1.x</td><td>исправления ошибок и уязвимостей</td></tr><tr><td>младше 2.1</td><td>не поддерживаются, рекомендуется обновиться до 2.1.x</td></tr></tbody></table>
+<p>Исправления выпускаются в последней минорной ветке. Совместимость Си-интерфейса (имена функций, коды состояния, номера сообщений) сохраняется в пределах мажорной версии.</p>
+<h2 id="сообщения-об-ошибках">Сообщения об ошибках</h2>
+<p>Сообщить об ошибке можно в разделе «Задачи» репозитория на Gitverse или в Issues на GitHub:</p>
+<ul><li>Gitverse: &lt;https://gitverse.ru/ermaleyalekov/beresta/tasktracker&gt;</li><li>GitHub: &lt;https://github.com/ErmaleyAlekov/beresta/issues&gt;</li></ul>
+<p>В сообщении укажите:</p>
+<ul><li>версию «Берёсты» (<code>beresta_version()</code> или <code>BERESTA_VERSION_STRING</code>), ОС, компилятор или язык обёртки;</li><li>минимальный XML, XSD или выражение XPath, на котором ошибка повторяется, ожидаемый и фактический результат;</li><li>для ошибок соответствия стандарту — пункт спецификации (XML 1.0, Namespaces, XSD 1.0 / 1.1, XPath 1.0) или случай набора тестов W3C.</li></ul>
+<p>Порядок устранения:</p>
+<ol><li>Регистрация: сообщение получает ответ и метку (ошибка, вопрос, предложение) — в срок до [N] рабочих дней.</li><li>Воспроизведение: ошибка повторяется на указанной версии; при необходимости запрашиваются данные.</li><li>Исправление: в исходный текст вносится исправление, а в модульные тесты (<code>tests/src/&lt;модуль&gt;/</code>) — тест, который до исправления не проходил.</li><li>Проверка: модульные тесты, при необходимости наборы W3C; CI на обеих площадках.</li><li>Выпуск: исправление входит в ближайшую патч-версию и описывается в <code>CHANGELOG.md</code>; задача закрывается со ссылкой на версию.</li></ol>
+<h2 id="уязвимости">Уязвимости</h2>
+<p>Порядок описан в файле <code>SECURITY.md</code> репозитория.</p>
+<ul><li>Об уязвимости сообщают закрыто: через GitHub (Security → Report a vulnerability) или, без подробностей, задачей на Gitverse с просьбой о закрытом канале связи. Публичные задачи с подробностями уязвимости не открываются.</li><li>Подтверждение получения — в течение 7 дней, оценка и план исправления — в течение 30 дней.</li><li>Исправление выходит патч-версией на Gitverse и GitHub и в пакетах всех языков, с описанием в <code>CHANGELOG.md</code>.</li><li>Уязвимостью считается, в частности, загрузка внешних ресурсов без явного разрешения (XXE, SSRF), обход лимитов сущностей и глубины, нелинейное время обработки, падение, выход за границы памяти или неопределённое поведение на любом входном документе, схеме или выражении XPath.</li></ul>
+<h2 id="контроль-качества">Контроль качества</h2>
+<ul><li>Модульные тесты C++ (<code>make test</code>), в том числе нагрузочные и многопоточные.</li><li>W3C XML Conformance Test Suite — 100 % применимых случаев; W3C XML Schema Test Suite — 96,2 % применимых случаев (расхождения перечислены в <code>tests/xsts</code>).</li><li>Проверка санитайзерами AddressSanitizer, UndefinedBehaviorSanitizer, LeakSanitizer и ThreadSanitizer; фаззинг libFuzzer (разбор, XPath, XML Schema).</li><li>Единые правила кода: короткие функции, небольшие файлы, двуязычные комментарии (<code>CONTRIBUTING.md</code>).</li></ul>
+<h2 id="совершенствование">Совершенствование</h2>
+<p>Развитие ведётся по задачам в репозиториях. Текущие направления:</p>
+<ul><li>повышение соответствия W3C XML Schema Test Suite (проверка документа схемы по схеме для схем);</li><li>новые возможности XSD 1.1 и расширение Си-интерфейса по запросам пользователей;</li><li>проверка сборки на российских операционных системах (Astra Linux, РЕД ОС, ALT) и процессорах.</li></ul>
+<p>Предложения принимаются в задачах Gitverse и GitHub; внешние изменения — через запросы на слияние по правилам <code>CONTRIBUTING.md</code>.</p>
+<h2 id="персонал-обеспечивающий-поддержку">Персонал, обеспечивающий поддержку</h2>
+<table><thead><tr><th>ФИО</th><th>Роль</th><th>Квалификация</th><th>Место нахождения</th></tr></thead><tbody><tr><td>[ФИО]</td><td>разработчик и сопровождающий: исправление ошибок, выпуск версий, ответы на сообщения</td><td>[образование, опыт]</td><td>Российская Федерация, [город]</td></tr><tr><td>[ФИО, если есть]</td><td>[роль]</td><td>[квалификация]</td><td>[город]</td></tr></tbody></table>
+<p>Техническая поддержка оказывается [на русском языке, бесплатно, через задачи Gitverse и по электронной почте [адрес]].</p>
+</main>
+</body>
+</html>

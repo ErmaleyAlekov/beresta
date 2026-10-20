@@ -1,0 +1,62 @@
+/* Стили документов реестра: одни для экрана (site/docs/*.html) и для печати в PDF (A4) */
+/* The registry document styles: the same for the screen (site/docs/*.html) and for PDF printing (A4) */
+:root {
+    --text: #1d1f22;
+    --muted: #5a6068;
+    --line: #d5d9de;
+    --accent: #8a4b16;
+    --code-bg: #f4f2ee;
+    --page: #ffffff;
+}
+@page {
+    size: A4;
+    margin: 18mm 15mm 20mm 20mm;
+    @bottom-center {
+        content: "Стр. " counter(page) " из " counter(pages);
+        font: 9pt "Segoe UI", "PT Sans", "DejaVu Sans", Arial, sans-serif;
+        color: #5a6068;
+    }
+}
+html { background: var(--page); }
+body {
+    margin: 0 auto;
+    max-width: 920px;
+    padding: 24px 16px 48px;
+    color: var(--text);
+    background: var(--page);
+    font: 11pt/1.5 "Segoe UI", "PT Sans", "DejaVu Sans", Arial, sans-serif;
+}
+.doc-head { border-bottom: 2px solid var(--accent); margin-bottom: 18px; }
+.doc-product { margin: 0; color: var(--muted); font-size: 10pt; }
+.doc-nav { margin: 2px 0 8px; font-size: 10pt; }
+h1 { font-size: 20pt; line-height: 1.25; margin: 10px 0 14px; color: var(--accent); }
+h2 { font-size: 15pt; margin: 26px 0 8px; border-bottom: 1px solid var(--line); padding-bottom: 3px; }
+h3 { font-size: 12.5pt; margin: 18px 0 6px; }
+h4 { font-size: 11pt; margin: 14px 0 4px; }
+h1, h2, h3, h4 { break-after: avoid; }
+a { color: #1f5fa8; }
+p, li { orphans: 2; widows: 2; }
+code { font-family: Consolas, "DejaVu Sans Mono", "Liberation Mono", monospace; font-size: 0.92em; background: var(--code-bg); padding: 0 3px; border-radius: 3px; overflow-wrap: anywhere; }
+pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px; white-space: pre-wrap; overflow-wrap: anywhere; break-inside: avoid; }
+pre code { background: none; padding: 0; font-size: 9pt; }
+table { border-collapse: collapse; width: 100%; margin: 8px 0 14px; font-size: 10pt; }
+th, td { border: 1px solid var(--line); padding: 4px 6px; text-align: left; vertical-align: top; }
+th { background: #efeae3; }
+tr { break-inside: avoid; }
+blockquote { margin: 10px 0; padding: 4px 12px; border-left: 3px solid var(--accent); color: var(--muted); }
+.doc-toc { border: 1px solid var(--line); border-radius: 4px; padding: 6px 14px; margin: 0 0 18px; break-inside: avoid; }
+.doc-toc p { margin: 4px 0; font-weight: 600; }
+.doc-toc ol { margin: 4px 0 6px; }
+@media print {
+    body { max-width: none; padding: 0; }
+    .doc-nav { display: none; }
+    a { color: inherit; text-decoration: none; }
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --text: #e4e6e9; --muted: #a3a9b1; --line: #3a3f45; --accent: #e0a060; --code-bg: #24282d; --page: #16191c; }
+    :root:not([data-theme="light"]) th { background: #262a2f; }
+    :root:not([data-theme="light"]) a { color: #7fb2ee; }
+}
+@media print and (prefers-color-scheme: dark) {
+    :root { --text: #1d1f22; --muted: #5a6068; --line: #d5d9de; --accent: #8a4b16; --code-bg: #f4f2ee; --page: #ffffff; }
+}

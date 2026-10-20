@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>XML-библиотека «Берёста»</title>
+<meta name="description" content="XML-библиотека «Берёста» (beresta) — библиотека для обработки XML на C++17 без сторонних зависимостей: DOM, SAX, DTD, XML Schema, XPath 1.0, Си-интерфейс.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="index.html">«Берёста»<small>beresta 2.1.2</small></a>
+    <nav class="site-nav" aria-label="Разделы сайта">
+      <a href="index.html" aria-current="page">О продукте</a>
+      <a href="download.html">Скачать</a>
+      <a href="documentation.html">Документация</a>
+      <a href="license.html">Лицензия и стоимость</a>
+    </nav>
+  </div>
+</header>
+<main>
+  <div class="wrap">
+    <h1>XML-библиотека «Берёста»</h1>
+    <p class="lead">Программа для ЭВМ «XML-библиотека „Берёста“ (beresta)» — библиотека на языке C++17 без единой сторонней зависимости: разбор и проверка XML, дерево документа (DOM), потоковая обработка (SAX), DTD, XML Schema, XPath 1.0, XInclude и запись XML. Через плоский Си-интерфейс ей пользуются программы на C, Java, C#, Python, Node.js и WebAssembly.</p>
+    <ul class="badges">
+      <li>Версия 2.1.2</li>
+      <li>Лицензия MIT</li>
+      <li>Бесплатно</li>
+      <li>Сообщения на русском языке</li>
+    </ul>
+    <div class="actions">
+      <a class="button primary" href="download.html">Скачать</a>
+      <a class="button" href="documentation.html">Документация</a>
+      <a class="button" href="https://gitverse.ru/ermaleyalekov/beresta">Исходный текст на Gitverse</a>
+    </div>
+
+    <h2>Возможности</h2>
+    <div class="grid">
+      <div class="card"><h3>Разбор XML 1.0</h3><p>100 % применимых случаев W3C XML Conformance Test Suite, пространства имён, восемь кодировок, включая windows-1251, KOI8-R и IBM866.</p></div>
+      <div class="card"><h3>DOM и SAX</h3><p>Компактное дерево с переносом узлов между документами и потоковый разбор, память которого не зависит от размера документа.</p></div>
+      <div class="card"><h3>DTD и XML Schema</h3><p>Проверка по DTD и XSD 1.0 с ключами, группами замены и утверждениями <code>xs:assert</code> из XSD 1.1 — по дереву, при разборе или потоком без дерева.</p></div>
+      <div class="card"><h3>XPath 1.0</h3><p>Все 13 осей и 27 функций, переменные, префиксы, скомпилированные выражения для многократного вызова из разных потоков.</p></div>
+      <div class="card"><h3>Безопасность по умолчанию</h3><p>Нет загрузки внешних ресурсов без разрешения (XXE, SSRF), лимиты на сущности и глубину, линейное время регулярных выражений.</p></div>
+      <div class="card"><h3>Шесть языков</h3><p>C++, C, Java (Project Panama), C# (P/Invoke), Python (ctypes), Node.js (Node-API) и WebAssembly из одного ядра.</p></div>
+    </div>
+
+    <h2>Поддерживаемые стандарты</h2>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Стандарт</th><th>Поддержка</th></tr></thead>
+        <tbody>
+          <tr><td>XML 1.0 (5-я редакция)</td><td>полностью; W3C XML Conformance — 100 % применимых случаев</td></tr>
+          <tr><td>Namespaces in XML</td><td>полностью</td></tr>
+          <tr><td>XML Schema 1.0</td><td>45 встроенных типов, фасеты, наследование, ключи, include/import/redefine; W3C XSTS — 96,2 % применимых случаев</td></tr>
+          <tr><td>XML Schema 1.1</td><td><code>xs:assert</code>, <code>xs:assertion</code>, <code>xs:override</code>, <code>vc:minVersion</code>/<code>vc:maxVersion</code></td></tr>
+          <tr><td>XPath 1.0</td><td>полностью</td></tr>
+          <tr><td>XInclude 1.0</td><td><code>parse="xml"</code> и <code>"text"</code>, <code>xi:fallback</code>, XPointer <code>element()</code></td></tr>
+          <tr><td>DOM Level 2 Traversal</td><td><code>TreeWalker</code>, <code>NodeIterator</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Технологический стек</h2>
+    <div class="table-scroll">
+      <table>
+        <tbody>
+          <tr><th>Язык</th><td>C++17, только стандартная библиотека (без iconv, ICU и других сторонних библиотек)</td></tr>
+          <tr><th>Сборка</th><td>CMake и GNU Make; компиляторы GCC, Clang, MinGW, MSVC, Emscripten</td></tr>
+          <tr><th>Программный интерфейс</th><td>C++ API (<code>beresta.hpp</code>) и плоский Си-интерфейс (<code>capi/beresta_c.h</code>, 71 функция)</td></tr>
+          <tr><th>Обёртки</th><td>Java 22+, C# (.NET Standard 2.1), Python 3.8+, Node.js 18+, WebAssembly</td></tr>
+          <tr><th>ОС</th><td>Linux (в том числе Astra Linux, РЕД ОС, ALT — сборка из исходного текста), Windows, macOS</td></tr>
+          <tr><th>Процессоры</th><td>x86_64, ARM64</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Правообладатель</h2>
+    <p>[ФИО правообладателя], Российская Федерация. Контакт: [адрес электронной почты]. Сообщения об ошибках — в <a href="https://gitverse.ru/ermaleyalekov/beresta/tasktracker">задачах репозитория на Gitverse</a>.</p>
+  </div>
+</main>
+<footer class="site-foot">
+  <div class="wrap">«Берёста» распространяется на безвозмездной основе на условиях лицензии MIT. Исходный текст: <a href="https://gitverse.ru/ermaleyalekov/beresta">Gitverse</a> · <a href="https://github.com/ErmaleyAlekov/beresta">GitHub</a>.</div>
+</footer>
+</body>
+</html>

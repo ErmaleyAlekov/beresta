@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Скачать «Берёсту»</title>
+<meta name="description" content="Скачать дистрибутив и исходный текст библиотеки «Берёста»: релизы на Gitverse и GitHub, пакеты для других языков.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="index.html">«Берёста»<small>beresta 2.1.2</small></a>
+    <nav class="site-nav" aria-label="Разделы сайта">
+      <a href="index.html">О продукте</a>
+      <a href="download.html" aria-current="page">Скачать</a>
+      <a href="documentation.html">Документация</a>
+      <a href="license.html">Лицензия и стоимость</a>
+    </nav>
+  </div>
+</header>
+<main>
+  <div class="wrap">
+    <h1>Скачать</h1>
+    <p class="lead">Текущая версия — 2.1.2. Дистрибутив, исходный текст и пакеты распространяются бесплатно.</p>
+
+    <h2>Релизы: дистрибутив и исходный текст</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Gitverse (Россия)</h3>
+        <p>Архив исходного текста, архивы SDK для C и C++ по платформам и пакеты всех языков.</p>
+        <p><a href="https://gitverse.ru/ermaleyalekov/beresta/releases">gitverse.ru/ermaleyalekov/beresta/releases</a></p>
+      </div>
+      <div class="card">
+        <h3>GitHub (зеркало)</h3>
+        <p>Те же файлы релиза.</p>
+        <p><a href="https://github.com/ErmaleyAlekov/beresta/releases">github.com/ErmaleyAlekov/beresta/releases</a></p>
+      </div>
+    </div>
+
+    <h2>Исходный текст</h2>
+    <p>Репозиторий на Gitverse: <a href="https://gitverse.ru/ermaleyalekov/beresta">gitverse.ru/ermaleyalekov/beresta</a>, зеркало на GitHub: <a href="https://github.com/ErmaleyAlekov/beresta">github.com/ErmaleyAlekov/beresta</a>.</p>
+    <pre><code>git clone https://gitverse.ru/ermaleyalekov/beresta.git
+cd beresta
+make
+make test</code></pre>
+
+    <h2>Состав релиза</h2>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Файл</th><th>Содержимое</th></tr></thead>
+        <tbody>
+          <tr><td><code>beresta-&lt;версия&gt;-&lt;платформа&gt;.zip</code></td><td>SDK для C и C++: заголовки <code>include/</code>, динамическая и статическая библиотеки, <code>LICENSE</code></td></tr>
+          <tr><td>Исходный код (zip, tar.gz)</td><td>полный исходный текст версии</td></tr>
+          <tr><td><code>beresta-&lt;версия&gt;.tgz</code>, <code>beresta-wasm-&lt;версия&gt;.tgz</code></td><td>пакеты npm для Node.js и WebAssembly</td></tr>
+          <tr><td><code>beresta-&lt;версия&gt;-py3-none-any.whl</code></td><td>пакет Python</td></tr>
+          <tr><td><code>Beresta.&lt;версия&gt;.nupkg</code></td><td>пакет .NET (на Gitverse — в архиве <code>.nupkg.zip</code>)</td></tr>
+          <tr><td><code>beresta-&lt;версия&gt;.jar</code></td><td>пакет Java</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="notice">Готовые сборки для Linux собраны на Ubuntu 22.04 и требуют glibc 2.35 и новее. На системах со старой glibc (например, Astra Linux SE 1.7) библиотеку собирают из исходного текста — см. «Руководство по установке и развёртыванию».</p>
+
+    <h2>Пакеты для других языков</h2>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Язык</th><th>Установка</th></tr></thead>
+        <tbody>
+          <tr><td>Node.js</td><td><code>npm install beresta</code></td></tr>
+          <tr><td>Браузер, Web Workers</td><td><code>npm install beresta-wasm</code></td></tr>
+          <tr><td>Python</td><td><code>pip install beresta</code></td></tr>
+          <tr><td>.NET</td><td><code>dotnet add package Beresta</code></td></tr>
+          <tr><td>Java</td><td>Maven: <code>io.github.ermaleyalekov:beresta:2.1.2</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Проверочный стенд</h2>
+    <p>Скрипт <code>tools/stand/run_stand.sh</code> из исходного текста собирает библиотеку, запускает модульные тесты и демонстрационные программы и записывает отчёт <code>stand_report.txt</code>. Нужны компилятор с поддержкой C++17 (GCC или Clang) и make или cmake.</p>
+    <pre><code>sh tools/stand/run_stand.sh</code></pre>
+  </div>
+</main>
+<footer class="site-foot">
+  <div class="wrap">«Берёста» распространяется на безвозмездной основе на условиях лицензии MIT. Исходный текст: <a href="https://gitverse.ru/ermaleyalekov/beresta">Gitverse</a> · <a href="https://github.com/ErmaleyAlekov/beresta">GitHub</a>.</div>
+</footer>
+</body>
+</html>

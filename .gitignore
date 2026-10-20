@@ -113,3 +113,11 @@ desktop.ini
 
 # ---- Контекст для сессий Claude (локальный) / Context for Claude sessions (local)
 /project_context.md
+
+# ---- Документы для Роспатента: депонируемые материалы и реферат (не публикуются)
+# ---- Documents for Rospatent: deposit materials and the abstract (not published)
+/legal/
+
+# ---- Результаты проверочного стенда (tools/stand) / The test stand results (tools/stand)
+/stand_logs/
+/stand_report.txt

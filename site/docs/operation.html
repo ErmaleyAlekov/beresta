@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Руководство по эксплуатации — «Берёста» 2.1.2</title>
+<style>
+/* Стили документов реестра: одни для экрана (site/docs/*.html) и для печати в PDF (A4) */
+/* The registry document styles: the same for the screen (site/docs/*.html) and for PDF printing (A4) */
+:root {
+    --text: #1d1f22;
+    --muted: #5a6068;
+    --line: #d5d9de;
+    --accent: #8a4b16;
+    --code-bg: #f4f2ee;
+    --page: #ffffff;
+}
+@page {
+    size: A4;
+    margin: 18mm 15mm 20mm 20mm;
+    @bottom-center {
+        content: "Стр. " counter(page) " из " counter(pages);
+        font: 9pt "Segoe UI", "PT Sans", "DejaVu Sans", Arial, sans-serif;
+        color: #5a6068;
+    }
+}
+html { background: var(--page); }
+body {
+    margin: 0 auto;
+    max-width: 920px;
+    padding: 24px 16px 48px;
+    color: var(--text);
+    background: var(--page);
+    font: 11pt/1.5 "Segoe UI", "PT Sans", "DejaVu Sans", Arial, sans-serif;
+}
+.doc-head { border-bottom: 2px solid var(--accent); margin-bottom: 18px; }
+.doc-product { margin: 0; color: var(--muted); font-size: 10pt; }
+.doc-nav { margin: 2px 0 8px; font-size: 10pt; }
+h1 { font-size: 20pt; line-height: 1.25; margin: 10px 0 14px; color: var(--accent); }
+h2 { font-size: 15pt; margin: 26px 0 8px; border-bottom: 1px solid var(--line); padding-bottom: 3px; }
+h3 { font-size: 12.5pt; margin: 18px 0 6px; }
+h4 { font-size: 11pt; margin: 14px 0 4px; }
+h1, h2, h3, h4 { break-after: avoid; }
+a { color: #1f5fa8; }
+p, li { orphans: 2; widows: 2; }
+code { font-family: Consolas, "DejaVu Sans Mono", "Liberation Mono", monospace; font-size: 0.92em; background: var(--code-bg); padding: 0 3px; border-radius: 3px; overflow-wrap: anywhere; }
+pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px; white-space: pre-wrap; overflow-wrap: anywhere; break-inside: avoid; }
+pre code { background: none; padding: 0; font-size: 9pt; }
+table { border-collapse: collapse; width: 100%; margin: 8px 0 14px; font-size: 10pt; }
+th, td { border: 1px solid var(--line); padding: 4px 6px; text-align: left; vertical-align: top; }
+th { background: #efeae3; }
+tr { break-inside: avoid; }
+blockquote { margin: 10px 0; padding: 4px 12px; border-left: 3px solid var(--accent); color: var(--muted); }
+.doc-toc { border: 1px solid var(--line); border-radius: 4px; padding: 6px 14px; margin: 0 0 18px; break-inside: avoid; }
+.doc-toc p { margin: 4px 0; font-weight: 600; }
+.doc-toc ol { margin: 4px 0 6px; }
+@media print {
+    body { max-width: none; padding: 0; }
+    .doc-nav { display: none; }
+    a { color: inherit; text-decoration: none; }
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --text: #e4e6e9; --muted: #a3a9b1; --line: #3a3f45; --accent: #e0a060; --code-bg: #24282d; --page: #16191c; }
+    :root:not([data-theme="light"]) th { background: #262a2f; }
+    :root:not([data-theme="light"]) a { color: #7fb2ee; }
+}
+@media print and (prefers-color-scheme: dark) {
+    :root { --text: #1d1f22; --muted: #5a6068; --line: #d5d9de; --accent: #8a4b16; --code-bg: #f4f2ee; --page: #ffffff; }
+}
+
+</style>
+</head>
+<body>
+<header class="doc-head">
+<p class="doc-product">Программа для ЭВМ «XML-библиотека „Берёста“ (beresta)», версия 2.1.2</p>
+<p class="doc-nav"><a href="../index.html">Сайт продукта</a> · <a href="../documentation.html">Документация</a></p>
+</header>
+<main>
+
+<h1 id="руководство-по-эксплуатации">Руководство по эксплуатации</h1>
+<p>Документ описывает функциональные характеристики программы для ЭВМ «XML-библиотека „Берёста“ (beresta)» и порядок работы с ней: программный интерфейс на C++ и плоский Си-интерфейс, примеры разбора (DOM и SAX), запросов XPath и проверки по XML Schema, обработку ошибок и безопасность. Установка и сборка описаны в «Руководстве по установке и развёртыванию».</p>
+<p>Правообладатель: [ФИО правообладателя].</p>
+<nav class="doc-toc"><p>Содержание</p><ol><li><a href="#функциональные-характеристики">Функциональные характеристики</a></li><li><a href="#порядок-работы">Порядок работы</a></li><li><a href="#работа-на-c">Работа на C++</a></li><li><a href="#работа-через-си-интерфейс">Работа через Си-интерфейс</a></li><li><a href="#справочник-си-интерфейса">Справочник Си-интерфейса</a></li><li><a href="#обёртки-для-других-языков">Обёртки для других языков</a></li><li><a href="#обработка-ошибок">Обработка ошибок</a></li><li><a href="#безопасность">Безопасность</a></li><li><a href="#потокобезопасность">Потокобезопасность</a></li><li><a href="#ограничения">Ограничения</a></li></ol></nav>
+<h2 id="функциональные-характеристики">Функциональные характеристики</h2>
+<p>«Берёста» — библиотека, которую встраивают в прикладные программы для работы с документами XML. Пользовательского интерфейса у неё нет: функции вызываются из кода программы. Все сообщения об ошибках выводятся на русском языке (по умолчанию) или на английском.</p>
+<table><thead><tr><th>Возможность</th><th>Стандарт и объём поддержки</th></tr></thead><tbody><tr><td>Разбор XML</td><td>XML 1.0 (5-я редакция): 100 % применимых случаев W3C XML Conformance Test Suite</td></tr><tr><td>Пространства имён</td><td>Namespaces in XML: проверка при разборе, URI вычисляются по текущему месту узла в дереве</td></tr><tr><td>Кодировки</td><td>UTF-8, UTF-16 LE/BE, ISO-8859-1, US-ASCII, windows-1251, windows-1252, KOI8-R, IBM866 (собственные таблицы)</td></tr><tr><td>Дерево документа (DOM)</td><td>создание, навигация, изменение, копирование и перенос узлов между документами</td></tr><tr><td>Потоковый разбор (SAX)</td><td>события без построения дерева, память не зависит от размера документа</td></tr><tr><td>DTD</td><td>внутреннее и внешнее подмножества, параметрические сущности, атрибуты по умолчанию, проверка валидности</td></tr><tr><td>XML Schema</td><td>XSD 1.0: 45 встроенных типов, фасеты, наследование, группы замены, <code>xs:key</code>/<code>xs:unique</code>/<code>xs:keyref</code>, <code>include</code>/<code>import</code>/<code>redefine</code>; из XSD 1.1 — <code>xs:assert</code>, <code>xs:assertion</code>, <code>xs:override</code>. W3C XML Schema Test Suite — 96,2 % применимых случаев</td></tr><tr><td>XPath</td><td>XPath 1.0 полностью: 13 осей, 27 функций, переменные и префиксы</td></tr><tr><td>XInclude</td><td>XInclude 1.0: <code>parse="xml|text"</code>, <code>xi:fallback</code>, XPointer <code>element()</code> и по ID</td></tr><tr><td>Обход дерева</td><td>DOM Level 2 Traversal: <code>TreeWalker</code>, <code>NodeIterator</code> с фильтрами</td></tr><tr><td>Запись XML</td><td>компактный и форматированный вывод, любая поддерживаемая выходная кодировка</td></tr><tr><td>Другие языки</td><td>Си-интерфейс (71 функция) и обёртки Java 22+, C#, Python, Node.js, WebAssembly</td></tr></tbody></table>
+<p>Сознательные ограничения перечислены в разделе «Ограничения» в конце документа.</p>
+<h2 id="порядок-работы">Порядок работы</h2>
+<ol><li>Подключите библиотеку к проекту (см. «Руководство по установке и развёртыванию»).</li><li>Программа на C++ подключает один заголовок <code>beresta.hpp</code>; программа на C или другом языке — <code>capi/beresta_c.h</code> или пакет своего языка.</li><li>Разберите документ (<code>XmlParser</code>, <code>beresta_document_parse</code>) или создайте его с нуля.</li><li>Работайте с деревом, вычисляйте XPath, проверяйте по схеме.</li><li>Запишите результат в строку или файл.</li><li>Обрабатывайте ошибки: в C++ — исключения <code>beresta::DomException</code>, в C — коды состояния и <code>beresta_last_error_message()</code>.</li></ol>
+<h2 id="работа-на-c">Работа на C++</h2>
+<h3 id="разбор-поиск-изменение-сохранение-dom">Разбор, поиск, изменение, сохранение (DOM)</h3>
+<pre><code class="language-cpp">#include "beresta.hpp"
+#include &lt;iostream&gt;
+
+int main()
+{
+    try
+    {
+        beresta::Document doc = beresta::XmlParser().parseFile("library.xml");
+
+        for (beresta::Element* book : beresta::xpath::selectElements(doc, "//book[@lang='ru']"))
+            book-&gt;setAttribute("checked", "yes");
+
+        beresta::SerializerOptions options;
+        options.prettyPrint = true;
+        beresta::XmlSerializer(options).writeFile(doc, "library.out.xml");
+    }
+    catch (const beresta::DomException&amp; error)
+    {
+        std::cerr &lt;&lt; error.what() &lt;&lt; '\n';     // [PARSE_ERROR] строка 3, столбец 7: ...
+        return 1;
+    }
+    return 0;
+}</code></pre>
+<h3 id="построение-документа-с-нуля">Построение документа с нуля</h3>
+<pre><code class="language-cpp">beresta::Document doc;
+doc.setDeclaration(beresta::XmlDeclaration{"1.0", "UTF-8", std::nullopt});
+
+beresta::Element* root = doc.setRoot(std::make_unique&lt;beresta::Element&gt;("note"));
+root-&gt;setAttribute("title", "Q&amp;A");
+root-&gt;appendChild(std::make_unique&lt;beresta::Comment&gt;(" черновик "));
+
+auto body = std::make_unique&lt;beresta::Element&gt;("body");
+body-&gt;setTextContent("1 &lt; 2");
+root-&gt;appendChild(std::move(body));
+
+std::cout &lt;&lt; doc.toString();
+// &lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;note title="Q&amp;amp;A"&gt;&lt;!-- черновик --&gt;&lt;body&gt;1 &amp;lt; 2&lt;/body&gt;&lt;/note&gt;</code></pre>
+<p>Родитель владеет детьми (<code>std::unique_ptr</code>), поэтому освобождать узлы вручную не нужно. Основные настройки разбора — структура <code>ParserOptions</code>: <code>preserveWhitespaceText</code>, <code>discardComments</code>, <code>trackLocations</code>, <code>validateDtd</code>, <code>processXInclude</code>, лимиты <code>maxDepth</code> (1024), <code>maxEntityExpansions</code> (10 000), <code>maxExpandedSize</code> (10 МБ), <code>resolver</code>, <code>errorHandler</code>, <code>schema</code>.</p>
+<h3 id="потоковый-разбор-sax">Потоковый разбор (SAX)</h3>
+<p>Дерево не строится, расход памяти не зависит от размера документа:</p>
+<pre><code class="language-cpp">class PriceCounter : public beresta::ContentHandler
+{
+public:
+    void startElement(const beresta::SaxElement&amp; e) override { inside = e.localName == "price"; }
+    void characters(std::string_view text) override { if (inside) total += beresta::xpath::stringToNumber(text); }
+    void endElement(const beresta::SaxElement&amp;) override { inside = false; }
+
+    bool inside = false;
+    double total = 0;
+};
+
+PriceCounter counter;
+beresta::SaxParser(options).parseFile("big.xml", counter);</code></pre>
+<p>События: <code>startDocument</code>/<code>endDocument</code>, <code>xmlDeclaration</code>, <code>documentType</code>, <code>startElement</code>/<code>endElement</code>, <code>characters</code>, <code>cdata</code>, <code>ignorableWhitespace</code>, <code>comment</code>, <code>processingInstruction</code>. Строки <code>string_view</code> в событиях действительны только на время вызова.</p>
+<h3 id="запросы-xpath-10">Запросы XPath 1.0</h3>
+<pre><code class="language-cpp">// Быстрые функции
+std::vector&lt;beresta::Element*&gt; books = beresta::xpath::selectElements(doc, "//book[price &gt; 300]");
+std::string title = beresta::xpath::evaluateString(doc, "string(//book[1]/title)");
+
+// Скомпилированное выражение: многократно и из разных потоков
+beresta::xpath::XPathExpression expression("//s:item[@code = $code]/s:name");
+beresta::xpath::XPathContext context;
+context.namespaces.emplace("s", "urn:shop");
+context.variables.emplace("code", beresta::xpath::XPathValue::fromString("B2"));
+
+beresta::xpath::XPathValue value = expression.evaluate(doc, context);
+value.getType();          // NODE_SET, BOOLEAN, NUMBER, STRING</code></pre>
+<h3 id="проверка-по-xml-schema">Проверка по XML Schema</h3>
+<pre><code class="language-cpp">// Загрузка схемы (один раз; схема неизменяема и разделяется между потоками)
+std::shared_ptr&lt;const beresta::xsd::Schema&gt; schema = beresta::xsd::Schema::fromFile("catalog.xsd", loadOptions);
+
+// Вариант 1: проверка готового дерева
+beresta::xsd::SchemaValidator validator(schema);
+std::vector&lt;beresta::Diagnostic&gt; errors = validator.validate(doc);
+
+// Вариант 2: проверка при разборе в DOM — один проход
+beresta::ParserOptions options;
+options.schema = schema;
+options.errorHandler = &amp;handler;          // без него — исключение на первой ошибке
+beresta::XmlParser(options).parseFile("catalog.xml");
+
+// Вариант 3: потоковая проверка без дерева — для выгрузок в гигабайты
+MyHandler events;                         // любой ContentHandler
+beresta::SaxParser(options).parseFile("export.xml", events);</code></pre>
+<p>Каждое нарушение содержит позицию и путь к элементу, например <code>строка 12, столбец 5: /catalog/book[2]/price: значение "-5" меньше минимума 0</code>. Во всех трёх вариантах нарушения, их порядок и позиции совпадают.</p>
+<h2 id="работа-через-си-интерфейс">Работа через Си-интерфейс</h2>
+<p>Заголовок <code>include/capi/beresta_c.h</code> написан на C99 и подключается и в <code>.c</code>, и в <code>.cpp</code>. На нём построены обёртки Java, C#, Python и Node.js; им же пользуются из C, Go (cgo), Rust (FFI), Delphi и любого языка, умеющего вызывать функции C.</p>
+<h3 id="соглашения">Соглашения</h3>
+<table><thead><tr><th>Правило</th><th>Пояснение</th></tr></thead><tbody><tr><td>Дескрипторы</td><td><code>beresta_document</code>, <code>beresta_node</code>, <code>beresta_xpath</code>, <code>beresta_nodeset</code>, <code>beresta_schema</code>, <code>beresta_diagnostics</code> — непрозрачные указатели <code>void*</code></td></tr><tr><td>Статус</td><td>функции, возвращающие <code>int</code>, отдают <code>BERESTA_OK</code> (0) при успехе или код ошибки</td></tr><tr><td>NULL</td><td>функции, возвращающие дескриптор или <code>char*</code>, отдают NULL при ошибке; NULL с кодом 0 означает «объекта нет»</td></tr><tr><td>Последняя ошибка</td><td><code>beresta_last_error_code()</code> и <code>beresta_last_error_message()</code> — своя у каждого потока; каждый вызов её сбрасывает</td></tr><tr><td>Строки</td><td>UTF-8; <code>char*</code> от библиотеки освобождается через <code>beresta_string_free</code>, <code>const char*</code> — заимствованная</td></tr><tr><td>Размеры и индексы</td><td><code>int64_t</code>; <code>-1</code> в результате означает ошибку</td></tr><tr><td>Владение</td><td>документ, схему, выражение, набор узлов и список нарушений освобождает вызывающий (<code>beresta_*_free</code>); узел принадлежит документу</td></tr><tr><td>Потоки</td><td>разные документы — в разных потоках параллельно; схема и скомпилированное выражение потокобезопасны</td></tr></tbody></table>
+<h3 id="пример-dom-и-xpath-на-c">Пример: DOM и XPath на C</h3>
+<pre><code class="language-c">#include "capi/beresta_c.h"
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+const char* xml = "&lt;shop&gt;&lt;item code=\"A1\"&gt;Чай&lt;/item&gt;&lt;item code=\"B2\"&gt;Кофе&lt;/item&gt;&lt;/shop&gt;";
+beresta_document document = NULL;
+beresta_xpath xpath = NULL;
+
+if (beresta_document_parse(xml, (int64_t)strlen(xml), BERESTA_PARSE_DEFAULT, NULL, &amp;document) != BERESTA_OK)
+{
+    fprintf(stderr, "[%s] %s\n", beresta_status_name(beresta_last_error_code()), beresta_last_error_message());
+    return 1;
+}
+beresta_xpath_compile("//item[@code = $code]", &amp;xpath);
+beresta_xpath_set_string(xpath, "code", "B2");
+
+char* name = beresta_xpath_string(xpath, document);   /* "Кофе" */
+printf("%s\n", name);
+beresta_string_free(name);                             /* строку освобождает библиотека */
+
+beresta_xpath_free(xpath);
+beresta_document_free(document);                       /* документ вместе со всеми узлами */</code></pre>
+<h3 id="пример-построение-документа-на-c">Пример: построение документа на C</h3>
+<pre><code class="language-c">beresta_document document = NULL;
+beresta_node item;
+
+if (beresta_document_create("order", &amp;document) != BERESTA_OK)
+    return 1;
+item = beresta_node_append_element(beresta_document_root(document), "item");
+beresta_element_set_attribute(item, "qty", "2");
+beresta_node_append_text(item, "Мёд &amp; орехи");
+
+char* text = beresta_node_to_string(document, BERESTA_WRITE_PRETTY);
+printf("%s\n", text);
+beresta_string_free(text);
+beresta_document_free(document);</code></pre>
+<h3 id="пример-потоковая-проверка-файла-по-схеме-на-c">Пример: потоковая проверка файла по схеме на C</h3>
+<pre><code class="language-c">beresta_schema schema = NULL;
+beresta_diagnostics problems = NULL;
+
+if (beresta_schema_load_file("catalog.xsd", &amp;schema) != BERESTA_OK)
+    return 1;
+if (beresta_schema_validate_file("export.xml", BERESTA_PARSE_DEFAULT, schema, &amp;problems) == BERESTA_OK)
+{
+    for (int64_t i = 0; i &lt; beresta_diagnostics_count(problems); ++i)
+    {
+        char* text = beresta_diagnostics_message(problems, i);
+        printf("%lld: %s\n", (long long)beresta_diagnostics_line(problems, i), text);
+        beresta_string_free(text);
+    }
+    beresta_diagnostics_free(problems);
+}
+beresta_schema_free(schema);</code></pre>
+<p>Полный пример на C — файл <code>examples/capi/capi_demo.c</code> (собирается вместе с библиотекой как <code>beresta_capi_demo</code>).</p>
+<h2 id="справочник-си-интерфейса">Справочник Си-интерфейса</h2>
+<p>Справочник построен из заголовка <code>include/capi/beresta_c.h</code> (функций: 71).</p>
+<h3 id="коды-состояния">Коды состояния</h3>
+<table><thead><tr><th>Имя</th><th>Значение</th><th>Описание</th></tr></thead><tbody><tr><td><code>BERESTA_OK</code></td><td><code>0</code></td><td>успех</td></tr><tr><td><code>BERESTA_INVALID_NAME</code></td><td><code>1</code></td><td>недопустимое XML-имя</td></tr><tr><td><code>BERESTA_INVALID_CONTENT</code></td><td><code>2</code></td><td>недопустимое содержимое узла</td></tr><tr><td><code>BERESTA_HIERARCHY_VIOLATION</code></td><td><code>3</code></td><td>нарушение структуры дерева</td></tr><tr><td><code>BERESTA_INDEX_OUT_OF_RANGE</code></td><td><code>4</code></td><td>индекс вне диапазона</td></tr><tr><td><code>BERESTA_NULL_NODE</code></td><td><code>5</code></td><td>пустой узел внутри ядра</td></tr><tr><td><code>BERESTA_PARSE_ERROR</code></td><td><code>6</code></td><td>синтаксическая ошибка XML</td></tr><tr><td><code>BERESTA_NOT_FOUND</code></td><td><code>7</code></td><td>объект не найден</td></tr><tr><td><code>BERESTA_NAMESPACE_ERROR</code></td><td><code>8</code></td><td>нарушение правил пространств имён</td></tr><tr><td><code>BERESTA_IO_ERROR</code></td><td><code>9</code></td><td>ошибка чтения или записи файла</td></tr><tr><td><code>BERESTA_ENCODING_ERROR</code></td><td><code>10</code></td><td>неизвестная или неверная кодировка</td></tr><tr><td><code>BERESTA_VALIDATION_ERROR</code></td><td><code>11</code></td><td>документ не соответствует DTD / XSD</td></tr><tr><td><code>BERESTA_XPATH_ERROR</code></td><td><code>12</code></td><td>ошибка XPath</td></tr><tr><td><code>BERESTA_SCHEMA_ERROR</code></td><td><code>13</code></td><td>некорректная XML Schema</td></tr><tr><td><code>BERESTA_RESOURCE_ERROR</code></td><td><code>14</code></td><td>внешний ресурс не загружен</td></tr><tr><td><code>BERESTA_LIMIT_EXCEEDED</code></td><td><code>15</code></td><td>превышен защитный лимит</td></tr><tr><td><code>BERESTA_INVALID_ARGUMENT</code></td><td><code>16</code></td><td>NULL или дескриптор не того типа</td></tr><tr><td><code>BERESTA_OUT_OF_MEMORY</code></td><td><code>17</code></td><td>не хватило памяти</td></tr><tr><td><code>BERESTA_UNKNOWN_ERROR</code></td><td><code>18</code></td><td>непредвиденное исключение</td></tr></tbody></table>
+<h3 id="флаги-разбора-и-вывода">Флаги разбора и вывода</h3>
+<table><thead><tr><th>Имя</th><th>Значение</th><th>Описание</th></tr></thead><tbody><tr><td><code>BERESTA_PARSE_DEFAULT</code></td><td><code>0u</code></td><td>настройки по умолчанию</td></tr><tr><td><code>BERESTA_PARSE_PRESERVE_WHITESPACE</code></td><td><code>(1u &lt;&lt; 0)</code></td><td>хранить пробельный текст между тегами</td></tr><tr><td><code>BERESTA_PARSE_DISCARD_COMMENTS</code></td><td><code>(1u &lt;&lt; 1)</code></td><td>не создавать узлы комментариев</td></tr><tr><td><code>BERESTA_PARSE_COALESCE_CDATA</code></td><td><code>(1u &lt;&lt; 2)</code></td><td>CDATA превращать в обычный текст</td></tr><tr><td><code>BERESTA_PARSE_VALIDATE_DTD</code></td><td><code>(1u &lt;&lt; 3)</code></td><td>проверять документ по DTD</td></tr><tr><td><code>BERESTA_PARSE_NO_NAMESPACES</code></td><td><code>(1u &lt;&lt; 4)</code></td><td>отключить обработку xmlns</td></tr><tr><td><code>BERESTA_PARSE_XINCLUDE</code></td><td><code>(1u &lt;&lt; 5)</code></td><td>выполнять xi:include</td></tr><tr><td><code>BERESTA_PARSE_FILE_RESOURCES</code></td><td><code>(1u &lt;&lt; 6)</code></td><td>разрешить внешние DTD/сущности/XInclude из каталога разбираемого файла</td></tr><tr><td><code>BERESTA_PARSE_TRACK_LOCATIONS</code></td><td><code>(1u &lt;&lt; 7)</code></td><td>запоминать строку и столбец узлов: тогда beresta_schema_validate даёт места нарушений (разбор ~8 % медленнее; потоковой проверке флаг не нужен — места известны и так)</td></tr><tr><td><code>BERESTA_WRITE_DEFAULT</code></td><td><code>0u</code></td><td>компактно, без лишних пробелов</td></tr><tr><td><code>BERESTA_WRITE_PRETTY</code></td><td><code>(1u &lt;&lt; 0)</code></td><td>отступы и переводы строк</td></tr><tr><td><code>BERESTA_WRITE_DECLARATION</code></td><td><code>(1u &lt;&lt; 1)</code></td><td>всегда писать &lt;?xml ...?&gt;</td></tr></tbody></table>
+<h3 id="библиотека-и-ошибки">Библиотека и ошибки</h3>
+<ul><li><code>const char* beresta_version(void)</code> — Версия библиотеки, например "2.1.0" (заимствованная строка)</li><li><code>int beresta_last_error_code(void)</code> — Код последней ошибки текущего потока (BERESTA_OK, если ошибки не было)</li><li><code>const char* beresta_last_error_message(void)</code> — Сообщение последней ошибки текущего потока ("" — ошибки не было). Заимствованная строка: действительна до следующего вызова в этом потоке</li><li><code>const char* beresta_status_name(int status)</code> — Имя кода состояния, например "PARSE_ERROR" (заимствованная строка)</li><li><code>void beresta_string_free(char* text)</code> — Освобождение строки, которую вернула библиотека (NULL допустим)</li></ul>
+<h3 id="языки-сообщений-об-ошибках">Языки сообщений об ошибках</h3>
+<ul><li><code>int beresta_set_language(const char* code)</code> — Смена языка сообщений для всех потоков ("ru", "en", ...). BERESTA_INVALID_ARGUMENT — такого языка нет, язык не меняется.</li><li><code>const char* beresta_language(void)</code> — Код текущего языка (заимствованная строка)</li><li><code>const char* beresta_languages(void)</code> — Все языки через запятую, например "ru,en" (заимствованная строка)</li><li><code>const char* beresta_message_text(int message)</code> — Текст сообщения на текущем языке (заимствованная строка; {0} — место аргумента)</li></ul>
+<h3 id="документы">Документы</h3>
+<ul><li><code>int beresta_document_create(const char* root_name, beresta_document* out)</code> — Новый документ; root_name == NULL — документ без корневого элемента</li><li><code>int beresta_document_parse(const void* data, int64_t size, uint32_t flags, beresta_schema schema, beresta_document* out)</code> — Разбор байтов в любой поддерживаемой кодировке (UTF-8/16, windows-1251...). schema == NULL — без проверки по схеме</li><li><code>int beresta_document_parse_file(const char* path, uint32_t flags, beresta_schema schema, beresta_document* out)</code> — Разбор файла (кодировка определяется автоматически)</li><li><code>void beresta_document_free(beresta_document document)</code> — Освобождение документа вместе со всеми его узлами (NULL допустим)</li><li><code>int beresta_document_clone(beresta_document document, beresta_document* out)</code> — Глубокая копия документа — новый независимый документ</li><li><code>beresta_node beresta_document_root(beresta_document document)</code> — Корневой элемент или NULL, если его нет</li><li><code>beresta_node beresta_document_element_by_id(beresta_document document, const char* id)</code> — Элемент с атрибутом типа ID (по DTD) или с атрибутом xml:id</li><li><code>int beresta_document_save(beresta_document document, const char* path, uint32_t flags, const char* encoding)</code> — Запись документа в файл; encoding == NULL — UTF-8</li></ul>
+<h3 id="узлы-свойства-и-навигация">Узлы: свойства и навигация</h3>
+<ul><li><code>int beresta_node_type(beresta_node node)</code> — Тип узла (значение beresta_node_kind) или -1 при ошибке</li><li><code>char* beresta_node_name(beresta_node node)</code> — Имя: тег элемента, цель PI, имя DOCTYPE; "#text", "#comment" и т.п.</li><li><code>char* beresta_node_text(beresta_node node)</code> — Текстовое содержимое узла (у элемента — весь текст потомков)</li><li><code>char* beresta_node_to_string(beresta_node node, uint32_t flags)</code> — Сериализация узла и его потомков в строку UTF-8</li><li><code>beresta_node beresta_node_parent(beresta_node node)</code> — Родительский узел или NULL у корня дерева</li><li><code>beresta_node beresta_node_first_child(beresta_node node)</code> — Первый дочерний узел или NULL</li><li><code>beresta_node beresta_node_last_child(beresta_node node)</code> — Последний дочерний узел или NULL</li><li><code>beresta_node beresta_node_next_sibling(beresta_node node)</code> — Следующий соседний узел или NULL</li><li><code>beresta_node beresta_node_previous_sibling(beresta_node node)</code> — Предыдущий соседний узел или NULL</li><li><code>beresta_document beresta_node_owner_document(beresta_node node)</code> — Документ, которому принадлежит узел (у документа — он сам)</li><li><code>int64_t beresta_node_child_count(beresta_node node)</code> — Число дочерних узлов (0 у листовых узлов) или -1 при ошибке</li><li><code>beresta_node beresta_node_child(beresta_node node, int64_t index)</code> — Дочерний узел по индексу</li></ul>
+<h3 id="узлы-изменение-дерева">Узлы: изменение дерева</h3>
+<ul><li><code>int beresta_node_set_text(beresta_node node, const char* text)</code> — Замена текста: у элемента — все дети заменяются одним текстовым узлом, у текста / комментария / CDATA / PI — новое значение</li><li><code>int beresta_node_remove(beresta_node node)</code> — Удаление узла из дерева вместе с потомками; дескриптор становится недействительным</li><li><code>int beresta_node_copy_to(beresta_node source, beresta_node parent, beresta_node* out)</code> — Глубокая копия source в конец детей parent (можно между документами)</li><li><code>int beresta_node_move_to(beresta_node node, beresta_node parent)</code> — Перенос узла (без копирования) в конец детей parent, в том числе в другой документ. Дескрипторы узла и его потомков остаются действительными и теперь принадлежат документу parent: освобождение прежнего документа их не затрагивает. Ошибки (дерево при этом не меняется): BERESTA_INVALID_ARGUMENT    — NULL, parent не элемент и не документ, node — сам документ; BERESTA_HIERARCHY_VIOLATION — node — корневой элемент документа, parent — сам node или его потомок, или parent не принимает узел такого типа (текст в документ).</li><li><code>beresta_node beresta_node_append_element(beresta_node parent, const char* name)</code> — Добавление нового узла в конец детей parent (элемента или документа). У документа append_element задаёт корневой элемент</li><li><code>beresta_node beresta_node_append_text(beresta_node parent, const char* text)</code> — Добавление нового узла в конец детей parent (элемента или документа). У документа append_element задаёт корневой элемент</li><li><code>beresta_node beresta_node_append_comment(beresta_node parent, const char* text)</code> — Добавление нового узла в конец детей parent (элемента или документа). У документа append_element задаёт корневой элемент</li><li><code>beresta_node beresta_node_append_cdata(beresta_node parent, const char* text)</code> — Добавление нового узла в конец детей parent (элемента или документа). У документа append_element задаёт корневой элемент</li><li><code>beresta_node beresta_node_append_pi(beresta_node parent, const char* target, const char* data)</code> — Добавление нового узла в конец детей parent (элемента или документа). У документа append_element задаёт корневой элемент</li></ul>
+<h3 id="элементы-и-атрибуты">Элементы и атрибуты</h3>
+<ul><li><code>char* beresta_element_get_attribute(beresta_node element, const char* name)</code> — Значение атрибута или NULL (код 0), если атрибута нет</li><li><code>int beresta_element_set_attribute(beresta_node element, const char* name, const char* value)</code> — Добавление или замена атрибута (позиция прежнего атрибута сохраняется)</li><li><code>int beresta_element_has_attribute(beresta_node element, const char* name)</code> — 1 — атрибут есть, 0 — нет, -1 — ошибка</li><li><code>int beresta_element_remove_attribute(beresta_node element, const char* name)</code> — 1 — атрибут удалён, 0 — его не было, -1 — ошибка</li><li><code>int64_t beresta_element_attribute_count(beresta_node element)</code> — Перебор атрибутов в порядке документа</li><li><code>char* beresta_element_attribute_name(beresta_node element, int64_t index)</code> — Перебор атрибутов в порядке документа</li><li><code>char* beresta_element_attribute_value(beresta_node element, int64_t index)</code> — Перебор атрибутов в порядке документа</li><li><code>char* beresta_element_local_name(beresta_node element)</code> — Локальное имя (без префикса)</li><li><code>char* beresta_element_namespace_uri(beresta_node element)</code> — URI пространства имён или NULL (код 0), если элемент вне пространств имён</li></ul>
+<h3 id="xpath-10">XPath 1.0</h3>
+<ul><li><code>int beresta_xpath_compile(const char* expression, beresta_xpath* out)</code> — Компиляция выражения (один раз — вычислять можно многократно)</li><li><code>void beresta_xpath_free(beresta_xpath xpath)</code> — Освобождение скомпилированного выражения (NULL допустим)</li><li><code>int beresta_xpath_bind_namespace(beresta_xpath xpath, const char* prefix, const char* uri)</code> — Привязка префикса к URI для имён вида p:name в выражении</li><li><code>int beresta_xpath_set_string(beresta_xpath xpath, const char* name, const char* value)</code> — Значения переменных $name</li><li><code>int beresta_xpath_set_number(beresta_xpath xpath, const char* name, double value)</code> — Значения переменных $name</li><li><code>int beresta_xpath_select(beresta_xpath xpath, beresta_node context, beresta_nodeset* out)</code> — Вычисление: множество узлов / строка / число / логическое (1, 0, -1 — ошибка)</li><li><code>char* beresta_xpath_string(beresta_xpath xpath, beresta_node context)</code> — Вычисление: множество узлов / строка / число / логическое (1, 0, -1 — ошибка)</li><li><code>int beresta_xpath_number(beresta_xpath xpath, beresta_node context, double* out)</code> — Вычисление: множество узлов / строка / число / логическое (1, 0, -1 — ошибка)</li><li><code>int beresta_xpath_boolean(beresta_xpath xpath, beresta_node context)</code> — Вычисление: множество узлов / строка / число / логическое (1, 0, -1 — ошибка)</li><li><code>int64_t beresta_nodeset_size(beresta_nodeset nodeset)</code> — Результат select: размер, узел (NULL для атрибута), строковое значение</li><li><code>beresta_node beresta_nodeset_node(beresta_nodeset nodeset, int64_t index)</code> — Результат select: размер, узел (NULL для атрибута), строковое значение</li><li><code>char* beresta_nodeset_value(beresta_nodeset nodeset, int64_t index)</code> — Результат select: размер, узел (NULL для атрибута), строковое значение</li><li><code>void beresta_nodeset_free(beresta_nodeset nodeset)</code> — Освобождение набора узлов (NULL допустим)</li></ul>
+<h3 id="xml-schema">XML Schema</h3>
+<ul><li><code>int beresta_schema_load(const void* data, int64_t size, beresta_schema* out)</code> — Загрузка схемы из байтов XSD (xs:include / xs:import недоступны)</li><li><code>int beresta_schema_load_file(const char* path, beresta_schema* out)</code> — Загрузка из файла: xs:include / xs:import ищутся в каталоге этого файла</li><li><code>void beresta_schema_free(beresta_schema schema)</code> — Освобождение схемы (NULL допустим)</li><li><code>int beresta_schema_validate(beresta_schema schema, beresta_document document, beresta_diagnostics* out)</code> — Проверка документа: все нарушения собираются за один проход в out</li><li><code>int beresta_schema_validate_bytes(const void* data, int64_t size, uint32_t flags, beresta_schema schema, beresta_diagnostics* out)</code> — Потоковая проверка без дерева (SAX + XSD): аргументы те же, что у beresta_document_parse / beresta_document_parse_file, но вместо документа в out — список нарушений. Память — O(глубины документа) плюс значения ID и таблицы ключей; файл отображается в память, а не копируется, поэтому так проверяются выгрузки в гигабайты. Нарушение схемы — не ошибка вызова (BERESTA_OK, нарушения в out); синтаксическая ошибка XML — BERESTA_PARSE_ERROR.</li><li><code>int beresta_schema_validate_file(const char* path, uint32_t flags, beresta_schema schema, beresta_diagnostics* out)</code> — Потоковая проверка файла без построения дерева (см. beresta_schema_validate_bytes)</li><li><code>int64_t beresta_diagnostics_count(beresta_diagnostics diagnostics)</code> — Список нарушений: число, текст, строка и столбец в исходнике (0 — неизвестно)</li><li><code>char* beresta_diagnostics_message(beresta_diagnostics diagnostics, int64_t index)</code> — Список нарушений: число, текст, строка и столбец в исходнике (0 — неизвестно)</li><li><code>int64_t beresta_diagnostics_line(beresta_diagnostics diagnostics, int64_t index)</code> — Список нарушений: число, текст, строка и столбец в исходнике (0 — неизвестно)</li><li><code>int64_t beresta_diagnostics_column(beresta_diagnostics diagnostics, int64_t index)</code> — Список нарушений: число, текст, строка и столбец в исходнике (0 — неизвестно)</li><li><code>void beresta_diagnostics_free(beresta_diagnostics diagnostics)</code> — Освобождение списка нарушений (NULL допустим)</li></ul>
+<h2 id="обёртки-для-других-языков">Обёртки для других языков</h2>
+<table><thead><tr><th>Язык</th><th>Установка</th><th>Основа</th></tr></thead><tbody><tr><td>Java 22+</td><td>Maven <code>io.github.ermaleyalekov:beresta</code></td><td>Project Panama (Foreign Function &amp; Memory API), без JNI</td></tr><tr><td>C#</td><td><code>dotnet add package Beresta</code></td><td>P/Invoke и <code>SafeHandle</code></td></tr><tr><td>Python 3.8+</td><td><code>pip install beresta</code></td><td>ctypes, без компилятора на машине пользователя</td></tr><tr><td>Node.js 18+</td><td><code>npm install beresta</code></td><td>собственный модуль Node-API, типы TypeScript в комплекте</td></tr><tr><td>Браузер, Workers</td><td><code>npm install beresta-wasm</code></td><td>WebAssembly (Emscripten), тот же JS-слой</td></tr></tbody></table>
+<p>Обёртки повторяют возможности Си-интерфейса: DOM, XPath, XML Schema, включая потоковую проверку без дерева. Подробно — в файле <code>docs/bindings.md</code> репозитория.</p>
+<h2 id="обработка-ошибок">Обработка ошибок</h2>
+<p>В C++ все ошибки — исключения <code>beresta::DomException</code> (код и сообщение) и производное <code>beresta::ParseException</code> (с позицией: смещение, строка, столбец). Коды ошибок <code>DomErrorCode</code>: <code>PARSE_ERROR</code>, <code>NAMESPACE_ERROR</code>, <code>ENCODING_ERROR</code>, <code>VALIDATION_ERROR</code>, <code>RESOURCE_ERROR</code>, <code>LIMIT_EXCEEDED</code>, <code>SCHEMA_ERROR</code>, <code>XPATH_ERROR</code>, <code>INVALID_NAME</code>, <code>INVALID_CONTENT</code>, <code>HIERARCHY_VIOLATION</code>, <code>INDEX_OUT_OF_RANGE</code>, <code>NULL_NODE</code>, <code>NOT_FOUND</code>, <code>IO_ERROR</code>.</p>
+<pre><code class="language-cpp">try { /* ... */ }
+catch (const beresta::ParseException&amp; e) { e.getLine(); e.getColumn(); e.getCode(); }
+catch (const beresta::DomException&amp; e)   { e.getCode(); e.getMessage(); beresta::errorCodeToString(e.getCode()); }</code></pre>
+<p>Нефатальные ошибки (нарушения DTD и XSD) можно собирать обработчиком <code>ErrorHandler</code> (готовый — <code>CollectingErrorHandler</code>), не прерывая разбор. В Си-интерфейсе исключения не пересекают границу библиотеки: каждая функция возвращает код состояния (таблица «Коды состояния» выше), а текст — <code>beresta_last_error_message()</code>.</p>
+<h3 id="язык-сообщений">Язык сообщений</h3>
+<p>Язык по умолчанию задаётся при сборке (<code>make ERRORS_LANG=en</code>, <code>-DBERESTA_ERRORS_LANG=en</code>; без параметра — русский) и меняется во время работы одним вызовом для всех потоков: <code>beresta::i18n::setLanguage("en")</code> в C++, <code>beresta_set_language("en")</code> в C. Имя кода ошибки одинаково во всех языках:</p>
+<pre><code>[PARSE_ERROR] строка 1, столбец 7: ожидался &lt;/b&gt;, найден &lt;/a&gt;
+[PARSE_ERROR] line 1, column 7: expected &lt;/b&gt;, found &lt;/a&gt;</code></pre>
+<h2 id="безопасность">Безопасность</h2>
+<ul><li>По умолчанию <strong>ничего внешнего не загружается</strong>: ни внешний DTD, ни внешние сущности, ни XInclude, ни <code>xs:include</code>. Это закрывает атаки XXE и SSRF. Загрузку разрешает только явно переданный загрузчик (<code>FileResourceResolver</code> — только локальные файлы внутри заданного каталога, без сетевых адресов) или флаг <code>BERESTA_PARSE_FILE_RESOURCES</code> в Си-интерфейсе.</li><li>Лимиты <code>maxEntityExpansions</code>, <code>maxEntityDepth</code>, <code>maxExpandedSize</code> и <code>maxDepth</code> всегда включены и защищают от «сущностных бомб» и слишком глубоких документов; превышение — ошибка <code>LIMIT_EXCEEDED</code>.</li><li>Регулярные выражения XSD выполняются за линейное время; хеш-таблицы с ключами из документа защищены от подбора коллизий (SipHash со случайным ключом процесса).</li><li>Рекурсии по дереву нет: разбор, копирование, вывод, проверка и удаление дерева обходят его по явному стеку.</li></ul>
+<h2 id="потокобезопасность">Потокобезопасность</h2>
+<ul><li><code>XmlParser</code>, <code>SaxParser</code>, <code>XmlSerializer</code>, <code>XPathExpression</code>, <code>Schema</code>, <code>SchemaValidator</code> неизменяемы: один объект можно использовать из многих потоков одновременно.</li><li>Разные деревья обрабатываются параллельно без синхронизации; одно дерево можно читать из многих потоков, а при изменении нужна внешняя синхронизация.</li></ul>
+<h2 id="ограничения">Ограничения</h2>
+<ul><li>XML Schema: при загрузке схемы не проверяются корректность ограничения модели содержимого и однозначность модели (UPA); документ схемы проверяется по схеме для схем не целиком; из XSD 1.1 поддерживаются только <code>xs:assert</code>, <code>xs:assertion</code>, <code>xs:override</code> и <code>vc:minVersion</code>/<code>vc:maxVersion</code>.</li><li>XPath: XPath 1.0 полностью; из XPath 2.0 — только подмножество для утверждений XSD 1.1.</li><li>Нет XSLT, DOM Range, особенностей XML 1.1 и загрузки по сети.</li><li>Через Си-интерфейс и обёртки доступны DOM, XPath и XML Schema; собственный SAX-обработчик, <code>TreeWalker</code> и свой загрузчик ресурсов — только из C++.</li><li>В WebAssembly нет файловой системы: работа идёт со строками и байтами.</li></ul>
+<p>Полный список — в файле <code>docs/comparison.md</code> репозитория (раздел «Ограничения»).</p>
+</main>
+</body>
+</html>

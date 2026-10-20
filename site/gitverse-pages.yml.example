@@ -1,0 +1,42 @@
+# ============================================================================
+#  Публикация сайта продукта (каталог site/) на Gitverse Pages
+#  Не подключён: чтобы включить, скопируйте в .gitverse/workflows/pages.yml и
+#  в настройках репозитория («Страницы») выберите источник «Воркфлоу».
+#  Адрес сайта: https://ermaleyalekov.gitverse.site/beresta
+# ============================================================================
+#  Publishing the product site (the site/ directory) to Gitverse Pages
+#  Not enabled: to turn it on, copy it to .gitverse/workflows/pages.yml and
+#  choose the "Workflow" source in the repository settings ("Pages").
+#  The site address: https://ermaleyalekov.gitverse.site/beresta
+# ============================================================================
+name: Pages
+
+on:
+  push:
+    branches: [ "main" ]
+    paths: [ "site/**" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Статика уже лежит в репозитории: сборка не нужна, только проверка
+      # The static files are already in the repository: no build, only a check
+      - name: Check site
+        run: test -f site/index.html && test -f site/docs/operation.pdf
+
+      - name: Upload pages artifact
+        uses: gitverse/upload-pages-artifact@v1.0.0
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy
+        uses: gitverse/deploy-pages@v1.0.0
