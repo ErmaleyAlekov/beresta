@@ -195,7 +195,7 @@ Gradle: `implementation("io.github.ermaleyalekov:beresta:2.1.3")`.
 Репозиторий зеркалируется на [Gitverse](https://gitverse.ru/ermaleyalekov/beresta). Gitverse читает свои workflow из `.gitverse/workflows` (в настройках репозитория: CI/CD → «Использовать конфигурацию из .gitverse/workflows»), GitHub эту папку не видит. Облачный раннер Gitverse один — `ubuntu-latest` (Linux x86_64, 30 минут на задачу), поэтому:
 
 - **`.gitverse/workflows/ci.yml`** — на каждый push и merge request: `make` и `make test` на Linux x86_64. Полная матрица платформ проверяется на GitHub.
-- **`.gitverse/workflows/release.yml`** — по тегу `vX.Y.Z` одной задачей (артефакты между задачами на Gitverse не передаются): сборка и тесты на Linux x86_64, затем ожидание релиза того же тега на GitHub (до 15 минут), скачивание всех его файлов (`tools/release/github_assets.sh`) и создание релиза Gitverse через публичный API (`tools/release/gitverse_release.sh`). Если релиз GitHub не готов, прикрепляется только SDK Linux x86_64; повторный запуск вручную (CI/CD → Release, параметр `tag`) заменяет файлы. **В реестры этот workflow ничего не публикует.** Gitverse принимает в релиз только файлы из своего списка расширений (`.zip`, `.tgz`, `.whl`, `.jar` и др.), поэтому пакет NuGet лежит там в архиве `Beresta.X.Y.Z.nupkg.zip`.
+- **`.gitverse/workflows/release.yml`** — по тегу `vX.Y.Z`: задача `create` создаёт релиз через публичный API (`tools/release/gitverse_release.sh`), затем три задачи параллельно добавляют файлы. **`linux`** собирает SDK Linux x86_64 и aarch64 в образе Astra Linux SE 1.7 (шаг `docker://`, GCC 8.3, glibc 2.28; `tools/release/build_linux.sh`) и прогоняет тесты на обеих архитектурах (aarch64 — в qemu); образ недоступен — тот же скрипт на раннере. **`windows`** собирает SDK Windows x86_64 кросс-компилятором MinGW-w64 (`tools/release/build_windows.sh`, архив `*-windows-x86_64-mingw.zip`). **`github`** ждёт релиз GitHub (до 25 минут) и берёт из него только то, что на Gitverse собрать нечем: SDK macOS и Windows ARM64, пакеты npm, PyPI, NuGet, Maven и WebAssembly (`tools/release/github_assets.sh`). Повторный запуск вручную (CI/CD → Release, параметр `tag`) заменяет файлы. **В реестры этот workflow ничего не публикует.** Gitverse принимает в релиз только файлы из своего списка расширений (`.zip`, `.tgz`, `.whl`, `.jar` и др.), поэтому пакет NuGet лежит там в архиве `Beresta.X.Y.Z.nupkg.zip`.
 - **`.gitverse/workflows/pages.yml`** — при изменении `site/` в `main`: публикация сайта продукта на Gitverse Pages (<https://ermaleyalekov.gitverse.site/beresta>); в настройках «Страницы» источник — «Воркфлоу».
 
 Секрет Gitverse (Настройки репозитория → Секреты и переменные): `GV_API_TOKEN` — токен со страницы gitverse.ru/settings/tokens с правом «Репозитории → Запись». Префикс `GITVERSE_` в именах секретов Gitverse запрещён.
@@ -214,7 +214,7 @@ git remote add gitverse git@gitverse.ru:ermaleyalekov/beresta.git
 
 1. Поднимите версию в `CMakeLists.txt`, `include/capi/beresta_c.h`, `bindings/*/package.json`, `bindings/python/pyproject.toml`, `bindings/python/tests/test_xpath_schema.py`, `bindings/java/pom.xml`, `bindings/csharp/Beresta/Beresta.csproj` и в примерах зависимостей (`docs/building*.md`, `docs/bindings*.md`, `bindings/java/README.md`); добавьте раздел версии в оба `CHANGELOG`.
 2. `make test` — зелёный; закоммитьте и отправьте `main` на оба удалённых репозитория, дождитесь зелёного CI на обоих.
-3. Тег — сначала на GitHub, там соберутся пакеты и релиз (около 20–30 минут):
+3. Тег — на GitHub, там соберутся пакеты и релиз (около 20–30 минут):
 
 ```bash
 git tag v2.1.3
@@ -223,7 +223,7 @@ git tag v2.1.3
 git push origin main v2.1.3
 ```
 
-4. Когда релиз GitHub готов — тот же тег на Gitverse, его workflow заберёт файлы релиза GitHub:
+4. Тот же тег — на Gitverse (через несколько минут после GitHub: задача `github` ждёт релиз GitHub не дольше 25 минут); Linux и Windows x86_64 Gitverse собирает сам:
 
 ```bash
 git push gitverse main v2.1.3

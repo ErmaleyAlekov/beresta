@@ -1,33 +1,37 @@
 # ============================================================================
 #  Релиз «Берёсты» на Gitverse по тегу vX.Y.Z
 #
-#  Пакеты в реестры (npm, PyPI, NuGet, Maven Central) здесь НЕ публикуются:
-#  это делает только .github/workflows/release.yml на GitHub. Gitverse получает
-#  тот же набор файлов, что и релиз GitHub. Всё идёт ОДНОЙ задачей: артефакты
-#  upload-artifact между задачами на Gitverse не доходят («Artifact not found»).
-#    1. сборка и тесты на Linux x86_64 (проверка и запасной архив SDK);
-#    2. ожидание релиза того же тега на GitHub (до 15 минут: лимит задачи — 30),
-#       скачивание всех его файлов (SDK пяти платформ, npm, колесо, NuGet, jar)
-#       и релиз Gitverse с ними; не дождался — прикрепляется только свой SDK.
-#  Порядок выпуска: тег сначала на GitHub, после готовности релиза — на Gitverse
-#  (docs/building.md, «Выпуск версии»). Повтор вручную: CI/CD → Release →
-#  запустить с параметром tag — файлы заменяются.
+#  Файлы, которые можно собрать на Gitverse (в России), собираются здесь:
+#    linux   — SDK Linux x86_64 и aarch64 в образе Astra Linux SE 1.7 (GCC 8.3,
+#              glibc 2.28), тесты x86_64 и aarch64 (в qemu); не вышло — тот же
+#              скрипт на раннере Ubuntu;
+#    windows — SDK Windows x86_64 кросс-компилятором MinGW-w64.
+#  Из релиза GitHub берётся только то, что здесь собрать нечем: SDK macOS
+#  (оборудование Apple) и Windows ARM64 (MSVC ARM64), а также пакеты npm, PyPI,
+#  NuGet, Maven и WebAssembly — это те же файлы, что опубликованы в реестрах
+#  (публикация в реестры — только из .github/workflows/release.yml).
+#  Сначала задача create создаёт релиз с описанием, затем три задачи параллельно
+#  добавляют в него файлы (артефакты между задачами на Gitverse не передаются,
+#  поэтому каждая задача загружает свои файлы сама). Лимит — 30 минут на задачу.
+#  Повтор вручную: CI/CD → Release → запустить с параметром tag — файлы заменяются.
 #  Нужен секрет репозитория GV_API_TOKEN: токен gitverse.ru с правом
 #  «Репозитории → Запись» (префикс GITVERSE_ у секретов запрещён).
 # ============================================================================
 #  The Beresta release on Gitverse by the vX.Y.Z tag
 #
-#  Packages are NOT published to registries (npm, PyPI, NuGet, Maven Central) here:
-#  only .github/workflows/release.yml on GitHub does that. Gitverse gets
-#  the same set of files as the GitHub release. Everything runs as ONE job: upload-artifact
-#  artifacts do not reach other jobs on Gitverse ("Artifact not found").
-#    1. the build and tests on Linux x86_64 (a check and a fallback SDK archive);
-#    2. waiting for the release of the same tag on GitHub (up to 15 minutes: the job limit is 30),
-#       downloading all its files (the SDK of five platforms, npm, the wheel, NuGet, the jar)
-#       and the Gitverse release with them; not waited out — only the own SDK is attached.
-#  The release order: the tag goes to GitHub first, to Gitverse after the release is ready
-#  (docs/building.en.md, "Releasing a version"). A manual repeat: CI/CD → Release →
-#  run with the tag parameter — the files are replaced.
+#  The files that can be built on Gitverse (in Russia) are built here:
+#    linux   — the Linux x86_64 and aarch64 SDK in the Astra Linux SE 1.7 image (GCC 8.3,
+#              glibc 2.28), the x86_64 and aarch64 tests (in qemu); if it fails — the same
+#              script on the Ubuntu runner;
+#    windows — the Windows x86_64 SDK with the MinGW-w64 cross compiler.
+#  Only what cannot be built here is taken from the GitHub release: the macOS SDK
+#  (Apple hardware) and Windows ARM64 (MSVC ARM64), and the npm, PyPI, NuGet, Maven
+#  and WebAssembly packages — the same files that are published to the registries
+#  (registry publishing is done only by .github/workflows/release.yml).
+#  First the create job creates the release with the notes, then three jobs in parallel
+#  add files to it (artifacts are not passed between jobs on Gitverse, so each
+#  job uploads its own files). The limit is 30 minutes per job.
+#  A manual repeat: CI/CD → Release → run with the tag parameter — the files are replaced.
 #  The GV_API_TOKEN repository secret is needed: a gitverse.ru token with the
 #  "Repositories → Write" right (the GITVERSE_ prefix is forbidden for secrets).
 # ============================================================================
@@ -39,7 +43,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Тег релиза, например v2.1.2 / The release tag, e.g. v2.1.2'
+        description: 'Тег релиза, например v2.1.4 / The release tag, e.g. v2.1.4'
         required: true
 
 env:
@@ -47,8 +51,8 @@ env:
   TAG: ${{ inputs.tag || gitverse.ref_name }}
 
 jobs:
-  release:
-    name: Gitverse Release
+  create:
+    name: Релиз / Release
     runs-on: ubuntu-latest
     env:
       GV_API_TOKEN: ${{ secrets.GV_API_TOKEN }}
@@ -63,21 +67,15 @@ jobs:
       - uses: actions/checkout@v4
         with:
           path: .release-tools
-      # Без токена релиз не создать: падаем сразу, а не после сборки
-      # A release cannot be created without the token: fail at once, not after the build
-      - name: Секрет GV_API_TOKEN / The GV_API_TOKEN secret
+      - name: Секрет и инструменты / The secret and tools
         shell: bash
         run: |
           if [ -z "$GV_API_TOKEN" ]; then
             echo "Нет секрета GV_API_TOKEN (Настройки → Секреты и переменные) / No GV_API_TOKEN secret"; exit 1
           fi
-      - name: Инструменты / Tools
-        shell: bash
-        run: |
           sudo=""
           if [ "$(id -u)" != "0" ]; then sudo="sudo"; fi
-          $sudo apt-get update -qq
-          $sudo apt-get install -y -qq g++ make zip curl python3
+          $sudo apt-get update -qq && $sudo apt-get install -y -qq curl python3 zip
       # Версия тега обязана совпадать с версией проекта / The tag version must match the project version
       - name: Проверка версии / Version check
         shell: bash
@@ -86,28 +84,94 @@ jobs:
           if [ "$TAG" != "v$version" ]; then
             echo "Тег $TAG не совпадает с версией $version / The tag does not match the version"; exit 1
           fi
-      - name: make + make test
+      - name: Описание и релиз / The notes and the release
         shell: bash
         run: |
-          make -j"$(nproc)" all bin/libberesta.a
-          make test
-      - name: SDK для C и C++ / The C and C++ SDK
-        shell: bash
-        run: |
-          sdk="beresta-${TAG#v}-linux-x86_64"
-          mkdir -p "sdk/$sdk/lib" fallback
-          cp -R include LICENSE README.md README.en.md CHANGELOG.md CHANGELOG.en.md docs "sdk/$sdk/"
-          cp bin/libberesta.a bin/libberesta.so "sdk/$sdk/lib/"
-          (cd sdk && zip -qr "../fallback/$sdk.zip" "$sdk")
-      # Файлы GitHub полнее (пять платформ, glibc 2.35), поэтому берутся они, если релиз готов
-      # The GitHub files are more complete (five platforms, glibc 2.35), so they are taken if the release is ready
-      - name: Релиз Gitverse / The Gitverse release
-        shell: bash
-        run: |
-          files=mirror
-          if ! bash .release-tools/tools/release/github_assets.sh "$TAG" mirror 15; then
-            echo "Прикрепляю только SDK Linux x86_64 / Attaching only the Linux x86_64 SDK"
-            files=fallback
-          fi
           bash .release-tools/tools/release/release_notes.sh "${TAG#v}" notes.md
-          bash .release-tools/tools/release/gitverse_release.sh "$TAG" notes.md "$files"/*
+          cat .release-tools/tools/release/gitverse_notes.md >> notes.md
+          bash .release-tools/tools/release/gitverse_release.sh "$TAG" notes.md
+
+  linux:
+    name: Linux x86_64 + aarch64 (Astra Linux SE 1.7)
+    needs: create
+    runs-on: ubuntu-latest
+    env:
+      GV_API_TOKEN: ${{ secrets.GV_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+      - uses: actions/checkout@v4
+        with:
+          path: .release-tools
+      - name: Сборка в Astra Linux SE 1.7 / The build in Astra Linux SE 1.7
+        id: astra
+        continue-on-error: true
+        uses: docker://registry.astralinux.ru/library/astra/ubi17:latest
+        with:
+          entrypoint: bash
+          args: .release-tools/tools/release/build_linux.sh ${{ env.TAG }} dist
+      # Запасной путь: образ Astra недоступен — сборка на раннере (glibc раннера)
+      # The fallback: the Astra image is unavailable — the build on the runner (the runner glibc)
+      - name: Сборка на раннере / The build on the runner
+        if: steps.astra.outcome != 'success'
+        shell: bash
+        run: bash .release-tools/tools/release/build_linux.sh "$TAG" dist
+      - name: Файлы в релиз / Files into the release
+        shell: bash
+        run: |
+          sudo=""
+          if [ "$(id -u)" != "0" ]; then sudo="sudo"; fi
+          $sudo apt-get update -qq && $sudo apt-get install -y -qq curl python3 zip
+          bash .release-tools/tools/release/gitverse_release.sh "$TAG" /dev/null dist/*.zip
+
+  windows:
+    name: Windows x86_64 (MinGW-w64)
+    needs: create
+    runs-on: ubuntu-latest
+    env:
+      GV_API_TOKEN: ${{ secrets.GV_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+      - uses: actions/checkout@v4
+        with:
+          path: .release-tools
+      - name: Сборка / The build
+        shell: bash
+        run: bash .release-tools/tools/release/build_windows.sh "$TAG" dist
+      - name: Файлы в релиз / Files into the release
+        shell: bash
+        run: |
+          sudo=""
+          if [ "$(id -u)" != "0" ]; then sudo="sudo"; fi
+          $sudo apt-get install -y -qq curl python3 zip
+          bash .release-tools/tools/release/gitverse_release.sh "$TAG" /dev/null dist/*.zip
+
+  github:
+    name: macOS, Windows ARM64, пакеты / packages (GitHub)
+    needs: create
+    runs-on: ubuntu-latest
+    env:
+      GV_API_TOKEN: ${{ secrets.GV_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: .release-tools
+      - name: Инструменты / Tools
+        shell: bash
+        run: |
+          sudo=""
+          if [ "$(id -u)" != "0" ]; then sudo="sudo"; fi
+          $sudo apt-get update -qq && $sudo apt-get install -y -qq curl python3 zip
+      # Релиз GitHub собирается ~20–30 минут: ждём до 25. SDK Linux и Windows x86_64
+      # собраны на Gitverse, поэтому их копии с GitHub не берутся
+      # The GitHub release takes ~20–30 minutes: wait up to 25. The Linux and Windows x86_64 SDKs
+      # are built on Gitverse, so their GitHub copies are not taken
+      - name: Файлы релиза GitHub / The GitHub release files
+        shell: bash
+        run: |
+          bash .release-tools/tools/release/github_assets.sh "$TAG" mirror 25
+          rm -f mirror/*-linux-x86_64.zip mirror/*-linux-aarch64.zip mirror/*-windows-x86_64.zip
+          bash .release-tools/tools/release/gitverse_release.sh "$TAG" /dev/null mirror/*

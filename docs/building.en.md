@@ -195,7 +195,7 @@ Publishing to the registries is enabled by repository secrets (Settings → Secr
 The repository is mirrored on [Gitverse](https://gitverse.ru/ermaleyalekov/beresta). Gitverse reads its workflows from `.gitverse/workflows` (in the repository settings: CI/CD → "Use the configuration from .gitverse/workflows"); GitHub does not see this folder. Gitverse has one cloud runner — `ubuntu-latest` (Linux x86_64, 30 minutes per job), so:
 
 - **`.gitverse/workflows/ci.yml`** — on every push and merge request: `make` and `make test` on Linux x86_64. The full platform matrix is checked on GitHub.
-- **`.gitverse/workflows/release.yml`** — on a `vX.Y.Z` tag as one job (artifacts are not passed between jobs on Gitverse): the build and tests on Linux x86_64, then waiting for the release of the same tag on GitHub (up to 15 minutes), downloading all its files (`tools/release/github_assets.sh`) and creating the Gitverse release through the public API (`tools/release/gitverse_release.sh`). If the GitHub release is not ready, only the Linux x86_64 SDK is attached; a manual re-run (CI/CD → Release, the `tag` parameter) replaces the files. **This workflow publishes nothing to registries.** Gitverse accepts release files only from its list of extensions (`.zip`, `.tgz`, `.whl`, `.jar` and others), so the NuGet package lies there in the `Beresta.X.Y.Z.nupkg.zip` archive.
+- **`.gitverse/workflows/release.yml`** — on a `vX.Y.Z` tag: the `create` job creates the release through the public API (`tools/release/gitverse_release.sh`), then three jobs add files in parallel. **`linux`** builds the Linux x86_64 and aarch64 SDKs in the Astra Linux SE 1.7 image (a `docker://` step, GCC 8.3, glibc 2.28; `tools/release/build_linux.sh`) and runs the tests on both architectures (aarch64 in qemu); if the image is unavailable, the same script runs on the runner. **`windows`** builds the Windows x86_64 SDK with the MinGW-w64 cross compiler (`tools/release/build_windows.sh`, the `*-windows-x86_64-mingw.zip` archive). **`github`** waits for the GitHub release (up to 25 minutes) and takes from it only what cannot be built on Gitverse: the macOS and Windows ARM64 SDKs, the npm, PyPI, NuGet, Maven and WebAssembly packages (`tools/release/github_assets.sh`). A manual rerun (CI/CD → Release, the `tag` parameter) replaces the files. **This workflow publishes nothing to the registries.** Gitverse accepts only files from its extension list (`.zip`, `.tgz`, `.whl`, `.jar` etc.) into a release, so the NuGet package is stored there in the `Beresta.X.Y.Z.nupkg.zip` archive.
 - **`.gitverse/workflows/pages.yml`** — on changes of `site/` in `main`: publishes the product site to Gitverse Pages (<https://ermaleyalekov.gitverse.site/beresta>); the "Pages" settings source is "Workflow".
 
 The Gitverse secret (Repository settings → Secrets and variables): `GV_API_TOKEN` — a token from gitverse.ru/settings/tokens with the "Repositories → Write" right. The `GITVERSE_` prefix is forbidden in Gitverse secret names.
@@ -214,7 +214,7 @@ The order:
 
 1. Bump the version in `CMakeLists.txt`, `include/capi/beresta_c.h`, `bindings/*/package.json`, `bindings/python/pyproject.toml`, `bindings/python/tests/test_xpath_schema.py`, `bindings/java/pom.xml`, `bindings/csharp/Beresta/Beresta.csproj` and in the dependency examples (`docs/building*.md`, `docs/bindings*.md`, `bindings/java/README.md`); add the version section to both `CHANGELOG` files.
 2. `make test` is green; commit and push `main` to both remotes, wait for a green CI on both.
-3. The tag goes to GitHub first; the packages and the release are built there (about 20–30 minutes):
+3. The tag goes to GitHub; the packages and the release are built there (about 20–30 minutes):
 
 ```bash
 git tag v2.1.3
@@ -223,7 +223,7 @@ git tag v2.1.3
 git push origin main v2.1.3
 ```
 
-4. When the GitHub release is ready — the same tag to Gitverse; its workflow takes the files of the GitHub release:
+4. The same tag goes to Gitverse (a few minutes after GitHub: the `github` job waits for the GitHub release for at most 25 minutes); Gitverse builds Linux and Windows x86_64 itself:
 
 ```bash
 git push gitverse main v2.1.3
