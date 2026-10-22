@@ -18,6 +18,12 @@ The fixes were found by debugging the W3C XML Schema Test Suite failures by hand
 - `xs:annotation` occurs at most once and only as the first child (global components and particles).
 - Inside `xs:group` there is one `sequence`/`choice`/`all` model. An `xs:group` reference stands only in a model or right in a type.
 - `name` of a global component is an NCName (with Unicode characters).
+- Schema building depth is limited: more than 256 levels of declarations, types and models is the
+  `SCHEMA_TOO_DEEP` schema error. Before, the particle limit started anew at every anonymous type, and with a
+  raised `maxDepth` a schema of about a thousand nested elements crashed the process with a stack overflow.
+- A schema document deeper than 1024 element levels is rejected before building (`SCHEMA_DOCUMENT_TOO_DEEP`).
+- README and the comparison: "no recursion" is made precise — there is no recursion over the document tree.
+  Schema building and expression parsing are recursive, their limits are described (XPath parsing has no limit yet).
 
 ### Tools
 

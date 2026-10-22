@@ -391,6 +391,8 @@ namespace beresta::i18n
         {Message::SCHEMA_NOT_NCNAME, "значение {0}=\"{1}\" не является NCName"},
         {Message::SCHEMA_DUPLICATE_ID, "повторный id \"{0}\" в документе схемы"},
         {Message::SCHEMA_ALL_OCCURS, "у xs:all minOccurs и maxOccurs могут быть только 0 или 1"},
+        {Message::SCHEMA_DOCUMENT_TOO_DEEP, "документ схемы вложен слишком глубоко: больше {0} уровней элементов"},
+        {Message::SCHEMA_TOO_DEEP,"схема вложена слишком глубоко: больше {0} уровней объявлений, типов и моделей"},
     };
 
     const Catalog RUSSIAN_CATALOG{"ru", "Русский", TEXTS, sizeof(TEXTS) / sizeof(TEXTS[0])};

@@ -36,6 +36,7 @@ namespace beresta::xsd::detail
     ElementDecl* SchemaBuilder::buildElement(const Element& definition, const SchemaSource& source,
         bool global)
     {
+        NestingGuard nesting(*this, definition);
         _schema._elements.emplace_back();
         ElementDecl& declaration = _schema._elements.back();
         std::optional<std::string> head = definition.getAttribute("substitutionGroup");

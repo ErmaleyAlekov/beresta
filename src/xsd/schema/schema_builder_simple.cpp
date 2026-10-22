@@ -20,6 +20,7 @@ namespace beresta::xsd::detail
     const SimpleType* SchemaBuilder::buildSimpleType(const Element& definition,
         const SchemaSource& source, const QualifiedKey& name, bool publish)
     {
+        NestingGuard nesting(*this, definition);
         _schema._simpleTypes.emplace_back();
         SimpleType& type = _schema._simpleTypes.back();
 

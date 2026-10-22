@@ -115,6 +115,59 @@ namespace beresta::xsd::detail
         void buildAll();
 
     private:
+        /*
+        ** Сборка схемы рекурсивна: частица -> локальный элемент -> анонимный
+        ** тип -> частица..., тип -> базовый тип, простой тип -> вложенный
+        ** простой тип. Предел depth у частиц считает только одну модель, а на
+        ** анонимном типе начинается заново, поэтому глубину всей цепочки
+        ** считает общий счётчик _nesting. NestingGuard (RAII) увеличивает его
+        ** при входе в buildParticle / buildElement / buildComplexType /
+        ** buildSimpleType / buildAttributes и уменьшает при выходе, в том числе
+        ** при исключении. Сверх MAX_NESTING — ошибка схемы SCHEMA_TOO_DEEP, а не
+        ** переполнение стека. 256 уровней — около 64 вложенных локальных
+        ** элементов с анонимными типами: с запасом для настоящих схем и
+        ** безопасно даже для потоков с маленьким стеком.
+        **
+        ** Building a schema is recursive: a particle -> a local element -> an anonymous
+        ** type -> a particle..., a type -> its base type, a simple type -> a nested
+        ** simple type. The depth limit of particles counts only one model and starts
+        ** anew at an anonymous type, so the depth of the whole chain is counted by the
+        ** common _nesting counter. NestingGuard (RAII) increases it on entering
+        ** buildParticle / buildElement / buildComplexType / buildSimpleType /
+        ** buildAttributes and decreases it on leaving, including on an exception.
+        ** Beyond MAX_NESTING it is the SCHEMA_TOO_DEEP schema error, not a stack
+        ** overflow. 256 levels are about 64 nested local elements with anonymous types:
+        ** plenty for real schemas and safe even for threads with a small stack.
+        */
+        static constexpr std::size_t MAX_NESTING = 256;
+
+        /*
+        ** Предел вложенности элементов самого документа схемы — как у парсера
+        ** по умолчанию (maxDepth = 1024). Документ глубже не собрать при
+        ** MAX_NESTING (уровень сборки — не больше четырёх уровней XML), а обход
+        ** такого документа стоил бы O(n · глубина): пространство имён элемента
+        ** ищется подъёмом к корню. Проверяется первым, в checkDocumentIds.
+        **
+        ** The element nesting limit of the schema document itself — as the parser's
+        ** default (maxDepth = 1024). A deeper document cannot be built under
+        ** MAX_NESTING (a building level is at most four XML levels), and a traversal
+        ** of such a document would cost O(n · depth): the namespace of an element
+        ** is looked up by climbing to the root. It is checked first, in checkDocumentIds.
+        */
+        static constexpr std::size_t MAX_DOCUMENT_DEPTH = 4 * MAX_NESTING;
+
+        class NestingGuard
+        {
+        public:
+            NestingGuard(SchemaBuilder& builder, const Element& where);
+            ~NestingGuard();
+            NestingGuard(const NestingGuard&) = delete;
+            NestingGuard& operator=(const NestingGuard&) = delete;
+
+        private:
+            SchemaBuilder& _builder;
+        };
+
         // Глобальные объявления атрибутов — в схему, для xs:anyAttribute (schema_builder.cpp)
         // Global attribute declarations — into the schema, for xs:anyAttribute (schema_builder.cpp)
         void buildGlobalAttributes();
@@ -171,6 +224,7 @@ namespace beresta::xsd::detail
         // ---- Строение документа схемы (schema_builder_structure.cpp) ----
         // ---- The structure of a schema document (schema_builder_structure.cpp) ----
         void checkDocumentIds(const Element& root) const;
+        void checkIdAttribute(const Element& element, std::set<std::string>& seen) const;
         void checkChildOrder(const Element& element) const;
         void checkGroupChild(const Element& parent, const Element& child, std::size_t& models) const;
         void checkNCName(const Element& where, std::string_view attribute, const std::string& value) const;
@@ -278,6 +332,7 @@ namespace beresta::xsd::detail
         std::map<const Element*, TypeRef> _builtOriginals;
         std::set<std::pair<std::string, QualifiedKey>> _overridden;
         std::set<const ElementDecl*> _headTyped;
+        std::size_t _nesting = 0;       // текущая глубина сборки / the current building depth
     };
 
     // ---- Обход XML схемы (schema_xml_helpers.cpp) ----

@@ -19,6 +19,7 @@ namespace beresta::xsd::detail
     const ComplexType* SchemaBuilder::buildComplexType(const Element& definition,
         const SchemaSource& source, const QualifiedKey& name, bool publish)
     {
+        NestingGuard nesting(*this, definition);
         _schema._complexTypes.emplace_back();
         ComplexType& type = _schema._complexTypes.back();
         const Element* simpleContent = firstSchemaChild(definition, "simpleContent");

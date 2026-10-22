@@ -15,6 +15,7 @@ namespace beresta::xsd::detail
     content::Particle SchemaBuilder::buildParticle(const Element& definition, const SchemaSource& source,
         ComplexType& owner, std::size_t depth)
     {
+        NestingGuard nesting(*this, definition);
         std::string_view kind = definition.getLocalName();
         content::Particle group;
 

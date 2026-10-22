@@ -4,6 +4,7 @@
 
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace beresta::xsd::detail
@@ -13,33 +14,31 @@ namespace beresta::xsd::detail
     ** уникальное в пределах ОДНОГО документа схемы. Поэтому проверка идёт
     ** отдельным обходом документа, а не при сборке компонентов: модель
     ** именованной группы собирается заново в каждом месте ссылки, и
-    ** её id нельзя считать повтором. Обход — явным стеком (глубина
-    ** документа не ограничена); содержимое xs:appinfo / xs:documentation
+    ** её id нельзя считать повтором. Обход — явным стеком с глубиной каждого
+    ** элемента: документ глубже MAX_DOCUMENT_DEPTH отвергается сразу, иначе
+    ** обход стоил бы O(n · глубина). Содержимое xs:appinfo / xs:documentation
     ** чужое и не проверяется.
     **
     ** The id attribute of XSD elements has the xs:ID type: the value is an NCName
     ** unique within ONE schema document. So the check is a separate traversal
     ** of the document, not part of building the components: the model of a named
     ** group is rebuilt at every reference place, and its id must not be counted
-    ** as a repeat. The traversal uses an explicit stack (the document depth is not
-    ** limited); the content of xs:appinfo / xs:documentation is foreign and not checked.
+    ** as a repeat. The traversal uses an explicit stack with the depth of each
+    ** element: a document deeper than MAX_DOCUMENT_DEPTH is rejected at once, otherwise
+    ** the traversal would cost O(n · depth). The content of xs:appinfo /
+    ** xs:documentation is foreign and not checked.
     */
     void SchemaBuilder::checkDocumentIds(const Element& root) const
     {
         std::set<std::string> seen;
-        std::vector<const Element*> pending{&root};
+        std::vector<std::pair<const Element*, std::size_t>> pending{{&root, 1}};
 
         while (!pending.empty())
         {
-            const Element& current = *pending.back();
+            const Element& current = *pending.back().first;
+            std::size_t depth = pending.back().second;
             pending.pop_back();
-            if (std::optional<std::string> id = current.getAttribute("id"))
-            {
-                std::string value = normalizeWhiteSpace(*id, WhiteSpace::COLLAPSE);
-                checkNCName(current, "id", value);
-                if (!seen.insert(value).second)
-                    fail(current, i18n::format(i18n::Message::SCHEMA_DUPLICATE_ID, {value}));
-            }
+            checkIdAttribute(current, seen);
             if (isSchemaElement(current, "appinfo") || isSchemaElement(current, "documentation"))
                 continue;
             for (const Node* node = current.getFirstChild(); node != nullptr; node = node->getNextSibling())
@@ -47,10 +46,27 @@ namespace beresta::xsd::detail
                 if (node->getType() != NodeType::ELEMENT)
                     continue;
                 const Element* child = static_cast<const Element*>(node);
+                if (depth >= MAX_DOCUMENT_DEPTH)
+                    fail(*child, i18n::format(i18n::Message::SCHEMA_DOCUMENT_TOO_DEEP,
+                        {std::to_string(MAX_DOCUMENT_DEPTH)}));
                 if (versionAccepted(*child) && child->getNamespaceURI().value_or("") == XSD_NAMESPACE_URI)
-                    pending.push_back(child);
+                    pending.emplace_back(child, depth + 1);
             }
         }
+    }
+
+    // id (если есть) — NCName и не повторяется среди уже встреченных в документе
+    // id (if any) is an NCName and does not repeat among the ones already met in the document
+    void SchemaBuilder::checkIdAttribute(const Element& element, std::set<std::string>& seen) const
+    {
+        std::optional<std::string> id = element.getAttribute("id");
+
+        if (!id.has_value())
+            return;
+        std::string value = normalizeWhiteSpace(*id, WhiteSpace::COLLAPSE);
+        checkNCName(element, "id", value);
+        if (!seen.insert(value).second)
+            fail(element, i18n::format(i18n::Message::SCHEMA_DUPLICATE_ID, {value}));
     }
 
     /*

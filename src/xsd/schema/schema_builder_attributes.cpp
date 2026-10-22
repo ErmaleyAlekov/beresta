@@ -20,6 +20,7 @@ namespace beresta::xsd::detail
     std::optional<AttributeWildcard> SchemaBuilder::buildAttributes(const Element& parent,
         const SchemaSource& source, ComplexType& owner, std::size_t depth)
     {
+        NestingGuard nesting(*this, parent);
         std::optional<AttributeWildcard> own;
         std::optional<AttributeWildcard> groups;
 
