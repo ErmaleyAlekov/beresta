@@ -56,6 +56,7 @@ namespace suites
     void registerXPathFunctionTests(test::TestRunner& runner);
     void registerXPathNamespaceTests(test::TestRunner& runner);
     void registerXPathNameTests(test::TestRunner& runner);
+    void registerXPathDepthTests(test::TestRunner& runner);
     void registerDecimalTests(test::TestRunner& runner);
 
     // ---- XML Schema и XInclude ----

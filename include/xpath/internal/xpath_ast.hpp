@@ -100,16 +100,30 @@ namespace beresta::xpath::detail
         STRING, BOOLEAN, DECIMAL, INTEGER, DOUBLE, DATE, DATE_TIME
     };
 
-    // Бинарное выражение: логика, сравнения, арифметика, объединение множеств
-    // A binary expression: logic, comparisons, arithmetic, set union
+    /*
+    ** Бинарное выражение: логика, сравнения, арифметика, объединение множеств.
+    ** Цепочка операторов одного уровня (1+1+…+1) разбирается в левый
+    ** «хребет» глубиной в длину цепочки, поэтому вычисление и разрушение
+    ** проходят по нему циклом, а не рекурсией (xpath_binary_chain.cpp).
+    **
+    ** A binary expression: logic, comparisons, arithmetic, set union.
+    ** A chain of same-level operators (1+1+…+1) is parsed into a left
+    ** "spine" as deep as the chain is long, so evaluation and destruction
+    ** walk it by a loop rather than by recursion (xpath_binary_chain.cpp).
+    */
     class BinaryExpr : public Expr
     {
     public:
         BinaryExpr(BinaryOperator op, ExprPtr left, ExprPtr right) noexcept;
+        ~BinaryExpr() override;
 
         XPathValue evaluate(const EvalContext& context) const override;
 
     private:
+        // Операция над уже вычисленным левым операндом (правый вычисляется здесь)
+        // The operation over the already evaluated left operand (the right one is evaluated here)
+        XPathValue combine(XPathValue left, const EvalContext& context) const;
+
         BinaryOperator _operator;
         ExprPtr _left;
         ExprPtr _right;

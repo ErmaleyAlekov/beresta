@@ -24,7 +24,7 @@ namespace
         suites::registerW3cValidityTests, suites::registerW3cEncodingTests,
         suites::registerFuzzRegressionTests,
         suites::registerSerializerTests, suites::registerTraversalTests, suites::registerXPathPathTests, suites::registerXPathFunctionTests, suites::registerXPathNamespaceTests,
-        suites::registerXPathNameTests, suites::registerDecimalTests,
+        suites::registerXPathNameTests, suites::registerXPathDepthTests, suites::registerDecimalTests,
         suites::registerXsdDatatypeTests, suites::registerXsdSchemaTests, suites::registerXsdAdvancedTests, suites::registerXsdIdentityTests, suites::registerXsdIdentityScopeTests, suites::registerXsdPathTests,
         suites::registerXsdStreamTests, suites::registerXsdStreamIdentityTests,
         suites::registerXsdSubstitutionTests, suites::registerXsdDerivationTests, suites::registerXsdFinalTests,

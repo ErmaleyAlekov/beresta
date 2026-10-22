@@ -6,6 +6,40 @@
 namespace beresta::xpath::detail
 {
     /*
+    ** Предел вложенности одиночных выражений. Через parseExprSingle идёт
+    ** вся рекурсия разбора: скобки, аргументы функций, предикаты, ветви if
+    ** и кванторы, а один уровень — это полтора десятка кадров стека. 128
+    ** уровней с запасом хватает любому настоящему выражению, а стек на них
+    ** расходуется в сотни килобайт, а не в мегабайты.
+    **
+    ** The nesting limit of single expressions. All the recursion of parsing
+    ** goes through parseExprSingle: parentheses, function arguments, predicates,
+    ** if branches and quantifiers, and one level is about fifteen stack frames.
+    ** 128 levels are amply enough for any real expression, and the stack spent
+    ** on them is hundreds of kilobytes rather than megabytes.
+    */
+    static constexpr std::size_t MAX_NESTING = 128;
+
+    /*
+    ** Одиночное выражение со счётчиком глубины: сверх предела — обычная
+    ** ошибка разбора, а не переполнение стека. При исключении счётчик не
+    ** восстанавливается: разбор на этом заканчивается, а парсер одноразовый.
+    **
+    ** A single expression with a depth counter: beyond the limit it is an ordinary
+    ** parse error rather than a stack overflow. On an exception the counter is not
+    ** restored: parsing ends there, and the parser is single-use.
+    */
+    ExprPtr XPathParser::parseExprSingle()
+    {
+        if (_depth >= MAX_NESTING)
+            fail(i18n::format(i18n::Message::XPATH_TOO_DEEP, {std::to_string(MAX_NESTING)}));
+        ++_depth;
+        ExprPtr expression = parseExprChoice();
+        --_depth;
+        return expression;
+    }
+
+    /*
     ** Одиночное выражение (ExprSingle XPath 2.0): в утверждениях XSD —
     ** if (…) then … else … или квантор some / every; иначе (и всегда в
     ** XPath 1.0) — бинарное выражение самого низкого приоритета. Квантор
@@ -16,7 +50,7 @@ namespace beresta::xpath::detail
     ** XPath 1.0) — a binary expression of the lowest precedence. A quantifier
     ** is recognized by the pair "some / every" + "$name": a bare some is a path.
     */
-    ExprPtr XPathParser::parseExprSingle()
+    ExprPtr XPathParser::parseExprChoice()
     {
         const Token& token = peek();
 

@@ -394,6 +394,7 @@ namespace beresta::i18n
         {Message::SCHEMA_ALL_OCCURS, "minOccurs and maxOccurs of xs:all can only be 0 or 1"},
         {Message::SCHEMA_DOCUMENT_TOO_DEEP, "the schema document is nested too deeply: more than {0} element levels"},
         {Message::SCHEMA_TOO_DEEP,"the schema is nested too deeply: more than {0} levels of declarations, types and models"},
+        {Message::XPATH_TOO_DEEP, "the expression is nested too deeply: more than {0} levels of parentheses, arguments and predicates"},
     };
 
     const Catalog ENGLISH_CATALOG{"en", "English", TEXTS, sizeof(TEXTS) / sizeof(TEXTS[0])};

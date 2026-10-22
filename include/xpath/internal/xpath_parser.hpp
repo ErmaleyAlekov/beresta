@@ -52,6 +52,7 @@ namespace beresta::xpath::detail
         // ---- Конструкции XPath 2.0 (xpath_parser_xpath2.cpp, xpath_parser_functions.cpp) ----
         // ---- XPath 2.0 constructs (xpath_parser_xpath2.cpp, xpath_parser_functions.cpp) ----
         ExprPtr parseExprSingle();
+        ExprPtr parseExprChoice();
         ExprPtr parseIf();
         ExprPtr parseQuantified();
         void expectKeyword(const char* word);
@@ -86,6 +87,10 @@ namespace beresta::xpath::detail
         std::size_t _index;
         XPathDialect _dialect;
         const XPathContext* _namespaces;
+
+        // Текущая вложенность одиночных выражений (предел — в xpath_parser_xpath2.cpp)
+        // The current nesting of single expressions (the limit is in xpath_parser_xpath2.cpp)
+        std::size_t _depth;
     };
 }
 

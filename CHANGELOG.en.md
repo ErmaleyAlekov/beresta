@@ -23,7 +23,15 @@ The fixes were found by debugging the W3C XML Schema Test Suite failures by hand
   raised `maxDepth` a schema of about a thousand nested elements crashed the process with a stack overflow.
 - A schema document deeper than 1024 element levels is rejected before building (`SCHEMA_DOCUMENT_TOO_DEEP`).
 - README and the comparison: "no recursion" is made precise — there is no recursion over the document tree.
-  Schema building and expression parsing are recursive, their limits are described (XPath parsing has no limit yet).
+  Schema building and expression parsing are recursive, their limits are described.
+
+### XPath
+
+- The nesting depth of an expression is limited: more than 128 levels of parentheses, function arguments and
+  predicates (and in XSD assertions also `if` branches and quantifiers) is the `XPATH_ERROR` parse error. Before,
+  an expression of about a thousand nested parentheses crashed the process with a stack overflow.
+- A long operator chain (`1+1+…+1`, `a | b | …`, `x or y or …`) is evaluated and freed by a loop:
+  before, a chain of several thousand operators crashed the process with a stack overflow.
 
 ### Tools
 

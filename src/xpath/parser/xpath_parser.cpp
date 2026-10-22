@@ -69,7 +69,7 @@ namespace beresta::xpath::detail
     // Парсер работает по готовому списку лексем в заданном диалекте
     // The parser works over a ready list of tokens in the given dialect
     XPathParser::XPathParser(std::vector<Token> tokens, XPathDialect dialect, const XPathContext* namespaces)
-        : _tokens(std::move(tokens)), _index(0), _dialect(dialect), _namespaces(namespaces)
+        : _tokens(std::move(tokens)), _index(0), _dialect(dialect), _namespaces(namespaces), _depth(0)
     {
     }
 

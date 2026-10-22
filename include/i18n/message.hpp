@@ -401,6 +401,7 @@ namespace beresta::i18n
         SCHEMA_ALL_OCCURS,
         SCHEMA_TOO_DEEP,
         SCHEMA_DOCUMENT_TOO_DEEP,
+        XPATH_TOO_DEEP,
 
         // Число сообщений (не сообщение) / The number of messages (not a message)
         COUNT

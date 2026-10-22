@@ -393,6 +393,7 @@ namespace beresta::i18n
         {Message::SCHEMA_ALL_OCCURS, "у xs:all minOccurs и maxOccurs могут быть только 0 или 1"},
         {Message::SCHEMA_DOCUMENT_TOO_DEEP, "документ схемы вложен слишком глубоко: больше {0} уровней элементов"},
         {Message::SCHEMA_TOO_DEEP,"схема вложена слишком глубоко: больше {0} уровней объявлений, типов и моделей"},
+        {Message::XPATH_TOO_DEEP, "выражение вложено слишком глубоко: больше {0} уровней скобок, аргументов и предикатов"},
     };
 
     const Catalog RUSSIAN_CATALOG{"ru", "Русский", TEXTS, sizeof(TEXTS) / sizeof(TEXTS[0])};

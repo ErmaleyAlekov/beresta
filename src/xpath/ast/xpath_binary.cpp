@@ -56,23 +56,22 @@ namespace beresta::xpath::detail
     }
 
     /*
-    ** or / and вычисляются с коротким замыканием; сравнения — по правилам
-    ** XPath для множеств; '|' — объединение множеств в порядке документа.
-    ** В утверждениях XSD (typed) сравнения и арифметика — типизированные.
+    ** Операция над готовым левым значением: or / and — с коротким замыканием
+    ** (правый операнд не вычисляется, если исход уже ясен); сравнения — по
+    ** правилам XPath для множеств; '|' — объединение множеств в порядке
+    ** документа. В утверждениях XSD (typed) сравнения и арифметика — типизированные.
     **
-    ** or / and are evaluated with short-circuiting; comparisons follow the XPath
-    ** rules for sets; '|' is the union of sets in document order.
-    ** In XSD assertions (typed) comparisons and arithmetic are typed.
+    ** The operation over a ready left value: or / and with short-circuiting
+    ** (the right operand is not evaluated when the outcome is already known); comparisons
+    ** follow the XPath rules for sets; '|' is the union of sets in document
+    ** order. In XSD assertions (typed) comparisons and arithmetic are typed.
     */
-    XPathValue BinaryExpr::evaluate(const EvalContext& context) const
+    XPathValue BinaryExpr::combine(XPathValue left, const EvalContext& context) const
     {
         if (_operator == BinaryOperator::OR_OP)
-            return XPathValue::fromBoolean(_left->evaluate(context).toBoolean()
-                || _right->evaluate(context).toBoolean());
+            return XPathValue::fromBoolean(left.toBoolean() || _right->evaluate(context).toBoolean());
         if (_operator == BinaryOperator::AND_OP)
-            return XPathValue::fromBoolean(_left->evaluate(context).toBoolean()
-                && _right->evaluate(context).toBoolean());
-        XPathValue left = _left->evaluate(context);
+            return XPathValue::fromBoolean(left.toBoolean() && _right->evaluate(context).toBoolean());
         XPathValue right = _right->evaluate(context);
         if (_operator == BinaryOperator::UNION_OP)
         {
