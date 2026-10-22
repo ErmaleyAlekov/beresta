@@ -37,8 +37,13 @@ namespace beresta::content
         PositionSet result;
         std::unordered_set<std::size_t> members;
         PositionSet current = starts;
-        std::size_t limit = particle.minOccurs + _children.size() + 1;
+        std::size_t extra = _children.size() + 1;
+        std::size_t limit = static_cast<std::size_t>(-1);
 
+        // Сложение с насыщением: огромный minOccurs не должен переполнить предел
+        // A saturating addition: a huge minOccurs must not overflow the limit
+        if (particle.minOccurs <= limit - extra)
+            limit = particle.minOccurs + extra;
         if (particle.minOccurs == 1 && particle.maxOccurs == 1)
             return matchOnce(particle, starts);
         for (std::size_t count = 0; count <= limit && !current.empty(); ++count)

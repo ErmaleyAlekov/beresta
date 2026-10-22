@@ -1,0 +1,6 @@
+# Результаты сборки отладчика (список failing_cases.tsv хранится в репозитории)
+# Debugger build results (the failing_cases.tsv list is kept in the repository)
+/obj/
+/dep/
+/bin/
+/build/

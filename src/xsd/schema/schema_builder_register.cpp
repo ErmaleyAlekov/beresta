@@ -19,11 +19,13 @@ namespace beresta::xsd::detail
         std::string kind(child.getLocalName());
         std::map<QualifiedKey, Definition>* registry = registryFor(kind);
 
+        checkChildOrder(child);
         if (registry == nullptr)
             return;
         std::string name = attributeOr(child, "name", "");
         if (name.empty())
             fail(child, i18n::format(i18n::Message::SCHEMA_GLOBAL_NO_NAME, {kind}));
+        checkNCName(child, "name", name);
         QualifiedKey key(source.targetNamespace, name);
         if (_overridden.count(std::make_pair(kind, key)) != 0)
             return;

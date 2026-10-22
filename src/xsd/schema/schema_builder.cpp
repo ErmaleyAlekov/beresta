@@ -48,6 +48,7 @@ namespace beresta::xsd::detail
             _loadedUris.insert(baseUri);
         if (!versionAccepted(root))
             return;
+        checkDocumentIds(root);
         for (const Element* child : schemaChildren(root))
         {
             if (isSchemaElement(*child, "include") || isSchemaElement(*child, "import"))

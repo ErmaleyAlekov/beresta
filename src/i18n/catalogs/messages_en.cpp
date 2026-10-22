@@ -387,6 +387,11 @@ namespace beresta::i18n
         {Message::BINDING_INVALID_ARGUMENT, "invalid argument #{0} of {1}: {2} expected"},
         {Message::BINDING_NO_FILE_SYSTEM, "WebAssembly has no file system: {0} is unavailable, pass a string or bytes"},
         {Message::LANGUAGE_UNKNOWN, "an unknown message language \"{0}\"; available: {1}"},
+        {Message::SCHEMA_ANNOTATION_POSITION, "xs:annotation in xs:{0} must be the first and the only one"},
+        {Message::SCHEMA_CHILD_NOT_ALLOWED, "xs:{0} is not allowed inside xs:{1}"},
+        {Message::SCHEMA_NOT_NCNAME, "the value {0}=\"{1}\" is not an NCName"},
+        {Message::SCHEMA_DUPLICATE_ID, "a duplicate id \"{0}\" in the schema document"},
+        {Message::SCHEMA_ALL_OCCURS, "minOccurs and maxOccurs of xs:all can only be 0 or 1"},
     };
 
     const Catalog ENGLISH_CATALOG{"en", "English", TEXTS, sizeof(TEXTS) / sizeof(TEXTS[0])};

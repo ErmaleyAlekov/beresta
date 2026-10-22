@@ -386,6 +386,11 @@ namespace beresta::i18n
         {Message::BINDING_INVALID_ARGUMENT, "неверный аргумент №{0} функции {1}: ожидается {2}"},
         {Message::BINDING_NO_FILE_SYSTEM, "в WebAssembly нет файловой системы: {0} недоступна, передайте строку или байты"},
         {Message::LANGUAGE_UNKNOWN, "неизвестный язык сообщений \"{0}\"; доступны: {1}"},
+        {Message::SCHEMA_ANNOTATION_POSITION, "xs:annotation в xs:{0} должна быть первой и единственной"},
+        {Message::SCHEMA_CHILD_NOT_ALLOWED, "xs:{0} не допускается внутри xs:{1}"},
+        {Message::SCHEMA_NOT_NCNAME, "значение {0}=\"{1}\" не является NCName"},
+        {Message::SCHEMA_DUPLICATE_ID, "повторный id \"{0}\" в документе схемы"},
+        {Message::SCHEMA_ALL_OCCURS, "у xs:all minOccurs и maxOccurs могут быть только 0 или 1"},
     };
 
     const Catalog RUSSIAN_CATALOG{"ru", "Русский", TEXTS, sizeof(TEXTS) / sizeof(TEXTS[0])};

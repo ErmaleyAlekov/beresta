@@ -394,6 +394,11 @@ namespace beresta::i18n
         BINDING_INVALID_ARGUMENT,
         BINDING_NO_FILE_SYSTEM,
         LANGUAGE_UNKNOWN,
+        SCHEMA_ANNOTATION_POSITION,
+        SCHEMA_CHILD_NOT_ALLOWED,
+        SCHEMA_NOT_NCNAME,
+        SCHEMA_DUPLICATE_ID,
+        SCHEMA_ALL_OCCURS,
 
         // Число сообщений (не сообщение) / The number of messages (not a message)
         COUNT

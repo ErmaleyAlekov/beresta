@@ -5,6 +5,25 @@
 Versions follow [semantic versioning](https://semver.org/). The entire version section
 is included in the release description on GitHub and Gitverse.
 
+## Unreleased
+
+### XML Schema: checking the schema document
+
+The fixes were found by debugging the W3C XML Schema Test Suite failures by hand
+(`tests/xsts_failing`). The suite result is **96.8 %** (was 96.2 %): 234 cases fixed, no new failures.
+
+- `minOccurs`/`maxOccurs` is any non-negative integer: a number longer than 9 digits is no longer an error.
+- `minOccurs` and `maxOccurs` of `xs:all` can only be 0 or 1.
+- `id` of XSD elements is an NCName unique within the schema document.
+- `xs:annotation` occurs at most once and only as the first child (global components and particles).
+- Inside `xs:group` there is one `sequence`/`choice`/`all` model. An `xs:group` reference stands only in a model or right in a type.
+- `name` of a global component is an NCName (with Unicode characters).
+
+### Tools
+
+- `tests/xsts_failing` — the XSTS failure debugger: the failure list from a run, running cases one by one
+  (a filter, `--case N`, `--stop-on-first`), a debug build together with the library.
+
 ## 2.1.4 — 2026-10-20
 
 ### License

@@ -168,6 +168,13 @@ namespace beresta::xsd::detail
             bool attribute) const;
         [[noreturn]] void fail(const Element& where, const std::string& message) const;
 
+        // ---- Строение документа схемы (schema_builder_structure.cpp) ----
+        // ---- The structure of a schema document (schema_builder_structure.cpp) ----
+        void checkDocumentIds(const Element& root) const;
+        void checkChildOrder(const Element& element) const;
+        void checkGroupChild(const Element& parent, const Element& child, std::size_t& models) const;
+        void checkNCName(const Element& where, std::string_view attribute, const std::string& value) const;
+
         // ---- Элементы (schema_builder_elements.cpp) ----
         // ---- Elements (schema_builder_elements.cpp) ----
         const ElementDecl* globalElement(const QualifiedKey& key);

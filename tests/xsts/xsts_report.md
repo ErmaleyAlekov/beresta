@@ -8,49 +8,49 @@
 
 | Группа | Прошло | Провал | Ограничение | Пропуск | Процент |
 |---|---:|---:|---:|---:|---:|
-| instanceTest invalid | 10926 | 17 | 19 | 160 | 99.8% |
-| instanceTest valid | 13806 | 17 | 26 | 121 | 99.9% |
-| schemaTest invalid | 1016 | 1417 | 291 | 6 | 41.8% |
-| schemaTest valid | 10975 | 12 | 23 | 588 | 99.9% |
-| **Итого** | 36723 | 1463 | 359 | 875 | 96.2% |
+| instanceTest invalid | 10927 | 16 | 19 | 160 | 99.9% |
+| instanceTest valid | 13811 | 12 | 26 | 121 | 99.9% |
+| schemaTest invalid | 1235 | 1198 | 291 | 6 | 50.8% |
+| schemaTest valid | 10984 | 3 | 23 | 588 | 100.0% |
+| **Итого** | 36957 | 1229 | 359 | 875 | 96.8% |
 
 ## По наборам
 
 | Группа | Прошло | Провал | Ограничение | Пропуск | Процент |
 |---|---:|---:|---:|---:|---:|
-| AGroupDef | 15 | 4 | 0 | 0 | 78.9% |
+| AGroupDef | 19 | 0 | 0 | 0 | 100.0% |
 | AttrDecl | 176 | 2 | 0 | 0 | 98.9% |
 | AttrUse | 9 | 0 | 0 | 0 | 100.0% |
 | BoeingXSDTestCases | 18 | 0 | 0 | 0 | 100.0% |
-| CType | 83 | 2 | 0 | 0 | 97.6% |
-| ElemDecl | 445 | 19 | 0 | 0 | 95.9% |
+| CType | 85 | 0 | 0 | 0 | 100.0% |
+| ElemDecl | 447 | 17 | 0 | 0 | 96.3% |
 | IdConstrDefs | 44 | 4 | 0 | 0 | 91.7% |
-| MGroup | 64 | 15 | 0 | 0 | 81.0% |
-| MGroupDef | 23 | 10 | 0 | 0 | 69.7% |
-| MS-Additional2006-07-15 | 391 | 43 | 9 | 7 | 90.1% |
-| MS-Annotations2006-07-15 | 50 | 27 | 2 | 1 | 64.9% |
-| MS-Attribute2006-07-15 | 295 | 107 | 0 | 1 | 73.4% |
-| MS-AttributeGroup2006-07-15 | 126 | 19 | 2 | 0 | 86.9% |
-| MS-ComplexType2006-07-15 | 570 | 237 | 0 | 5 | 70.6% |
+| MGroup | 76 | 3 | 0 | 0 | 96.2% |
+| MGroupDef | 33 | 0 | 0 | 0 | 100.0% |
+| MS-Additional2006-07-15 | 394 | 40 | 9 | 7 | 90.8% |
+| MS-Annotations2006-07-15 | 58 | 19 | 2 | 1 | 75.3% |
+| MS-Attribute2006-07-15 | 300 | 102 | 0 | 1 | 74.6% |
+| MS-AttributeGroup2006-07-15 | 136 | 9 | 2 | 0 | 93.8% |
+| MS-ComplexType2006-07-15 | 591 | 216 | 0 | 5 | 73.2% |
 | MS-DataTypes2006-07-15 | 3005 | 416 | 23 | 16 | 87.8% |
-| MS-Element2006-07-15 | 477 | 25 | 8 | 20 | 95.0% |
+| MS-Element2006-07-15 | 488 | 14 | 8 | 20 | 97.2% |
 | MS-Errata102006-07-15 | 28 | 2 | 1 | 0 | 93.3% |
-| MS-Group2006-07-15 | 309 | 35 | 0 | 0 | 89.8% |
-| MS-IdentityConstraint2006-07-15 | 945 | 112 | 0 | 7 | 89.4% |
-| MS-ModelGroups2006-07-15 | 505 | 92 | 2 | 0 | 84.6% |
-| MS-Notations2006-07-15 | 48 | 71 | 0 | 0 | 40.3% |
-| MS-Particles2006-07-15 | 1077 | 13 | 276 | 12 | 98.8% |
+| MS-Group2006-07-15 | 341 | 3 | 0 | 0 | 99.1% |
+| MS-IdentityConstraint2006-07-15 | 960 | 97 | 0 | 7 | 90.8% |
+| MS-ModelGroups2006-07-15 | 556 | 41 | 2 | 0 | 93.1% |
+| MS-Notations2006-07-15 | 52 | 67 | 0 | 0 | 43.7% |
+| MS-Particles2006-07-15 | 1081 | 9 | 276 | 12 | 99.2% |
 | MS-Regex2006-07-15 | 3462 | 0 | 2 | 713 | 100.0% |
-| MS-Schema2006-07-15 | 122 | 18 | 25 | 0 | 87.1% |
-| MS-SimpleType2006-07-15 | 344 | 91 | 4 | 2 | 79.1% |
-| MS-Wildcards2006-07-15 | 343 | 86 | 4 | 1 | 80.0% |
+| MS-Schema2006-07-15 | 124 | 16 | 25 | 0 | 88.6% |
+| MS-SimpleType2006-07-15 | 364 | 71 | 4 | 2 | 83.7% |
+| MS-Wildcards2006-07-15 | 356 | 73 | 4 | 1 | 83.0% |
 | NIST2004-01-14 | 23080 | 0 | 0 | 90 | 100.0% |
-| Notation | 16 | 5 | 0 | 0 | 76.2% |
-| SType | 334 | 3 | 1 | 0 | 99.1% |
+| Notation | 18 | 3 | 0 | 0 | 85.7% |
+| SType | 335 | 2 | 1 | 0 | 99.4% |
 | Schema | 12 | 0 | 0 | 0 | 100.0% |
-| Wildcard | 57 | 4 | 0 | 0 | 93.4% |
+| Wildcard | 59 | 2 | 0 | 0 | 96.7% |
 | suntest | 250 | 1 | 0 | 0 | 99.6% |
-| **Итого** | 36723 | 1463 | 359 | 875 | 96.2% |
+| **Итого** | 36957 | 1229 | 359 | 875 | 96.8% |
 
 ## По каталогам данных
 
@@ -62,40 +62,40 @@
 | boeingData/ipo4 | 3 | 0 | 0 | 0 | 100.0% |
 | boeingData/ipo5 | 3 | 0 | 0 | 0 | 100.0% |
 | boeingData/ipo6 | 3 | 0 | 0 | 0 | 100.0% |
-| msData/additional | 391 | 43 | 9 | 7 | 90.1% |
-| msData/annotations | 50 | 27 | 2 | 1 | 64.9% |
-| msData/attribute | 295 | 107 | 0 | 1 | 73.4% |
-| msData/attributeGroup | 126 | 19 | 2 | 0 | 86.9% |
-| msData/complexType | 570 | 237 | 0 | 5 | 70.6% |
+| msData/additional | 394 | 40 | 9 | 7 | 90.8% |
+| msData/annotations | 58 | 19 | 2 | 1 | 75.3% |
+| msData/attribute | 300 | 102 | 0 | 1 | 74.6% |
+| msData/attributeGroup | 136 | 9 | 2 | 0 | 93.8% |
+| msData/complexType | 591 | 216 | 0 | 5 | 73.2% |
 | msData/datatypes | 3005 | 416 | 23 | 16 | 87.8% |
-| msData/element | 477 | 25 | 8 | 20 | 95.0% |
+| msData/element | 488 | 14 | 8 | 20 | 97.2% |
 | msData/errata10 | 28 | 2 | 1 | 0 | 93.3% |
-| msData/group | 309 | 35 | 0 | 0 | 89.8% |
-| msData/identityConstraint | 945 | 112 | 0 | 7 | 89.4% |
-| msData/modelGroups | 505 | 92 | 2 | 0 | 84.6% |
-| msData/notations | 48 | 71 | 0 | 0 | 40.3% |
-| msData/particles | 1077 | 13 | 276 | 12 | 98.8% |
+| msData/group | 341 | 3 | 0 | 0 | 99.1% |
+| msData/identityConstraint | 960 | 97 | 0 | 7 | 90.8% |
+| msData/modelGroups | 556 | 41 | 2 | 0 | 93.1% |
+| msData/notations | 52 | 67 | 0 | 0 | 43.7% |
+| msData/particles | 1081 | 9 | 276 | 12 | 99.2% |
 | msData/regex | 3462 | 0 | 2 | 713 | 100.0% |
-| msData/schema | 122 | 18 | 25 | 0 | 87.1% |
-| msData/simpleType | 344 | 91 | 4 | 2 | 79.1% |
-| msData/wildcards | 343 | 86 | 4 | 1 | 80.0% |
+| msData/schema | 124 | 16 | 25 | 0 | 88.6% |
+| msData/simpleType | 364 | 71 | 4 | 2 | 83.7% |
+| msData/wildcards | 356 | 73 | 4 | 1 | 83.0% |
 | nistData/atomic | 11746 | 0 | 0 | 90 | 100.0% |
 | nistData/list | 10854 | 0 | 0 | 0 | 100.0% |
 | nistData/union | 480 | 0 | 0 | 0 | 100.0% |
-| sunData/AGroupDef | 15 | 4 | 0 | 0 | 78.9% |
+| sunData/AGroupDef | 19 | 0 | 0 | 0 | 100.0% |
 | sunData/AttrDecl | 176 | 2 | 0 | 0 | 98.9% |
 | sunData/AttrUse | 9 | 0 | 0 | 0 | 100.0% |
-| sunData/CType | 83 | 2 | 0 | 0 | 97.6% |
-| sunData/ElemDecl | 445 | 19 | 0 | 0 | 95.9% |
+| sunData/CType | 85 | 0 | 0 | 0 | 100.0% |
+| sunData/ElemDecl | 447 | 17 | 0 | 0 | 96.3% |
 | sunData/IdConstrDefs | 44 | 4 | 0 | 0 | 91.7% |
-| sunData/MGroup | 64 | 15 | 0 | 0 | 81.0% |
-| sunData/MGroupDef | 23 | 10 | 0 | 0 | 69.7% |
-| sunData/Notation | 16 | 5 | 0 | 0 | 76.2% |
-| sunData/SType | 334 | 3 | 1 | 0 | 99.1% |
+| sunData/MGroup | 76 | 3 | 0 | 0 | 96.2% |
+| sunData/MGroupDef | 33 | 0 | 0 | 0 | 100.0% |
+| sunData/Notation | 18 | 3 | 0 | 0 | 85.7% |
+| sunData/SType | 335 | 2 | 1 | 0 | 99.4% |
 | sunData/Schema | 12 | 0 | 0 | 0 | 100.0% |
-| sunData/Wildcard | 57 | 4 | 0 | 0 | 93.4% |
+| sunData/Wildcard | 59 | 2 | 0 | 0 | 96.7% |
 | sunData/combined | 250 | 1 | 0 | 0 | 99.6% |
-| **Итого** | 36723 | 1463 | 359 | 875 | 96.2% |
+| **Итого** | 36957 | 1229 | 359 | 875 | 96.8% |
 
 ## По возможностям (метки по тексту документов, пересекаются)
 
@@ -103,7 +103,7 @@
 |---|---:|---:|---:|---:|---:|
 | abstract | 126 | 0 | 9 | 8 | 100.0% |
 | block/final | 554 | 5 | 24 | 11 | 99.1% |
-| redefine | 136 | 7 | 25 | 3 | 95.1% |
+| redefine | 138 | 5 | 25 | 3 | 96.5% |
 | substitutionGroup | 353 | 1 | 16 | 18 | 99.7% |
 | xsi:type | 263 | 0 | 2 | 9 | 100.0% |
 
@@ -124,27 +124,13 @@
 
 ## Расхождения
 
-### AGroupDef (4)
-
-- `AGroupDef/annotation00101m2/annotation00101m2` (schemaTest invalid; sunData/AGroupDef/annotation/annotation00101m/annotation00101m2.xsd) «human-targeted double annotation for an attribute group definition (invalid schema)Annotations provide for human- and machine-targeted annotations of schema com» — ошибочная схема принята
-- `AGroupDef/annotation00101m3/annotation00101m3` (schemaTest invalid; sunData/AGroupDef/annotation/annotation00101m/annotation00101m3.xsd) «human-targeted misplaced annotation for an attribute group definition (invalid schema)Annotations provide for human- and machine-targeted annotations of schema» — ошибочная схема принята
-- `AGroupDef/annotation00101m5/annotation00101m5` (schemaTest invalid; sunData/AGroupDef/annotation/annotation00101m/annotation00101m5.xsd) «machine-targeted double annotation for an attribute group definition (invalid schema)Annotations provide for human- and machine-targeted annotations of schema c» — ошибочная схема принята
-- `AGroupDef/annotation00101m6/annotation00101m6` (schemaTest invalid; sunData/AGroupDef/annotation/annotation00101m/annotation00101m6.xsd) «machine-targeted misplaced annotation for an attribute group definition (invalid schema)Annotations provide for human- and machine-targeted annotations of schem» — ошибочная схема принята
-
 ### AttrDecl (2)
 
 - `AttrDecl/ad_valconstr00201m2/AD_valConstr00201m2` (schemaTest invalid; sunData/AttrDecl/AD_valConstr/AD_valConstr00201m/AD_valConstr00201m2.xsd) «Attribute with 'default' value and "required" 'use' is declared entirely within element declaration (invalid schema)If 'default' and 'use' are both present, 'us» — ошибочная схема принята
 - `AttrDecl/ad_valconstr00201m5/AD_valConstr00201m5` (schemaTest invalid; sunData/AttrDecl/AD_valConstr/AD_valConstr00201m/AD_valConstr00201m5.xsd) «Attribute with 'default' value and "required" 'use' is declared within element by reference (invalid schema)If 'default' and 'use' are both present, 'use' must» — ошибочная схема принята
 
-### CType (2)
+### ElemDecl (17)
 
-- `CType/annotation00101m3/annotation00101m3` (schemaTest invalid; sunData/CType/annotation/annotation00101m/annotation00101m3.xsd) «human-targeted annotation misplaced for complex type definition (invalid schema)Annotations provide for human- and machine-targeted annotations of schema compon» — ошибочная схема принята
-- `CType/annotation00101m4/annotation00101m4` (schemaTest invalid; sunData/CType/annotation/annotation00101m/annotation00101m4.xsd) «machine-targeted annotation misplaced for complex type definition (invalid schema)Annotations provide for human- and machine-targeted annotations of schema comp» — ошибочная схема принята
-
-### ElemDecl (19)
-
-- `ElemDecl/annotation00101m2/annotation00101m2` (schemaTest invalid; sunData/ElemDecl/annotation/annotation00101m/annotation00101m2.xsd) «human-targeted misplaced annotation for element declaration (invalid schema)Annotations provide for human- and machine-targeted annotations of schema components» — ошибочная схема принята
-- `ElemDecl/annotation00101m4/annotation00101m4` (schemaTest invalid; sunData/ElemDecl/annotation/annotation00101m/annotation00101m4.xsd) «machine-targeted misplaced annotation for element declaration (invalid schema)Annotations provide for human- and machine-targeted annotations of schema componen» — ошибочная схема принята
 - `ElemDecl/typedef00501m2/typeDef00501m2` (schemaTest invalid; sunData/ElemDecl/typeDef/typeDef00501m/typeDef00501m2.xsd) «complexType and type are mutually exclusive (invalid schema)Declare an element using type . Declare another element with a complexType . Set type attribute of t» — ошибочная схема принята
 - `ElemDecl/typedef00502m2/typeDef00502m2` (schemaTest invalid; sunData/ElemDecl/typeDef/typeDef00502m/typeDef00502m2.xsd) «simpleType and type are mutually exclusive (invalid schema)Declare an element using type . Declare another element with a simpleType . Set type attribute of the» — ошибочная схема принята
 - `ElemDecl/valueconstraint00101m2/valueConstraint00101m2` (schemaTest invalid; sunData/ElemDecl/valueConstraint/valueConstraint00101m/valueConstraint00101m2.xsd) «Validation of the default value attribute (negative case). (invalid schema)Define an elements with default value defined. Ensure that the value is validated.» — ошибочная схема принята
@@ -170,38 +156,13 @@
 - `IdConstrDefs/annotation00101m5/annotation00101m5` (schemaTest invalid; sunData/IdConstrDefs/annotation/annotation00101m/annotation00101m5.xsd) «machine-targeted misplaced annotation for an Identity-constraint Definition (invalid schema)Annotations provide for human- and machine-targeted annotations of s» — ошибочная схема принята
 - `IdConstrDefs/annotation00101m6/annotation00101m6` (schemaTest invalid; sunData/IdConstrDefs/annotation/annotation00101m/annotation00101m6.xsd) «machine-targeted double annotation for an Identity-constraint Definition (invalid schema)Annotations provide for human- and machine-targeted annotations of sche» — ошибочная схема принята
 
-### MGroup (15)
+### MGroup (3)
 
-- `MGroup/annotation00101m11/annotation00101m11` (schemaTest invalid; sunData/MGroup/annotation/annotation00101m/annotation00101m11.xsd) «machine-targeted double annotation for a model group schema component (choice) (invalid schema)Annotations provide for human- and machine-targeted annotations o» — ошибочная схема принята
-- `MGroup/annotation00101m12/annotation00101m12` (schemaTest invalid; sunData/MGroup/annotation/annotation00101m/annotation00101m12.xsd) «machine-targeted misplaced annotation for a model group schema component (choice) (invalid schema)Annotations provide for human- and machine-targeted annotation» — ошибочная схема принята
-- `MGroup/annotation00101m14/annotation00101m14` (schemaTest invalid; sunData/MGroup/annotation/annotation00101m/annotation00101m14.xsd) «human-targeted double annotation for a model group schema component (sequence) (invalid schema)Annotations provide for human- and machine-targeted annotations o» — ошибочная схема принята
-- `MGroup/annotation00101m15/annotation00101m15` (schemaTest invalid; sunData/MGroup/annotation/annotation00101m/annotation00101m15.xsd) «human-targeted misplaced annotation for a model group schema component (sequence) (invalid schema)Annotations provide for human- and machine-targeted annotation» — ошибочная схема принята
-- `MGroup/annotation00101m17/annotation00101m17` (schemaTest invalid; sunData/MGroup/annotation/annotation00101m/annotation00101m17.xsd) «machine-targeted double annotation for a model group schema component (sequence) (invalid schema)Annotations provide for human- and machine-targeted annotations» — ошибочная схема принята
-- `MGroup/annotation00101m18/annotation00101m18` (schemaTest invalid; sunData/MGroup/annotation/annotation00101m/annotation00101m18.xsd) «machine-targeted misplaced annotation for a model group schema component (sequence) (invalid schema)Annotations provide for human- and machine-targeted annotati» — ошибочная схема принята
-- `MGroup/annotation00101m2/annotation00101m2` (schemaTest invalid; sunData/MGroup/annotation/annotation00101m/annotation00101m2.xsd) «human-targeted double annotation for a model group schema component (all) (invalid schema)Annotations provide for human- and machine-targeted annotations of sch» — ошибочная схема принята
-- `MGroup/annotation00101m3/annotation00101m3` (schemaTest invalid; sunData/MGroup/annotation/annotation00101m/annotation00101m3.xsd) «human-targeted misplaced annotation for a model group schema component (all) (invalid schema)Annotations provide for human- and machine-targeted annotations of» — ошибочная схема принята
-- `MGroup/annotation00101m5/annotation00101m5` (schemaTest invalid; sunData/MGroup/annotation/annotation00101m/annotation00101m5.xsd) «machine-targeted double annotation for a model group schema component (all) (invalid schema)Annotations provide for human- and machine-targeted annotations of s» — ошибочная схема принята
-- `MGroup/annotation00101m6/annotation00101m6` (schemaTest invalid; sunData/MGroup/annotation/annotation00101m/annotation00101m6.xsd) «machine-targeted misplaced annotation for a model group schema component (all) (invalid schema)Annotations provide for human- and machine-targeted annotations o» — ошибочная схема принята
-- `MGroup/annotation00101m8/annotation00101m8` (schemaTest invalid; sunData/MGroup/annotation/annotation00101m/annotation00101m8.xsd) «human-targeted double annotation for a model group schema component (choice) (invalid schema)Annotations provide for human- and machine-targeted annotations of» — ошибочная схема принята
-- `MGroup/annotation00101m9/annotation00101m9` (schemaTest invalid; sunData/MGroup/annotation/annotation00101m/annotation00101m9.xsd) «human-targeted misplaced annotation for a model group schema component (choice) (invalid schema)Annotations provide for human- and machine-targeted annotations» — ошибочная схема принята
 - `MGroup/particles00103m1/particles00103m1` (schemaTest invalid; sunData/MGroup/particles/particles00103m/particles00103m1.xsd) «<sequence> as one of {particles} (invalid schema)The {particles} of 'all' must be <element>. So <sequence> is prohibited.» — ошибочная схема принята
 - `MGroup/particles00104m1/particles00104m1` (schemaTest invalid; sunData/MGroup/particles/particles00104m/particles00104m1.xsd) «<any> as one of {particles} (invalid schema)The {particles} of 'all' must be <element>. So <any> is prohibited.» — ошибочная схема принята
 - `MGroup/particles00105m1/particles00105m1` (schemaTest invalid; sunData/MGroup/particles/particles00105m/particles00105m1.xsd) «<choice> as one of {particles} (invalid schema)The {particles} of 'all' must be <element>. So <choice> is prohibited.» — ошибочная схема принята
 
-### MGroupDef (10)
-
-- `MGroupDef/annotation00101m2/annotation00101m2` (schemaTest invalid; sunData/MGroupDef/annotation/annotation00101m/annotation00101m2.xsd) «human-targeted double annotation for a model group definition (invalid schema)Annotations provide for human- and machine-targeted annotations of schema componen» — ошибочная схема принята
-- `MGroupDef/annotation00101m3/annotation00101m3` (schemaTest invalid; sunData/MGroupDef/annotation/annotation00101m/annotation00101m3.xsd) «human-targeted misplaced annotation for a model group definition (invalid schema)Annotations provide for human- and machine-targeted annotations of schema compo» — ошибочная схема принята
-- `MGroupDef/annotation00101m5/annotation00101m5` (schemaTest invalid; sunData/MGroupDef/annotation/annotation00101m/annotation00101m5.xsd) «machine-targeted double annotation for a model group definition (invalid schema)Annotations provide for human- and machine-targeted annotations of schema compon» — ошибочная схема принята
-- `MGroupDef/annotation00101m6/annotation00101m6` (schemaTest invalid; sunData/MGroupDef/annotation/annotation00101m/annotation00101m6.xsd) «machine-targeted misplaced annotation for a model group definition (invalid schema)Annotations provide for human- and machine-targeted annotations of schema com» — ошибочная схема принята
-- `MGroupDef/modelgroup00102m1/modelGroup00102m1` (schemaTest invalid; sunData/MGroupDef/modelGroup/modelGroup00102m/modelGroup00102m1.xsd) «2 model groups: <all>, <all> (invalid schema)A model group must be one.» — ошибочная схема принята
-- `MGroupDef/modelgroup00102m2/modelGroup00102m2` (schemaTest invalid; sunData/MGroupDef/modelGroup/modelGroup00102m/modelGroup00102m2.xsd) «2 model groups: <all>, <choice> (invalid schema)A model group must be one.» — ошибочная схема принята
-- `MGroupDef/modelgroup00102m3/modelGroup00102m3` (schemaTest invalid; sunData/MGroupDef/modelGroup/modelGroup00102m/modelGroup00102m3.xsd) «2 model groups: <all>, <sequence> (invalid schema)A model group must be one.» — ошибочная схема принята
-- `MGroupDef/modelgroup00102m4/modelGroup00102m4` (schemaTest invalid; sunData/MGroupDef/modelGroup/modelGroup00102m/modelGroup00102m4.xsd) «2 model groups: <choice>, <choice> (invalid schema)A model group must be one.» — ошибочная схема принята
-- `MGroupDef/modelgroup00102m5/modelGroup00102m5` (schemaTest invalid; sunData/MGroupDef/modelGroup/modelGroup00102m/modelGroup00102m5.xsd) «2 model groups: <choice>, <sequence> (invalid schema)A model group must be one.» — ошибочная схема принята
-- `MGroupDef/modelgroup00102m6/modelGroup00102m6` (schemaTest invalid; sunData/MGroupDef/modelGroup/modelGroup00102m/modelGroup00102m6.xsd) «2 model groups: <sequence>, <sequence> (invalid schema)A model group must be one.» — ошибочная схема принята
-
-### MS-Additional2006-07-15 (43)
+### MS-Additional2006-07-15 (40)
 
 - `MS-Additional2006-07-15/addB004/addB004` (schemaTest invalid; msData/additional/test64817a.xsd) «TEST :Adhoc XSD: : id="64817" title="xsd: notation with no attribute should give error."» — ошибочная схема принята
 - `MS-Additional2006-07-15/addB005/addB005` (schemaTest invalid; msData/additional/test60998.xsd) «TEST :Adhoc XSD: : id="60998" title="xsd: E is drived by extention from B, and E should not allow 'all' as part of the extension"» — ошибочная схема принята
@@ -214,16 +175,13 @@
 - `MS-Additional2006-07-15/addB035/addB035` (schemaTest invalid; msData/additional/test71395.xsd) «TEST :Adhoc XSD: : id="71395" description="Test import with empty namespace."» — ошибочная схема принята
 - `MS-Additional2006-07-15/addB036/addB036` (schemaTest invalid; msData/additional/test71847.xsd) «TEST :Adhoc XSD: : id="71847" description="xsd: a complexType should not be able to drive by extension from a complexType with simpleContent or simpleType"» — ошибочная схема принята
 - `MS-Additional2006-07-15/addB041/addB041` (schemaTest invalid; msData/additional/test72405.xsd) «TEST :Adhoc XSD: : id="72405" description="Test invalid default value against a pattern"» — ошибочная схема принята
-- `MS-Additional2006-07-15/addB043/addB043` (schemaTest invalid; msData/additional/test72530.xsd) «TEST :Adhoc XSD: : id="72530" description="'XSD - Duplicate IDs with one of them is in simpleContent extension"» — ошибочная схема принята
 - `MS-Additional2006-07-15/addB044/addB044` (schemaTest invalid; msData/additional/test72793.xsd) «TEST :Adhoc XSD: : id="72793" description="xsd: top level attribute should prohibig 'form' attribute"» — ошибочная схема принята
 - `MS-Additional2006-07-15/addB063/addB063.i` (instanceTest invalid; msData/additional/test72702.xml) «TEST :Adhoc XSD: : 72702 - test using or validating a not-wellformed XSD» — схема по xsi:schemaLocation не загрузилась: [PARSE_ERROR] строка 16, столбец 13: текст вне корневого элемента недопустим
 - `MS-Additional2006-07-15/addB070a/addB070a` (schemaTest invalid; msData/additional/test64756.xsd) «TEST :Adhoc XSD: : id="64756" description="xsd: attribute from Schema (xsd:) namespace on schema"» — ошибочная схема принята
 - `MS-Additional2006-07-15/addB081/addB081` (schemaTest invalid; msData/additional/addB081.xsd) «TEST :Adhoc XSD: : id="59812" description="xsd: both type and simpleType are present in an attribute decl."» — ошибочная схема принята
 - `MS-Additional2006-07-15/addB082/addB082` (schemaTest invalid; msData/additional/addB082.xsd) «TEST :Adhoc XSD: : id="62925" description="xsd: xsd:type attribute on a complexType element should give error"» — ошибочная схема принята
-- `MS-Additional2006-07-15/addB083/addB083` (schemaTest invalid; msData/additional/addB083.xsd) «TEST :Adhoc XSD: : id="61316" description="test 'group' with more than one particle (choice | sequence| all) as child"» — ошибочная схема принята
 - `MS-Additional2006-07-15/addB089/addB089` (schemaTest invalid; msData/additional/addB089.xsd) «TEST :Adhoc XSD: : id="61896" description="xsd: extension with 'all' as a base type"» — ошибочная схема принята
 - `MS-Additional2006-07-15/addB095/addB095` (schemaTest invalid; msData/additional/addB095.xsd) «TEST :Adhoc XSD: : id="60947" description="xsd: particle(s) under model group 'all' cannot have maxOccurs > 1, this is not enforced when there are other sibling» — ошибочная схема принята
-- `MS-Additional2006-07-15/addB099/addB099` (schemaTest valid; msData/additional/addB099.xsd) «TEST :Adhoc XSD: : id="61126" description="xsd: value range of minOccurs and maxOccurs should allow big NonNegativeInteger, such as 12678967543233"» — корректная схема отвергнута: [SCHEMA_ERROR] схема, строка 21: некорректный minOccurs "12678967543233"
 - `MS-Additional2006-07-15/addB100/addB100` (schemaTest invalid; msData/additional/addB100.xsd) «TEST :Adhoc XSD: : id="61604" description="xsd: test there are 2 elements with same name but different type."» — ошибочная схема принята
 - `MS-Additional2006-07-15/addB108/addB108` (schemaTest invalid; msData/additional/addB108.xsd) «TEST :Adhoc XSD: : check that the local fixed value must be the same as the global fixed value» — ошибочная схема принята
 - `MS-Additional2006-07-15/addB110/addB110` (schemaTest invalid; msData/additional/test65911_1.xsd) «TEST :Adhoc XSD: : id="65911" description="xsd: anySimpleType as a build in base type"» — ошибочная схема принята
@@ -247,29 +205,21 @@
 - `MS-Additional2006-07-15/addB178/addB178` (schemaTest invalid; msData/additional/test102850_3.xsd) «TEST :Adhoc XSD: : id="102850" description="test non deterministic complex schema declaration(2)"» — ошибочная схема принята
 - `MS-Additional2006-07-15/isDefault079/isDefault079.v` (instanceTest valid; msData/additional/isdefault079.xml) «TEST :Adhoc XSD: : multiple 'fixed' constraints» — ложная ошибка: /regvaluemodopset/regvalueop[2]: значение должно быть равно фиксированному "reg_value_delete"
 
-### MS-Annotations2006-07-15 (27)
+### MS-Annotations2006-07-15 (19)
 
 - `MS-Annotations2006-07-15/annotB001/annotB001` (schemaTest invalid; msData/annotations/annotB001.xsd) «TEST :Annotation Tests : Annotation within Annotation» — ошибочная схема принята
-- `MS-Annotations2006-07-15/annotB004/annotB004` (schemaTest invalid; msData/annotations/annotB004.xsd) «TEST :Annotation Tests : Declare annotation twice under the all Element» — ошибочная схема принята
 - `MS-Annotations2006-07-15/annotB005/annotB005` (schemaTest invalid; msData/annotations/annotB005.xsd) «TEST :Annotation Tests : Declare annotation twice under the annotation Element» — ошибочная схема принята
-- `MS-Annotations2006-07-15/annotB006/annotB006` (schemaTest invalid; msData/annotations/annotB006.xsd) «TEST :Annotation Tests : Declare annotation twice under the any Element» — ошибочная схема принята
 - `MS-Annotations2006-07-15/annotB007/annotB007` (schemaTest invalid; msData/annotations/annotB007.xsd) «TEST :Annotation Tests : Declare annotation twice under the anyAttribute Element» — ошибочная схема принята
-- `MS-Annotations2006-07-15/annotB009/annotB009` (schemaTest invalid; msData/annotations/annotB009.xsd) «TEST :Annotation Tests : Declare annotation twice under the attribute Element» — ошибочная схема принята
 - `MS-Annotations2006-07-15/annotB010/annotB010` (schemaTest invalid; msData/annotations/annotB010.xsd) «TEST :Annotation Tests : Declare annotation twice under the attributeGroup Element» — ошибочная схема принята
-- `MS-Annotations2006-07-15/annotB011/annotB011` (schemaTest invalid; msData/annotations/annotB011.xsd) «TEST :Annotation Tests : Declare annotation twice under the choice Element» — ошибочная схема принята
 - `MS-Annotations2006-07-15/annotB012/annotB012` (schemaTest invalid; msData/annotations/annotB012.xsd) «TEST :Annotation Tests : Declare annotation twice under the complexContent Element» — ошибочная схема принята
 - `MS-Annotations2006-07-15/annotB013/annotB013` (schemaTest invalid; msData/annotations/annotB013.xsd) «TEST :Annotation Tests : Declare annotation twice under the complexType Element» — ошибочная схема принята
-- `MS-Annotations2006-07-15/annotB015/annotB015` (schemaTest invalid; msData/annotations/annotB015.xsd) «TEST :Annotation Tests : Declare annotation twice under the element Element» — ошибочная схема принята
 - `MS-Annotations2006-07-15/annotB016/annotB016` (schemaTest invalid; msData/annotations/annotB016.xsd) «TEST :Annotation Tests : Declare annotation twice under the extension Element» — ошибочная схема принята
 - `MS-Annotations2006-07-15/annotB017/annotB017` (schemaTest invalid; msData/annotations/annotB017.xsd) «TEST :Annotation Tests : Declare annotation twice under the field Element» — ошибочная схема принята
-- `MS-Annotations2006-07-15/annotB018/annotB018` (schemaTest invalid; msData/annotations/annotB018.xsd) «TEST :Annotation Tests : Declare annotation twice under the group Element» — ошибочная схема принята
 - `MS-Annotations2006-07-15/annotB021/annotB021` (schemaTest invalid; msData/annotations/annotB021.xsd) «TEST :Annotation Tests : Declare annotation twice under the key Element» — ошибочная схема принята
 - `MS-Annotations2006-07-15/annotB022/annotB022` (schemaTest invalid; msData/annotations/annotB022.xsd) «TEST :Annotation Tests : Declare annotation twice under the keyRef Element» — ошибочная схема принята
 - `MS-Annotations2006-07-15/annotB023/annotB023` (schemaTest invalid; msData/annotations/annotB023.xsd) «TEST :Annotation Tests : Declare annotation twice under the list Element» — ошибочная схема принята
-- `MS-Annotations2006-07-15/annotB024/annotB024` (schemaTest invalid; msData/annotations/annotB024.xsd) «TEST :Annotation Tests : Declare annotation twice under the Notation Element» — ошибочная схема принята
 - `MS-Annotations2006-07-15/annotB026/annotB026` (schemaTest invalid; msData/annotations/annotB026.xsd) «TEST :Annotation Tests : Declare annotation twice under the restriction Element» — ошибочная схема принята
 - `MS-Annotations2006-07-15/annotB028/annotB028` (schemaTest invalid; msData/annotations/annotB028.xsd) «TEST :Annotation Tests : Declare annotation twice under the selector Element» — ошибочная схема принята
-- `MS-Annotations2006-07-15/annotB029/annotB029` (schemaTest invalid; msData/annotations/annotB029.xsd) «TEST :Annotation Tests : Declare annotation twice under the sequence Element» — ошибочная схема принята
 - `MS-Annotations2006-07-15/annotB031/annotB031` (schemaTest invalid; msData/annotations/annotB031.xsd) «TEST :Annotation Tests : Declare annotation twice under the simpleType Element» — ошибочная схема принята
 - `MS-Annotations2006-07-15/annotB032/annotB032` (schemaTest invalid; msData/annotations/annotB032.xsd) «TEST :Annotation Tests : Declare annotation twice under the union Element» — ошибочная схема принята
 - `MS-Annotations2006-07-15/annotB033/annotB033` (schemaTest invalid; msData/annotations/annotB033.xsd) «TEST :Annotation Tests : Declare annotation twice under the unique Element» — ошибочная схема принята
@@ -277,7 +227,7 @@
 - `MS-Annotations2006-07-15/annotF003/annotF003` (schemaTest invalid; msData/annotations/annotF003.xsd) «TEST :Annotation Tests : Annotation with documentation source="http://foo.com" xml:lang=" "» — ошибочная схема принята
 - `MS-Annotations2006-07-15/annotF009/annotF009` (schemaTest invalid; msData/annotations/annotF009.xsd) «TEST :Annotation Tests : Annotation with an arbit attribute foo="bar"» — ошибочная схема принята
 
-### MS-Attribute2006-07-15 (107)
+### MS-Attribute2006-07-15 (102)
 
 - `MS-Attribute2006-07-15/attA001/attA001` (schemaTest invalid; msData/attribute/attA001.xsd) «TEST :Syntax Checking for Attribute Declaration (form) : Test attribute declaration with optional attribute form = 'qualified' at top level» — ошибочная схема принята
 - `MS-Attribute2006-07-15/attA002/attA002` (schemaTest invalid; msData/attribute/attA002.xsd) «TEST :Syntax Checking for Attribute Declaration (form) : Test attribute declaration with optional attribute form = 'unqualified' at top level» — ошибочная схема принята
@@ -285,10 +235,7 @@
 - `MS-Attribute2006-07-15/attA004/attA004` (schemaTest invalid; msData/attribute/attA004.xsd) «TEST :Syntax Checking for Attribute Declaration (form) : Test attribute declaration with optional attribute form = ''» — ошибочная схема принята
 - `MS-Attribute2006-07-15/attA005/attA005` (schemaTest invalid; msData/attribute/attA005.xsd) «TEST :Syntax Checking for Attribute Declaration (form) : Test attribute declaration with optional attribute form = 'Qualified'» — ошибочная схема принята
 - `MS-Attribute2006-07-15/attA006/attA006` (schemaTest invalid; msData/attribute/attA006.xsd) «TEST :Syntax Checking for Attribute Declaration (form) : Test attribute declaration with optional attribute form = 'Unqualified'» — ошибочная схема принята
-- `MS-Attribute2006-07-15/attB005/attB005` (schemaTest invalid; msData/attribute/attB005.xsd) «TEST :Syntax Checking for Attribute Declaration (form) : Test attribute declaration with optional attribute id = ''» — ошибочная схема принята
-- `MS-Attribute2006-07-15/attB006/attB006` (schemaTest invalid; msData/attribute/attB006.xsd) «TEST :Syntax Checking for Attribute Declaration (form) : Test attribute declaration with optional attribute id = '0'» — ошибочная схема принята
 - `MS-Attribute2006-07-15/attC004/attC004` (schemaTest invalid; msData/attribute/attC004.xsd) «TEST :Syntax Checking for Attribute Declaration (form) : Test attribute declaration with attribute name = ''» — ошибочная схема принята
-- `MS-Attribute2006-07-15/attC005/attC005` (schemaTest invalid; msData/attribute/attC005.xsd) «TEST :Syntax Checking for Attribute Declaration (form) : Test attribute declaration with attribute name = '0'» — ошибочная схема принята
 - `MS-Attribute2006-07-15/attC006/attC006` (schemaTest invalid; msData/attribute/attC006.xsd) «TEST :Syntax Checking for Attribute Declaration (form) : Test attribute declaration with attribute name = '''» — ошибочная схема принята
 - `MS-Attribute2006-07-15/attC007/attC007` (schemaTest invalid; msData/attribute/attC007.xsd) «TEST :Syntax Checking for Attribute Declaration (form) : Test attribute declaration with attribute name = 'a:b' namespace for prefix 'a' is declared» — ошибочная схема принята
 - `MS-Attribute2006-07-15/attC008/attC008` (schemaTest invalid; msData/attribute/attC008.xsd) «TEST :Syntax Checking for Attribute Declaration (form) : Test attribute declaration with attribute name = 'a:b' namespace for prefix 'a' is NOT declared» — ошибочная схема принята
@@ -365,14 +312,12 @@
 - `MS-Attribute2006-07-15/attP030/attP030` (schemaTest invalid; msData/attribute/attP030.xsd) «TEST :Syntax Checking for Attribute Declaration (form) : use=prohibited, default="37" (must not appear in xml instant, attribute does appear in the instant XML» — ошибочная схема принята
 - `MS-Attribute2006-07-15/attQ001/attQ001` (schemaTest invalid; msData/attribute/attQ001.xsd) «TEST :Syntax Checking for Attribute Declaration (form) : parent is complexType, Attr Decl before simpleContent» — ошибочная схема принята
 - `MS-Attribute2006-07-15/attQ002/attQ002` (schemaTest invalid; msData/attribute/attQ002.xsd) «TEST :Syntax Checking for Attribute Declaration (form) : parent is complexType, Attr Decl before complexContent» — ошибочная схема принята
-- `MS-Attribute2006-07-15/attQ004/attQ004` (schemaTest invalid; msData/attribute/attQ004.xsd) «TEST :Syntax Checking for Attribute Declaration (form) : Attr Decl before annotation» — ошибочная схема принята
 - `MS-Attribute2006-07-15/attQ006/attQ006` (schemaTest invalid; msData/attribute/attQ006.xsd) «TEST :Syntax Checking for Attribute Declaration (form) : Attribute\attribute decl with child of node other than notation and simpleType, child=complexType» — ошибочная схема принята
 - `MS-Attribute2006-07-15/attQ008/attQ008` (schemaTest invalid; msData/attribute/attQ008.xsd) «TEST :Syntax Checking for Attribute Declaration (form) : two attribute decl with the same name, one inside attribute Group and other is a reference to global at» — ошибочная схема принята
 - `MS-Attribute2006-07-15/attQ009/attQ009` (schemaTest invalid; msData/attribute/attQ009.xsd) «TEST :Syntax Checking for Attribute Declaration (form) : two attribute decl with the same name, one from local one from referenced attribute Group» — ошибочная схема принята
 - `MS-Attribute2006-07-15/attQ011/attQ011` (schemaTest invalid; msData/attribute/attQ011.xsd) «TEST :Syntax Checking for Attribute Declaration (form) : two attribute decl with the same name, one from global, one from from redefine XSD with same namespace» — ошибочная схема принята [redefine]
 - `MS-Attribute2006-07-15/attQ012/attQ012` (schemaTest invalid; msData/attribute/attQ012.xsd) «TEST :Syntax Checking for Attribute Declaration (form) : two attribute decl with the same name, one from global, one from included XSD» — ошибочная схема принята
 - `MS-Attribute2006-07-15/attQ013/attQ013` (schemaTest invalid; msData/attribute/attQ013.xsd) «TEST :Syntax Checking for Attribute Declaration (form) : two attribute decl with the same name, reference from different attributeGroup» — ошибочная схема принята
-- `MS-Attribute2006-07-15/attQ015/attQ015` (schemaTest invalid; msData/attribute/attQ015.xsd) «TEST :Syntax Checking for Attribute Declaration (form) : two attribute decl with same id, one under attribute group and, one in element.» — ошибочная схема принята
 - `MS-Attribute2006-07-15/attQ016/attQ016` (schemaTest invalid; msData/attribute/attQ016.xsd) «TEST :Syntax Checking for Attribute Declaration (form) : two attribute decl with same id, one under attribute group and, one from imported xsd» — ошибочная схема принята
 - `MS-Attribute2006-07-15/attQ017/attQ017` (schemaTest invalid; msData/attribute/attQ017.xsd) «TEST :Syntax Checking for Attribute Declaration (form) : two attribute decl with same id, one in complex type and, one redefine» — ошибочная схема принята [redefine]
 - `MS-Attribute2006-07-15/attQ018/attQ018` (schemaTest invalid; msData/attribute/attQ018.xsd) «TEST :Syntax Checking for Attribute Declaration (form) : two attribute decl with same id, one in element and one from included» — ошибочная схема принята
@@ -387,18 +332,9 @@
 - `MS-Attribute2006-07-15/attZ013a/attZ013a` (schemaTest invalid; msData/attribute/attZ013a.xsd) «TEST :Syntax Checking for Attribute Declaration (form) : XSD: attribute and element declarations can not have a value constraint if it type is ID» — ошибочная схема принята
 - `MS-Attribute2006-07-15/attZ013b/attZ013b` (schemaTest invalid; msData/attribute/attZ013b.xsd) «TEST :Syntax Checking for Attribute Declaration (form) : XSD: attribute and element declarations can not have a value constraint if it type is derived from ID» — ошибочная схема принята
 
-### MS-AttributeGroup2006-07-15 (19)
+### MS-AttributeGroup2006-07-15 (9)
 
-- `MS-AttributeGroup2006-07-15/attgA002/attgA002` (schemaTest invalid; msData/attributeGroup/attgA002.xsd) «TEST :Syntax Checking for Attribute Declaration (ID) : Test attributeGroup declaration with optional attribute id='0'» — ошибочная схема принята
-- `MS-AttributeGroup2006-07-15/attgA003/attgA003` (schemaTest invalid; msData/attributeGroup/attgA003.xsd) «TEST :Syntax Checking for Attribute Declaration (ID) : Test attributeGroup declaration with optional attribute id=''» — ошибочная схема принята
-- `MS-AttributeGroup2006-07-15/attgA004/attgA004` (schemaTest invalid; msData/attributeGroup/attgA004.xsd) «TEST :Syntax Checking for Attribute Declaration (ID) : Test attributeGroup declaration with attribute id=':a'» — ошибочная схема принята
-- `MS-AttributeGroup2006-07-15/attgA005/attgA005` (schemaTest invalid; msData/attributeGroup/attgA005.xsd) «TEST :Syntax Checking for Attribute Declaration (ID) : Test attributeGroups: 2 global attributeGroups with same ID» — ошибочная схема принята
-- `MS-AttributeGroup2006-07-15/attgA006/attgA006` (schemaTest invalid; msData/attributeGroup/attgA006.xsd) «TEST :Syntax Checking for Attribute Declaration (ID) : Test attributeGroups: 2 attributeGroups, one is global and one is from 'redefine', with same ID» — ошибочная схема принята [redefine]
-- `MS-AttributeGroup2006-07-15/attgA007/attgA007` (schemaTest invalid; msData/attributeGroup/attgA007.xsd) «TEST :Syntax Checking for Attribute Declaration (ID) : Test attributeGroups: 2 attributeGroup, one is from complexType and one is inside another attributeGroup» — ошибочная схема принята
-- `MS-AttributeGroup2006-07-15/attgA009/attgA009` (schemaTest invalid; msData/attributeGroup/attgA009.xsd) «TEST :Syntax Checking for Attribute Declaration (ID) : Test attributeGroups: redefine an attributeGroup and give it an existing ID» — ошибочная схема принята [redefine]
-- `MS-AttributeGroup2006-07-15/attgB006/attgB006` (schemaTest invalid; msData/attributeGroup/attgB006.xsd) «TEST :Syntax Checking for Attribute Declaration (ID) : Test attributeGroup declaration with attribute name='0'» — ошибочная схема принята
 - `MS-AttributeGroup2006-07-15/attgC028/attgC028` (schemaTest invalid; msData/attributeGroup/attgC028.xsd) «TEST :Syntax Checking for Attribute Declaration (ID) : Test attributeGroup declaration: can only reference global attributeGroup parent is extension, ref='name» — ошибочная схема принята [redefine]
-- `MS-AttributeGroup2006-07-15/attgD002/attgD002` (schemaTest invalid; msData/attributeGroup/attgD002.xsd) «TEST :Syntax Checking for Attribute Declaration (ID) : attributeGroup with two annotation» — ошибочная схема принята
 - `MS-AttributeGroup2006-07-15/attgD006/attgD006` (schemaTest invalid; msData/attributeGroup/attgD006.xsd) «TEST :Syntax Checking for Attribute Declaration (ID) : attributeGroup with two attribute, same name, same namespace» — ошибочная схема принята
 - `MS-AttributeGroup2006-07-15/attgD007/attgD007` (schemaTest invalid; msData/attributeGroup/attgD007.xsd) «TEST :Syntax Checking for Attribute Declaration (ID) : attribute group with two attribute, where the name of one att is same as the ref value of the other» — ошибочная схема принята
 - `MS-AttributeGroup2006-07-15/attgD008/attgD008` (schemaTest invalid; msData/attributeGroup/attgD008.xsd) «TEST :Syntax Checking for Attribute Declaration (ID) : attributeGroup with two attribute, same name, same type» — ошибочная схема принята
@@ -407,18 +343,10 @@
 - `MS-AttributeGroup2006-07-15/attgD037/attgD037` (schemaTest invalid; msData/attributeGroup/attgD037.xsd) «TEST :Syntax Checking for Attribute Declaration (ID) : AttributeGroup with ref="foo" and has attribute decl as child» — ошибочная схема принята
 - `MS-AttributeGroup2006-07-15/attgD038/attgD038` (schemaTest invalid; msData/attributeGroup/attgD038.xsd) «TEST :Syntax Checking for Attribute Declaration (ID) : AttributeGroup with ref="foo" and has attributeGroup decl as child» — ошибочная схема принята
 - `MS-AttributeGroup2006-07-15/attgD039/attgD039` (schemaTest invalid; msData/attributeGroup/attgD039.xsd) «TEST :Syntax Checking for Attribute Declaration (ID) : AttributeGroup with ref="foo" and has AnyAattribute decl as child» — ошибочная схема принята
-- `MS-AttributeGroup2006-07-15/attgD041/attgD041` (schemaTest invalid; msData/attributeGroup/attgD041.xsd) «TEST :Syntax Checking for Attribute Declaration (ID) : circular reference, attG A ref to B which ref C which ref back to A» — ошибочная схема принята
 
-### MS-ComplexType2006-07-15 (237)
+### MS-ComplexType2006-07-15 (216)
 
-- `MS-ComplexType2006-07-15/ctA028/ctA028` (schemaTest invalid; msData/complexType/ctA028.xsd) «TEST :Syntax Checking for top level complexType Declaration : Declaration with optional attribute id = 'foo123' , another object with an ID ='foo123'» — ошибочная схема принята
-- `MS-ComplexType2006-07-15/ctA030/ctA030` (schemaTest invalid; msData/complexType/ctA030.xsd) «TEST :Syntax Checking for top level complexType Declaration : Declaration with optional attribute id = ''» — ошибочная схема принята
-- `MS-ComplexType2006-07-15/ctA031/ctA031` (schemaTest invalid; msData/complexType/ctA031.xsd) «TEST :Syntax Checking for top level complexType Declaration : Declaration with optional attribute id = '123'» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctA042/ctA042` (schemaTest invalid; msData/complexType/ctA042.xsd) «TEST :Syntax Checking for top level complexType Declaration : Declaration with optional attribute name = 'fooType' , complexType not global, parent is an elemen» — ошибочная схема принята
-- `MS-ComplexType2006-07-15/ctA043/ctA043` (schemaTest invalid; msData/complexType/ctA043.xsd) «TEST :Syntax Checking for top level complexType Declaration : Declaration with optional attribute name = 'a:b'» — ошибочная схема принята
-- `MS-ComplexType2006-07-15/ctA046/ctA046` (schemaTest invalid; msData/complexType/ctA046.xsd) «TEST :Syntax Checking for top level complexType Declaration : Declaration with optional attribute name = '1foo'» — ошибочная схема принята
-- `MS-ComplexType2006-07-15/ctB002/ctB002` (schemaTest invalid; msData/complexType/ctB002.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with two annotations» — ошибочная схема принята
-- `MS-ComplexType2006-07-15/ctB004/ctB004` (schemaTest invalid; msData/complexType/ctB004.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with simpleContent then annotation» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB005/ctB005` (schemaTest invalid; msData/complexType/ctB005.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with simpleContent then simpleContent» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB006/ctB006` (schemaTest invalid; msData/complexType/ctB006.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with simpleContent then complexContent» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB007/ctB007` (schemaTest invalid; msData/complexType/ctB007.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with simpleContent then group» — ошибочная схема принята
@@ -431,7 +359,6 @@
 - `MS-ComplexType2006-07-15/ctB014/ctB014` (schemaTest invalid; msData/complexType/ctB014.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with simpleContent then two attributeGroups» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB015/ctB015` (schemaTest invalid; msData/complexType/ctB015.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with simpleContent then anyAttribute» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB016/ctB016` (schemaTest invalid; msData/complexType/ctB016.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with simpleContent then two anyAttributes» — ошибочная схема принята
-- `MS-ComplexType2006-07-15/ctB018/ctB018` (schemaTest invalid; msData/complexType/ctB018.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with complexContent then annotation» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB019/ctB019` (schemaTest invalid; msData/complexType/ctB019.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with complexContent then simpleContent» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB020/ctB020` (schemaTest invalid; msData/complexType/ctB020.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with complexContent then complexContent» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB021/ctB021` (schemaTest invalid; msData/complexType/ctB021.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with complexContent then group» — ошибочная схема принята
@@ -444,7 +371,6 @@
 - `MS-ComplexType2006-07-15/ctB028/ctB028` (schemaTest invalid; msData/complexType/ctB028.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with complexContent then two attributeGroups» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB029/ctB029` (schemaTest invalid; msData/complexType/ctB029.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with complexContent then anyAttribute» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB030/ctB030` (schemaTest invalid; msData/complexType/ctB030.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with complexContent then two anyAttributes» — ошибочная схема принята
-- `MS-ComplexType2006-07-15/ctB032/ctB032` (schemaTest invalid; msData/complexType/ctB032.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with group then annotation» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB033/ctB033` (schemaTest invalid; msData/complexType/ctB033.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with group then simpleContent» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB034/ctB034` (schemaTest invalid; msData/complexType/ctB034.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with group then complexContent» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB035/ctB035` (schemaTest invalid; msData/complexType/ctB035.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with group then group» — ошибочная схема принята
@@ -452,7 +378,6 @@
 - `MS-ComplexType2006-07-15/ctB037/ctB037` (schemaTest invalid; msData/complexType/ctB037.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with group then choice» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB038/ctB038` (schemaTest invalid; msData/complexType/ctB038.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with group then sequence» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB044/ctB044` (schemaTest invalid; msData/complexType/ctB044.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with group then two anyAttributes» — ошибочная схема принята
-- `MS-ComplexType2006-07-15/ctB046/ctB046` (schemaTest invalid; msData/complexType/ctB046.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with all then annotation» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB047/ctB047` (schemaTest invalid; msData/complexType/ctB047.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with all then simpleContent» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB048/ctB048` (schemaTest invalid; msData/complexType/ctB048.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with all then complexContent» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB049/ctB049` (schemaTest invalid; msData/complexType/ctB049.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with all then group» — ошибочная схема принята
@@ -460,7 +385,6 @@
 - `MS-ComplexType2006-07-15/ctB051/ctB051` (schemaTest invalid; msData/complexType/ctB051.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with all then choice» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB052/ctB052` (schemaTest invalid; msData/complexType/ctB052.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with all then sequence» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB058/ctB058` (schemaTest invalid; msData/complexType/ctB058.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with all then two anyAttributes» — ошибочная схема принята
-- `MS-ComplexType2006-07-15/ctB060/ctB060` (schemaTest invalid; msData/complexType/ctB060.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with choice then annotation» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB061/ctB061` (schemaTest invalid; msData/complexType/ctB061.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with choice then simpleContent» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB062/ctB062` (schemaTest invalid; msData/complexType/ctB062.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with choice then complexContent» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB063/ctB063` (schemaTest invalid; msData/complexType/ctB063.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with choice then group» — ошибочная схема принята
@@ -468,7 +392,6 @@
 - `MS-ComplexType2006-07-15/ctB065/ctB065` (schemaTest invalid; msData/complexType/ctB065.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with choice then choice» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB066/ctB066` (schemaTest invalid; msData/complexType/ctB066.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with choice then sequence» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB072/ctB072` (schemaTest invalid; msData/complexType/ctB072.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with choice then two anyAttributes» — ошибочная схема принята
-- `MS-ComplexType2006-07-15/ctB074/ctB074` (schemaTest invalid; msData/complexType/ctB074.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with sequence then annotation» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB075/ctB075` (schemaTest invalid; msData/complexType/ctB075.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with sequence then simpleContent» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB076/ctB076` (schemaTest invalid; msData/complexType/ctB076.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with sequence then complexContent» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB077/ctB077` (schemaTest invalid; msData/complexType/ctB077.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with sequence then group» — ошибочная схема принята
@@ -476,7 +399,6 @@
 - `MS-ComplexType2006-07-15/ctB079/ctB079` (schemaTest invalid; msData/complexType/ctB079.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with sequence then choice» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB080/ctB080` (schemaTest invalid; msData/complexType/ctB080.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with sequence then sequence» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB086/ctB086` (schemaTest invalid; msData/complexType/ctB086.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with sequence then two anyAttributes» — ошибочная схема принята
-- `MS-ComplexType2006-07-15/ctB088/ctB088` (schemaTest invalid; msData/complexType/ctB088.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with attribute then annotation» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB089/ctB089` (schemaTest invalid; msData/complexType/ctB089.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with attribute then simpleContent» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB090/ctB090` (schemaTest invalid; msData/complexType/ctB090.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with attribute then complexContent» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB091/ctB091` (schemaTest invalid; msData/complexType/ctB091.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with attribute then group» — ошибочная схема принята
@@ -484,7 +406,6 @@
 - `MS-ComplexType2006-07-15/ctB093/ctB093` (schemaTest invalid; msData/complexType/ctB093.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with attribute then choice» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB094/ctB094` (schemaTest invalid; msData/complexType/ctB094.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with attribute then sequence» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB099/ctB099` (schemaTest invalid; msData/complexType/ctB099.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with attribute then two anyAttributes» — ошибочная схема принята
-- `MS-ComplexType2006-07-15/ctB101/ctB101` (schemaTest invalid; msData/complexType/ctB101.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with attributeGroup then annotation» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB102/ctB102` (schemaTest invalid; msData/complexType/ctB102.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with attributeGroup then simpleContent» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB103/ctB103` (schemaTest invalid; msData/complexType/ctB103.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with attributeGroup then complexContent» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB104/ctB104` (schemaTest invalid; msData/complexType/ctB104.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with attributeGroup then group» — ошибочная схема принята
@@ -492,7 +413,6 @@
 - `MS-ComplexType2006-07-15/ctB106/ctB106` (schemaTest invalid; msData/complexType/ctB106.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with attributeGroup then choice» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB107/ctB107` (schemaTest invalid; msData/complexType/ctB107.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with attributeGroup then sequence» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB112/ctB112` (schemaTest invalid; msData/complexType/ctB112.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with attributeGroup then two anyAttributes» — ошибочная схема принята
-- `MS-ComplexType2006-07-15/ctB114/ctB114` (schemaTest invalid; msData/complexType/ctB114.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with anyAttribute then annotation» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB115/ctB115` (schemaTest invalid; msData/complexType/ctB115.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with anyAttribute then simpleContent» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB116/ctB116` (schemaTest invalid; msData/complexType/ctB116.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with anyAttribute then complexContent» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB117/ctB117` (schemaTest invalid; msData/complexType/ctB117.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with anyAttribute then group» — ошибочная схема принята
@@ -504,9 +424,6 @@
 - `MS-ComplexType2006-07-15/ctB123/ctB123` (schemaTest invalid; msData/complexType/ctB123.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with anyAttribute then attributeGroup» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB124/ctB124` (schemaTest invalid; msData/complexType/ctB124.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with anyAttribute then two attributeGroups» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctB125/ctB125` (schemaTest invalid; msData/complexType/ctB125.xsd) «TEST :Syntax Checking for top level complexType Declaration : content with anyAttribute then anyAttribute» — ошибочная схема принята
-- `MS-ComplexType2006-07-15/ctC002/ctC002` (schemaTest invalid; msData/complexType/ctC002.xsd) «TEST :Syntax Checking for top level complexType Declaration : simpleContent with optional attribute id = 'foo123' , another object with an ID ='foo123'» — ошибочная схема принята
-- `MS-ComplexType2006-07-15/ctC004/ctC004` (schemaTest invalid; msData/complexType/ctC004.xsd) «TEST :Syntax Checking for top level complexType Declaration : simpleContent with optional attribute id = ''» — ошибочная схема принята
-- `MS-ComplexType2006-07-15/ctC005/ctC005` (schemaTest invalid; msData/complexType/ctC005.xsd) «TEST :Syntax Checking for top level complexType Declaration : simpleContent with optional attribute id = '123'» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctC010/ctC010` (schemaTest invalid; msData/complexType/ctC010.xsd) «TEST :Syntax Checking for top level complexType Declaration : simpleContent and content of extension and annotation» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctC011/ctC011` (schemaTest invalid; msData/complexType/ctC011.xsd) «TEST :Syntax Checking for top level complexType Declaration : simpleContent and content of restriction and annotation» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctD001/ctD001` (schemaTest invalid; msData/complexType/ctD001.xsd) «TEST :Syntax Checking for top level complexType Declaration : simpleContent, content of restriction and base = 'xsd:string'» — ошибочная схема принята
@@ -529,9 +446,6 @@
 - `MS-ComplexType2006-07-15/ctE014/ctE014` (schemaTest invalid; msData/complexType/ctE014.xsd) «TEST :Syntax Checking for top level complexType Declaration : simpleContent, content of extension with base='xsd:string' and content of sequence» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctE015/ctE015` (schemaTest invalid; msData/complexType/ctE015.xsd) «TEST :Syntax Checking for top level complexType Declaration : simpleContent, content of extension with base='xsd:string' and content of attribute then annotatio» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctE016/ctE016` (schemaTest invalid; msData/complexType/ctE016.xsd) «TEST :Syntax Checking for top level complexType Declaration : simpleContent, content of extension with base='xsd:string' and content of anyAttribute then attrib» — ошибочная схема принята
-- `MS-ComplexType2006-07-15/ctF002/ctF002` (schemaTest invalid; msData/complexType/ctF002.xsd) «TEST :Syntax Checking for top level complexType Declaration : comlexContent with optional attribute id = 'foo123' , another object with an ID ='foo123'» — ошибочная схема принята
-- `MS-ComplexType2006-07-15/ctF004/ctF004` (schemaTest invalid; msData/complexType/ctF004.xsd) «TEST :Syntax Checking for top level complexType Declaration : comlexContent with optional attribute id = ''» — ошибочная схема принята
-- `MS-ComplexType2006-07-15/ctF005/ctF005` (schemaTest invalid; msData/complexType/ctF005.xsd) «TEST :Syntax Checking for top level complexType Declaration : comlexContent with optional attribute id = '123'» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctF006/ctF006` (schemaTest invalid; msData/complexType/ctF006.xsd) «TEST :Syntax Checking for top level complexType Declaration : complexContent with optional attribute mixed = 'true' and content of restriction then content of s» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctF008/ctF008` (schemaTest invalid; msData/complexType/ctF008.xsd) «TEST :Syntax Checking for top level complexType Declaration : complexContent with optional attribute mixed = 'true' and content of extension» — ошибочная схема принята
 - `MS-ComplexType2006-07-15/ctF009/ctF009` (schemaTest invalid; msData/complexType/ctF009.xsd) «TEST :Syntax Checking for top level complexType Declaration : complexContent with optional attribute mixed = 'true' and content of extension then content of seq» — ошибочная схема принята
@@ -1068,12 +982,8 @@
 - `MS-DataTypes2006-07-15/union_minInclisive_1019/union_minInclisive_1019` (schemaTest invalid; msData/datatypes/union_minInclusive.xsd) «TEST :Facet Schemas for string : minInclisive not allowed on union» — ошибочная схема принята
 - `MS-DataTypes2006-07-15/list_minInclusive_1850/list_minInclusive_1850` (schemaTest invalid; msData/datatypes/Facets/list/list_minInclusive.xsd) «TEST :Facet Schemas for string : minInclusive is not allowed on list» — ошибочная схема принята
 
-### MS-Element2006-07-15 (25)
+### MS-Element2006-07-15 (14)
 
-- `MS-Element2006-07-15/elemA009/elemA009` (schemaTest invalid; msData/element/elemA009.xsd) «TEST :3.3.2 XML Representation of Element Declaration Schema Components : Element with name='foo:bar'» — ошибочная схема принята
-- `MS-Element2006-07-15/elemA010/elemA010` (schemaTest invalid; msData/element/elemA010.xsd) «TEST :3.3.2 XML Representation of Element Declaration Schema Components : Element with name=':bar'» — ошибочная схема принята
-- `MS-Element2006-07-15/elemA011/elemA011` (schemaTest invalid; msData/element/elemA011.xsd) «TEST :3.3.2 XML Representation of Element Declaration Schema Components : Element with name='foo:'» — ошибочная схема принята
-- `MS-Element2006-07-15/elemA014/elemA014` (schemaTest invalid; msData/element/elemA014.xsd) «TEST :3.3.2 XML Representation of Element Declaration Schema Components : Element with name='-2.5foo'» — ошибочная схема принята
 - `MS-Element2006-07-15/elemD004/elemD004` (schemaTest invalid; msData/element/elemD004.xsd) «TEST :3.3.2 XML Representation of Element Declaration Schema Components : Element type is complexType and default is present» — ошибочная схема принята
 - `MS-Element2006-07-15/elemD005/elemD005` (schemaTest invalid; msData/element/elemD005.xsd) «TEST :3.3.2 XML Representation of Element Declaration Schema Components : Element with default='foo' and the content is not a textOnly» — ошибочная схема принята
 - `MS-Element2006-07-15/elemG003/elemG003` (schemaTest invalid; msData/element/elemG003.xsd) «TEST :3.3.2 XML Representation of Element Declaration Schema Components : Element type is complexType and fixed is present» — ошибочная схема принята
@@ -1082,17 +992,10 @@
 - `MS-Element2006-07-15/elemH004/elemH004` (schemaTest invalid; msData/element/elemH004.xsd) «TEST :3.3.2 XML Representation of Element Declaration Schema Components : Element with its schema elementFormDefault='Qualified'» — ошибочная схема принята
 - `MS-Element2006-07-15/elemH005/elemH005` (schemaTest invalid; msData/element/elemH005.xsd) «TEST :3.3.2 XML Representation of Element Declaration Schema Components : Element with its schema elementFormDefault='Unqualified'» — ошибочная схема принята
 - `MS-Element2006-07-15/elemH006/elemH006` (schemaTest invalid; msData/element/elemH006.xsd) «TEST :3.3.2 XML Representation of Element Declaration Schema Components : Element with its schema elementFormDefault='qualified unqualified'» — ошибочная схема принята
-- `MS-Element2006-07-15/elemI003/elemI003` (schemaTest invalid; msData/element/elemI003.xsd) «TEST :3.3.2 XML Representation of Element Declaration Schema Components : Element with id='25'» — ошибочная схема принята
-- `MS-Element2006-07-15/elemI004/elemI004` (schemaTest invalid; msData/element/elemI004.xsd) «TEST :3.3.2 XML Representation of Element Declaration Schema Components : Element with id=''» — ошибочная схема принята
-- `MS-Element2006-07-15/elemI005/elemI005` (schemaTest invalid; msData/element/elemI005.xsd) «TEST :3.3.2 XML Representation of Element Declaration Schema Components : Duplicate ID="foo25" where foo25 is already exists» — ошибочная схема принята
 - `MS-Element2006-07-15/elemK007/elemK007` (schemaTest invalid; msData/element/elemK007.xsd) «TEST :3.3.2 XML Representation of Element Declaration Schema Components : Element using nullable attribute, invalid cas.» — ошибочная схема принята
 - `MS-Element2006-07-15/elemN006/elemN006` (schemaTest invalid; msData/element/elemN006.xsd) «TEST :3.3.2 XML Representation of Element Declaration Schema Components : Element with an attribute foo="bar" where foo is a random attribute» — ошибочная схема принята
-- `MS-Element2006-07-15/elemQ004/elemQ004` (schemaTest invalid; msData/element/elemQ004.xsd) «TEST :3.3.2 XML Representation of Element Declaration Schema Components : Element with simpleType and annotation» — ошибочная схема принята
-- `MS-Element2006-07-15/elemQ006/elemQ006` (schemaTest invalid; msData/element/elemQ006.xsd) «TEST :3.3.2 XML Representation of Element Declaration Schema Components : Element with complexType and annotation» — ошибочная схема принята
-- `MS-Element2006-07-15/elemZ004/elemZ004` (schemaTest valid; msData/element/elemZ004.xsd) «TEST :3.3.2 XML Representation of Element Declaration Schema Components : test maxOccurs to take values more than int (2147483647)» — корректная схема отвергнута: [SCHEMA_ERROR] схема, строка 6: некорректный maxOccurs "2147483648"
 - `MS-Element2006-07-15/elemZ012/elemZ012` (schemaTest invalid; msData/element/elemZ012.xsd) «TEST :3.3.2 XML Representation of Element Declaration Schema Components : XSD: when element with invalid default value that has substitution group whose head al» — ошибочная схема принята [block/final, substitutionGroup]
 - `MS-Element2006-07-15/QFE1700c2/QFE1700c2.v` (instanceTest valid; msData/element/QFE1700c2.xml) «TEST :3.3.2 XML Representation of Element Declaration Schema Components : C2:XmlValidation for xsi:nil="false" even though processContents="skip"» — ложная ошибка: /root/e2[1]/e3: значение "" не соответствует типу int
-- `MS-Element2006-07-15/elemZ030/elemZ030` (schemaTest invalid; msData/element/elemZ030.xsd) «TEST :3.3.2 XML Representation of Element Declaration Schema Components : XSD: empty value of the id attribute should not be allowed» — ошибочная схема принята
 - `MS-Element2006-07-15/elemZ032a/elemZ032a` (schemaTest invalid; msData/element/elemZ032a.xsd) «TEST :3.3.2 XML Representation of Element Declaration Schema Components : XSD: attribute and element declarations can not have a value constraint if it type is» — ошибочная схема принята
 - `MS-Element2006-07-15/elemZ032b/elemZ032b` (schemaTest invalid; msData/element/elemZ032b.xsd) «TEST :3.3.2 XML Representation of Element Declaration Schema Components : XSD: attribute and element declarations can not have a value constraint if it type is» — ошибочная схема принята
 
@@ -1101,49 +1004,14 @@
 - `MS-Errata102006-07-15/errC008/errC008` (schemaTest invalid; msData/errata10/errC008.xsd) «TEST :Primer Errata : Errata E1-21 - processContents of restriction must be identical or stronger than that of base,xs:any» — ошибочная схема принята
 - `MS-Errata102006-07-15/errC009/errC009` (schemaTest invalid; msData/errata10/errC009.xsd) «TEST :Primer Errata : Errata E1-21 - processContents of restriction must be identical or stronger than that of base,xs:anyAttribute» — ошибочная схема принята
 
-### MS-Group2006-07-15 (35)
+### MS-Group2006-07-15 (3)
 
-- `MS-Group2006-07-15/groupA003/groupA003` (schemaTest invalid; msData/group/groupA003.xsd) «TEST :Syntax Checking (id, ref) : Test id: two global groups with same id» — ошибочная схема принята
-- `MS-Group2006-07-15/groupA004/groupA004` (schemaTest invalid; msData/group/groupA004.xsd) «TEST :Syntax Checking (id, ref) : Test id: two groups with same id, one from global, one inside a complexType» — ошибочная схема принята
-- `MS-Group2006-07-15/groupA005/groupA005` (schemaTest invalid; msData/group/groupA005.xsd) «TEST :Syntax Checking (id, ref) : Test id: two groups with same id, one from complexType, one inside choice» — ошибочная схема принята
 - `MS-Group2006-07-15/groupA008/groupA008` (schemaTest invalid; msData/group/groupA008.xsd) «TEST :Syntax Checking (id, ref) : Test id: two groups with same id, one from imported xsd and the other from included xsd» — ошибочная схема принята
-- `MS-Group2006-07-15/groupA009/groupA009` (schemaTest invalid; msData/group/groupA009.xsd) «TEST :Syntax Checking (id, ref) : Test id:, id=''» — ошибочная схема принята
-- `MS-Group2006-07-15/groupA010/groupA010` (schemaTest invalid; msData/group/groupA010.xsd) «TEST :Syntax Checking (id, ref) : Test id:, id='1'» — ошибочная схема принята
-- `MS-Group2006-07-15/groupA012/groupA012` (schemaTest invalid; msData/group/groupA012.xsd) «TEST :Syntax Checking (id, ref) : Test id:, id='a:b'» — ошибочная схема принята
-- `MS-Group2006-07-15/groupC010/groupC010` (schemaTest invalid; msData/group/groupC010.xsd) «TEST :Syntax Checking (id, ref) : Test name:, name='1'» — ошибочная схема принята
-- `MS-Group2006-07-15/groupF009v/groupF009v` (schemaTest valid; msData/group/groupF009.xsd) «TEST :Syntax Checking (id, ref) : parent is extension: elements in instant XML=0, minOccurs=0, maxOccurs=999999999999999999999» — корректная схема отвергнута: [SCHEMA_ERROR] схема, строка 18: некорректный maxOccurs "999999999999999"
-- `MS-Group2006-07-15/groupF009v/groupF009v.v` (instanceTest valid; msData/group/groupF009.xml) «TEST :Syntax Checking (id, ref) : parent is extension: elements in instant XML=0, minOccurs=0, maxOccurs=999999999999999999999» — схема группы не загрузилась: [SCHEMA_ERROR] схема, строка 18: некорректный maxOccurs "999999999999999"
 - `MS-Group2006-07-15/groupH007v/groupH007v` (schemaTest invalid; msData/group/groupH007.xsd) «TEST :Syntax Checking (id, ref) : parent is restriction: elements in instant XML=0, minOccurs=0, maxOccurs=0» — ошибочная схема принята
-- `MS-Group2006-07-15/groupH009v/groupH009v` (schemaTest valid; msData/group/groupH009.xsd) «TEST :Syntax Checking (id, ref) : parent is restriction: elements in instant XML=0, minOccurs=0, maxOccurs=999999999999999» — корректная схема отвергнута: [SCHEMA_ERROR] схема, строка 31: некорректный maxOccurs "999999999999999"
-- `MS-Group2006-07-15/groupH009v/groupH009v.v` (instanceTest valid; msData/group/groupH009.xml) «TEST :Syntax Checking (id, ref) : parent is restriction: elements in instant XML=0, minOccurs=0, maxOccurs=999999999999999» — схема группы не загрузилась: [SCHEMA_ERROR] схема, строка 31: некорректный maxOccurs "999999999999999"
 - `MS-Group2006-07-15/groupH021v/groupH021v` (schemaTest invalid; msData/group/groupH021.xsd) «TEST :Syntax Checking (id, ref) : parent is restriction: elements in instant XML=3, maxOccurs=unbounded» — ошибочная схема принята
-- `MS-Group2006-07-15/groupJ009v/groupJ009v` (schemaTest valid; msData/group/groupJ009.xsd) «TEST :Syntax Checking (id, ref) : parent is sequence: elements in instant XML=0, minOccurs=0, maxOccurs=99999999999» — корректная схема отвергнута: [SCHEMA_ERROR] схема, строка 5: некорректный maxOccurs "99999999999"
-- `MS-Group2006-07-15/groupJ009v/groupJ009v.v` (instanceTest valid; msData/group/groupJ009.xml) «TEST :Syntax Checking (id, ref) : parent is sequence: elements in instant XML=0, minOccurs=0, maxOccurs=99999999999» — схема группы не загрузилась: [SCHEMA_ERROR] схема, строка 5: некорректный maxOccurs "99999999999"
-- `MS-Group2006-07-15/groupL009v/groupL009v` (schemaTest valid; msData/group/groupL009.xsd) «TEST :Syntax Checking (id, ref) : parent is choice: elements in instant XML=0, minOccurs=0, maxOccurs=999999999» — корректная схема отвергнута: [SCHEMA_ERROR] схема, строка 5: некорректный maxOccurs "99999999999999"
-- `MS-Group2006-07-15/groupL009v/groupL009v.v` (instanceTest valid; msData/group/groupL009.xml) «TEST :Syntax Checking (id, ref) : parent is choice: elements in instant XML=0, minOccurs=0, maxOccurs=999999999» — схема группы не загрузилась: [SCHEMA_ERROR] схема, строка 5: некорректный maxOccurs "99999999999999"
-- `MS-Group2006-07-15/groupN009v/groupN009v` (schemaTest valid; msData/group/groupN009.xsd) «TEST :Syntax Checking (id, ref) : parent is complexType: elements in instant XML=0, minOccurs=0, maxOccurs=999999999» — корректная схема отвергнута: [SCHEMA_ERROR] схема, строка 14: некорректный maxOccurs "99999999999999"
-- `MS-Group2006-07-15/groupN009v/groupN009v.v` (instanceTest valid; msData/group/groupN009.xml) «TEST :Syntax Checking (id, ref) : parent is complexType: elements in instant XML=0, minOccurs=0, maxOccurs=999999999» — схема группы не загрузилась: [SCHEMA_ERROR] схема, строка 14: некорректный maxOccurs "99999999999999"
-- `MS-Group2006-07-15/groupO002/groupO002` (schemaTest invalid; msData/group/groupO002.xsd) «TEST :Syntax Checking (id, ref) : Test content: annotation, two annotation as child nodes» — ошибочная схема принята
-- `MS-Group2006-07-15/groupO003/groupO003` (schemaTest invalid; msData/group/groupO003.xsd) «TEST :Syntax Checking (id, ref) : Test content: annotation must be the first node if present, two children, sequence follow by annotation» — ошибочная схема принята
-- `MS-Group2006-07-15/groupO010/groupO010` (schemaTest invalid; msData/group/groupO010.xsd) «TEST :Syntax Checking (id, ref) : Test content: annotation follow by element» — ошибочная схема принята
-- `MS-Group2006-07-15/groupO015/groupO015` (schemaTest invalid; msData/group/groupO015.xsd) «TEST :Syntax Checking (id, ref) : Test content: only one is allow (all | choice | sequence), all follow by choice» — ошибочная схема принята
-- `MS-Group2006-07-15/groupO016/groupO016` (schemaTest invalid; msData/group/groupO016.xsd) «TEST :Syntax Checking (id, ref) : Test content: only one is allow (all | choice | sequence), all follow by sequence» — ошибочная схема принята
-- `MS-Group2006-07-15/groupO017/groupO017` (schemaTest invalid; msData/group/groupO017.xsd) «TEST :Syntax Checking (id, ref) : Test content: only one is allow (all | choice | sequence), choice follow by sequence» — ошибочная схема принята
-- `MS-Group2006-07-15/groupO018/groupO018` (schemaTest invalid; msData/group/groupO018.xsd) «TEST :Syntax Checking (id, ref) : Test content: only one is allow (all | choice | sequence), sequence follow by all» — ошибочная схема принята
-- `MS-Group2006-07-15/groupO019/groupO019` (schemaTest invalid; msData/group/groupO019.xsd) «TEST :Syntax Checking (id, ref) : Test content: only one is allow (all | choice | sequence), choice follow by all» — ошибочная схема принята
-- `MS-Group2006-07-15/groupO020/groupO020` (schemaTest invalid; msData/group/groupO020.xsd) «TEST :Syntax Checking (id, ref) : Test content: only one is allow (all | choice | sequence), all follow by all» — ошибочная схема принята
-- `MS-Group2006-07-15/groupO021/groupO021` (schemaTest invalid; msData/group/groupO021.xsd) «TEST :Syntax Checking (id, ref) : Test content: only one is allow (all | choice | sequence), choice follow by choice» — ошибочная схема принята
-- `MS-Group2006-07-15/groupO022/groupO022` (schemaTest invalid; msData/group/groupO022.xsd) «TEST :Syntax Checking (id, ref) : Test content: only one is allow (all | choice | sequence), sequence follow by sequence» — ошибочная схема принята
-- `MS-Group2006-07-15/groupO024/groupO024` (schemaTest invalid; msData/group/groupO024.xsd) «TEST :Syntax Checking (id, ref) : Test parent: parent is element» — ошибочная схема принята
-- `MS-Group2006-07-15/groupO025/groupO025` (schemaTest invalid; msData/group/groupO025.xsd) «TEST :Syntax Checking (id, ref) : Test parent: parent is attributeGroup» — ошибочная схема принята
-- `MS-Group2006-07-15/groupO026/groupO026` (schemaTest invalid; msData/group/groupO026.xsd) «TEST :Syntax Checking (id, ref) : Test parent: parent is any» — ошибочная схема принята
-- `MS-Group2006-07-15/groupO027/groupO027` (schemaTest invalid; msData/group/groupO027.xsd) «TEST :Syntax Checking (id, ref) : Test parent: parent is group» — ошибочная схема принята
 
-### MS-IdentityConstraint2006-07-15 (112)
+### MS-IdentityConstraint2006-07-15 (97)
 
-- `MS-IdentityConstraint2006-07-15/idA002/idA002` (schemaTest invalid; msData/identityConstraint/idA002.xsd) «TEST :Identity-constraint Definition Schema Component : unique Declaration with optional attribute id = 'foo123' , name attribute = 'idName' , another object wi» — ошибочная схема принята
-- `MS-IdentityConstraint2006-07-15/idA006/idA006` (schemaTest invalid; msData/identityConstraint/idA006.xsd) «TEST :Identity-constraint Definition Schema Component : unique Declaration with optional attribute id = '' , name attribute = 'idName'» — ошибочная схема принята
-- `MS-IdentityConstraint2006-07-15/idA007/idA007` (schemaTest invalid; msData/identityConstraint/idA007.xsd) «TEST :Identity-constraint Definition Schema Component : unique Declaration with optional attribute id = '123' , name attribute = 'idName'» — ошибочная схема принята
 - `MS-IdentityConstraint2006-07-15/idA020/idA020` (schemaTest invalid; msData/identityConstraint/idA020.xsd) «TEST :Identity-constraint Definition Schema Component : unique Declaration with mandatory attribute name = 'fooID' , object is defined globally» — ошибочная схема принята
 - `MS-IdentityConstraint2006-07-15/idA021/idA021` (schemaTest invalid; msData/identityConstraint/idA021.xsd) «TEST :Identity-constraint Definition Schema Component : unique Declaration with mandatory attribute name = 'fooID' , object is a child of attribute» — ошибочная схема принята
 - `MS-IdentityConstraint2006-07-15/idA023/idA023` (schemaTest invalid; msData/identityConstraint/idA023.xsd) «TEST :Identity-constraint Definition Schema Component : unique Declaration with mandatory attribute name = 'fooID' , object is a child of complexType» — ошибочная схема принята
@@ -1155,9 +1023,6 @@
 - `MS-IdentityConstraint2006-07-15/idA043/idA043` (schemaTest invalid; msData/identityConstraint/idA043.xsd) «TEST :Identity-constraint Definition Schema Component : unique element, content of selector then field and then annotation» — ошибочная схема принята
 - `MS-IdentityConstraint2006-07-15/idA044/idA044` (schemaTest invalid; msData/identityConstraint/idA044.xsd) «TEST :Identity-constraint Definition Schema Component : unique element, content of annotation then field and then selector» — ошибочная схема принята
 - `MS-IdentityConstraint2006-07-15/idA046/idA046` (schemaTest invalid; msData/identityConstraint/idA046.xsd) «TEST :Identity-constraint Definition Schema Component : unique element, content of two selectors and then a field» — ошибочная схема принята
-- `MS-IdentityConstraint2006-07-15/idB002/idB002` (schemaTest invalid; msData/identityConstraint/idB002.xsd) «TEST :Identity-constraint Definition Schema Component : key Declaration with optional attribute id = 'foo123' , name attribute = 'keyName' , another object with» — ошибочная схема принята
-- `MS-IdentityConstraint2006-07-15/idB006/idB006` (schemaTest invalid; msData/identityConstraint/idB006.xsd) «TEST :Identity-constraint Definition Schema Component : key Declaration with optional attribute id = '' , name attribute = 'keyName'» — ошибочная схема принята
-- `MS-IdentityConstraint2006-07-15/idB007/idB007` (schemaTest invalid; msData/identityConstraint/idB007.xsd) «TEST :Identity-constraint Definition Schema Component : key Declaration with optional attribute id = '123' , name attribute = 'keyName'» — ошибочная схема принята
 - `MS-IdentityConstraint2006-07-15/idB020/idB020` (schemaTest invalid; msData/identityConstraint/idB020.xsd) «TEST :Identity-constraint Definition Schema Component : key Declaration with mandatory attribute name = 'keyName' , object is defined globally» — ошибочная схема принята
 - `MS-IdentityConstraint2006-07-15/idB021/idB021` (schemaTest invalid; msData/identityConstraint/idB021.xsd) «TEST :Identity-constraint Definition Schema Component : key Declaration with mandatory attribute name = 'keyName' , object is a child of attribute» — ошибочная схема принята
 - `MS-IdentityConstraint2006-07-15/idB023/idB023` (schemaTest invalid; msData/identityConstraint/idB023.xsd) «TEST :Identity-constraint Definition Schema Component : key Declaration with mandatory attribute name = 'keyName' , object is a child of complexType» — ошибочная схема принята
@@ -1169,9 +1034,6 @@
 - `MS-IdentityConstraint2006-07-15/idB043/idB043` (schemaTest invalid; msData/identityConstraint/idB043.xsd) «TEST :Identity-constraint Definition Schema Component : key element, content of selector then field and then annotation» — ошибочная схема принята
 - `MS-IdentityConstraint2006-07-15/idB044/idB044` (schemaTest invalid; msData/identityConstraint/idB044.xsd) «TEST :Identity-constraint Definition Schema Component : key element, content of annotation then field and then selector» — ошибочная схема принята
 - `MS-IdentityConstraint2006-07-15/idB046/idB046` (schemaTest invalid; msData/identityConstraint/idB046.xsd) «TEST :Identity-constraint Definition Schema Component : key element, content of two selectors and then a field» — ошибочная схема принята
-- `MS-IdentityConstraint2006-07-15/idC002/idC002` (schemaTest invalid; msData/identityConstraint/idC002.xsd) «TEST :Identity-constraint Definition Schema Component : keyref Declaration with optional attribute id = 'foo123' , name attribute = 'keyrefName' , another objec» — ошибочная схема принята
-- `MS-IdentityConstraint2006-07-15/idC006/idC006` (schemaTest invalid; msData/identityConstraint/idC006.xsd) «TEST :Identity-constraint Definition Schema Component : keyref Declaration with optional attribute id = '' , name attribute = 'keyrefName'» — ошибочная схема принята
-- `MS-IdentityConstraint2006-07-15/idC007/idC007` (schemaTest invalid; msData/identityConstraint/idC007.xsd) «TEST :Identity-constraint Definition Schema Component : keyref Declaration with optional attribute id = '123' , name attribute = 'keyrefName'» — ошибочная схема принята
 - `MS-IdentityConstraint2006-07-15/idC020/idC020` (schemaTest invalid; msData/identityConstraint/idC020.xsd) «TEST :Identity-constraint Definition Schema Component : keyref Declaration with mandatory attribute name = 'keyrefName' , object is defined globally» — ошибочная схема принята
 - `MS-IdentityConstraint2006-07-15/idC021/idC021` (schemaTest invalid; msData/identityConstraint/idC021.xsd) «TEST :Identity-constraint Definition Schema Component : keyref Declaration with mandatory attribute name = 'keyrefName' , object is a child of attribute» — ошибочная схема принята
 - `MS-IdentityConstraint2006-07-15/idC023/idC023` (schemaTest invalid; msData/identityConstraint/idC023.xsd) «TEST :Identity-constraint Definition Schema Component : keyref Declaration with mandatory attribute name = 'keyrefName' , object is a child of complexType» — ошибочная схема принята
@@ -1182,9 +1044,6 @@
 - `MS-IdentityConstraint2006-07-15/idC046/idC046` (schemaTest invalid; msData/identityConstraint/idC046.xsd) «TEST :Identity-constraint Definition Schema Component : keyref element, content of selector then field and then annotation» — ошибочная схема принята
 - `MS-IdentityConstraint2006-07-15/idC047/idC047` (schemaTest invalid; msData/identityConstraint/idC047.xsd) «TEST :Identity-constraint Definition Schema Component : keyref element, content of annotation then field and then selector» — ошибочная схема принята
 - `MS-IdentityConstraint2006-07-15/idC049/idC049` (schemaTest invalid; msData/identityConstraint/idC049.xsd) «TEST :Identity-constraint Definition Schema Component : keyref element, content of two selectors and then a field» — ошибочная схема принята
-- `MS-IdentityConstraint2006-07-15/idD002/idD002` (schemaTest invalid; msData/identityConstraint/idD002.xsd) «TEST :Identity-constraint Definition Schema Component : selector Declaration with optional attribute id = 'foo123' , another object with an ID ='foo123'» — ошибочная схема принята
-- `MS-IdentityConstraint2006-07-15/idD004/idD004` (schemaTest invalid; msData/identityConstraint/idD004.xsd) «TEST :Identity-constraint Definition Schema Component : selector Declaration with optional attribute id = ''» — ошибочная схема принята
-- `MS-IdentityConstraint2006-07-15/idD005/idD005` (schemaTest invalid; msData/identityConstraint/idD005.xsd) «TEST :Identity-constraint Definition Schema Component : selector Declaration with optional attribute id = '123'» — ошибочная схема принята
 - `MS-IdentityConstraint2006-07-15/idD006/idD006` (schemaTest invalid; msData/identityConstraint/idD006.xsd) «TEST :Identity-constraint Definition Schema Component : selector Declaration with attribute name = 'fooID'» — ошибочная схема принята
 - `MS-IdentityConstraint2006-07-15/idD011/idD011` (schemaTest invalid; msData/identityConstraint/idD011.xsd) «TEST :Identity-constraint Definition Schema Component : selector is a child of element» — ошибочная схема принята
 - `MS-IdentityConstraint2006-07-15/idD014/idD014` (schemaTest invalid; msData/identityConstraint/idD014.xsd) «TEST :Identity-constraint Definition Schema Component : selector Declaration with mandatory attribute xpath contains invalid Xpath subset» — ошибочная схема принята
@@ -1205,9 +1064,6 @@
 - `MS-IdentityConstraint2006-07-15/idD031/idD031` (schemaTest invalid; msData/identityConstraint/idD031.xsd) «TEST :Identity-constraint Definition Schema Component : selector element, content of choice» — ошибочная схема принята
 - `MS-IdentityConstraint2006-07-15/idD032/idD032` (schemaTest invalid; msData/identityConstraint/idD032.xsd) «TEST :Identity-constraint Definition Schema Component : selector element, content of sequence» — ошибочная схема принята
 - `MS-IdentityConstraint2006-07-15/idD033/idD033` (schemaTest invalid; msData/identityConstraint/idD033.xsd) «TEST :Identity-constraint Definition Schema Component : selector element, content of any» — ошибочная схема принята
-- `MS-IdentityConstraint2006-07-15/idE002/idE002` (schemaTest invalid; msData/identityConstraint/idE002.xsd) «TEST :Identity-constraint Definition Schema Component : field Declaration with optional attribute id = 'foo123' , another object with an ID ='foo123'» — ошибочная схема принята
-- `MS-IdentityConstraint2006-07-15/idE004/idE004` (schemaTest invalid; msData/identityConstraint/idE004.xsd) «TEST :Identity-constraint Definition Schema Component : field Declaration with optional attribute id = ''» — ошибочная схема принята
-- `MS-IdentityConstraint2006-07-15/idE005/idE005` (schemaTest invalid; msData/identityConstraint/idE005.xsd) «TEST :Identity-constraint Definition Schema Component : field Declaration with optional attribute id = '123'» — ошибочная схема принята
 - `MS-IdentityConstraint2006-07-15/idE006/idE006` (schemaTest invalid; msData/identityConstraint/idE006.xsd) «TEST :Identity-constraint Definition Schema Component : field Declaration with attribute name = 'fooID'» — ошибочная схема принята
 - `MS-IdentityConstraint2006-07-15/idE007/idE007` (schemaTest invalid; msData/identityConstraint/idE007.xsd) «TEST :Identity-constraint Definition Schema Component : field is defined globally» — ошибочная схема принята
 - `MS-IdentityConstraint2006-07-15/idE011/idE011` (schemaTest invalid; msData/identityConstraint/idE011.xsd) «TEST :Identity-constraint Definition Schema Component : field is a child of element» — ошибочная схема принята
@@ -1254,67 +1110,16 @@
 - `MS-IdentityConstraint2006-07-15/idJ210/idJ210` (schemaTest invalid; msData/identityConstraint/idJ210.xsd) «TEST :Identity-constraint Definition Schema Component : field xpath='qname[predicate]' , selector contains *» — ошибочная схема принята
 - `MS-IdentityConstraint2006-07-15/idZ003/idZ003` (schemaTest invalid; msData/identityConstraint/idZ003.xml) «TEST :Identity-constraint Definition Schema Component : 71410 - XSD - Order of elements in content model of XmlSchemaElement» — ошибочная схема принята
 
-### MS-ModelGroups2006-07-15 (92)
+### MS-ModelGroups2006-07-15 (41)
 
-- `MS-ModelGroups2006-07-15/mgA002/mgA002` (schemaTest invalid; msData/modelGroups/mgA002.xsd) «TEST :model groups (ALL) : all: id, id=""» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgA003/mgA003` (schemaTest invalid; msData/modelGroups/mgA003.xsd) «TEST :model groups (ALL) : all: id, id="0"» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgA004/mgA004` (schemaTest invalid; msData/modelGroups/mgA004.xsd) «TEST :model groups (ALL) : all: id, id="-999"» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgA005/mgA005` (schemaTest invalid; msData/modelGroups/mgA005.xsd) «TEST :model groups (ALL) : all: id, id="a:b"» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgA006/mgA006` (schemaTest invalid; msData/modelGroups/mgA006.xsd) «TEST :model groups (ALL) : all: id, two 'all' with same id, one from complexType, one from restriction» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgA007/mgA007` (schemaTest invalid; msData/modelGroups/mgA007.xsd) «TEST :model groups (ALL) : all: id, two 'all' with same id, one from complexType, one from extension» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgA008/mgA008` (schemaTest invalid; msData/modelGroups/mgA008.xsd) «TEST :model groups (ALL) : all: id, two 'all' with same id, one from complexType, one from group» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgA009/mgA009` (schemaTest invalid; msData/modelGroups/mgA009.xsd) «TEST :model groups (ALL) : all: id, two 'all' with same id, one from restriction, one from extension» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgA010/mgA010` (schemaTest invalid; msData/modelGroups/mgA010.xsd) «TEST :model groups (ALL) : all: id, two 'all' with same id, one from restriction, one from group» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgA011/mgA011` (schemaTest invalid; msData/modelGroups/mgA011.xsd) «TEST :model groups (ALL) : all: id, two 'all' with same id, one from extension, one from group» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgA012/mgA012` (schemaTest invalid; msData/modelGroups/mgA012.xsd) «TEST :model groups (ALL) : all: id, two 'all' with same id, both in complexType ( complextype, has an 'all', and a 'group'), the 'group' has an 'all'» — ошибочная схема принята
 - `MS-ModelGroups2006-07-15/mgA013/mgA013` (schemaTest invalid; msData/modelGroups/mgA013.xsd) «TEST :model groups (ALL) : all: with name as attribute» — ошибочная схема принята
 - `MS-ModelGroups2006-07-15/mgA016/mgA016` (schemaTest invalid; msData/modelGroups/mgA016.xsd) «TEST :model groups (ALL) : all: with parent extension» — ошибочная схема принята
 - `MS-ModelGroups2006-07-15/mgA018/mgA018` (schemaTest invalid; msData/modelGroups/mgA018.xsd) «TEST :model groups (ALL) : all: with parent choice» — ошибочная схема принята
 - `MS-ModelGroups2006-07-15/mgA019/mgA019` (schemaTest invalid; msData/modelGroups/mgA019.xsd) «TEST :model groups (ALL) : all: with parent sequence» — ошибочная схема принята
 - `MS-ModelGroups2006-07-15/mgA020/mgA020` (schemaTest invalid; msData/modelGroups/mgA020.xsd) «TEST :model groups (ALL) : all can only be root» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgAb004/mgAb004` (schemaTest invalid; msData/modelGroups/mgAb004.xsd) «TEST :model groups (ALL) : all: maxOccurs = 2» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgAb007/mgAb007` (schemaTest invalid; msData/modelGroups/mgAb007.xsd) «TEST :model groups (ALL) : all: maxOccurs = unbounded» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgB003/mgB003` (schemaTest invalid; msData/modelGroups/mgB003.xsd) «TEST :model groups (ALL) : all: with two annotation» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgB007/mgB007` (schemaTest invalid; msData/modelGroups/mgB007.xsd) «TEST :model groups (ALL) : all: with element follow by annotation» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgC013/mgC013` (schemaTest invalid; msData/modelGroups/mgC013.xsd) «TEST :model groups (ALL) : , minOccurs=absent, maxOccurs=2» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgE002/mgE002` (schemaTest invalid; msData/modelGroups/mgE002.xsd) «TEST :model groups (ALL) : sequence: id, id=""» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgE003/mgE003` (schemaTest invalid; msData/modelGroups/mgE003.xsd) «TEST :model groups (ALL) : sequence: id, id="0"» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgE004/mgE004` (schemaTest invalid; msData/modelGroups/mgE004.xsd) «TEST :model groups (ALL) : sequence: id, id="-1"» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgE005/mgE005` (schemaTest invalid; msData/modelGroups/mgE005.xsd) «TEST :model groups (ALL) : sequence: id, id="a:b"» — ошибочная схема принята
 - `MS-ModelGroups2006-07-15/mgE006/mgE006` (schemaTest invalid; msData/modelGroups/mgE006.xsd) «TEST :model groups (ALL) : sequence: id, two 'sequence' with same id, one from complexType, one from restriction» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgE007/mgE007` (schemaTest invalid; msData/modelGroups/mgE007.xsd) «TEST :model groups (ALL) : sequence: id, two 'sequence' with same id, one from complexType, one from extension» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgE008/mgE008` (schemaTest invalid; msData/modelGroups/mgE008.xsd) «TEST :model groups (ALL) : sequence: id, two 'sequence' with same id, one from complexType, one from group» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgE009/mgE009` (schemaTest invalid; msData/modelGroups/mgE009.xsd) «TEST :model groups (ALL) : sequence: id, two 'sequence' with same id, one from restriction, one from extension» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgE010/mgE010` (schemaTest invalid; msData/modelGroups/mgE010.xsd) «TEST :model groups (ALL) : sequence: id, two 'sequence' with same id, one from restriction, one from group» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgE011/mgE011` (schemaTest invalid; msData/modelGroups/mgE011.xsd) «TEST :model groups (ALL) : sequence: id, two 'sequence' with same id, one from extension, one from group» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgE012/mgE012` (schemaTest invalid; msData/modelGroups/mgE012.xsd) «TEST :model groups (ALL) : sequence: id, two 'sequence' with same id, both in complexType ( complextype, has an 'all', and a 'group'), the 'group' has an 'all'» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgF003/mgF003` (schemaTest invalid; msData/modelGroups/mgF003.xsd) «TEST :model groups (ALL) : sequence: with two annotation» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgF020/mgF020` (schemaTest invalid; msData/modelGroups/mgF020.xsd) «TEST :model groups (ALL) : sequence: with children element, annotation» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgF021/mgF021` (schemaTest invalid; msData/modelGroups/mgF021.xsd) «TEST :model groups (ALL) : sequence: with children group, annotation» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgF022/mgF022` (schemaTest invalid; msData/modelGroups/mgF022.xsd) «TEST :model groups (ALL) : sequence: with children choice, annotation» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgF023/mgF023` (schemaTest invalid; msData/modelGroups/mgF023.xsd) «TEST :model groups (ALL) : sequence: with children sequence, annotation» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgH002/mgH002` (schemaTest invalid; msData/modelGroups/mgH002.xsd) «TEST :model groups (ALL) : choice: id, id=""» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgH003/mgH003` (schemaTest invalid; msData/modelGroups/mgH003.xsd) «TEST :model groups (ALL) : choice: id, id="0"» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgH004/mgH004` (schemaTest invalid; msData/modelGroups/mgH004.xsd) «TEST :model groups (ALL) : choice: id, id="-1"» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgH005/mgH005` (schemaTest invalid; msData/modelGroups/mgH005.xsd) «TEST :model groups (ALL) : choice: id, id="a:b"» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgH006/mgH006` (schemaTest invalid; msData/modelGroups/mgH006.xsd) «TEST :model groups (ALL) : choice: id, two 'choice' with same id, one from complexType, one from restriction» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgH007/mgH007` (schemaTest invalid; msData/modelGroups/mgH007.xsd) «TEST :model groups (ALL) : choice: id, two 'choice' with same id, one from complexType, one from extension» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgH008/mgH008` (schemaTest invalid; msData/modelGroups/mgH008.xsd) «TEST :model groups (ALL) : choice: id, two 'choice' with same id, one from complexType, one from group» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgH009/mgH009` (schemaTest invalid; msData/modelGroups/mgH009.xsd) «TEST :model groups (ALL) : choice: id, two 'choice' with same id, one from restriction, one from extension» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgH010/mgH010` (schemaTest invalid; msData/modelGroups/mgH010.xsd) «TEST :model groups (ALL) : choice: id, two 'choice' with same id, one from restriction, one from group» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgH011/mgH011` (schemaTest invalid; msData/modelGroups/mgH011.xsd) «TEST :model groups (ALL) : choice: id, two 'choice' with same id, one from extension, one from group» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgH012/mgH012` (schemaTest invalid; msData/modelGroups/mgH012.xsd) «TEST :model groups (ALL) : choice: id, two 'choice' with same id, both in complexType ( complextype, has an 'all', and a 'group'), the 'group' has an 'all'» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgI003/mgI003` (schemaTest invalid; msData/modelGroups/mgI003.xsd) «TEST :model groups (ALL) : choice: with two annotation» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgI020/mgI020` (schemaTest invalid; msData/modelGroups/mgI020.xsd) «TEST :model groups (ALL) : choice: with children element, annotation» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgI021/mgI021` (schemaTest invalid; msData/modelGroups/mgI021.xsd) «TEST :model groups (ALL) : choice: with children group, annotation» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgI022/mgI022` (schemaTest invalid; msData/modelGroups/mgI022.xsd) «TEST :model groups (ALL) : choice: with children choice, annotation» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgI023/mgI023` (schemaTest invalid; msData/modelGroups/mgI023.xsd) «TEST :model groups (ALL) : choice: with children sequence, annotation» — ошибочная схема принята
 - `MS-ModelGroups2006-07-15/mgO001/mgO001` (schemaTest invalid; msData/modelGroups/mgO001.xsd) «TEST :model groups (ALL) : all has particle with minOccurs=maxOccur = 0» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgO003/mgO003` (schemaTest invalid; msData/modelGroups/mgO003.xsd) «TEST :model groups (ALL) : all has particle with minOccurs=0, maxOccur = 2» — ошибочная схема принята
 - `MS-ModelGroups2006-07-15/mgO018/mgO018` (schemaTest invalid; msData/modelGroups/mgO018.xsd) «TEST :model groups (ALL) : 'all', appear under 'complexType' has minOccurs=0, maxOccurs=0» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgP039/mgP039` (schemaTest invalid; msData/modelGroups/mgP039.xsd) «TEST :model groups (ALL) : 'all', appear under 'complexType', and has minOccurs=1, maxOccurs=2» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgP042/mgP042` (schemaTest invalid; msData/modelGroups/mgP042.xsd) «TEST :model groups (ALL) : 'all', appear under 'extension', which is part of a complexType, and has minOccurs=1, maxOccurs=2» — ошибочная схема принята
-- `MS-ModelGroups2006-07-15/mgP043/mgP043` (schemaTest invalid; msData/modelGroups/mgP043.xsd) «TEST :model groups (ALL) : group' with 'all', appear under 'restriction', whiche is part of a complexType, and particles in all has minOccurs=1, maxOccurs=2» — ошибочная схема принята
 - `MS-ModelGroups2006-07-15/mgQ001/mgQ001` (schemaTest invalid; msData/modelGroups/mgQ001.xsd) «TEST :model groups (ALL) : 2 particles with idendical element declarations (same type), both under all» — ошибочная схема принята
 - `MS-ModelGroups2006-07-15/mgQ004/mgQ004` (schemaTest invalid; msData/modelGroups/mgQ004.xsd) «TEST :model groups (ALL) : 2 particles with idendical element declarations (same type), one under 'all', one under 'sequence' inside 'all'» — ошибочная схема принята
 - `MS-ModelGroups2006-07-15/mgQ005/mgQ005` (schemaTest invalid; msData/modelGroups/mgQ005.xsd) «TEST :model groups (ALL) : 2 particles with idendical element declarations (same type), one under 'all', one under 'choice' inside 'all'» — ошибочная схема принята
@@ -1349,12 +1154,9 @@
 - `MS-ModelGroups2006-07-15/mgS004/mgS004` (schemaTest invalid; msData/modelGroups/mgS004.xsd) «TEST :model groups (ALL) : sequence must be deterministic:((ab) | ( a | b))» — ошибочная схема принята
 - `MS-ModelGroups2006-07-15/mgS005/mgS005` (schemaTest invalid; msData/modelGroups/mgS005.xsd) «TEST :model groups (ALL) : sequence must be deterministic:((a, b) | ( ab | b))» — ошибочная схема принята
 
-### MS-Notations2006-07-15 (71)
+### MS-Notations2006-07-15 (67)
 
 - `MS-Notations2006-07-15/notatA002/notatA002` (schemaTest invalid; msData/notations/notatA002.xsd) «TEST :Notations : Empty notation under schema» — ошибочная схема принята
-- `MS-Notations2006-07-15/notatA005/notatA005` (schemaTest invalid; msData/notations/notatA005.xsd) «TEST :Notations : Notation with ID="25"» — ошибочная схема принята
-- `MS-Notations2006-07-15/notatA006/notatA006` (schemaTest invalid; msData/notations/notatA006.xsd) «TEST :Notations : Notation with ID=""» — ошибочная схема принята
-- `MS-Notations2006-07-15/notatA007/notatA007` (schemaTest invalid; msData/notations/notatA007.xsd) «TEST :Notations : Duplicate ID="foo25" where foo25 is already exists» — ошибочная схема принята
 - `MS-Notations2006-07-15/notatB001/notatB001` (schemaTest invalid; msData/notations/notatB001.xsd) «TEST :Notations : Notation with name="foo"» — ошибочная схема принята
 - `MS-Notations2006-07-15/notatB005/notatB005` (schemaTest invalid; msData/notations/notatB005.xsd) «TEST :Notations : Declare a dupe Notation with the same name» — ошибочная схема принята
 - `MS-Notations2006-07-15/notatB008/notatB008` (schemaTest invalid; msData/notations/notatB008.xsd) «TEST :Notations : Notation with name="foo:bar"» — ошибочная схема принята
@@ -1389,7 +1191,6 @@
 - `MS-Notations2006-07-15/notatF028/notatF028` (schemaTest invalid; msData/notations/notatF028.xsd) «TEST :Notations : Notation with extension as its content» — ошибочная схема принята
 - `MS-Notations2006-07-15/notatF029/notatF029` (schemaTest invalid; msData/notations/notatF029.xsd) «TEST :Notations : Notation with field as its parent» — ошибочная схема принята
 - `MS-Notations2006-07-15/notatF030/notatF030` (schemaTest invalid; msData/notations/notatF030.xsd) «TEST :Notations : Notation with field as its content» — ошибочная схема принята
-- `MS-Notations2006-07-15/notatF032/notatF032` (schemaTest invalid; msData/notations/notatF032.xsd) «TEST :Notations : Notation with group as its content» — ошибочная схема принята
 - `MS-Notations2006-07-15/notatF033/notatF033` (schemaTest invalid; msData/notations/notatF033.xsd) «TEST :Notations : Notation with import as its parent» — ошибочная схема принята
 - `MS-Notations2006-07-15/notatF034/notatF034` (schemaTest invalid; msData/notations/notatF034.xsd) «TEST :Notations : Notation with import as its content» — ошибочная схема принята
 - `MS-Notations2006-07-15/notatF036/notatF036` (schemaTest invalid; msData/notations/notatF036.xsd) «TEST :Notations : Notation with include as its content» — ошибочная схема принята
@@ -1423,30 +1224,24 @@
 - `MS-Notations2006-07-15/notatG002/notatG002` (schemaTest invalid; msData/notations/notatG002.xsd) «TEST :Notations : Notation with some well formed XML» — ошибочная схема принята
 - `MS-Notations2006-07-15/notatG003/notatG003` (schemaTest invalid; msData/notations/notatG003.xsd) «TEST :Notations : Notation with known entities & " '» — ошибочная схема принята
 
-### MS-Particles2006-07-15 (13)
+### MS-Particles2006-07-15 (9)
 
 - `MS-Particles2006-07-15/particlesEa025/particlesEa025` (schemaTest invalid; msData/particles/particlesEa025.xsd) «TEST :3.9.1 The Particle Schema Component [ check length of element information items ] : The {term} is a model group with minOccurs=1, maxOccurs=2, content=all» — ошибочная схема принята
-- `MS-Particles2006-07-15/particlesEd001/particlesEd001` (schemaTest invalid; msData/particles/particlesEd001.xsd) «TEST :3.9.1 The Particle Schema Component [ check length of element information items ] : The {term} is a model group with content: sequence (a,b), all(x,y), ch» — ошибочная схема принята
 - `MS-Particles2006-07-15/particlesFb002/particlesFb002` (schemaTest invalid; msData/particles/particlesFb002.xsd) «TEST :3.9.1 The Particle Schema Component [ check length of element information items ] : E drived by extension from B, B=sequence, E=sequence with B as the fir» — ошибочная схема принята
 - `MS-Particles2006-07-15/particlesZ011/particlesZ011` (schemaTest invalid; msData/particles/particlesZ011.xsd) «TEST :3.9.1 The Particle Schema Component [ check length of element information items ] : XSD: should fail to restrict simpleType in a complexType local to an e» — ошибочная схема принята
 - `MS-Particles2006-07-15/particlesZ013/particlesZ013` (schemaTest invalid; msData/particles/particlesZ013.xsd) «TEST :3.9.1 The Particle Schema Component [ check length of element information items ] : id="86379" description="xsd: derived attribute's type should validly d» — ошибочная схема принята
 - `MS-Particles2006-07-15/particlesZ017/particlesZ017` (schemaTest invalid; msData/particles/particlesZ017.xsd) «TEST :3.9.1 The Particle Schema Component [ check length of element information items ] : Base complex type with attribute use="required" should not have derive» — ошибочная схема принята
 - `MS-Particles2006-07-15/particlesZ018/particlesZ018` (schemaTest invalid; msData/particles/particlesZ018.xsd) «TEST :3.9.1 The Particle Schema Component [ check length of element information items ] : List of xsd:int should not be a derived type of decimal» — ошибочная схема принята
 - `MS-Particles2006-07-15/particlesZ030_d/particlesZ030_d` (schemaTest invalid; msData/particles/particlesZ030_d.xsd) «TEST :3.9.1 The Particle Schema Component [ check length of element information items ] : 108882 - xsd: complexType simpleContent restriction with simpleType de» — ошибочная схема принята
-- `MS-Particles2006-07-15/particlesZ033_a/particlesZ033_a` (schemaTest valid; msData/particles/particlesZ033_a.xsd) «TEST :3.9.1 The Particle Schema Component [ check length of element information items ] : Schema validation engine validates as xs:any if maxOccurs greater than» — корректная схема отвергнута: [SCHEMA_ERROR] схема, строка 6: некорректный minOccurs "79228162514244337593543950335"
 - `MS-Particles2006-07-15/particlesZ033_c/particlesZ033_c` (schemaTest invalid; msData/particles/particlesZ033_c.xsd) «TEST :3.9.1 The Particle Schema Component [ check length of element information items ] : Schema validation engine validates as xs:any if maxOccurs greater than» — ошибочная схема принята
-- `MS-Particles2006-07-15/particlesZ035_a/particlesZ035_a` (schemaTest valid; msData/particles/particlesZ035_a.xsd) «TEST :3.9.1 The Particle Schema Component [ check length of element information items ] : Schema validation engine validates as xs:any if maxOccurs greater than» — корректная схема отвергнута: [SCHEMA_ERROR] схема, строка 13: некорректный maxOccurs "100000000000"
-- `MS-Particles2006-07-15/particlesZ035_a/particlesZ035_a.i` (instanceTest invalid; msData/particles/particlesZ035_a.xml) «TEST :3.9.1 The Particle Schema Component [ check length of element information items ] : Schema validation engine validates as xs:any if maxOccurs greater than» — схема группы не загрузилась: [SCHEMA_ERROR] схема, строка 13: некорректный maxOccurs "100000000000"
 - `MS-Particles2006-07-15/particlesZ039/particlesZ039` (schemaTest invalid; msData/particles/particlesZ039.xsd) «TEST :3.9.1 The Particle Schema Component [ check length of element information items ] : XSD: invalid content type restriction» — ошибочная схема принята
 
-### MS-Schema2006-07-15 (18)
+### MS-Schema2006-07-15 (16)
 
 - `MS-Schema2006-07-15/schA2/schA2.i` (instanceTest invalid; msData/schema/schA2.xml) «TEST :schema collection and schema location : Schema Collection:(A,a.xsd), SchemaLocation: (A,b.xsd), NoNSSchemaLocation:, expected: the xml instance must confo» — невалидный экземпляр принят
 - `MS-Schema2006-07-15/schA5/schA5.i` (instanceTest invalid; msData/schema/schA5.xml) «TEST :schema collection and schema location : Schema Collection:(A,a.xsd) (B, b.xsd), SchemaLocation:(B,a.xsd), NoNSSchemaLocation:, xmlinstance should conform» — невалидный экземпляр принят
-- `MS-Schema2006-07-15/schB1i/schB1i` (schemaTest invalid; msData/schema/schB1i.xsd) «TEST :schema collection and schema location : test the ID attribute on include, by setting duplicated id» — ошибочная схема принята
 - `MS-Schema2006-07-15/schC2/schC2` (schemaTest invalid; msData/schema/schC2_a.xsd) «TEST :schema collection and schema location : XSD A include XSD B, A's ns="", B's ns="A", test the namespace of include (4.2.1) (SRC 2)» — ошибочная схема принята
 - `MS-Schema2006-07-15/schC5/schC5` (schemaTest invalid; msData/schema/schC5_a.xsd) «TEST :schema collection and schema location : XSD A include XSD B, A's ns="A", B's ns="B", test the namespace of include (4.2.1) (SRC 2)» — ошибочная схема принята
-- `MS-Schema2006-07-15/schE1i/schE1i` (schemaTest invalid; msData/schema/schE1i.xsd) «TEST :schema collection and schema location : test ID attribute on import, by setting duplicated id» — ошибочная схема принята
 - `MS-Schema2006-07-15/schF6/schF6` (schemaTest invalid; msData/schema/schF6_a.xsd) «TEST :schema collection and schema location : XSD: test namespace on the xs:import statement does not match the one in the imported schema.» — ошибочная схема принята
 - `MS-Schema2006-07-15/schG13/schG13` (schemaTest invalid; msData/schema/schG13.xsd) «TEST :schema collection and schema location : A import B, B ihas no target NS but 'import' has NS.» — ошибочная схема принята
 - `MS-Schema2006-07-15/schH4/schH4` (schemaTest invalid; msData/schema/schH4_a.xsd) «TEST :schema collection and schema location : redefine namespace="foo"» — ошибочная схема принята [redefine]
@@ -1460,54 +1255,34 @@
 - `MS-Schema2006-07-15/schZ014_a/schZ014_a` (schemaTest invalid; msData/schema/schZ014_a.xsd) «TEST :schema collection and schema location : xsd: empty string value of namespace is not allowed for namespace attribute» — ошибочная схема принята
 - `MS-Schema2006-07-15/schZ014_b/schZ014_b` (schemaTest invalid; msData/schema/schZ014_b.xsd) «TEST :schema collection and schema location : xsd: empty string value of namespace is not allowed for targetNamespace attribute» — ошибочная схема принята
 
-### MS-SimpleType2006-07-15 (91)
+### MS-SimpleType2006-07-15 (71)
 
-- `MS-SimpleType2006-07-15/stA002/stA002` (schemaTest invalid; msData/simpleType/stA002.xsd) «TEST :Syntax Checking for simpleType Declaration : Declaration with optional attribute id = 'foo123' , another object with an ID ='foo123'» — ошибочная схема принята
-- `MS-SimpleType2006-07-15/stA004/stA004` (schemaTest invalid; msData/simpleType/stA004.xsd) «TEST :Syntax Checking for simpleType Declaration : Declaration with optional attribute id = ''» — ошибочная схема принята
-- `MS-SimpleType2006-07-15/stA005/stA005` (schemaTest invalid; msData/simpleType/stA005.xsd) «TEST :Syntax Checking for simpleType Declaration : Declaration with optional attribute id = '123'» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stA008/stA008` (schemaTest invalid; msData/simpleType/stA008.xsd) «TEST :Syntax Checking for simpleType Declaration : Declaration with optional attribute name = 'fooType' , simpleType not global, parent is simpleType restrictio» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stA009/stA009` (schemaTest invalid; msData/simpleType/stA009.xsd) «TEST :Syntax Checking for simpleType Declaration : Declaration with optional attribute name = 'fooType' , simpleType not global, parent is list» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stA010/stA010` (schemaTest invalid; msData/simpleType/stA010.xsd) «TEST :Syntax Checking for simpleType Declaration : Declaration with optional attribute name = 'fooType' , simpleType not global, parent is union» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stA011/stA011` (schemaTest invalid; msData/simpleType/stA011.xsd) «TEST :Syntax Checking for simpleType Declaration : Declaration with optional attribute name = 'fooType' , simpleType not global, parent is attribute» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stA012/stA012` (schemaTest invalid; msData/simpleType/stA012.xsd) «TEST :Syntax Checking for simpleType Declaration : Declaration with optional attribute name = 'fooType' , simpleType not global, parent is element» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stA013/stA013` (schemaTest invalid; msData/simpleType/stA013.xsd) «TEST :Syntax Checking for simpleType Declaration : Declaration with optional attribute name = 'fooType' , simpleType not global, parent is simpleContent restric» — ошибочная схема принята
-- `MS-SimpleType2006-07-15/stA014/stA014` (schemaTest invalid; msData/simpleType/stA014.xsd) «TEST :Syntax Checking for simpleType Declaration : Declaration with optional attribute name = 'a:b'» — ошибочная схема принята
-- `MS-SimpleType2006-07-15/stA017/stA017` (schemaTest invalid; msData/simpleType/stA017.xsd) «TEST :Syntax Checking for simpleType Declaration : Declaration with optional attribute name = '1foo'» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stB004/stB004` (schemaTest invalid; msData/simpleType/stB004.xsd) «TEST :Syntax Checking for simpleType Declaration : content with two restrctions» — ошибочная схема принята
-- `MS-SimpleType2006-07-15/stB005/stB005` (schemaTest invalid; msData/simpleType/stB005.xsd) «TEST :Syntax Checking for simpleType Declaration : content with restriction then annotation» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stB007/stB007` (schemaTest invalid; msData/simpleType/stB007.xsd) «TEST :Syntax Checking for simpleType Declaration : content with restriction then attribute» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stB009/stB009` (schemaTest invalid; msData/simpleType/stB009.xsd) «TEST :Syntax Checking for simpleType Declaration : content with two lists» — ошибочная схема принята
-- `MS-SimpleType2006-07-15/stB010/stB010` (schemaTest invalid; msData/simpleType/stB010.xsd) «TEST :Syntax Checking for simpleType Declaration : content with list then annotation» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stB013/stB013` (schemaTest invalid; msData/simpleType/stB013.xsd) «TEST :Syntax Checking for simpleType Declaration : content with two unions» — ошибочная схема принята
-- `MS-SimpleType2006-07-15/stB014/stB014` (schemaTest invalid; msData/simpleType/stB014.xsd) «TEST :Syntax Checking for simpleType Declaration : content with union then annotation» — ошибочная схема принята
-- `MS-SimpleType2006-07-15/stB016/stB016` (schemaTest invalid; msData/simpleType/stB016.xsd) «TEST :Syntax Checking for simpleType Declaration : content with two annotations then restriction» — ошибочная схема принята
-- `MS-SimpleType2006-07-15/stB017/stB017` (schemaTest invalid; msData/simpleType/stB017.xsd) «TEST :Syntax Checking for simpleType Declaration : content with two annotations then list» — ошибочная схема принята
-- `MS-SimpleType2006-07-15/stB018/stB018` (schemaTest invalid; msData/simpleType/stB018.xsd) «TEST :Syntax Checking for simpleType Declaration : content with two annotations then union» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stB019/stB019` (schemaTest invalid; msData/simpleType/stB019.xsd) «TEST :Syntax Checking for simpleType Declaration : content with list then restriction» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stB020/stB020` (schemaTest invalid; msData/simpleType/stB020.xsd) «TEST :Syntax Checking for simpleType Declaration : content with list then union» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stB021/stB021` (schemaTest invalid; msData/simpleType/stB021.xsd) «TEST :Syntax Checking for simpleType Declaration : content with restriction then list» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stB022/stB022` (schemaTest invalid; msData/simpleType/stB022.xsd) «TEST :Syntax Checking for simpleType Declaration : content with restriction then union» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stB023/stB023` (schemaTest invalid; msData/simpleType/stB023.xsd) «TEST :Syntax Checking for simpleType Declaration : content with union then list» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stB024/stB024` (schemaTest invalid; msData/simpleType/stB024.xsd) «TEST :Syntax Checking for simpleType Declaration : content with union then restriction» — ошибочная схема принята
-- `MS-SimpleType2006-07-15/stC006/stC006` (schemaTest invalid; msData/simpleType/stC006.xsd) «TEST :Syntax Checking for simpleType Declaration : Restriction with optional attribute id = 'foo123' , another object with an ID ='foo123'» — ошибочная схема принята
-- `MS-SimpleType2006-07-15/stC008/stC008` (schemaTest invalid; msData/simpleType/stC008.xsd) «TEST :Syntax Checking for simpleType Declaration : Restriction with optional attribute id = ''» — ошибочная схема принята
-- `MS-SimpleType2006-07-15/stC009/stC009` (schemaTest invalid; msData/simpleType/stC009.xsd) «TEST :Syntax Checking for simpleType Declaration : Restriction with optional attribute id = '123'» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stC011/stC011` (schemaTest invalid; msData/simpleType/stC011.xsd) «TEST :Syntax Checking for simpleType Declaration : Restriction. content of two simpleTypes» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stC027/stC027` (schemaTest invalid; msData/simpleType/stC027.xsd) «TEST :Syntax Checking for simpleType Declaration : Restriction. base is valid for restriction facet and content of attribute» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stC028/stC028` (schemaTest invalid; msData/simpleType/stC028.xsd) «TEST :Syntax Checking for simpleType Declaration : Restriction. content of attributeGroup» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stC029/stC029` (schemaTest invalid; msData/simpleType/stC029.xsd) «TEST :Syntax Checking for simpleType Declaration : Restriction. content of anyAttribute» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stC031/stC031` (schemaTest invalid; msData/simpleType/stC031.xsd) «TEST :Syntax Checking for simpleType Declaration : Restriction. base = 'xsd:string' and content of simpleType» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stC032/stC032` (schemaTest invalid; msData/simpleType/stC032.xsd) «TEST :Syntax Checking for simpleType Declaration : Restriction. content of simpleType and length=5» — ошибочная схема принята
-- `MS-SimpleType2006-07-15/stD002/stD002` (schemaTest invalid; msData/simpleType/stD002.xsd) «TEST :Syntax Checking for simpleType Declaration : List with optional attribute id = 'foo123' , another object with an ID ='foo123'» — ошибочная схема принята
-- `MS-SimpleType2006-07-15/stD004/stD004` (schemaTest invalid; msData/simpleType/stD004.xsd) «TEST :Syntax Checking for simpleType Declaration : List with optional attribute id = ''» — ошибочная схема принята
-- `MS-SimpleType2006-07-15/stD005/stD005` (schemaTest invalid; msData/simpleType/stD005.xsd) «TEST :Syntax Checking for simpleType Declaration : List with optional attribute id = '123'» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stD015/stD015` (schemaTest invalid; msData/simpleType/stD015.xsd) «TEST :Syntax Checking for simpleType Declaration : List content of two simpleTypes» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stD016/stD016` (schemaTest invalid; msData/simpleType/stD016.xsd) «TEST :Syntax Checking for simpleType Declaration : List content of two annotations then simpleType» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stD017/stD017` (schemaTest invalid; msData/simpleType/stD017.xsd) «TEST :Syntax Checking for simpleType Declaration : List content of simpleType then annotation» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stD018/stD018` (schemaTest invalid; msData/simpleType/stD018.xsd) «TEST :Syntax Checking for simpleType Declaration : List with optional attribute itemType = 'xsd:Integer' content of simpleType» — ошибочная схема принята
-- `MS-SimpleType2006-07-15/stE002/stE002` (schemaTest invalid; msData/simpleType/stE002.xsd) «TEST :Syntax Checking for simpleType Declaration : Union with optional attribute id = 'foo123' , another object with an ID ='foo123'» — ошибочная схема принята
-- `MS-SimpleType2006-07-15/stE004/stE004` (schemaTest invalid; msData/simpleType/stE004.xsd) «TEST :Syntax Checking for simpleType Declaration : Union with optional attribute id = ''» — ошибочная схема принята
-- `MS-SimpleType2006-07-15/stE005/stE005` (schemaTest invalid; msData/simpleType/stE005.xsd) «TEST :Syntax Checking for simpleType Declaration : Union with optional attribute id = '123'» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stE015/stE015` (schemaTest invalid; msData/simpleType/stE015.xsd) «TEST :Syntax Checking for simpleType Declaration : Union content of two annotations then simpleType» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stE016/stE016` (schemaTest invalid; msData/simpleType/stE016.xsd) «TEST :Syntax Checking for simpleType Declaration : Union content of simpleType then annotation» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stE050/stE050.v` (instanceTest valid; msData/simpleType/stE050.xml) «TEST :Syntax Checking for simpleType Declaration : Union with Fixed Value (1)» — ложная ошибка: /root: значение должно быть равно фиксированному "1"
@@ -1554,14 +1329,8 @@
 - `MS-SimpleType2006-07-15/stZ028/stZ028` (schemaTest invalid; msData/simpleType/stZ028.xsd) «TEST :Syntax Checking for simpleType Declaration : Schema Component Constraint: whiteSpace valid inline restriction, base=replace, derived=preserve» — ошибочная схема принята
 - `MS-SimpleType2006-07-15/stZ070/stZ070` (schemaTest invalid; msData/simpleType/stZ070.xsd) «TEST :Syntax Checking for simpleType Declaration : XSD: test an invalid fixed value for a union» — ошибочная схема принята
 
-### MS-Wildcards2006-07-15 (86)
+### MS-Wildcards2006-07-15 (73)
 
-- `MS-Wildcards2006-07-15/wildA003/wildA003` (schemaTest invalid; msData/wildcards/wildA003.xsd) «TEST :Syntax Validation - any : ANY with ID="25"» — ошибочная схема принята
-- `MS-Wildcards2006-07-15/wildA004/wildA004` (schemaTest invalid; msData/wildcards/wildA004.xsd) «TEST :Syntax Validation - any : ANY with ID="0"» — ошибочная схема принята
-- `MS-Wildcards2006-07-15/wildA005/wildA005` (schemaTest invalid; msData/wildcards/wildA005.xsd) «TEST :Syntax Validation - any : ANY with ID="1"» — ошибочная схема принята
-- `MS-Wildcards2006-07-15/wildA006/wildA006` (schemaTest invalid; msData/wildcards/wildA006.xsd) «TEST :Syntax Validation - any : ANY with ID="foo:bar"» — ошибочная схема принята
-- `MS-Wildcards2006-07-15/wildA007/wildA007` (schemaTest invalid; msData/wildcards/wildA007.xsd) «TEST :Syntax Validation - any : ANY with ID=":bar"» — ошибочная схема принята
-- `MS-Wildcards2006-07-15/wildA008/wildA008` (schemaTest invalid; msData/wildcards/wildA008.xsd) «TEST :Syntax Validation - any : Duplicate ID="foo25" where foo25 is already exists» — ошибочная схема принята
 - `MS-Wildcards2006-07-15/wildC035/wildC035` (schemaTest invalid; msData/wildcards/wildC035.xsd) «TEST :Syntax Validation - any : ANY with namespace = ##target» — ошибочная схема принята
 - `MS-Wildcards2006-07-15/wildC036/wildC036` (schemaTest invalid; msData/wildcards/wildC036.xsd) «TEST :Syntax Validation - any : ANY with namespace = ##all» — ошибочная схема принята
 - `MS-Wildcards2006-07-15/wildC049/wildC049` (schemaTest invalid; msData/wildcards/wildC049.xsd) «TEST :Syntax Validation - any : ANY with namespace = ##any ##other» — ошибочная схема принята
@@ -1581,7 +1350,6 @@
 - `MS-Wildcards2006-07-15/wildD077/wildD077` (schemaTest invalid; msData/wildcards/wildD077.xsd) «TEST :Syntax Validation - any : ANY with processContents = skip strict» — ошибочная схема принята
 - `MS-Wildcards2006-07-15/wildD078/wildD078` (schemaTest invalid; msData/wildcards/wildD078.xsd) «TEST :Syntax Validation - any : ANY with processContents = lax skip strict» — ошибочная схема принята
 - `MS-Wildcards2006-07-15/wildD079/wildD079` (schemaTest invalid; msData/wildcards/wildD079.xsd) «TEST :Syntax Validation - any : ANY with processContents = all» — ошибочная схема принята
-- `MS-Wildcards2006-07-15/wildE002/wildE002` (schemaTest invalid; msData/wildcards/wildE002.xsd) «TEST :Syntax Validation - any : ANY with two annotations» — ошибочная схема принята
 - `MS-Wildcards2006-07-15/wildF006/wildF006` (schemaTest invalid; msData/wildcards/wildF006.xsd) «TEST :Syntax Validation - any : ANY with namespace = ##any ##other and schema targetNamespace="http://foobar"» — ошибочная схема принята
 - `MS-Wildcards2006-07-15/wildF007/wildF007` (schemaTest invalid; msData/wildcards/wildF007.xsd) «TEST :Syntax Validation - any : ANY with namespace = ##any ##local and schema targetNamespace="http://foobar"» — ошибочная схема принята
 - `MS-Wildcards2006-07-15/wildF008/wildF008` (schemaTest invalid; msData/wildcards/wildF008.xsd) «TEST :Syntax Validation - any : ANY with namespace = ##any ##targetNamespace and schema targetNamespace="http://foobar"» — ошибочная схема принята
@@ -1598,12 +1366,6 @@
 - `MS-Wildcards2006-07-15/wildI005/wildI005.v` (instanceTest valid; msData/wildcards/wildI005.xml) «TEST :Syntax Validation - any : multiple any in sequence with different namespaces and valid instance xml» — ложная ошибка: /foo/a:b[1]: нет глобального объявления для элемента из xs:any
 - `MS-Wildcards2006-07-15/wildI006/wildI006.v` (instanceTest valid; msData/wildcards/wildI006.xml) «TEST :Syntax Validation - any : multiple any in choice with different namespaces (a, b, ##targetNamespace, ##local), and valid instance xml» — ложная ошибка: /tns:foo/a:b[1]: нет глобального объявления для элемента из xs:any
 - `MS-Wildcards2006-07-15/wildI007/wildI007.v` (instanceTest valid; msData/wildcards/wildI007.xml) «TEST :Syntax Validation - any : multiple any in choice with namespaces (##other, ##targetNamespace), and valid instance xml» — ложная ошибка: /tns:foo/a:b[1]: нет глобального объявления для элемента из xs:any
-- `MS-Wildcards2006-07-15/wildJ003/wildJ003` (schemaTest invalid; msData/wildcards/wildJ003.xsd) «TEST :Syntax Validation - any : anyAttribute with ID="25"» — ошибочная схема принята
-- `MS-Wildcards2006-07-15/wildJ004/wildJ004` (schemaTest invalid; msData/wildcards/wildJ004.xsd) «TEST :Syntax Validation - any : anyAttribute with ID="0"» — ошибочная схема принята
-- `MS-Wildcards2006-07-15/wildJ005/wildJ005` (schemaTest invalid; msData/wildcards/wildJ005.xsd) «TEST :Syntax Validation - any : anyAttribute with ID="1"» — ошибочная схема принята
-- `MS-Wildcards2006-07-15/wildJ006/wildJ006` (schemaTest invalid; msData/wildcards/wildJ006.xsd) «TEST :Syntax Validation - any : anyAttribute with ID="foo:bar"» — ошибочная схема принята
-- `MS-Wildcards2006-07-15/wildJ007/wildJ007` (schemaTest invalid; msData/wildcards/wildJ007.xsd) «TEST :Syntax Validation - any : anyAttribute with ID=":bar"» — ошибочная схема принята
-- `MS-Wildcards2006-07-15/wildJ008/wildJ008` (schemaTest invalid; msData/wildcards/wildJ008.xsd) «TEST :Syntax Validation - any : Duplicate ID="foo25" where foo25 is already exists» — ошибочная схема принята
 - `MS-Wildcards2006-07-15/wildK002/wildK002` (schemaTest invalid; msData/wildcards/wildK002.xsd) «TEST :Syntax Validation - any : anyAttribute with namespace = ##anyAttribute» — ошибочная схема принята
 - `MS-Wildcards2006-07-15/wildK006/wildK006` (schemaTest invalid; msData/wildcards/wildK006.xsd) «TEST :Syntax Validation - any : anyAttribute with namespace = ##target» — ошибочная схема принята
 - `MS-Wildcards2006-07-15/wildK007/wildK007` (schemaTest invalid; msData/wildcards/wildK007.xsd) «TEST :Syntax Validation - any : anyAttribute with namespace = ##all» — ошибочная схема принята
@@ -1643,26 +1405,21 @@
 - `MS-Wildcards2006-07-15/wildZ008/wildZ008` (schemaTest invalid; msData/wildcards/wildZ008.xsd) «TEST :Syntax Validation - any : XSD: processContents on derivation» — ошибочная схема принята
 - `MS-Wildcards2006-07-15/wildZ009/wildZ009` (schemaTest invalid; msData/wildcards/wildZ009.xsd) «TEST :Syntax Validation - any : XSD: processContents on derivation(2)» — ошибочная схема принята
 
-### Notation (5)
+### Notation (3)
 
-- `Notation/annotation00101m2/annotation00101m2` (schemaTest invalid; sunData/Notation/annotation/annotation00101m/annotation00101m2.xsd) «human-targeted double annotation for a notation declaration (invalid schema)Annotations provide for human- and machine-targeted annotations of schema components» — ошибочная схема принята
-- `Notation/annotation00101m4/annotation00101m4` (schemaTest invalid; sunData/Notation/annotation/annotation00101m/annotation00101m4.xsd) «machine-targeted double annotation for a notation declaration (invalid schema)Annotations provide for human- and machine-targeted annotations of schema componen» — ошибочная схема принята
 - `Notation/name00101m2/name00101m2` (schemaTest invalid; sunData/Notation/name/name00101m/name00101m2.xsd) «Use the undeclared notation with the name 'jpeg' (invalid schema)Notation declarations are referenced in the course of *validating* strings as members of the NO» — ошибочная схема принята
 - `Notation/name00201m1/name00201m1` (schemaTest invalid; sunData/Notation/name/name00201m/name00201m1.xsd) «Declare a notation without name (invalid schema)A name [attribute] is a required attribute» — ошибочная схема принята
 - `Notation/publicid00201m1/publicId00201m1` (schemaTest invalid; sunData/Notation/publicId/publicId00201m/publicId00201m1.xsd) «Declare a notation without the {public identifier} (invalid schema)The public [attribute] is a required attribute.» — ошибочная схема принята
 
-### SType (3)
+### SType (2)
 
-- `SType/st_name00201m/ST_name00201m` (schemaTest invalid; sunData/SType/ST_name/ST_name00201m/ST_name00201m.xsd) «The ':' is prohibited in {name}. (invalid schema)The ':' is prohibited in {name}.» — ошибочная схема принята
 - `SType/st_variety00201m1/ST_variety00201m1` (schemaTest invalid; sunData/SType/ST_variety/ST_variety00201m/ST_variety00201m1.xsd) «The {variety} is list (invalid schema)If the {variety} is list, then all of the following must be true: 1. The {item type definition} must have a {variety} of a» — ошибочная схема принята
 - `SType/st_variety00201m2/ST_variety00201m2` (schemaTest invalid; sunData/SType/ST_variety/ST_variety00201m/ST_variety00201m2.xsd) «The {variety} is list (invalid schema)If the {variety} is list, then all of the following must be true: 1. The {item type definition} must have a {variety} of a» — ошибочная схема принята
 
-### Wildcard (4)
+### Wildcard (2)
 
 - `Wildcard/annotation00101m2/annotation00101m2` (schemaTest invalid; sunData/Wildcard/annotation/annotation00101m/annotation00101m2.xsd) «human-targeted double annotation for a wildcard schema component (anyAttribute) (invalid schema)Annotations provide for human- and machine-targeted annotations» — ошибочная схема принята
 - `Wildcard/annotation00101m4/annotation00101m4` (schemaTest invalid; sunData/Wildcard/annotation/annotation00101m/annotation00101m4.xsd) «machine-targeted double annotation for a wildcard schema component (anyAttribute) (invalid schema)Annotations provide for human- and machine-targeted annotation» — ошибочная схема принята
-- `Wildcard/annotation00101m6/annotation00101m6` (schemaTest invalid; sunData/Wildcard/annotation/annotation00101m/annotation00101m6.xsd) «human-targeted double annotation for a wildcard schema component (any) (invalid schema)Annotations provide for human- and machine-targeted annotations of schema» — ошибочная схема принята
-- `Wildcard/annotation00101m8/annotation00101m8` (schemaTest invalid; sunData/Wildcard/annotation/annotation00101m/annotation00101m8.xsd) «machine-targeted double annotation for a wildcard schema component (any) (invalid schema)Annotations provide for human- and machine-targeted annotations of sche» — ошибочная схема принята
 
 ### suntest (1)
 
