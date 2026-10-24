@@ -395,6 +395,18 @@ namespace beresta::i18n
         {Message::SCHEMA_DOCUMENT_TOO_DEEP, "the schema document is nested too deeply: more than {0} element levels"},
         {Message::SCHEMA_TOO_DEEP,"the schema is nested too deeply: more than {0} levels of declarations, types and models"},
         {Message::XPATH_TOO_DEEP, "the expression is nested too deeply: more than {0} levels of parentheses, arguments and predicates"},
+        {Message::SCHEMA_DEFAULT_WITH_USE, "together with default the use attribute can only be optional, not \"{0}\""},
+        {Message::SCHEMA_GLOBAL_ATTRIBUTE_FORBIDDEN, "a global attribute declaration \"{0}\" cannot have {1}"},
+        {Message::SCHEMA_ALL_GROUP_NESTED, "the group \"{0}\" with an xs:all model cannot stand inside xs:{1}"},
+        {Message::SCHEMA_FACET_DUPLICATE, "the facet xs:{0} is specified twice in one restriction"},
+        {Message::SCHEMA_FACET_NOT_APPLICABLE, "the facet xs:{0} is not applicable to the type {1}"},
+        {Message::SCHEMA_FACET_VALUE_INVALID, "the value of the facet xs:{0} is not allowed by the base type: {1}"},
+        {Message::SCHEMA_FACET_CONFLICT, "the facets xs:{0} and xs:{1} cannot be specified in one restriction"},
+        {Message::SCHEMA_FACET_ORDER, "the facet xs:{0}=\"{1}\" is incompatible with the facet xs:{2}=\"{3}\""},
+        {Message::SCHEMA_ATTRIBUTE_PARTS_CONFLICT, "xs:attribute \"{0}\" cannot have {1} together with {2}"},
+        {Message::SCHEMA_ATTRIBUTE_NO_NAME, "xs:attribute has neither name nor ref"},
+        {Message::SCHEMA_ATTRIBUTE_RESERVED_NAME, "the attribute declaration \"{0}\" is not allowed: the name xmlns and the xsi namespace are reserved"},
+        {Message::SCHEMA_FACET_WIDENS, "the facet xs:{0}=\"{1}\" weakens the restriction of the base type xs:{2}=\"{3}\""},
     };
 
     const Catalog ENGLISH_CATALOG{"en", "English", TEXTS, sizeof(TEXTS) / sizeof(TEXTS[0])};

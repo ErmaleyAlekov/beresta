@@ -10,7 +10,8 @@ is included in the release description on GitHub and Gitverse.
 ### XML Schema: checking the schema document
 
 The fixes were found by debugging the W3C XML Schema Test Suite failures by hand
-(`tests/xsts_failing`). The suite result is **96.8 %** (was 96.2 %): 234 cases fixed, no new failures.
+(`tests/xsts_failing`). The suite result is **98.2 %** (was 96.2 %): 792 cases fixed, no new failures
+(234 by the fixes below, 558 by the facet and attribute rules and the choice of the declaration, the next section).
 
 - `minOccurs`/`maxOccurs` is any non-negative integer: a number longer than 9 digits is no longer an error.
 - `minOccurs` and `maxOccurs` of `xs:all` can only be 0 or 1.
@@ -24,6 +25,30 @@ The fixes were found by debugging the W3C XML Schema Test Suite failures by hand
 - A schema document deeper than 1024 element levels is rejected before building (`SCHEMA_DOCUMENT_TOO_DEEP`).
 - README and the comparison: "no recursion" is made precise — there is no recursion over the document tree.
   Schema building and expression parsing are recursive, their limits are described.
+
+### XML Schema: facets, attributes and the declaration by particle
+
+- The facets of simple types are checked when the schema is loaded (part 2, §4.3): a facet is applicable to the base type
+  (`totalDigits` on a string, `length` on a number, `enumeration` on boolean are errors), the values of bounds and of the
+  enumeration are values of the base type, `totalDigits` > 0, `length` is not in one step with `minLength`/`maxLength`, `min*` is not
+  greater than `max*`, two lower or two upper bounds in one step are not allowed, a restriction does not weaken the base (bounds,
+  lengths, digits, `fractionDigits` = 0 for integers, `whiteSpace`), a facet is not repeated in a step. New messages
+  `SCHEMA_FACET_*`.
+- `xs:attribute`: a global declaration has no `use`, `form`, `ref`; `use` is only optional/required/prohibited;
+  with `default` only `use="optional"` is allowed (`fixed` with `required`/`prohibited` is still allowed); exactly one
+  of `name` and `ref`, a reference has no `type`, `form` and nested type; `type` and a nested `xs:simpleType` together are not allowed;
+  the name is an NCName, not `xmlns`, the namespace is not xsi.
+- `xs:all` contains no `sequence`/`choice`/`all` and itself does not stand inside `sequence`/`choice` (including through
+  a group reference). `xs:any` and a group reference inside `xs:all` are allowed, as in XSD 1.1.
+- A child element is validated against the declaration of the model particle that accepted it, not against the first
+  declaration of the same name: same-named elements with different `fixed` or types and an element accepted by `xs:any`
+  are validated correctly; every `xs:any` has its own `processContents` (previously the last one applied to the whole type).
+- An attribute with `use="prohibited"` is admitted by the type's `xs:anyAttribute` if it allows its namespace.
+- `fixed` and the enumeration of union and list are compared by value: a union value belongs to the first matching
+  member (`fixed="1"` equals `true` for union(boolean, int)), for a list the items are compared.
+- The `xsd_advanced_tests` test relied on a schema with an `xs:all` group inside `xs:sequence` — it is not allowed
+  (cos-all-limited), the test was rewritten. In `tests/xsts/known_limitations.txt` the `disputed` key was extended with cases where
+  the suite expects the 1st edition gMonth notation in facets and NMTOKENS / positiveInteger restrictions prohibited by §4.3.
 
 ### XPath
 

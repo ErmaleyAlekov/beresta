@@ -45,10 +45,12 @@ namespace beresta::xsd
         wildcard.kind = content::ParticleKind::WILDCARD;
         wildcard.minOccurs = 0;
         wildcard.maxOccurs = content::UNBOUNDED;
+        wildcard.slot = 0;
         type.particle.children.push_back(wildcard);
         type.hasParticle = true;
         type.hasElementWildcard = true;
         type.elementWildcard = ProcessContents::LAX_CHECK;
+        type.wildcards.push_back(ProcessContents::LAX_CHECK);
         type.anyAttribute = true;
         type.attributeWildcard.process = ProcessContents::LAX_CHECK;
         return type;

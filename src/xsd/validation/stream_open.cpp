@@ -83,7 +83,7 @@ namespace beresta::xsd::detail
         if (parent.complex->content != ContentType::SIMPLE_CONTENT)
         {
             stepModel(parent, element);
-            return childDeclaration(*parent.complex, element);
+            return childDeclaration(*parent.complex, element, parent.cursor.matchedLeaf());
         }
         if (!parent.reportedChildren)
             report(level, CheckPhase::VALUE, i18n::format(i18n::Message::XSD_SIMPLE_CONTENT_CHILDREN));
@@ -124,43 +124,5 @@ namespace beresta::xsd::detail
         parent.modelFailed = true;
         reportAtChild(CheckPhase::MODEL, i18n::format(i18n::Message::XSD_CHILD_POSITION,
             {content::describeParticle(parent.complex->particle)}));
-    }
-
-    /*
-    ** Объявление ребёнка: из модели типа по паре (пространство имён,
-    ** локальное имя); затем — член группы замены одного из элементов
-    ** модели: у него своё глобальное объявление (свой тип), а не головы;
-    ** иначе — для xs:any с lax / strict — глобальное, а без него — тип
-    ** из xsi:type. Ненайденное при strict — ошибка у ребёнка. Второй проход идёт, только если имя не
-    ** нашлось в модели, и смотрит лишь на головы с непустыми группами.
-    **
-    ** The child's declaration: from the type model by the pair (namespace,
-    ** local name); then — a member of the substitution group of one of the model's
-    ** elements: it has its own global declaration (its own type), not the head's;
-    ** otherwise — for xs:any with lax / strict — a global one, and without it — the type
-    ** from xsi:type. One not found with strict is an error at the child. The second pass runs only if the name was not
-    ** found in the model, and looks only at heads with non-empty groups.
-    */
-    const ElementDecl* StreamValidator::childDeclaration(const ComplexType& type, const SaxElement& element)
-    {
-        for (const ElementDecl* declaration : type.elements)
-        {
-            if (declaration->name == element.localName && declaration->namespaceUri == element.namespaceUri)
-                return declaration;
-        }
-        content::ChildKey key{element.name, element.localName, element.namespaceUri};
-        for (const ElementDecl* declaration : type.elements)
-        {
-            if (!declaration->substitutes.empty() && content::isSubstitute(declaration->substitutes, key))
-                return _schema.findElement(element.namespaceUri, element.localName);
-        }
-        const ElementDecl* global = nullptr;
-        if (type.hasElementWildcard && type.elementWildcard != ProcessContents::SKIP_CHECK)
-            global = _schema.findElement(element.namespaceUri, element.localName);
-        if (global == nullptr && type.hasElementWildcard && type.elementWildcard != ProcessContents::SKIP_CHECK)
-            global = typeOnlyDeclaration(element);
-        if (global == nullptr && type.hasElementWildcard && type.elementWildcard == ProcessContents::STRICT_CHECK)
-            reportAtChild(CheckPhase::WILDCARD, i18n::format(i18n::Message::XSD_WILDCARD_UNDECLARED));
-        return global;
     }
 }

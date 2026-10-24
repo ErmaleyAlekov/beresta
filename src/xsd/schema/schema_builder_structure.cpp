@@ -114,6 +114,10 @@ namespace beresta::xsd::detail
     **    или прямо в типе (complexType, restriction, extension); глобальные
     **    определения xs:group сюда не попадают — их родитель xs:schema
     **    или xs:redefine не проверяется.
+    ** И правило про xs:all (схема для схем, в XSD 1.0 и 1.1): внутри xs:all нет
+    ** sequence / choice / all, а сама xs:all не стоит внутри sequence / choice.
+    ** xs:any и ссылка xs:group внутри xs:all допустимы в XSD 1.1, поэтому
+    ** здесь не запрещаются.
     ** models — счётчик моделей, уже встреченных у этого родителя.
     **
     ** Two rules of the schema for schemas about xs:group:
@@ -123,6 +127,10 @@ namespace beresta::xsd::detail
     **    or right in a type (complexType, restriction, extension); global
     **    xs:group definitions do not get here — their parent xs:schema
     **    or xs:redefine is not checked.
+    ** And a rule about xs:all (the schema for schemas, in XSD 1.0 and 1.1): there is no
+    ** sequence / choice / all inside xs:all, and xs:all itself does not stand inside sequence / choice.
+    ** xs:any and an xs:group reference inside xs:all are allowed in XSD 1.1, so
+    ** they are not prohibited here.
     ** models — the counter of the models already met at this parent.
     */
     void SchemaBuilder::checkGroupChild(const Element& parent, const Element& child, std::size_t& models) const
@@ -137,6 +145,10 @@ namespace beresta::xsd::detail
         if (parentKind == "group" && (MODELS.count(kind) == 0 || ++models > 1))
             misplaced = true;
         if (kind == "group" && GROUP_PLACES.count(parentKind) == 0)
+            misplaced = true;
+        if (parentKind == "all" && MODELS.count(kind) != 0)
+            misplaced = true;
+        if (kind == "all" && (parentKind == "sequence" || parentKind == "choice"))
             misplaced = true;
         if (misplaced)
             fail(child, i18n::format(i18n::Message::SCHEMA_CHILD_NOT_ALLOWED,

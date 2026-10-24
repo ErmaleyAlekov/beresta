@@ -107,17 +107,28 @@ namespace beresta::xsd
         return validateSimpleValue(type, value, ElementPrefixResolver(context));
     }
 
-    // Равенство в пространстве значений: числа и даты — по значению, остальное — по строке
-    // Equality in the value space: numbers and dates by value, the rest by string
+    /*
+    ** Равенство в пространстве значений: числа и даты — по значению, остальное —
+    ** по строке. Значение объединения принадлежит первому члену, который его
+    ** принимает (со своими пробелами), а у списка сравниваются элементы: обоим
+    ** правилам уже следует каноническая запись. Так fixed="1" равно "true" у
+    ** union(boolean, int), а "01" и "1" у union(string, int) — разные строки.
+    **
+    ** Equality in the value space: numbers and dates by value, the rest
+    ** by string. A union value belongs to the first member that
+    ** accepts it (with its own whitespace), and for a list the items are compared: the
+    ** canonical form already follows both rules. So fixed="1" equals "true" for
+    ** union(boolean, int), while "01" and "1" for union(string, int) are different strings.
+    */
     bool valuesEqual(const SimpleType& type, std::string_view left, std::string_view right)
     {
         std::string leftBuffer;
         std::string rightBuffer;
-        std::string_view a = detail::normalizedView(left, type.facets.whiteSpace, leftBuffer);
-        std::string_view b = detail::normalizedView(right, type.facets.whiteSpace, rightBuffer);
 
         if (type.variety != Variety::ATOMIC)
-            return a == b;
+            return canonicalValue(type, left) == canonicalValue(type, right);
+        std::string_view a = detail::normalizedView(left, type.facets.whiteSpace, leftBuffer);
+        std::string_view b = detail::normalizedView(right, type.facets.whiteSpace, rightBuffer);
         if (type.primitive == Primitive::BOOLEAN)
             return (a == "true" || a == "1") == (b == "true" || b == "1");
         if (type.primitive == Primitive::DECIMAL && detail::isDecimalLexical(a, false))

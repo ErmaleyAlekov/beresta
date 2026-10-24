@@ -68,8 +68,12 @@ namespace beresta::xsd::detail
         if (complexBase != nullptr)
         {
             type.attributes = complexBase->attributes;
+            // Листья базовой модели ссылаются на объявления и шаблоны базы по номерам — они идут первыми
+            // The leaves of the base model refer to the base's declarations and wildcards by numbers — they go first
             if (extension)
                 type.elements = complexBase->elements;
+            if (extension)
+                type.wildcards = complexBase->wildcards;
         }
         buildTypeBody(type, derivation, source, mixed);
         if (extension && complexBase != nullptr)

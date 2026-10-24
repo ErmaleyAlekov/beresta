@@ -1,4 +1,5 @@
 #include "xsd/internal/stream_validator.hpp"
+#include "xsd/internal/attribute_wildcards.hpp"
 #include "i18n/i18n.hpp"
 #include "utils/qualified_name.hpp"
 
@@ -26,10 +27,16 @@ namespace beresta::xsd::detail
     /*
     ** Каждый атрибут экземпляра должен быть объявлен в типе (или допущен
     ** xs:anyAttribute). Объявления xmlns и атрибуты xsi:* — служебные.
+    ** Использование с use="prohibited" не входит в атрибуты типа (3.2.2):
+    ** такой атрибут допускает xs:anyAttribute типа, если шаблон разрешает его
+    ** пространство имён, и лишь иначе он сообщается как запрещённый.
     ** wildIds — сколько атрибутов из шаблона оказались типа ID (cvc-complex-type.5).
     **
     ** Every instance attribute must be declared in the type (or admitted by
     ** xs:anyAttribute). xmlns declarations and xsi:* attributes are service ones.
+    ** A use="prohibited" use is not among the attribute uses of the type (3.2.2):
+    ** such an attribute is admitted by the type's xs:anyAttribute if the wildcard
+    ** allows its namespace, and only otherwise is it reported as prohibited.
     ** wildIds — how many attributes from the wildcard turned out to be of the ID type (cvc-complex-type.5).
     */
     void StreamValidator::validateAttributes(const SaxElement& element, const ComplexType& type)
@@ -49,7 +56,8 @@ namespace beresta::xsd::detail
                 use = &type.attributes[index];
             if (use != nullptr && index < USE_MASK_BITS)
                 seen |= std::uint64_t(1) << index;
-            if (use == nullptr)
+            bool wildcard = type.anyAttribute && wildcardAllows(type.attributeWildcard, attribute.namespaceUri);
+            if (use == nullptr || (use->prohibited && wildcard))
                 wildIds += checkWildcardAttribute(type, attribute, position);
             else if (use->prohibited)
                 report(_depth - 1, CheckPhase::ATTRIBUTES, i18n::format(i18n::Message::XSD_ATTRIBUTE_PROHIBITED,

@@ -394,6 +394,18 @@ namespace beresta::i18n
         {Message::SCHEMA_DOCUMENT_TOO_DEEP, "документ схемы вложен слишком глубоко: больше {0} уровней элементов"},
         {Message::SCHEMA_TOO_DEEP,"схема вложена слишком глубоко: больше {0} уровней объявлений, типов и моделей"},
         {Message::XPATH_TOO_DEEP, "выражение вложено слишком глубоко: больше {0} уровней скобок, аргументов и предикатов"},
+        {Message::SCHEMA_DEFAULT_WITH_USE, "вместе с default атрибут use может быть только optional, а не \"{0}\""},
+        {Message::SCHEMA_GLOBAL_ATTRIBUTE_FORBIDDEN, "у глобального объявления атрибута \"{0}\" не может быть {1}"},
+        {Message::SCHEMA_ALL_GROUP_NESTED, "группа \"{0}\" с моделью xs:all не может стоять внутри xs:{1}"},
+        {Message::SCHEMA_FACET_DUPLICATE, "фасет xs:{0} указан в одном ограничении дважды"},
+        {Message::SCHEMA_FACET_NOT_APPLICABLE, "фасет xs:{0} неприменим к типу {1}"},
+        {Message::SCHEMA_FACET_VALUE_INVALID, "значение фасета xs:{0} недопустимо для базового типа: {1}"},
+        {Message::SCHEMA_FACET_CONFLICT, "фасеты xs:{0} и xs:{1} нельзя указывать в одном ограничении"},
+        {Message::SCHEMA_FACET_ORDER, "фасет xs:{0}=\"{1}\" несовместим с фасетом xs:{2}=\"{3}\""},
+        {Message::SCHEMA_ATTRIBUTE_PARTS_CONFLICT, "у xs:attribute \"{0}\" нельзя указывать {1} вместе с {2}"},
+        {Message::SCHEMA_ATTRIBUTE_NO_NAME, "у xs:attribute нет ни name, ни ref"},
+        {Message::SCHEMA_ATTRIBUTE_RESERVED_NAME, "объявление атрибута \"{0}\" недопустимо: имя xmlns и пространство имён xsi зарезервированы"},
+        {Message::SCHEMA_FACET_WIDENS, "фасет xs:{0}=\"{1}\" ослабляет ограничение базового типа xs:{2}=\"{3}\""},
     };
 
     const Catalog RUSSIAN_CATALOG{"ru", "Русский", TEXTS, sizeof(TEXTS) / sizeof(TEXTS[0])};

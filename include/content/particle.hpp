@@ -12,6 +12,10 @@ namespace beresta::content
     // The maxOccurs="unbounded" value (and '*' / '+' in a DTD)
     inline constexpr std::size_t UNBOUNDED = static_cast<std::size_t>(-1);
 
+    // Частица без номера объявления (DTD, группы, частицы вне типа XSD)
+    // A particle without a declaration number (a DTD, groups, particles outside an XSD type)
+    inline constexpr std::size_t NO_SLOT = static_cast<std::size_t>(-1);
+
     // Вид частицы модели содержимого
     // The kind of a content model particle
     enum class ParticleKind
@@ -77,6 +81,16 @@ namespace beresta::content
     ** substitutes is the substitution group of a global element (a ref reference): it
     ** is filled after the whole schema is loaded, so the particle keeps only
     ** a pointer to it. For a DTD and for local elements it is null.
+    **
+    ** slot — номер, по которому владелец модели находит своё описание листа:
+    ** у XSD это индекс объявления элемента (ELEMENT) или режима
+    ** processContents (WILDCARD) в составном типе. Сопоставление его не
+    ** читает: курсор лишь сообщает, какой лист принял ребёнка.
+    **
+    ** slot is the number by which the model owner finds its own description of the leaf:
+    ** for XSD it is the index of the element declaration (ELEMENT) or of the
+    ** processContents mode (WILDCARD) in the complex type. Matching does not
+    ** read it: the cursor only reports which leaf accepted the child.
     */
     struct Particle
     {
@@ -90,6 +104,7 @@ namespace beresta::content
         std::vector<std::string> wildcardNamespaces;
         std::vector<Particle> children;
         const SubstitutionGroup* substitutes = nullptr;
+        std::size_t slot = NO_SLOT;
     };
 
     // Ребёнок проверяемого элемента: полное имя, локальное имя и пространство имён

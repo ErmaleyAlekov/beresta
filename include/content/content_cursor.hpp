@@ -125,6 +125,19 @@ namespace beresta::content
         // The result after the last child: success or the error index (the number of children — "missing")
         MatchResult finish();
 
+        /*
+        ** Лист (ELEMENT или WILDCARD), принявший последнего ребёнка. nullptr —
+        ** неизвестно: шага ещё не было, он не удался или способ BUFFERED
+        ** сопоставляет детей только в конце. Если модель неоднозначна (UPA
+        ** нарушено), берётся лист первой из конфигураций.
+        **
+        ** The leaf (ELEMENT or WILDCARD) that accepted the last child. nullptr means
+        ** unknown: there has been no step yet, it failed, or the BUFFERED plan
+        ** matches the children only at the end. If the model is ambiguous (UPA
+        ** is violated), the leaf of the first configuration is taken.
+        */
+        const Particle* matchedLeaf() const noexcept;
+
     private:
         // ---- Жадный путь (content_fast_path.cpp) ----
         // ---- The greedy path (content_fast_path.cpp) ----

@@ -71,6 +71,7 @@ namespace beresta::xsd::detail
         AttributeUse use;
         const SchemaSource* typeSource = &source;
 
+        checkAttributeForm(definition, source, global);
         use.name = attributeOr(definition, "name", "");
         use.namespaceUri = localNamespace(definition, source, true);
         if (global)

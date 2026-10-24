@@ -402,6 +402,18 @@ namespace beresta::i18n
         SCHEMA_TOO_DEEP,
         SCHEMA_DOCUMENT_TOO_DEEP,
         XPATH_TOO_DEEP,
+        SCHEMA_DEFAULT_WITH_USE,
+        SCHEMA_GLOBAL_ATTRIBUTE_FORBIDDEN,
+        SCHEMA_ALL_GROUP_NESTED,
+        SCHEMA_FACET_DUPLICATE,
+        SCHEMA_FACET_NOT_APPLICABLE,
+        SCHEMA_FACET_VALUE_INVALID,
+        SCHEMA_FACET_CONFLICT,
+        SCHEMA_FACET_ORDER,
+        SCHEMA_FACET_WIDENS,
+        SCHEMA_ATTRIBUTE_PARTS_CONFLICT,
+        SCHEMA_ATTRIBUTE_NO_NAME,
+        SCHEMA_ATTRIBUTE_RESERVED_NAME,
 
         // Число сообщений (не сообщение) / The number of messages (not a message)
         COUNT

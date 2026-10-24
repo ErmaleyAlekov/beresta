@@ -50,19 +50,34 @@ namespace beresta::xsd::detail
         return group;
     }
 
-    // <xs:group ref="g"/>: модель именованной группы с повторениями из места ссылки
-    // <xs:group ref="g"/>: the model of a named group with the repetitions from the reference place
+    /*
+    ** <xs:group ref="g"/>: модель именованной группы с повторениями из места
+    ** ссылки. Группа с моделью xs:all не может стоять внутри sequence / choice
+    ** (cos-all-limited): xs:all — только вся модель типа (или, в XSD 1.1,
+    ** часть другой xs:all).
+    **
+    ** <xs:group ref="g"/>: the model of a named group with the repetitions from the
+    ** reference place. A group with an xs:all model cannot stand inside sequence / choice
+    ** (cos-all-limited): xs:all is only the whole model of a type (or, in XSD 1.1,
+    ** a part of another xs:all).
+    */
     content::Particle SchemaBuilder::buildGroupReference(const Element& reference, ComplexType& owner,
         std::size_t depth)
     {
         std::string name = attributeOr(reference, "ref", "");
         const Definition* named = referencedDefinition(reference, "group", resolveQName(reference, name));
+        const Node* parent = reference.getParent();
         std::vector<const Element*> model;
+        std::string place;
 
         if (named != nullptr)
             model = schemaChildren(*named->element);
         if (model.empty())
             fail(reference, i18n::format(i18n::Message::SCHEMA_GROUP_MISSING, {name}));
+        if (parent != nullptr && parent->getType() == NodeType::ELEMENT)
+            place = static_cast<const Element*>(parent)->getLocalName();
+        if (isSchemaElement(*model.front(), "all") && (place == "sequence" || place == "choice"))
+            fail(reference, i18n::format(i18n::Message::SCHEMA_ALL_GROUP_NESTED, {name, place}));
         content::Particle group = buildParticle(*model.front(), *named->source, owner, depth + 1);
         readOccurs(reference, group);
         return group;
@@ -106,6 +121,7 @@ namespace beresta::xsd::detail
         particle.kind = content::ParticleKind::ELEMENT;
         particle.name = declaration->name;
         particle.namespaceUri = declaration->namespaceUri;
+        particle.slot = owner.elements.size();
         readOccurs(definition, particle);
         owner.elements.push_back(declaration);
         return particle;
@@ -129,6 +145,8 @@ namespace beresta::xsd::detail
             particle.wildcardNamespaces);
         owner.hasElementWildcard = true;
         owner.elementWildcard = parseProcessContents(definition);
+        particle.slot = owner.wildcards.size();
+        owner.wildcards.push_back(owner.elementWildcard);
         readOccurs(definition, particle);
         return particle;
     }

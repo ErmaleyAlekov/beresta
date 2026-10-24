@@ -117,6 +117,10 @@ namespace beresta::xsd
     ** проверяется, выведен ли тип из xsi:type из объявленного. assertions —
     ** утверждения xs:assert (XSD 1.1): сначала унаследованные от базового
     ** типа (и при расширении, и при ограничении), затем свои.
+    ** elements и wildcards — объявления элементов и режимы processContents
+    ** частиц xs:any модели: лист модели ссылается на них номером slot.
+    ** hasElementWildcard / elementWildcard — режим последнего xs:any; по
+    ** нему проверяется ребёнок, если курсор не знает принявший лист.
     **
     ** A complex type: the content model and the attributes. baseType and
     ** derivationMethod describe the derivation step (a type without
@@ -124,6 +128,10 @@ namespace beresta::xsd
     ** to check whether the xsi:type type is derived from the declared one. assertions are
     ** the xs:assert assertions (XSD 1.1): first the ones inherited from the base
     ** type (both on extension and on restriction), then the own ones.
+    ** elements and wildcards are the element declarations and the processContents modes
+    ** of the xs:any particles of the model: a model leaf refers to them by the slot number.
+    ** hasElementWildcard / elementWildcard is the mode of the last xs:any; a child
+    ** is validated by it if the cursor does not know the accepting leaf.
     */
     struct ComplexType
     {
@@ -144,6 +152,7 @@ namespace beresta::xsd
         AttributeWildcard attributeWildcard;
         bool hasElementWildcard = false;
         ProcessContents elementWildcard = ProcessContents::STRICT_CHECK;
+        std::vector<ProcessContents> wildcards;
         std::vector<std::shared_ptr<const Assertion>> assertions;
     };
 

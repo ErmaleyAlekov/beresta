@@ -173,7 +173,14 @@ namespace beresta::xsd::detail
         const ElementDecl* admitRoot(const SaxElement& element);
         const ElementDecl* admitChild(const SaxElement& element);
         void stepModel(ElementFrame& parent, const SaxElement& element);
-        const ElementDecl* childDeclaration(const ComplexType& type, const SaxElement& element);
+
+        // ---- Объявление ребёнка (stream_child_declaration.cpp) ----
+        // ---- The declaration of a child (stream_child_declaration.cpp) ----
+        const ElementDecl* childDeclaration(const ComplexType& type, const SaxElement& element,
+            const content::Particle* leaf);
+        const ElementDecl* leafDeclaration(const ElementDecl& declaration, const SaxElement& element) const;
+        const ElementDecl* declarationByName(const ComplexType& type, const SaxElement& element);
+        const ElementDecl* wildcardDeclaration(const SaxElement& element, ProcessContents mode);
 
         // ---- Начало проверки элемента (stream_begin.cpp) ----
         // ---- The start of an element check (stream_begin.cpp) ----

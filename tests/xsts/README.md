@@ -71,7 +71,7 @@ cmake --build build-xsts --config Release --target xsts_run
 | `s4s-namespace` | схемы с `targetNamespace` самого XML Schema (схема для схем) не загружаются | 3 |
 | `redefine-cycle` | циклы через `xs:redefine` (A переопределяет B, а B переопределяет или включает A) | 3 |
 | `nested-derivation` | тип, выведенный из составного типа внутри его же модели, считается циклическим | 1 |
-| `disputed` | ожидание набора расходится со спецификацией или зависит от процессора (ниже) | 42 |
+| `disputed` | ожидание набора расходится со спецификацией или зависит от процессора (ниже) | 73 |
 
 Списки `particle-restrict` и `upa` собраны по описаниям групп
 («Particle Derivation OK», «NameAndTypeOK», «non-deterministic» и т. п.) только
@@ -83,7 +83,9 @@ cmake --build build-xsts --config Release --target xsts_run
 |---|---|---|
 | `ste110` | циклический union (`st` → `st2` → `st`) допустим | st-props-correct.2 запрещает циклы определений |
 | `elemE002`…`elemE005` | шаблон `[0-9]{,5}` допустим | в грамматике регулярных выражений XSD 1.0 квантификатора `{,n}` нет |
-| `stZ043` и ещё 19 случаев gMonth | `--12--` — верное значение gMonth | это запись 1-й редакции; во 2-й (по ней идёт набор) — `--MM` |
+| `stZ043` и ещё 19 случаев gMonth, 26 групп `gMonth_*` и `ST_facets00119m` | `--12--` — верное значение gMonth (в том числе в фасетах схемы) | это запись 1-й редакции; во 2-й (по ней идёт набор) — `--MM` |
+| `NMTOKENS_minLength001`, `NMTOKENS_minLength004`, `NMTOKENS_maxLength001` | ограничение NMTOKENS с `minLength="0"` или `maxLength="0"` корректно | у NMTOKENS `minLength=1` (часть 2, §3.3.4): его нельзя уменьшить (minLength valid restriction), а `maxLength` не может быть меньше (minLength <= maxLength) |
+| `positiveInteger_maxExclusive001`, `…002` | `maxExclusive="1"` у positiveInteger корректен | maxExclusive valid restriction, п. 3: значение не может быть меньше или равно `minInclusive` базы (1) |
 | `particlesIg003.v` | `xsi:type` допустим при `block="restriction"` у элемента типа anyType | тип из xsi:type выведен через неявное ограничение anyType, а Type Derivation OK (Complex), п. 1 запрещает такой шаг (так же считает Xerces) |
 | `isDefault060_2.i` | невалиден пустой элемент с `default="5"` и `xsi:type` (int ≤ 6) | по cvc-elt.5.1 значение по умолчанию подставляется и проходит проверку |
 | `mgO013` | схема валидна, экземпляр с `e1` — нет | переопределение без ссылки на себя не является ограничением прежней группы (`maxOccurs="0"`), а с действующей группой экземпляр валиден |

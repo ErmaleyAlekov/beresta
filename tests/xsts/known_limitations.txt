@@ -357,7 +357,7 @@ redefine-cycle MS-Schema2006-07-15/schU5/schU5.i
 # A type derived from a complex type inside the model of that same type is taken as circular derivation.
 nested-derivation MS-Particles2006-07-15/particlesEb041
 
-# ---- disputed (42) ----
+# ---- disputed (73) ----
 # Ожидание набора расходится со спецификацией XSD 1.0 2-й редакции или зависит от необязательного поведения процессора (разбор — в README.md).
 # The expectation of the suite disagrees with the XSD 1.0 2nd edition specification or depends on optional processor behavior (analysis in README.md).
 disputed MS-SimpleType2006-07-15/ste110
@@ -386,6 +386,34 @@ disputed MS-DataTypes2006-07-15/gMonth_minExclusive003_1292/gMonth_minExclusive0
 disputed MS-DataTypes2006-07-15/gMonth_minExclusive004_1293/gMonth_minExclusive004_1293.v
 disputed MS-DataTypes2006-07-15/gMonth_minExclusive005_1294/gMonth_minExclusive005_1294.v
 disputed MS-DataTypes2006-07-15/gMonth002_2061/gMonth002_2061.v
+# Схемы с фасетами gMonth в записи 1-й редакции (--MM--): по 2-й редакции значение фасета не принадлежит gMonth
+# Schemas with gMonth facets in the 1st edition notation (--MM--): by the 2nd edition the facet value is not a gMonth
+disputed MS-DataTypes2006-07-15/gMonth_enumeration001_1275
+disputed MS-DataTypes2006-07-15/gMonth_enumeration002_1276
+disputed MS-DataTypes2006-07-15/gMonth_enumeration002_203
+disputed MS-DataTypes2006-07-15/gMonth_enumeration003_1277
+disputed MS-DataTypes2006-07-15/gMonth_enumeration004_1278
+disputed MS-DataTypes2006-07-15/gMonth_maxExclusive001_1282
+disputed MS-DataTypes2006-07-15/gMonth_maxExclusive002_1283
+disputed MS-DataTypes2006-07-15/gMonth_maxExclusive002_208
+disputed MS-DataTypes2006-07-15/gMonth_maxExclusive003_1284
+disputed MS-DataTypes2006-07-15/gMonth_maxInclusive001_1279
+disputed MS-DataTypes2006-07-15/gMonth_maxInclusive002_1280
+disputed MS-DataTypes2006-07-15/gMonth_maxInclusive002_205
+disputed MS-DataTypes2006-07-15/gMonth_maxInclusive003_1281
+disputed MS-DataTypes2006-07-15/gMonth_minExclusive001_1290
+disputed MS-DataTypes2006-07-15/gMonth_minExclusive002_1291
+disputed MS-DataTypes2006-07-15/gMonth_minExclusive002_213
+disputed MS-DataTypes2006-07-15/gMonth_minExclusive003_1292
+disputed MS-DataTypes2006-07-15/gMonth_minExclusive004_1293
+disputed MS-DataTypes2006-07-15/gMonth_minExclusive005_1294
+disputed MS-DataTypes2006-07-15/gMonth_minInclusive001_1285
+disputed MS-DataTypes2006-07-15/gMonth_minInclusive002_1286
+disputed MS-DataTypes2006-07-15/gMonth_minInclusive002_210
+disputed MS-DataTypes2006-07-15/gMonth_minInclusive003_1287
+disputed MS-DataTypes2006-07-15/gMonth_minInclusive004_1288
+disputed MS-DataTypes2006-07-15/gMonth_minInclusive005_1289
+disputed SType/st_facets00119m
 disputed MS-DataTypes2006-07-15/gMonth004_2063/gMonth004_2063.v
 disputed MS-Errata102006-07-15/errE006/errE006.v
 disputed MS-Regex2006-07-15/reDG7/reDG7.v
@@ -414,3 +442,12 @@ disputed MS-Particles2006-07-15/particlesZ001/particlesZ001.i
 # The expectation is a System.Xml peculiarity (maxOccurs > 4096 is validated as xs:any), the schema is queried (Bugzilla 4075).
 disputed MS-Particles2006-07-15/particlesZ036_b1/particlesZ036_b1.i
 disputed MS-Particles2006-07-15/particlesZ036_b2/particlesZ036_b2.i
+# Часть 2, §4.3 (2-я редакция): у NMTOKENS minLength=1, его нельзя уменьшить (minLength valid restriction) и maxLength не меньше его;
+# maxExclusive у positiveInteger больше minInclusive=1 базы (maxExclusive valid restriction, п. 3). Набор считает такие схемы корректными.
+# Part 2, §4.3 (2nd edition): NMTOKENS has minLength=1, it cannot be decreased (minLength valid restriction) and maxLength is not less than it;
+# maxExclusive of positiveInteger is greater than the base's minInclusive=1 (maxExclusive valid restriction, item 3). The suite takes such schemas as valid.
+disputed MS-DataTypes2006-07-15/NMTOKENS_maxLength001_1468
+disputed MS-DataTypes2006-07-15/NMTOKENS_minLength001_1464
+disputed MS-DataTypes2006-07-15/NMTOKENS_minLength004_1467
+disputed MS-DataTypes2006-07-15/positiveInteger_maxExclusive001_1834
+disputed MS-DataTypes2006-07-15/positiveInteger_maxExclusive002_1835

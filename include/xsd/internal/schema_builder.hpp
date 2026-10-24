@@ -19,6 +19,10 @@ namespace beresta::xsd::detail
     // The name of a schema component: (namespace, local name)
     using QualifiedKey = std::pair<std::string, std::string>;
 
+    // Шаг ограничения простого типа для правил фасетов (xsd/internal/facet_rules.hpp)
+    // A restriction step of a simple type for the facet rules (xsd/internal/facet_rules.hpp)
+    struct FacetStep;
+
     // Один документ схемы и его настройки по умолчанию (включая blockDefault / finalDefault)
     // One schema document and its default settings (including blockDefault / finalDefault)
     struct SchemaSource
@@ -212,6 +216,12 @@ namespace beresta::xsd::detail
         bool booleanAttribute(const Element& definition, std::string_view name, bool fallback) const;
         void checkElementAttributes(const Element& definition, ElementPlace place) const;
 
+        // ---- Форма объявления атрибута (schema_builder_attribute_form.cpp) ----
+        // ---- The form of an attribute declaration (schema_builder_attribute_form.cpp) ----
+        void checkAttributeForm(const Element& definition, const SchemaSource& source, bool global) const;
+        void checkAttributeParts(const Element& definition) const;
+        void checkAttributeName(const Element& definition, const SchemaSource& source, bool global) const;
+
         // ---- Имена (schema_builder_names.cpp) ----
         // ---- Names (schema_builder_names.cpp) ----
         QualifiedKey resolveQName(const Element& context, std::string_view value) const;
@@ -259,6 +269,7 @@ namespace beresta::xsd::detail
         void buildRestriction(SimpleType& type, const Element& restriction, const SchemaSource& source);
         void buildMembers(SimpleType& type, const Element& definition, const SchemaSource& source);
         void applyFacets(SimpleType& type, const Element& restriction, const SchemaSource& source);
+        void applyNamedFacet(SimpleType& type, FacetStep& step, const Element& facet) const;
 
         // ---- Утверждения XSD 1.1 (schema_builder_assertions.cpp) ----
         // ---- XSD 1.1 assertions (schema_builder_assertions.cpp) ----

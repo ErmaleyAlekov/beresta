@@ -72,4 +72,22 @@ namespace beresta::content
             return MatchResult{true, 0};
         return MatchResult{false, _consumed};
     }
+
+    /*
+    ** У жадного прохода лист — текущая частица последовательности, у
+    ** автомата — вершина стека конфигурации (descend кладёт её последней).
+    **
+    ** For the greedy pass the leaf is the current particle of the sequence, for
+    ** the automaton it is the top of the configuration stack (descend pushes it last).
+    */
+    const Particle* ContentCursor::matchedLeaf() const noexcept
+    {
+        if (_failed || _consumed == 0 || _model == nullptr)
+            return nullptr;
+        if (_plan == CursorPlan::GREEDY_SEQUENCE && _leaf < _model->children.size())
+            return &_model->children[_leaf];
+        if (_plan != CursorPlan::AUTOMATON || _current.count == 0 || _current.items[0].empty())
+            return nullptr;
+        return _current.items[0].back().particle;
+    }
 }

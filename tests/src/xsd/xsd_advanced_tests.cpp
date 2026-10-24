@@ -3,8 +3,13 @@
 
 namespace
 {
-    // Схема с пространством имён, наследованием, simpleContent, xs:all, xs:any, группами и ID
-    // A schema with a namespace, derivation, simpleContent, xs:all, xs:any, groups and IDs
+    /*
+    ** Схема с пространством имён, наследованием, simpleContent, xs:all, xs:any, группами и ID.
+    ** Группа с xs:all — вся модель элемента opts: внутри xs:sequence она недопустима (cos-all-limited).
+    **
+    ** A schema with a namespace, derivation, simpleContent, xs:all, xs:any, groups and IDs.
+    ** The group with xs:all is the whole model of the opts element: inside xs:sequence it is not allowed (cos-all-limited).
+    */
     const char* const ADVANCED_XSD =
         "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:t=\"urn:t\""
         " targetNamespace=\"urn:t\" elementFormDefault=\"qualified\">"
@@ -12,7 +17,8 @@ namespace
         "</xs:sequence></xs:complexType>"
         "<xs:complexType name=\"Item\"><xs:complexContent><xs:extension base=\"t:Base\"><xs:sequence>"
         "<xs:element name=\"price\" type=\"t:Price\"/><xs:element name=\"ref\" type=\"xs:IDREF\" minOccurs=\"0\"/>"
-        "<xs:group ref=\"t:Extra\" minOccurs=\"0\"/></xs:sequence>"
+        "<xs:element name=\"opts\" minOccurs=\"0\"><xs:complexType><xs:group ref=\"t:Extra\"/></xs:complexType>"
+        "</xs:element></xs:sequence>"
         "<xs:attributeGroup ref=\"t:Common\"/></xs:extension></xs:complexContent></xs:complexType>"
         "<xs:complexType name=\"Price\"><xs:simpleContent><xs:extension base=\"xs:decimal\">"
         "<xs:attribute name=\"currency\" type=\"xs:string\" use=\"required\"/></xs:extension>"
@@ -49,10 +55,10 @@ namespace
     void testAdvancedRules()
     {
         TEST_ASSERT(errorsFor("<item note=\"n\"><id>i1</id><price currency=\"RUB\">10.5</price></item>"
-            "<item><id>i2</id><price currency=\"USD\">1</price><ref>i1</ref><b>2</b><a>1</a></item>"
+            "<item><id>i2</id><price currency=\"USD\">1</price><ref>i1</ref><opts><b>2</b><a>1</a></opts></item>"
             "<item xsi:nil=\"true\"/><x:any xmlns:x=\"urn:other\"><free/></x:any>") == 0);
         TEST_ASSERT(errorsFor("<item><id>i1</id><price>10</price></item>") == 1);
-        TEST_ASSERT(errorsFor("<item><id>i1</id><price currency=\"R\">1</price><b>1</b></item>") == 1);
+        TEST_ASSERT(errorsFor("<item><id>i1</id><price currency=\"R\">1</price><opts><b>1</b></opts></item>") == 1);
         TEST_ASSERT(errorsFor("<item><id>i1</id><price currency=\"R\">1</price><ref>none</ref></item>") == 1);
         TEST_ASSERT(errorsFor("<item><id>i1</id><price currency=\"R\">1</price></item>"
             "<item><id>i1</id><price currency=\"R\">2</price></item>") == 1);
