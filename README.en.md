@@ -112,6 +112,21 @@ std::cout << doc.toString();                                      // <greeting l
 
 ---
 
+## Who does what
+
+Beresta is made by a person together with two language models. The decisions are made by the person,
+and the models work on his assignments. Every change is checked by the tests and the W3C suites.
+
+| Participant | Role |
+|---|---|
+| **Ermakov Aleksei Aleksandrovich** — author and rights holder | The main idea and concept of the project, setting the tasks and making the decisions. Creating and editing the code generation rules for both models. Checking the code in a debugger, finding bugs. Human analysis of the documentation, the library code and the tests: what a W3C case checks, whether the behavior is right, where the suite's expectation is disputable. |
+| **Claude** (Anthropic), assistant in Claude Code | Architecture and module design. Implementation of most of the code: the parser, DTD, XPath, XML Schema, the C interface and the bindings. Checking the behavior against the W3C specifications, diagnosing bugs, the W3C suite runners, building and releasing, documentation. Reviewing the local model's code. |
+| **Qwen2.5-Coder 14B** (Alibaba), local model | Simple boilerplate code from a ready assignment: headers with declarations, entities and unit tests. |
+
+The rights to the program belong to the rights holder (see [LICENSE](LICENSE)).
+
+---
+
 ## License
 
 Beresta is distributed under the **MIT** license — the text is in the [LICENSE](LICENSE) file, details about the license in the packages are in [docs/development.en.md](docs/development.en.md#license).
