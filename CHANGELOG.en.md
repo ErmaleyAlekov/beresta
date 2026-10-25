@@ -71,6 +71,24 @@ The fixes were found by debugging the W3C XML Schema Test Suite failures by hand
 - `tests/xsts_failing` — the XSTS failure debugger: the failure list from a run, running cases one by one
   (a filter, `--case N`, `--stop-on-first`), a debug build together with the library.
 
+### XML Schema: values by the type, annotations and notations
+
+The W3C XML Schema Test Suite result is **98.6 %**: failures 671 → 515, no new ones.
+
+- `default` and `fixed` of elements and attributes are checked by the type when the schema is loaded. For an element
+  of a complex type the value is allowed with simple content (checked by it) or mixed content; with empty or element-only
+  content it is an error. New messages `SCHEMA_VALUE_CONSTRAINT_INVALID`, `SCHEMA_VALUE_CONSTRAINT_CONTENT`.
+- On `xs:element` the `type` attribute, a nested `xs:simpleType` and a nested `xs:complexType` exclude each other
+  (`SCHEMA_ELEMENT_PARTS_CONFLICT`).
+- The order of children is checked for every element of the schema document, not only for global components and particles:
+  `xs:annotation` occurs once and first also in `xs:key`, `xs:selector`, `xs:field`, `xs:list`, `xs:union`, `xs:extension`,
+  `xs:anyAttribute` and unused definitions. Inside `xs:annotation` only `xs:appinfo` / `xs:documentation` are allowed.
+- `xs:notation`: only right in `xs:schema`, only an annotation inside; the name is an NCName without repeats; `public`
+  or `system` is required (`SCHEMA_NOTATION_NO_IDENTIFIER`).
+- The XSD 1.0 rules removed in 1.1 (`xs:any` inside `xs:all`, `default`/`fixed` on the ID type) are not applied:
+  Beresta is a 1.1 processor. `tests/xsts/known_limitations.txt` has a new key `xsd11-rules` (7 cases); 3 groups with a
+  gMonth `fixed` in the 1st edition notation are added to `disputed`.
+
 ## 2.1.4 — 2026-10-20
 
 ### License

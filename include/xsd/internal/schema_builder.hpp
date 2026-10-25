@@ -150,13 +150,13 @@ namespace beresta::xsd::detail
         ** по умолчанию (maxDepth = 1024). Документ глубже не собрать при
         ** MAX_NESTING (уровень сборки — не больше четырёх уровней XML), а обход
         ** такого документа стоил бы O(n · глубина): пространство имён элемента
-        ** ищется подъёмом к корню. Проверяется первым, в checkDocumentIds.
+        ** ищется подъёмом к корню. Проверяется первым, в checkDocumentStructure.
         **
         ** The element nesting limit of the schema document itself — as the parser's
         ** default (maxDepth = 1024). A deeper document cannot be built under
         ** MAX_NESTING (a building level is at most four XML levels), and a traversal
         ** of such a document would cost O(n · depth): the namespace of an element
-        ** is looked up by climbing to the root. It is checked first, in checkDocumentIds.
+        ** is looked up by climbing to the root. It is checked first, in checkDocumentStructure.
         */
         static constexpr std::size_t MAX_DOCUMENT_DEPTH = 4 * MAX_NESTING;
 
@@ -233,11 +233,24 @@ namespace beresta::xsd::detail
 
         // ---- Строение документа схемы (schema_builder_structure.cpp) ----
         // ---- The structure of a schema document (schema_builder_structure.cpp) ----
-        void checkDocumentIds(const Element& root) const;
+        void checkDocumentStructure(const Element& root) const;
         void checkIdAttribute(const Element& element, std::set<std::string>& seen) const;
         void checkChildOrder(const Element& element) const;
         void checkGroupChild(const Element& parent, const Element& child, std::size_t& models) const;
         void checkNCName(const Element& where, std::string_view attribute, const std::string& value) const;
+
+        // ---- Место компонентов и нотации (schema_builder_placement.cpp) ----
+        // ---- The place of components and notations (schema_builder_placement.cpp) ----
+        void checkSchemaPlacement(const Element& parent, const Element& child) const;
+        void checkNotation(const Element& notation) const;
+
+        // ---- Значения default / fixed по типу (schema_builder_values.cpp) ----
+        // ---- default / fixed values by the type (schema_builder_values.cpp) ----
+        void checkElementValues() const;
+        void checkValueConstraints(const Element& definition, TypeRef type,
+            const std::optional<std::string>& defaultValue, const std::optional<std::string>& fixedValue) const;
+        void checkValueConstraint(const Element& definition, TypeRef type, std::string_view attribute,
+            const std::string& value) const;
 
         // ---- Элементы (schema_builder_elements.cpp) ----
         // ---- Elements (schema_builder_elements.cpp) ----
@@ -343,6 +356,11 @@ namespace beresta::xsd::detail
         std::map<const Element*, TypeRef> _builtOriginals;
         std::set<std::pair<std::string, QualifiedKey>> _overridden;
         std::set<const ElementDecl*> _headTyped;
+        // Объявления элементов с default / fixed: их значения проверяются по типу в конце buildAll,
+        // когда все типы достроены (тип может ещё строиться, а тип головы группы замены — уточняться)
+        // Element declarations with default / fixed: their values are checked by the type at the end of
+        // buildAll, when all types are complete (a type may still be built, and a head type — refined)
+        std::vector<std::pair<const Element*, const ElementDecl*>> _valueChecks;
         std::size_t _nesting = 0;       // текущая глубина сборки / the current building depth
     };
 

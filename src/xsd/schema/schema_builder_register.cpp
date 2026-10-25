@@ -8,24 +8,27 @@ namespace beresta::xsd::detail
     /*
     ** Глобальное определение регистрируется под полным именем; дубликат —
     ** ошибка схемы. Имя, уже занятое через xs:override, пропускается:
-    ** это и есть подменённое определение подключаемого документа.
+    ** это и есть подменённое определение подключаемого документа. Нотации
+    ** тоже регистрируются: так проверяются их имя и повтор имени.
     **
     ** A global definition is registered under its full name; a duplicate is
     ** a schema error. A name already taken through xs:override is skipped:
-    ** this is exactly the replaced definition of the included document.
+    ** this is exactly the replaced definition of the included document. Notations
+    ** are registered too: so their name and a repeated name are checked.
     */
     void SchemaBuilder::registerDefinition(const Element& child, const SchemaSource& source)
     {
         std::string kind(child.getLocalName());
         std::map<QualifiedKey, Definition>* registry = registryFor(kind);
 
-        checkChildOrder(child);
         if (registry == nullptr)
             return;
         std::string name = attributeOr(child, "name", "");
         if (name.empty())
             fail(child, i18n::format(i18n::Message::SCHEMA_GLOBAL_NO_NAME, {kind}));
         checkNCName(child, "name", name);
+        if (kind == "notation")
+            checkNotation(child);
         QualifiedKey key(source.targetNamespace, name);
         if (_overridden.count(std::make_pair(kind, key)) != 0)
             return;
@@ -86,7 +89,7 @@ namespace beresta::xsd::detail
     std::map<QualifiedKey, Definition>* SchemaBuilder::registryFor(std::string_view kind)
     {
         static const char* const KINDS[] = {
-            "element", "complexType", "simpleType", "attribute", "group", "attributeGroup"
+            "element", "complexType", "simpleType", "attribute", "group", "attributeGroup", "notation"
         };
 
         for (const char* known : KINDS)

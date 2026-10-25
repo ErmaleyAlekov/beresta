@@ -357,7 +357,20 @@ redefine-cycle MS-Schema2006-07-15/schU5/schU5.i
 # A type derived from a complex type inside the model of that same type is taken as circular derivation.
 nested-derivation MS-Particles2006-07-15/particlesEb041
 
-# ---- disputed (73) ----
+# ---- xsd11-rules (7) ----
+# Правило XSD 1.0, отменённое в XSD 1.1, не применяется: «Берёста» — процессор версии 1.1 (решение 2026-10-25).
+# xs:any внутри xs:all в XSD 1.1 допустим; ограничение значения у типа ID (e-props-correct.4, a-props-correct.3) в XSD 1.1 снято.
+# An XSD 1.0 rule removed in XSD 1.1 is not applied: Beresta is a processor of version 1.1 (decision of 2026-10-25).
+# xs:any inside xs:all is allowed in XSD 1.1; a value constraint on the ID type (e-props-correct.4, a-props-correct.3) is lifted in XSD 1.1.
+xsd11-rules MGroup/particles00104m1/particles00104m1
+xsd11-rules ElemDecl/valueconstraint01001m2/valueConstraint01001m2
+xsd11-rules ElemDecl/valueconstraint01001m3/valueConstraint01001m3
+xsd11-rules ElemDecl/valueconstraint01001m5/valueConstraint01001m5
+xsd11-rules ElemDecl/valueconstraint01001m6/valueConstraint01001m6
+xsd11-rules MS-Attribute2006-07-15/attZ013a/attZ013a
+xsd11-rules MS-Attribute2006-07-15/attZ013b/attZ013b
+
+# ---- disputed (76) ----
 # Ожидание набора расходится со спецификацией XSD 1.0 2-й редакции или зависит от необязательного поведения процессора (разбор — в README.md).
 # The expectation of the suite disagrees with the XSD 1.0 2nd edition specification or depends on optional processor behavior (analysis in README.md).
 disputed MS-SimpleType2006-07-15/ste110
@@ -410,6 +423,13 @@ disputed MS-DataTypes2006-07-15/gMonth_minExclusive005_1294
 disputed MS-DataTypes2006-07-15/gMonth_minInclusive001_1285
 disputed MS-DataTypes2006-07-15/gMonth_minInclusive002_1286
 disputed MS-DataTypes2006-07-15/gMonth_minInclusive002_210
+# fixed элемента — gMonth (или список из gMonth) в записи 1-й редакции (--MM--): с 2026-10-25 значения default / fixed
+# проверяются по типу при загрузке схемы, и по 2-й редакции такая схема ошибочна
+# An element fixed value is a gMonth (or a list with gMonth) in the 1st edition notation (--MM--): since 2026-10-25
+# default / fixed values are checked by the type when the schema is loaded, and by the 2nd edition such a schema is in error
+disputed MS-SimpleType2006-07-15/stE075
+disputed MS-SimpleType2006-07-15/stE096
+disputed MS-SimpleType2006-07-15/stE097
 disputed MS-DataTypes2006-07-15/gMonth_minInclusive003_1287
 disputed MS-DataTypes2006-07-15/gMonth_minInclusive004_1288
 disputed MS-DataTypes2006-07-15/gMonth_minInclusive005_1289

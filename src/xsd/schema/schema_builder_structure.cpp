@@ -17,7 +17,10 @@ namespace beresta::xsd::detail
     ** её id нельзя считать повтором. Обход — явным стеком с глубиной каждого
     ** элемента: документ глубже MAX_DOCUMENT_DEPTH отвергается сразу, иначе
     ** обход стоил бы O(n · глубина). Содержимое xs:appinfo / xs:documentation
-    ** чужое и не проверяется.
+    ** чужое и не проверяется. Тем же обходом проверяется порядок и состав детей
+    ** каждого элемента XSD (checkChildOrder): так правила схемы для схем
+    ** действуют и там, куда сборка компонентов не заходит (xs:key, xs:list,
+    ** xs:extension, неиспользуемые определения).
     **
     ** The id attribute of XSD elements has the xs:ID type: the value is an NCName
     ** unique within ONE schema document. So the check is a separate traversal
@@ -26,9 +29,12 @@ namespace beresta::xsd::detail
     ** as a repeat. The traversal uses an explicit stack with the depth of each
     ** element: a document deeper than MAX_DOCUMENT_DEPTH is rejected at once, otherwise
     ** the traversal would cost O(n · depth). The content of xs:appinfo /
-    ** xs:documentation is foreign and not checked.
+    ** xs:documentation is foreign and not checked. The same traversal checks the order
+    ** and the set of the children of every XSD element (checkChildOrder): so the rules
+    ** of the schema for schemas also hold where building the components does not go
+    ** (xs:key, xs:list, xs:extension, unused definitions).
     */
-    void SchemaBuilder::checkDocumentIds(const Element& root) const
+    void SchemaBuilder::checkDocumentStructure(const Element& root) const
     {
         std::set<std::string> seen;
         std::vector<std::pair<const Element*, std::size_t>> pending{{&root, 1}};
@@ -41,6 +47,9 @@ namespace beresta::xsd::detail
             checkIdAttribute(current, seen);
             if (isSchemaElement(current, "appinfo") || isSchemaElement(current, "documentation"))
                 continue;
+            if (!isSchemaElement(current, "schema") && !isSchemaElement(current, "redefine")
+                && !isSchemaElement(current, "override"))
+                checkChildOrder(current);
             for (const Node* node = current.getFirstChild(); node != nullptr; node = node->getNextSibling())
             {
                 if (node->getType() != NodeType::ELEMENT)
@@ -73,13 +82,15 @@ namespace beresta::xsd::detail
     ** Порядок детей компонента XSD: xs:annotation — не больше одной и
     ** только первой (у всех элементов, кроме xs:schema / xs:redefine /
     ** xs:override, которые сюда не попадают). Остальные дети проверяет
-    ** checkGroupChild. Исключённые vc:minVersion / vc:maxVersion
+    ** checkGroupChild, место каждого ребёнка (в том числе аннотации) —
+    ** checkSchemaPlacement. Исключённые vc:minVersion / vc:maxVersion
     ** элементы и элементы чужих пространств имён не учитываются.
     **
     ** The order of the children of an XSD component: xs:annotation — at most one and
     ** only as the first (for all elements except xs:schema / xs:redefine /
     ** xs:override, which do not get here). The other children are checked by
-    ** checkGroupChild. Elements excluded by vc:minVersion / vc:maxVersion
+    ** checkGroupChild, the place of every child (an annotation too) —
+    ** checkSchemaPlacement. Elements excluded by vc:minVersion / vc:maxVersion
     ** and elements of foreign namespaces are not counted.
     */
     void SchemaBuilder::checkChildOrder(const Element& element) const
@@ -95,6 +106,7 @@ namespace beresta::xsd::detail
             const Element& child = static_cast<const Element&>(*node);
             if (child.getNamespaceURI().value_or("") != XSD_NAMESPACE_URI || !versionAccepted(child))
                 continue;
+            checkSchemaPlacement(element, child);
             if (child.getLocalName() != "annotation")
             {
                 content = true;

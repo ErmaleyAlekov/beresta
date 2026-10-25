@@ -81,6 +81,7 @@ namespace suites
     void registerXsdValueConstraintTests(test::TestRunner& runner);
     void registerXsdSchemaRulesTests(test::TestRunner& runner);
     void registerXsdLeafDeclarationTests(test::TestRunner& runner);
+    void registerXsdSchemaPlacementTests(test::TestRunner& runner);
     void registerXsdIdentityFieldTests(test::TestRunner& runner);
     void registerXsdDeepTests(test::TestRunner& runner);
     void registerXsdDeepSchemaTests(test::TestRunner& runner);

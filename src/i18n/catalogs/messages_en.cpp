@@ -407,6 +407,10 @@ namespace beresta::i18n
         {Message::SCHEMA_ATTRIBUTE_NO_NAME, "xs:attribute has neither name nor ref"},
         {Message::SCHEMA_ATTRIBUTE_RESERVED_NAME, "the attribute declaration \"{0}\" is not allowed: the name xmlns and the xsi namespace are reserved"},
         {Message::SCHEMA_FACET_WIDENS, "the facet xs:{0}=\"{1}\" weakens the restriction of the base type xs:{2}=\"{3}\""},
+        {Message::SCHEMA_ELEMENT_PARTS_CONFLICT, "xs:element \"{0}\" cannot have {1} together with {2}"},
+        {Message::SCHEMA_VALUE_CONSTRAINT_INVALID, "the value {0}=\"{1}\" of the declaration \"{2}\" does not fit its type: {3}"},
+        {Message::SCHEMA_VALUE_CONSTRAINT_CONTENT, "the element \"{0}\" cannot have {1}: its complex type has neither simple nor mixed content"},
+        {Message::SCHEMA_NOTATION_NO_IDENTIFIER, "the notation \"{0}\" has neither public nor system"},
     };
 
     const Catalog ENGLISH_CATALOG{"en", "English", TEXTS, sizeof(TEXTS) / sizeof(TEXTS[0])};

@@ -406,6 +406,10 @@ namespace beresta::i18n
         {Message::SCHEMA_ATTRIBUTE_NO_NAME, "у xs:attribute нет ни name, ни ref"},
         {Message::SCHEMA_ATTRIBUTE_RESERVED_NAME, "объявление атрибута \"{0}\" недопустимо: имя xmlns и пространство имён xsi зарезервированы"},
         {Message::SCHEMA_FACET_WIDENS, "фасет xs:{0}=\"{1}\" ослабляет ограничение базового типа xs:{2}=\"{3}\""},
+        {Message::SCHEMA_ELEMENT_PARTS_CONFLICT, "у xs:element \"{0}\" нельзя указывать {1} вместе с {2}"},
+        {Message::SCHEMA_VALUE_CONSTRAINT_INVALID, "значение {0}=\"{1}\" у объявления \"{2}\" не подходит к его типу: {3}"},
+        {Message::SCHEMA_VALUE_CONSTRAINT_CONTENT, "у элемента \"{0}\" не может быть {1}: его составной тип не имеет ни простого, ни смешанного содержимого"},
+        {Message::SCHEMA_NOTATION_NO_IDENTIFIER, "у нотации \"{0}\" нет ни public, ни system"},
     };
 
     const Catalog RUSSIAN_CATALOG{"ru", "Русский", TEXTS, sizeof(TEXTS) / sizeof(TEXTS[0])};

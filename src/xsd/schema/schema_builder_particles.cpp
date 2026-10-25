@@ -19,7 +19,6 @@ namespace beresta::xsd::detail
         std::string_view kind = definition.getLocalName();
         content::Particle group;
 
-        checkChildOrder(definition);
         if (depth > 64)
             fail(definition, i18n::format(i18n::Message::MODEL_TOO_DEEP));
         if (kind == "element")

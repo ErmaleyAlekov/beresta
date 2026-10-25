@@ -64,6 +64,11 @@ namespace beresta::xsd::detail
     ** An attribute use: the name and the namespace, the type (the type attribute,
     ** an anonymous xs:simpleType or anySimpleType), use, default and fixed.
     ** For ref the type and the constraints are taken from the global declaration.
+    ** Тип атрибута — простой и к этому моменту достроен, поэтому default / fixed
+    ** проверяются по нему сразу.
+    **
+    ** The type of an attribute is simple and complete by this moment, so default / fixed
+    ** are checked by it at once.
     */
     AttributeUse SchemaBuilder::buildAttributeUse(const Element& definition, const SchemaSource& source,
         bool global)
@@ -86,6 +91,7 @@ namespace beresta::xsd::detail
         if (&typed != &definition)
             readValueConstraints(typed, use.defaultValue, use.fixedValue);
         readValueConstraints(definition, use.defaultValue, use.fixedValue);
+        checkValueConstraints(definition, TypeRef{use.type, nullptr}, use.defaultValue, use.fixedValue);
         return use;
     }
 

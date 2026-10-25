@@ -56,6 +56,8 @@ namespace beresta::xsd::detail
             _builtLocals[&definition] = &declaration;
         readElementFlags(definition, source, declaration);
         readValueConstraints(definition, declaration.defaultValue, declaration.fixedValue);
+        if (declaration.defaultValue.has_value() || declaration.fixedValue.has_value())
+            _valueChecks.emplace_back(&definition, &declaration);
         if (global && head.has_value())
             declaration.substitutionHead = globalElement(resolveQName(definition, head.value()));
         declaration.type = elementType(definition, source, declaration);
@@ -85,6 +87,13 @@ namespace beresta::xsd::detail
     ** the type of the substitution group head (substitutionGroup) or xs:anyType. The head
     ** may still be under construction (its type refers to this element), so the type
     ** taken from the head is refined after the schema is loaded (inheritHeadTypes).
+    ** Атрибут type, анонимный xs:simpleType и анонимный xs:complexType взаимно
+    ** исключают друг друга (src-element.3 и схема для схем). Ссылка ref сюда
+    ** не попадает: её дети проверены в checkElementAttributes.
+    **
+    ** The type attribute, an anonymous xs:simpleType and an anonymous xs:complexType
+    ** exclude each other (src-element.3 and the schema for schemas). A ref reference
+    ** does not get here: its children are checked in checkElementAttributes.
     */
     TypeRef SchemaBuilder::elementType(const Element& definition, const SchemaSource& source,
         ElementDecl& declaration)
@@ -92,7 +101,17 @@ namespace beresta::xsd::detail
         std::optional<std::string> typeName = definition.getAttribute("type");
         const Element* simple = firstSchemaChild(definition, "simpleType");
         const Element* complex = firstSchemaChild(definition, "complexType");
+        std::vector<std::string_view> parts;
 
+        if (typeName.has_value())
+            parts.push_back("type");
+        if (complex != nullptr)
+            parts.push_back("xs:complexType");
+        if (simple != nullptr)
+            parts.push_back("xs:simpleType");
+        if (parts.size() > 1)
+            fail(definition, i18n::format(i18n::Message::SCHEMA_ELEMENT_PARTS_CONFLICT,
+                {declaration.name, parts[0], parts[1]}));
         if (typeName.has_value())
             return resolveType(resolveQName(definition, typeName.value()));
         if (simple != nullptr)

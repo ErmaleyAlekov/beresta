@@ -10,7 +10,7 @@ namespace beresta::xsd::detail
     SchemaBuilder::SchemaBuilder(Schema& schema, const SchemaLoadOptions& options)
         : _schema(schema), _options(options), _sources(), _loaded(), _loadedUris(), _loadedBy(),
           _definitions(), _builtElements(), _builtLocals(), _builtTypes(), _incomplete(), _builtIdentities(),
-          _redefinitions(), _builtOriginals(), _overridden(), _headTyped()
+          _redefinitions(), _builtOriginals(), _overridden(), _headTyped(), _valueChecks()
     {
     }
 
@@ -48,7 +48,7 @@ namespace beresta::xsd::detail
             _loadedUris.insert(baseUri);
         if (!versionAccepted(root))
             return;
-        checkDocumentIds(root);
+        checkDocumentStructure(root);
         for (const Element* child : schemaChildren(root))
         {
             if (isSchemaElement(*child, "include") || isSchemaElement(*child, "import"))
@@ -65,13 +65,15 @@ namespace beresta::xsd::detail
     ** схемы проявились при загрузке. Группы замены вычисляются, когда построены
     ** все элементы (член группы может быть объявлен где угодно). Ссылки
     ** keyref связываются последними: ключ, на который ссылается keyref,
-    ** может быть объявлен в любом месте схемы.
+    ** может быть объявлен в любом месте схемы. Значения default / fixed
+    ** элементов проверяются по типу в самом конце, когда все типы достроены.
     **
     ** All global elements, types and groups are built at once so that schema
     ** errors show up at loading. Substitution groups are computed when all the
     ** elements are built (a group member may be declared anywhere). keyref
     ** references are bound last: the key a keyref refers to may be declared
-    ** anywhere in the schema.
+    ** anywhere in the schema. The default / fixed values of elements are checked
+    ** by the type at the very end, when all types are complete.
     */
     void SchemaBuilder::buildAll()
     {
@@ -92,6 +94,7 @@ namespace beresta::xsd::detail
         buildNamedGroups();
         buildSubstitutionGroups();
         resolveKeyReferences();
+        checkElementValues();
     }
 
     /*

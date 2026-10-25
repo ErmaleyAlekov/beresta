@@ -414,6 +414,10 @@ namespace beresta::i18n
         SCHEMA_ATTRIBUTE_PARTS_CONFLICT,
         SCHEMA_ATTRIBUTE_NO_NAME,
         SCHEMA_ATTRIBUTE_RESERVED_NAME,
+        SCHEMA_ELEMENT_PARTS_CONFLICT,
+        SCHEMA_VALUE_CONSTRAINT_INVALID,
+        SCHEMA_VALUE_CONSTRAINT_CONTENT,
+        SCHEMA_NOTATION_NO_IDENTIFIER,
 
         // Число сообщений (не сообщение) / The number of messages (not a message)
         COUNT

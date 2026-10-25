@@ -71,7 +71,8 @@ cmake --build build-xsts --config Release --target xsts_run
 | `s4s-namespace` | схемы с `targetNamespace` самого XML Schema (схема для схем) не загружаются | 3 |
 | `redefine-cycle` | циклы через `xs:redefine` (A переопределяет B, а B переопределяет или включает A) | 3 |
 | `nested-derivation` | тип, выведенный из составного типа внутри его же модели, считается циклическим | 1 |
-| `disputed` | ожидание набора расходится со спецификацией или зависит от процессора (ниже) | 73 |
+| `xsd11-rules` | правило XSD 1.0, отменённое в XSD 1.1, не применяется («Берёста» — процессор 1.1): `xs:any` внутри `xs:all`, `default`/`fixed` у типа ID | 7 |
+| `disputed` | ожидание набора расходится со спецификацией или зависит от процессора (ниже) | 76 |
 
 Списки `particle-restrict` и `upa` собраны по описаниям групп
 («Particle Derivation OK», «NameAndTypeOK», «non-deterministic» и т. п.) только

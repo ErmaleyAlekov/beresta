@@ -71,6 +71,24 @@
 - `tests/xsts_failing` — отладчик провалов XSTS: список провалов из прогона, выполнение случаев по одному
   (фильтр, `--case N`, `--stop-on-first`), отладочная сборка вместе с библиотекой.
 
+### XML Schema: значения по типу, аннотации и нотации
+
+Итог W3C XML Schema Test Suite — **98,6 %**: провалов 671 → 515, новых нет.
+
+- `default` и `fixed` элементов и атрибутов проверяются по типу при загрузке схемы. У элемента с составным типом
+  значение допустимо при простом (проверка по нему) или смешанном содержимом; при пустом или только элементах —
+  ошибка. Новые сообщения `SCHEMA_VALUE_CONSTRAINT_INVALID`, `SCHEMA_VALUE_CONSTRAINT_CONTENT`.
+- У `xs:element` атрибут `type`, вложенный `xs:simpleType` и вложенный `xs:complexType` взаимно исключают друг друга
+  (`SCHEMA_ELEMENT_PARTS_CONFLICT`).
+- Порядок детей проверяется у каждого элемента документа схемы, а не только у глобальных компонентов и частиц:
+  `xs:annotation` одна и первая также в `xs:key`, `xs:selector`, `xs:field`, `xs:list`, `xs:union`, `xs:extension`,
+  `xs:anyAttribute` и неиспользуемых определениях. Внутри `xs:annotation` — только `xs:appinfo` / `xs:documentation`.
+- `xs:notation`: только прямо в `xs:schema`, внутри — только аннотация; имя — NCName без повторов; нужен
+  `public` или `system` (`SCHEMA_NOTATION_NO_IDENTIFIER`).
+- Правила XSD 1.0, отменённые в 1.1 (`xs:any` внутри `xs:all`, `default`/`fixed` у типа ID), не применяются:
+  «Берёста» — процессор 1.1. В `tests/xsts/known_limitations.txt` — новый ключ `xsd11-rules` (7 случаев); в
+  `disputed` добавлены 3 группы с `fixed` gMonth в записи 1-й редакции.
+
 ## 2.1.4 — 2026-10-20
 
 ### Лицензия
