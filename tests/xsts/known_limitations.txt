@@ -39,7 +39,7 @@ upa MS-Wildcards2006-07-15/wildI010/wildI010
 upa MS-Wildcards2006-07-15/wildI013/wildI013
 upa MS-Wildcards2006-07-15/wildI014/wildI014
 
-# ---- particle-restrict (260) ----
+# ---- particle-restrict (261) ----
 # Корректность ограничения модели (cos-particle-restrict, в т.ч. с группами замены) не проверяется.
 # The validity of a model restriction (cos-particle-restrict, including with substitution groups) is not checked.
 particle-restrict MS-Element2006-07-15/elemZ026
@@ -47,6 +47,7 @@ particle-restrict MS-Element2006-07-15/elemZ027_c
 particle-restrict MS-Element2006-07-15/elemZ028b
 particle-restrict MS-Element2006-07-15/elemZ028e
 particle-restrict MS-Additional2006-07-15/addB118/addB118
+particle-restrict MS-Particles2006-07-15/particlesEb040/particlesEb040
 particle-restrict MS-Particles2006-07-15/particlesHa021/particlesHa021
 particle-restrict MS-Particles2006-07-15/particlesHa052/particlesHa052
 particle-restrict MS-Particles2006-07-15/particlesHa071/particlesHa071
@@ -351,11 +352,6 @@ s4s-namespace MS-Additional2006-07-15/addB071
 redefine-cycle MS-Schema2006-07-15/schU1
 redefine-cycle MS-Schema2006-07-15/schU4/schU4.i
 redefine-cycle MS-Schema2006-07-15/schU5/schU5.i
-
-# ---- nested-derivation (1) ----
-# Тип, выведенный из составного типа внутри модели этого же типа, считается циклическим наследованием.
-# A type derived from a complex type inside the model of that same type is taken as circular derivation.
-nested-derivation MS-Particles2006-07-15/particlesEb041
 
 # ---- xsd11-rules (7) ----
 # Правило XSD 1.0, отменённое в XSD 1.1, не применяется: «Берёста» — процессор версии 1.1 (решение 2026-10-25).

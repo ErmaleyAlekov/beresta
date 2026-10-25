@@ -7,6 +7,13 @@ is included in the release description on GitHub and Gitverse.
 
 ## Unreleased
 
+### XML Schema: recursive models and derivation
+
+- Fixed a false "cyclic type derivation" for Composite-style schemas: a container type holds elements whose
+  type extends the container itself (`BoxType` holds `Panel`, `PanelType` extends `BoxType`). The result used
+  to depend on the alphabetical order of element names. A derived type now waits until its base is complete
+  and gets its full model; real cycles (`A` → `A`, `A` → `B` → `A`) are still a schema error.
+
 ### PHP binding through FFI
 
 - A new Composer package `bindings/php` (`ermaleyalekov/beresta`, PHP 8.2+, the `ffi` extension): all 71 functions

@@ -71,6 +71,7 @@ namespace suites
     void registerXsdStreamIdentityTests(test::TestRunner& runner);
     void registerXsdSubstitutionTests(test::TestRunner& runner);
     void registerXsdDerivationTests(test::TestRunner& runner);
+    void registerXsdRecursiveDerivationTests(test::TestRunner& runner);
     void registerXsdFinalTests(test::TestRunner& runner);
     void registerXsdRedefineTests(test::TestRunner& runner);
     void registerXsdSchemaLexicalTests(test::TestRunner& runner);

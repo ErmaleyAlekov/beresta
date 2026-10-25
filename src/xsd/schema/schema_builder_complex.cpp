@@ -5,14 +5,18 @@ namespace beresta::xsd::detail
 {
     /*
     ** xs:complexType. Объект регистрируется до построения содержимого
-    ** (рекурсивные модели), но помечается незавершённым: наследоваться
-    ** от незавершённого типа нельзя — это циклическое наследование.
+    ** (рекурсивные модели) и помечается незавершённым. Если базовый тип ещё
+    ** строится (его модель ссылается на элемент этого типа — паттерн Composite),
+    ** содержимое откладывается до завершения базы (schema_builder_pending.cpp):
+    ** это рекурсивная структура данных, а не цикл наследования.
     ** publish = false — прежнее определение, заменённое xs:redefine: оно
     ** сохраняет имя, но под ним не регистрируется (имя занято новым).
     **
     ** xs:complexType. The object is registered before its content is built
-    ** (recursive models), but marked incomplete: deriving from an
-    ** incomplete type is not allowed — it is circular derivation.
+    ** (recursive models) and marked incomplete. If the base type is still being
+    ** built (its model refers to an element of this type — the Composite pattern),
+    ** the content is deferred until the base is complete (schema_builder_pending.cpp):
+    ** it is a recursive data structure, not a derivation cycle.
     ** publish = false — the former definition replaced by xs:redefine: it keeps
     ** its name but is not registered under it (the name belongs to the new one).
     */
@@ -22,9 +26,7 @@ namespace beresta::xsd::detail
         NestingGuard nesting(*this, definition);
         _schema._complexTypes.emplace_back();
         ComplexType& type = _schema._complexTypes.back();
-        const Element* simpleContent = firstSchemaChild(definition, "simpleContent");
-        const Element* complexContent = firstSchemaChild(definition, "complexContent");
-        bool mixed = booleanAttribute(definition, "mixed", false);
+        PendingType job{&type, &definition, &source, nullptr, TypeRef()};
 
         type.name = name.second;
         type.namespaceUri = name.first;
@@ -35,13 +37,10 @@ namespace beresta::xsd::detail
             _schema._globalTypes[name] = TypeRef{nullptr, &type};
         }
         _incomplete.insert(&type);
-        if (simpleContent != nullptr)
-            buildSimpleContent(type, *simpleContent, source);
-        else if (complexContent != nullptr)
-            buildComplexContent(type, *complexContent, source, mixed);
+        if (readDerivationBase(job))
+            finishComplexType(job);
         else
-            buildTypeBody(type, definition, source, mixed);
-        _incomplete.erase(&type);
+            _pendingTypes.push_back(job);
         return &type;
     }
 
@@ -89,31 +88,25 @@ namespace beresta::xsd::detail
     }
 
     /*
-    ** Базовый тип (по умолчанию xs:anyType) и способ наследования
-    ** запоминаются в типе — по ним проверяется xsi:type. От незавершённого
-    ** типа наследоваться нельзя (цикл), от типа с этим способом в final —
-    ** тоже. Ссылка на собственное имя в xs:redefine ведёт к прежнему типу.
-    ** Утверждения базового типа наследуются и при расширении, и при ограничении.
+    ** Способ наследования запоминается в типе, базовый тип уже записан
+    ** (readDerivationBase, finishComplexType) — по ним проверяется xsi:type.
+    ** К этому моменту база завершена: циклы ловит checkPendingTypes. От типа
+    ** с этим способом в final наследоваться нельзя. Утверждения базового типа
+    ** наследуются и при расширении, и при ограничении.
     **
-    ** The base type (xs:anyType by default) and the derivation method
-    ** are remembered in the type — xsi:type is checked by them. Deriving from an
-    ** incomplete type is not allowed (a cycle), nor from a type with this method in
-    ** final. A reference to its own name in xs:redefine leads to the former type.
-    ** The assertions of the base type are inherited both on extension and on restriction.
+    ** The derivation method is remembered in the type, the base type is already set
+    ** (readDerivationBase, finishComplexType) — xsi:type is checked by them.
+    ** By this moment the base is complete: cycles are caught by checkPendingTypes.
+    ** Deriving from a type with this method in final is not allowed. The assertions
+    ** of the base type are inherited both on extension and on restriction.
     */
     const ComplexType* SchemaBuilder::completeBase(const Element& derivation, bool extension, ComplexType& type)
     {
-        std::optional<std::string> name = derivation.getAttribute("base");
+        const ComplexType* base = type.baseType.complex;
 
-        type.baseType = TypeRef();
         type.derivationMethod = DERIVATION_RESTRICTION;
         if (extension)
             type.derivationMethod = DERIVATION_EXTENSION;
-        if (name.has_value())
-            type.baseType = referencedType(derivation, name.value());
-        const ComplexType* base = type.baseType.complex;
-        if (base != nullptr && _incomplete.count(base) != 0)
-            fail(derivation, i18n::format(i18n::Message::SCHEMA_CYCLIC_DERIVATION));
         if (base != nullptr)
             checkFinal(derivation, base->finalSet, base->name, type.derivationMethod);
         if (base != nullptr)

@@ -62,6 +62,28 @@ namespace beresta::xsd::detail
         Definition original;
     };
 
+    /*
+    ** Составной тип, чьё содержимое ещё не построено (schema_builder_pending.cpp).
+    ** Производный тип ждёт, пока достроится базовый: при расширении он копирует
+    ** модель и атрибуты базы, а из незавершённой базы скопировалась бы пустая модель.
+    ** derivation — xs:extension / xs:restriction (nullptr у типа без наследования),
+    ** base — уже найденный базовый тип.
+    **
+    ** A complex type whose content is not built yet (schema_builder_pending.cpp).
+    ** A derived type waits until its base type is complete: on extension it copies
+    ** the model and the attributes of the base, and an incomplete base would give an empty model.
+    ** derivation — xs:extension / xs:restriction (nullptr for a type without derivation),
+    ** base — the base type already found.
+    */
+    struct PendingType
+    {
+        ComplexType* type;
+        const Element* definition;
+        const SchemaSource* source;
+        const Element* derivation;
+        TypeRef base;
+    };
+
     // Все способы наследования для #all: у элемента в block, у элемента и составного типа в final, у простого типа
     // All derivation methods for #all: of an element in block, of an element and a complex type in final, of a simple type
     inline constexpr DerivationSet ELEMENT_BLOCK_ALL = DERIVATION_EXTENSION | DERIVATION_RESTRICTION
@@ -301,6 +323,14 @@ namespace beresta::xsd::detail
         const Element& derivationOf(const Element& content, bool& extension) const;
         const ComplexType* completeBase(const Element& derivation, bool extension, ComplexType& type);
 
+        // ---- Отложенное построение производных типов (schema_builder_pending.cpp) ----
+        // ---- Deferred building of derived types (schema_builder_pending.cpp) ----
+        bool readDerivationBase(PendingType& job);
+        bool baseIncomplete(const PendingType& job) const;
+        void finishComplexType(const PendingType& job);
+        void buildPendingTypes();
+        void checkPendingTypes() const;
+
         // ---- Наследование (schema_builder_derivation.cpp) ----
         // ---- Derivation (schema_builder_derivation.cpp) ----
         void buildSimpleContent(ComplexType& type, const Element& simpleContent, const SchemaSource& source);
@@ -351,6 +381,9 @@ namespace beresta::xsd::detail
         std::map<const Element*, ElementDecl*> _builtLocals;
         std::map<QualifiedKey, TypeRef> _builtTypes;
         std::set<const void*> _incomplete;
+        // Производные типы, ждущие завершения базы; в конце сборки остаются только циклы
+        // Derived types waiting for their base to complete; at the end of building only cycles remain
+        std::vector<PendingType> _pendingTypes;
         std::map<const Element*, IdentityConstraint*> _builtIdentities;
         std::map<const Element*, Redefinition> _redefinitions;
         std::map<const Element*, TypeRef> _builtOriginals;

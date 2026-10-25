@@ -9,7 +9,8 @@ namespace beresta::xsd::detail
     // The builder fills the given schema
     SchemaBuilder::SchemaBuilder(Schema& schema, const SchemaLoadOptions& options)
         : _schema(schema), _options(options), _sources(), _loaded(), _loadedUris(), _loadedBy(),
-          _definitions(), _builtElements(), _builtLocals(), _builtTypes(), _incomplete(), _builtIdentities(),
+          _definitions(), _builtElements(), _builtLocals(), _builtTypes(), _incomplete(), _pendingTypes(),
+          _builtIdentities(),
           _redefinitions(), _builtOriginals(), _overridden(), _headTyped(), _valueChecks()
     {
     }
@@ -92,6 +93,7 @@ namespace beresta::xsd::detail
             resolveType(key);
         buildGlobalAttributes();
         buildNamedGroups();
+        checkPendingTypes();
         buildSubstitutionGroups();
         resolveKeyReferences();
         checkElementValues();
