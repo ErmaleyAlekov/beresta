@@ -4,7 +4,7 @@
 #  Цели:
 #    make               — библиотеки (динамическая + статическая) и демо-программы
 #    make test          — собрать и запустить модульные тесты C++
-#    make bindings-test — самопроверки включённых обёрток (JAVA/CSHARP/PYTHON/NODE=1)
+#    make bindings-test — самопроверки включённых обёрток (JAVA/CSHARP/PYTHON/PHP/NODE=1)
 #    make java-package  — jar через Maven (нужен mvn и доступ к репозиторию)
 #    make csharp-package— NuGet-пакет через dotnet pack
 #    make node-package  — пакет npm (.tgz) через npm pack
@@ -17,6 +17,7 @@
 #    make JAVA=1        — бинарник -> bindings/java/src/main/resources/natives/<os>-<arch>/
 #    make CSHARP=1      — бинарник -> bindings/csharp/Beresta/runtimes/<rid>/native/
 #    make PYTHON=1      — бинарник -> bindings/python/beresta/_native/<os>-<arch>/
+#    make PHP=1         — бинарник -> bindings/php/native/<os>-<arch>/
 #    make NODE=1        — аддон beresta.node -> bindings/node/native/<os>-<arch>/
 #
 #  Язык сообщений об ошибках (код каталога src/i18n/catalogs/messages_<код>.cpp):
@@ -24,7 +25,7 @@
 #
 #  Интерпретатор Python для самопроверки: python на Windows, python3 в
 #  Linux / macOS (там команды python часто нет); свой — make PYTHON_EXE=...
-#  Node.js — make NODE_EXE=...
+#  PHP — make PHP_EXE=... (нужно расширение ffi), Node.js — make NODE_EXE=...
 #
 #  Структура выходных каталогов зеркально повторяет src/:
 #    src/core/element/element.cpp -> obj/core/element/element.o
@@ -35,7 +36,7 @@
 #  Targets:
 #    make               — the libraries (shared + static) and the demo programs
 #    make test          — build and run the C++ unit tests
-#    make bindings-test — self-tests of the enabled bindings (JAVA/CSHARP/PYTHON/NODE=1)
+#    make bindings-test — self-tests of the enabled bindings (JAVA/CSHARP/PYTHON/PHP/NODE=1)
 #    make java-package  — a jar through Maven (needs mvn and repository access)
 #    make csharp-package— a NuGet package through dotnet pack
 #    make node-package  — an npm package (.tgz) through npm pack
@@ -51,6 +52,7 @@
 #    make JAVA=1        — binary -> bindings/java/src/main/resources/natives/<os>-<arch>/
 #    make CSHARP=1      — binary -> bindings/csharp/Beresta/runtimes/<rid>/native/
 #    make PYTHON=1      — binary -> bindings/python/beresta/_native/<os>-<arch>/
+#    make PHP=1         — binary -> bindings/php/native/<os>-<arch>/
 #    make NODE=1        — the beresta.node addon -> bindings/node/native/<os>-<arch>/
 #
 #  The error message language (the code of a catalog src/i18n/catalogs/messages_<code>.cpp):
@@ -58,7 +60,7 @@
 #
 #  The Python interpreter for the self-test: python on Windows, python3 on
 #  Linux / macOS (the python command is often missing there); your own — make PYTHON_EXE=...
-#  Node.js — make NODE_EXE=...
+#  PHP — make PHP_EXE=... (the ffi extension is needed), Node.js — make NODE_EXE=...
 #
 #  The output directory structure mirrors src/:
 #    src/core/element/element.cpp -> obj/core/element/element.o
@@ -90,8 +92,10 @@ BIND_DIR    := bindings
 JAVA        ?= 0
 CSHARP      ?= 0
 PYTHON      ?= 0
+PHP         ?= 0
 NODE        ?= 0
 NODE_EXE    ?= node
+PHP_EXE     ?= php
 
 # ---- Язык сообщений об ошибках / Error message language ----------------------
 # Каталог обязан существовать: опечатка в коде языка останавливает сборку сразу,
@@ -353,6 +357,8 @@ CSHARP_DIR  := $(BIND_DIR)/csharp
 CSHARP_NATIVE := $(CSHARP_DIR)/Beresta/runtimes/$(DOTNET_RID)/native
 PYTHON_DIR  := $(BIND_DIR)/python
 PYTHON_NATIVE := $(PYTHON_DIR)/beresta/_native/$(PLATFORM)
+PHP_DIR     := $(BIND_DIR)/php
+PHP_NATIVE  := $(PHP_DIR)/native/$(PLATFORM)
 NODE_NATIVE := $(NODE_DIR)/native/$(PLATFORM)
 NODE_COPY   := $(NODE_NATIVE)/beresta.node
 
@@ -382,7 +388,8 @@ WASM_LDFLAGS := -fwasm-exceptions -sMODULARIZE=1 -sEXPORT_ES6=1 -sEXPORT_NAME=cr
                 -sSTACK_SIZE=1048576 -sEXPORTED_FUNCTIONS=@$(WASM_DIR)/exports.json \
                 -sEXPORTED_RUNTIME_METHODS=UTF8ToString,stringToUTF8,lengthBytesUTF8,getValue,HEAPU8
 
-ALL_COPIES     := $(JAVA_NATIVE)/$(SHARED_NAME) $(CSHARP_NATIVE)/$(SHARED_NAME) $(PYTHON_NATIVE)/$(SHARED_NAME)
+ALL_COPIES     := $(JAVA_NATIVE)/$(SHARED_NAME) $(CSHARP_NATIVE)/$(SHARED_NAME) $(PYTHON_NATIVE)/$(SHARED_NAME) \
+                  $(PHP_NATIVE)/$(SHARED_NAME)
 BINDING_COPIES :=
 BINDING_TESTS  :=
 ifeq ($(JAVA),1)
@@ -396,6 +403,10 @@ endif
 ifeq ($(PYTHON),1)
     BINDING_COPIES += $(PYTHON_NATIVE)/$(SHARED_NAME)
     BINDING_TESTS  += python-test
+endif
+ifeq ($(PHP),1)
+    BINDING_COPIES += $(PHP_NATIVE)/$(SHARED_NAME)
+    BINDING_TESTS  += php-test
 endif
 ifeq ($(NODE),1)
     BINDING_COPIES += $(NODE_COPY)
@@ -416,7 +427,7 @@ DEPFLAGS     = -MMD -MP -MF $(call dep_of,$@) -MT $@
 
 # ---- Основные цели ----------------------------------------------------------
 # ---- Main targets ----------------------------------------------------------
-.PHONY: all test bindings-test java-test csharp-test python-test node-test \
+.PHONY: all test bindings-test java-test csharp-test python-test php-test node-test \
         java-package csharp-package node-package platform universal wasm wasm-test clean fclean re
 
 all: $(LIB_BIN) $(SHARED_BIN) $(DEMO_BIN) $(CAPI_BIN) $(BINDING_COPIES)
@@ -549,8 +560,10 @@ endif
 		-output $(BIN_DIR)/$(file) && lipo -info $(BIN_DIR)/$(file) &&) true
 	$(foreach platform,$(UNIVERSAL_PLATFORMS),$(call MKDIR,$(JAVA_DIR)/src/main/resources/natives/$(platform)) && \
 		$(call MKDIR,$(PYTHON_DIR)/beresta/_native/$(platform)) && $(call MKDIR,$(NODE_DIR)/native/$(platform)) && \
+		$(call MKDIR,$(PHP_DIR)/native/$(platform)) && \
 		$(call COPY,$(SHARED_BIN),$(JAVA_DIR)/src/main/resources/natives/$(platform)/$(SHARED_NAME)) && \
 		$(call COPY,$(SHARED_BIN),$(PYTHON_DIR)/beresta/_native/$(platform)/$(SHARED_NAME)) && \
+		$(call COPY,$(SHARED_BIN),$(PHP_DIR)/native/$(platform)/$(SHARED_NAME)) && \
 		$(call COPY,$(ADDON_BIN),$(NODE_DIR)/native/$(platform)/beresta.node) &&) true
 	$(foreach rid,$(UNIVERSAL_RIDS),$(call MKDIR,$(CSHARP_DIR)/Beresta/runtimes/$(rid)/native) && \
 		$(call COPY,$(SHARED_BIN),$(CSHARP_DIR)/Beresta/runtimes/$(rid)/native/$(SHARED_NAME)) &&) true
@@ -594,6 +607,13 @@ csharp-test: $(CSHARP_NATIVE)/$(SHARED_NAME)
 python-test: $(PYTHON_NATIVE)/$(SHARED_NAME)
 	$(call RUN_IN,$(PYTHON_DIR),$(PYTHON_EXE) -m unittest discover -s tests)
 
+# PHP проверяется своим маленьким прогонщиком (без PHPUnit и composer install);
+# ffi.enable=1 — на случай php.ini, где FFI разрешён только в preload
+# PHP is checked with its own small runner (without PHPUnit and composer install);
+# ffi.enable=1 is for a php.ini where FFI is allowed only in preload
+php-test: $(PHP_NATIVE)/$(SHARED_NAME)
+	$(call RUN_IN,$(PHP_DIR),$(PHP_EXE) -d ffi.enable=1 tests/run.php)
+
 # Node.js проверяется встроенным node --test (без Jest, Mocha и npm install)
 # Node.js is checked with the built-in node --test (without Jest, Mocha and npm install)
 node-test: $(NODE_COPY)
@@ -614,6 +634,7 @@ platform:
 	@echo JAVA=$(JAVA_NATIVE)
 	@echo CSHARP=$(CSHARP_NATIVE)
 	@echo PYTHON=$(PYTHON_NATIVE)
+	@echo PHP=$(PHP_NATIVE)
 	@echo NODE=$(NODE_NATIVE)
 
 # ---- Очистка ----------------------------------------------------------------
@@ -634,6 +655,7 @@ fclean: clean
 	@$(call RMDIR,$(JAVA_DIR)/target)
 	@$(call RMDIR,$(CSHARP_NATIVE))
 	@$(call RMDIR,$(PYTHON_NATIVE))
+	@$(call RMDIR,$(PHP_NATIVE))
 	@$(call RMDIR,$(NODE_NATIVE))
 	@$(call RMDIR,$(WASM_DIST))
 

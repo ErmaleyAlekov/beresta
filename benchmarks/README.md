@@ -38,7 +38,7 @@ BENCH_NODE_MODULES=/tmp/nodebench node node/compare.js 20000
 
 ### Обёртки против родных библиотек языков
 
-`wrappers/` сравнивает обёртки Java, .NET и Python с XML-библиотеками своих языков: JDK DOM (`javax.xml`), `XmlDocument` и `XDocument`, lxml и `xml.etree`. Все программы читают одни и те же файлы из `wrappers/data` (каталог, схема, запрос), а память каждой библиотеки меряется в отдельном процессе (`--memory N`, Linux). Сначала соберите ядро с нужными обёртками (`make JAVA=1 CSHARP=1 PYTHON=1`), затем из каталога `benchmarks/wrappers`:
+`wrappers/` сравнивает обёртки Java, .NET, Python и PHP с XML-библиотеками своих языков: JDK DOM (`javax.xml`), `XmlDocument` и `XDocument`, lxml и `xml.etree`, ext/dom и SimpleXML. Все программы читают одни и те же файлы из `wrappers/data` (каталог, схема, запрос), а память каждой библиотеки меряется в отдельном процессе (`--memory N`, Linux). Сначала соберите ядро с нужными обёртками (`make JAVA=1 CSHARP=1 PYTHON=1 PHP=1`), затем из каталога `benchmarks/wrappers`:
 
 ```bash
 node make_data.js 50000
@@ -53,9 +53,13 @@ dotnet run -c Release --project csharp/WrapperBench.csproj -- data
 PYTHONPATH=../../bindings/python python3 python/bench.py data
 ```
 
-lxml необязательна (`pip install lxml`): без неё её строка пропускается.
+```bash
+php -d ffi.enable=1 php/bench.php data
+```
 
-Потоковая проверка по XSD без дерева сравнивается отдельными программами на тех же данных: `bench.StreamBench` (Java: «Берёста» против `javax.xml.validation.Validator`), `WrapperBench` с ключом `--stream` (.NET: против проверяющего `XmlReader`) и `python/stream_bench.py` (Python: против lxml `iterparse` со схемой). Запуск — как у основных программ, например `java ... bench.StreamBench data` или `dotnet run -c Release --project csharp/WrapperBench.csproj -- data --stream`.
+lxml необязательна (`pip install lxml`): без неё её строка пропускается. PHP-обёртка (`make PHP=1`) сравнивается с ext/dom (`DOMDocument` + `DOMXPath`, XSD — `schemaValidateSource`) и SimpleXML; память — `php php/bench.php data --memory N` (N — номер библиотеки, Linux).
+
+Потоковая проверка по XSD без дерева сравнивается отдельными программами на тех же данных: `bench.StreamBench` (Java: «Берёста» против `javax.xml.validation.Validator`), `WrapperBench` с ключом `--stream` (.NET: против проверяющего `XmlReader`), `python/stream_bench.py` (Python: против lxml `iterparse` со схемой) и `php/stream_bench.php` (PHP: против `XMLReader` с `setSchema`). Запуск — как у основных программ, например `java ... bench.StreamBench data` или `dotnet run -c Release --project csharp/WrapperBench.csproj -- data --stream`.
 
 Результаты и выводы — в разделе «Производительность» файла [docs/comparison.md](../docs/comparison.md#производительность).
 
@@ -74,6 +78,6 @@ The `beresta_bench` program compares Beresta with other XML libraries on the sam
 
 The compared libraries are included only if pkg-config found them (RapidXML — by its header). Beresta itself does not depend on them: this is only a comparison tool.
 
-`wrappers/` compares the Java, .NET and Python wrappers with the XML libraries of their languages: the JDK DOM (`javax.xml`), `XmlDocument` and `XDocument`, lxml and `xml.etree`. All programs read the same files from `wrappers/data` (`node make_data.js`), and the memory of every library is measured in a separate process (`--memory N`, Linux). The commands are given above. Streaming XSD validation without a tree is compared by separate programs on the same data: `bench.StreamBench` (Java: Beresta against `javax.xml.validation.Validator`), `WrapperBench` with the `--stream` switch (.NET: against a validating `XmlReader`) and `python/stream_bench.py` (Python: against lxml `iterparse` with a schema).
+`wrappers/` compares the Java, .NET, Python and PHP wrappers with the XML libraries of their languages: the JDK DOM (`javax.xml`), `XmlDocument` and `XDocument`, lxml and `xml.etree`, ext/dom and SimpleXML. All programs read the same files from `wrappers/data` (`node make_data.js`), and the memory of every library is measured in a separate process (`--memory N`, Linux). The commands are given above. Streaming XSD validation without a tree is compared by separate programs on the same data: `bench.StreamBench` (Java: Beresta against `javax.xml.validation.Validator`), `WrapperBench` with the `--stream` switch (.NET: against a validating `XmlReader`), `python/stream_bench.py` (Python: against lxml `iterparse` with a schema) and `php/stream_bench.php` (PHP: against `XMLReader` with `setSchema`).
 
 See the "Performance" section of [docs/comparison.en.md](../docs/comparison.en.md#performance) for the results.

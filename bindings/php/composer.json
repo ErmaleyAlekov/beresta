@@ -1,0 +1,41 @@
+{
+    "name": "ermaleyalekov/beresta",
+    "description": "Берёста — XML-библиотека на C++17 для PHP через FFI: DOM, XPath 1.0, XML Schema, DTD / Beresta — a C++17 XML library for PHP through FFI: DOM, XPath 1.0, XML Schema, DTD",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["xml", "dom", "xpath", "xsd", "xml-schema", "dtd", "ffi", "parser"],
+    "homepage": "https://github.com/ErmaleyAlekov/beresta",
+    "authors": [
+        {
+            "name": "Ермаков Алексей Александрович (Ermakov Aleksei Aleksandrovich)",
+            "email": "ermaley.alekov@yandex.ru"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/ErmaleyAlekov/beresta/issues",
+        "source": "https://github.com/ErmaleyAlekov/beresta/tree/main/bindings/php"
+    },
+    "require": {
+        "php": ">=8.2",
+        "ext-ffi": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Beresta\\": [
+                "src/Dom/",
+                "src/Parsing/",
+                "src/XPath/",
+                "src/Schema/",
+                "src/Errors/",
+                "src/Library/",
+                "src/"
+            ]
+        }
+    },
+    "scripts": {
+        "test": "@php -d ffi.enable=1 tests/run.php"
+    },
+    "archive": {
+        "exclude": ["/tests"]
+    }
+}

@@ -10,8 +10,9 @@
 2. [Java (Project Panama)](#java-project-panama)
 3. [C# (P/Invoke)](#c-pinvoke)
 4. [Python (ctypes)](#python-ctypes)
-5. [Node.js (Node-API)](#nodejs-node-api)
-6. [WebAssembly (браузер и Workers)](#webassembly-браузер-и-workers)
+5. [PHP (FFI)](#php-ffi)
+6. [Node.js (Node-API)](#nodejs-node-api)
+7. [WebAssembly (браузер и Workers)](#webassembly-браузер-и-workers)
 
 ---
 
@@ -264,6 +265,57 @@ python -m pip wheel bindings/python -w dist
 - Библиотека ищется в `BERESTA_LIBRARY`, затем в `beresta/_native/<os>-<arch>/`, затем в системе.
 
 Самопроверка на стандартном `unittest`: `make PYTHON=1 python-test`. Makefile запускает `python` на Windows и `python3` на Linux и macOS; другой интерпретатор задаётся так: `make PYTHON_EXE=/path/python3.12 python-test`.
+
+---
+
+## PHP (FFI)
+
+Пакет Composer `bindings/php` (PHP 8.2+, расширение `ffi`). Нативный код вызывается через встроенный в PHP FFI, поэтому ничего не компилируется на машине пользователя и не нужно своё расширение PHP.
+
+```php
+use Beresta\{BerestaException, Document, Parser, ParseFlags, Schema, WriteFlags, XPath};
+
+$document = (new Parser())->parseString('<shop><item code="A1">Чай</item></shop>');
+$item = $document->root()->firstChild();
+echo $item['code'], ' ', $item->text(), PHP_EOL;                    // A1 Чай
+echo (new XPath('//item[@code = $c]', [], ['c' => 'A1']))->string($document), PHP_EOL;
+foreach ($document->root() as $child) {
+    echo $child->name(), PHP_EOL;                                    // item
+}
+
+$order = Document::create('order');
+$order->root()->appendElement('item')->setAttribute('qty', '2')->appendText('Мёд & орехи');
+$order->save('order.xml', WriteFlags::PRETTY, 'windows-1251');
+
+try {
+    $schema = Schema::fromFile('order.xsd');
+    $checked = (new Parser(ParseFlags::TRACK_LOCATIONS))->parseFile('order.xml');
+    foreach ($schema->validate($checked) as $problem) {              // готовое дерево
+        echo $problem, PHP_EOL;                                      // "строка:столбец: текст"
+    }
+    $prices = (new XPath('//item/@price'))->selectValues($checked);  // строки без объектов-узлов
+    $export = $schema->validateFile('export.xml');                   // поток без дерева, хоть гигабайты
+} catch (BerestaException $error) {
+    echo $error->statusName(), ' ', $error->detail(), PHP_EOL;
+}
+```
+
+Подготовка пакета:
+
+```bash
+make PHP=1
+```
+
+Как это устроено:
+- `resources/beresta.h` — те же 71 функция, что и в `beresta_c.h`, но без препроцессора: разборщик PHP FFI не понимает `#ifdef` и макросы. Совпадение имён проверяет тест `HeaderSyncTest`, а наличие символов — сам `FFI::cdef` при загрузке.
+- Возвращаемый `const char*` PHP FFI сам превращает в строку, а `char*` оставляет указателем: обёртка копирует его и сразу освобождает через `beresta_string_free`.
+- Документ освобождается при `close()` или деструктором, как только на него и его узлы не осталось ссылок. Подсчёт ссылок PHP делает это сразу, без сборщика мусора. После `close()` обращение к узлу даёт `ClosedException`, а не падение процесса.
+- Узлы выглядят как обычные объекты PHP: `count($node)`, `foreach ($node as $child)`, `echo $node` (XML узла). Атрибуты элемента читаются и пишутся и методами в духе ext/dom, и как элементы массива, как в SimpleXML: `$item['code']`, `isset`, `unset`. `clone $document` делает глубокую копию.
+- У одного узла дерева всегда один объект PHP (карта обёрток документа со слабыми ссылками). Поэтому `moveTo` в другой документ безопасен и для объектов потомков, полученных раньше.
+- Библиотека ищется в `BERESTA_LIBRARY`, затем в `native/<os>-<arch>/` пакета, затем в системе.
+- В PHP-FPM и Apache по умолчанию `ffi.enable=preload`, и `FFI::cdef` в веб-запросе запрещён. Для них библиотека загружается один раз в скрипте `opcache.preload` вызовом `Beresta\Beresta::preload()`, а пакет затем берёт готовую область FFI `BERESTA`. Другой путь — `ffi.enable=1` в php.ini.
+
+Самопроверка — свой маленький прогонщик без PHPUnit и `composer install`: `make PHP=1 php-test` (или `composer test` в `bindings/php`). Другой интерпретатор задаётся так: `make PHP_EXE=/path/php8.4 php-test`.
 
 ---
 

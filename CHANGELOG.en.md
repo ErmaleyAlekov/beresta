@@ -7,6 +7,14 @@ is included in the release description on GitHub and Gitverse.
 
 ## Unreleased
 
+### PHP binding through FFI
+
+- A new Composer package `bindings/php` (`ermaleyalekov/beresta`, PHP 8.2+, the `ffi` extension): all 71 functions
+  of the C interface and the `Beresta\Parser`, `Document`, `Node`, `Element`, `XPath`, `Schema`, `Diagnostic` classes.
+  Nodes are iterated with `foreach`, attributes are read as `$element['code']`, `clone $document` is a deep copy.
+- Loading for PHP-FPM / Apache in `opcache.preload` (`Beresta\Beresta::preload()`).
+- Build: `make PHP=1`, `cmake -DBERESTA_BUILD_PHP=ON`; the self-test `make PHP=1 php-test` is an own runner without PHPUnit.
+
 ### XML Schema: checking the schema document
 
 The fixes were found by debugging the W3C XML Schema Test Suite failures by hand

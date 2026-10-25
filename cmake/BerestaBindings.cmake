@@ -126,6 +126,25 @@ function(beresta_setup_python)
     endif()
 endfunction()
 
+# ---- PHP (FFI) --------------------------------------------------------------------
+# Пакет Composer загружает библиотеку через расширение ffi; самопроверка —
+# свой прогонщик tests/run.php (без PHPUnit). ffi.enable=1 разрешает FFI::cdef
+# даже при php.ini, где FFI доступен только в opcache.preload.
+# ---- PHP (FFI) --------------------------------------------------------------------
+# The Composer package loads the library through the ffi extension; the self-test is
+# the own tests/run.php runner (without PHPUnit). ffi.enable=1 allows FFI::cdef
+# even with a php.ini where FFI is available only in opcache.preload.
+function(beresta_setup_php)
+    set(package_dir "${BERESTA_BINDINGS_DIR}/php")
+    beresta_copy_for_platforms(beresta "${package_dir}/native" "${BERESTA_PLATFORMS}" "")
+    find_program(BERESTA_PHP_EXECUTABLE NAMES php)
+    if(BERESTA_BUILD_TESTS AND BERESTA_PHP_EXECUTABLE)
+        add_test(NAME beresta_php_selftest
+            COMMAND "${BERESTA_PHP_EXECUTABLE}" -d ffi.enable=1 tests/run.php
+            WORKING_DIRECTORY "${package_dir}")
+    endif()
+endfunction()
+
 # ---- Node.js (Node-API) ---------------------------------------------------------
 # Аддон beresta.node — отдельный модуль: переходники Node-API плюс те же объекты
 # ядра, что и в динамической библиотеке (один самодостаточный файл в пакете

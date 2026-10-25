@@ -10,8 +10,9 @@
 2. [Java (Project Panama)](#java-project-panama)
 3. [C# (P/Invoke)](#c-pinvoke)
 4. [Python (ctypes)](#python-ctypes)
-5. [Node.js (Node-API)](#nodejs-node-api)
-6. [WebAssembly (browsers and Workers)](#webassembly-browsers-and-workers)
+5. [PHP (FFI)](#php-ffi)
+6. [Node.js (Node-API)](#nodejs-node-api)
+7. [WebAssembly (browsers and Workers)](#webassembly-browsers-and-workers)
 
 ---
 
@@ -264,6 +265,57 @@ How it works:
 - The library is looked up in `BERESTA_LIBRARY`, then in `beresta/_native/<os>-<arch>/`, then in the system.
 
 A self-test on the standard `unittest`: `make PYTHON=1 python-test`. The Makefile runs `python` on Windows and `python3` on Linux and macOS; another interpreter is set like this: `make PYTHON_EXE=/path/python3.12 python-test`.
+
+---
+
+## PHP (FFI)
+
+The Composer package `bindings/php` (PHP 8.2+, the `ffi` extension). The native code is called through the FFI built into PHP, so nothing is compiled on the user's machine and no PHP extension of its own is needed.
+
+```php
+use Beresta\{BerestaException, Document, Parser, ParseFlags, Schema, WriteFlags, XPath};
+
+$document = (new Parser())->parseString('<shop><item code="A1">Чай</item></shop>');
+$item = $document->root()->firstChild();
+echo $item['code'], ' ', $item->text(), PHP_EOL;                    // A1 Чай
+echo (new XPath('//item[@code = $c]', [], ['c' => 'A1']))->string($document), PHP_EOL;
+foreach ($document->root() as $child) {
+    echo $child->name(), PHP_EOL;                                    // item
+}
+
+$order = Document::create('order');
+$order->root()->appendElement('item')->setAttribute('qty', '2')->appendText('Мёд & орехи');
+$order->save('order.xml', WriteFlags::PRETTY, 'windows-1251');
+
+try {
+    $schema = Schema::fromFile('order.xsd');
+    $checked = (new Parser(ParseFlags::TRACK_LOCATIONS))->parseFile('order.xml');
+    foreach ($schema->validate($checked) as $problem) {              // a ready tree
+        echo $problem, PHP_EOL;                                      // "line:column: text"
+    }
+    $prices = (new XPath('//item/@price'))->selectValues($checked);  // strings without node objects
+    $export = $schema->validateFile('export.xml');                   // a stream without a tree, even gigabytes
+} catch (BerestaException $error) {
+    echo $error->statusName(), ' ', $error->detail(), PHP_EOL;
+}
+```
+
+Preparing the package:
+
+```bash
+make PHP=1
+```
+
+How it works:
+- `resources/beresta.h` holds the same 71 functions as `beresta_c.h`, but without the preprocessor: the PHP FFI parser does not understand `#ifdef` and macros. The `HeaderSyncTest` test checks that the names match, and `FFI::cdef` itself checks the symbols at load time.
+- PHP FFI turns a returned `const char*` into a string by itself and leaves a `char*` as a pointer: the wrapper copies it and frees it at once through `beresta_string_free`.
+- A document is freed by `close()` or by the destructor as soon as no references to it and its nodes remain. PHP reference counting does it at once, without the garbage collector. After `close()` an access to a node gives a `ClosedException`, not a process crash.
+- Nodes look like ordinary PHP objects: `count($node)`, `foreach ($node as $child)`, `echo $node` (the node XML). Element attributes are read and written both by ext/dom-style methods and as array elements, as in SimpleXML: `$item['code']`, `isset`, `unset`. `clone $document` makes a deep copy.
+- One tree node always has one PHP object (the document wrapper map with weak references). So `moveTo` into another document is safe for descendant objects obtained earlier too.
+- The library is looked up in `BERESTA_LIBRARY`, then in the package's `native/<os>-<arch>/`, then in the system.
+- PHP-FPM and Apache have `ffi.enable=preload` by default, and `FFI::cdef` is forbidden in a web request. For them the library is loaded once in the `opcache.preload` script by calling `Beresta\Beresta::preload()`, and the package then takes the ready `BERESTA` FFI scope. The other way is `ffi.enable=1` in php.ini.
+
+The self-test is an own small runner without PHPUnit and `composer install`: `make PHP=1 php-test` (or `composer test` in `bindings/php`). Another interpreter is set like this: `make PHP_EXE=/path/php8.4 php-test`.
 
 ---
 

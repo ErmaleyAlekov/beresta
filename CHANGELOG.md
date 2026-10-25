@@ -7,6 +7,14 @@
 
 ## Не выпущено
 
+### PHP-обёртка через FFI
+
+- Новый пакет Composer `bindings/php` (`ermaleyalekov/beresta`, PHP 8.2+, расширение `ffi`): все 71 функция
+  Си-интерфейса и классы `Beresta\Parser`, `Document`, `Node`, `Element`, `XPath`, `Schema`, `Diagnostic`.
+  Узлы перебираются в `foreach`, атрибуты читаются как `$element['code']`, `clone $document` — глубокая копия.
+- Загрузка для PHP-FPM / Apache в `opcache.preload` (`Beresta\Beresta::preload()`).
+- Сборка: `make PHP=1`, `cmake -DBERESTA_BUILD_PHP=ON`; самопроверка `make PHP=1 php-test` — свой прогонщик без PHPUnit.
+
 ### XML Schema: проверка документа схемы
 
 Исправления найдены ручной отладкой провалов W3C XML Schema Test Suite

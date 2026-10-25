@@ -61,10 +61,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      # PHP с расширением ffi для самопроверки PHP-обёртки (младшая поддерживаемая версия — 8.2)
+      # PHP with the ffi extension for the PHP binding self-test (the oldest supported version is 8.2)
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: ffi
+          ini-values: ffi.enable=1
+          tools: none
       - name: Make (GCC) + тесты C++ / tests
         run: make -j"$(nproc)" && make test
-      - name: Обёртки / Wrappers (Java, C#, Python, Node.js)
-        run: make -j"$(nproc)" JAVA=1 CSHARP=1 PYTHON=1 NODE=1 bindings-test
+      - name: Обёртки / Wrappers (Java, C#, Python, PHP, Node.js)
+        run: make -j"$(nproc)" JAVA=1 CSHARP=1 PYTHON=1 PHP=1 NODE=1 bindings-test
       - name: CMake (Clang) + ctest
         run: |
           cmake -S . -B build -DCMAKE_CXX_COMPILER=clang++ -DBERESTA_BUILD_TESTS=ON -DBERESTA_BUILD_NODE=ON -DBERESTA_BUILD_PYTHON=ON

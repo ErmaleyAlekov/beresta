@@ -43,6 +43,7 @@ compile_commands.json
 /bindings/java/src/main/resources/natives/
 /bindings/csharp/Beresta/runtimes/
 /bindings/python/beresta/_native/
+/bindings/php/native/
 /bindings/node/native/
 
 # ---- Результаты сборки обёрток / Binding build results ----------------------
@@ -59,6 +60,10 @@ __pycache__/
 *.egg-info/
 /bindings/python/build/
 /bindings/python/dist/
+# PHP (зависимости и lock-файл composer install, если его запускали)
+# PHP (the dependencies and the lock file of composer install, if it was run)
+/bindings/php/vendor/
+/bindings/php/composer.lock
 # Node.js (пакет npm pack и зависимости, если их поставили для экспериментов)
 # Node.js (the npm pack package and dependencies, if installed for experiments)
 /bindings/node/*.tgz
