@@ -5,7 +5,13 @@
 Versions follow [semantic versioning](https://semver.org/). The entire version section
 is included in the release description on GitHub and Gitverse.
 
-## Unreleased
+## 2.2.0 — 2026-10-26
+
+A new PHP binding and strict checking of the schema document: the W3C XML Schema Test Suite — **98.6 %**
+of the applicable cases (96.2 % in 2.1.4), failures 1,463 → 515, no new ones. Protection against stack
+overflow on deeply nested schemas and XPath expressions. Schemas wrongly rejected before (a recursive model
+with derivation) now load; schemas accepted before without checking facets, attributes and the order of children
+may now be rejected — the message gives the line and the rule.
 
 ### XML Schema: recursive models and derivation
 

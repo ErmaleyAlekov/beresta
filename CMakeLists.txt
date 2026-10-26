@@ -59,7 +59,7 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Минимальная ве
 
 # Версия совпадает с BERESTA_VERSION_STRING в include/capi/beresta_c.h
 # The version matches BERESTA_VERSION_STRING in include/capi/beresta_c.h
-project(beresta VERSION 2.1.4 LANGUAGES CXX)
+project(beresta VERSION 2.2.0 LANGUAGES CXX)
 
 # ---- Тип сборки по умолчанию — Release ---------------------------------------
 # Без него однотипные генераторы (Make, Ninja) собирают без оптимизаций: ядро

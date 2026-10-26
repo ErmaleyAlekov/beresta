@@ -169,11 +169,11 @@ Linux-бинарники собираются на Ubuntu 22.04 и работа�
 <dependency>
     <groupId>io.github.ermaleyalekov</groupId>
     <artifactId>beresta</artifactId>
-    <version>2.1.4</version>
+    <version>2.2.0</version>
 </dependency>
 ```
 
-Gradle: `implementation("io.github.ermaleyalekov:beresta:2.1.4")`.
+Gradle: `implementation("io.github.ermaleyalekov:beresta:2.2.0")`.
 
 ### CI/CD в GitHub Actions
 
@@ -217,16 +217,16 @@ git remote add gitverse git@gitverse.ru:ermaleyalekov/beresta.git
 3. Тег — на GitHub, там соберутся пакеты и релиз (около 20–30 минут):
 
 ```bash
-git tag v2.1.4
+git tag v2.2.0
 ```
 ```bash
-git push origin main v2.1.4
+git push origin main v2.2.0
 ```
 
 4. Тот же тег — на Gitverse (через несколько минут после GitHub: задача `github` ждёт релиз GitHub не дольше 25 минут); Linux и Windows x86_64 Gitverse собирает сам:
 
 ```bash
-git push gitverse main v2.1.4
+git push gitverse main v2.2.0
 ```
 
 5. Проверка: [релизы GitHub](https://github.com/ErmaleyAlekov/beresta/releases) и [Actions](https://github.com/ErmaleyAlekov/beresta/actions), [релизы Gitverse](https://gitverse.ru/ermaleyalekov/beresta/releases) и раздел CI/CD репозитория на Gitverse; пакеты — на npm, PyPI, NuGet, Maven Central (если заданы секреты GitHub).
