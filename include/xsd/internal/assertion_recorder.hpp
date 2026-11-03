@@ -144,6 +144,10 @@ namespace beresta::xsd::detail
     // Копия начала элемента SAX как автономного элемента DOM (имя и все атрибуты, включая xmlns)
     // A copy of a SAX element start as a standalone DOM element (the name and all attributes, including xmlns)
     std::unique_ptr<Element> copyElement(const SaxElement& element);
+
+    // $value утверждений xs:assert мини-дерева: значение простого содержимого или пустая последовательность (assertion_types.cpp)
+    // The $value of the xs:assert assertions of a mini-tree: the simple content value or the empty sequence (assertion_types.cpp)
+    xpath::XPathValue assertValueOf(const AssertionCapture& capture);
 }
 
 #endif

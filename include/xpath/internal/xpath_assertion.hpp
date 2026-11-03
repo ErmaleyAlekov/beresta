@@ -39,11 +39,11 @@ namespace beresta::xpath::detail
 
         /*
         ** Действующее логическое значение утверждения в узле context. value —
-        ** значение $value (фасет xs:assertion) или nullptr (xs:assert).
+        ** значение $value (фасет xs:assertion, xs:assert) или nullptr (без $value).
         ** Ошибка вычисления — DomException(XPATH_ERROR): утверждение не выполнено.
         **
         ** The effective boolean value of the assertion at the node context. value is
-        ** the value of $value (the xs:assertion facet) or nullptr (xs:assert).
+        ** the value of $value (the xs:assertion facet, xs:assert) or nullptr (no $value).
         ** An evaluation error is DomException(XPATH_ERROR): the assertion is not satisfied.
         */
         static bool evaluateAssertion(const XPathExpression& test, const Node& context,

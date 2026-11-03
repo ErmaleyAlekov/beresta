@@ -88,6 +88,7 @@ namespace suites
     void registerXsdDeepSchemaTests(test::TestRunner& runner);
     void registerXsdAssertTests(test::TestRunner& runner);
     void registerXsdAssertRulesTests(test::TestRunner& runner);
+    void registerXsdAssertValueTests(test::TestRunner& runner);
     void registerXsdAssertXPathTests(test::TestRunner& runner);
     void registerXsdAssertSchemaTests(test::TestRunner& runner);
     void registerXsdAssertParallelTests(test::TestRunner& runner);

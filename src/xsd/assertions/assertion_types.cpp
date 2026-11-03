@@ -50,4 +50,22 @@ namespace beresta::xsd::detail
     {
         return parseDateAtom(type, text, result);
     }
+
+    /*
+    ** $value утверждения xs:assert (XSD 1.1, часть 1, 3.13.4.1, правило 3.1.2):
+    ** у типа с простым содержимым — типизированное значение корня мини-дерева
+    ** (тот же путь, что атомизация узла: тип корня уже отмечен в annotate),
+    ** у прочих типов — пустая последовательность, а не «переменная не определена».
+    **
+    ** The $value of an xs:assert assertion (XSD 1.1, part 1, 3.13.4.1, rule 3.1.2):
+    ** for a type with simple content — the typed value of the mini-tree root
+    ** (the same path as node atomization: the root type is already recorded in annotate),
+    ** for other types — the empty sequence rather than "the variable is not defined".
+    */
+    xpath::XPathValue assertValueOf(const AssertionCapture& capture)
+    {
+        if (capture.type->content != ContentType::SIMPLE_CONTENT)
+            return xpath::XPathValue::fromNodeSet({});
+        return capture.types.atomize(xpath::XPathItem{capture.root.get(), nullptr, nullptr});
+    }
 }

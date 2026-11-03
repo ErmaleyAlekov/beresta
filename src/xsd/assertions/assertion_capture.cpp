@@ -78,13 +78,15 @@ namespace beresta::xsd::detail
     */
     static void evaluateAssertions(const AssertionCapture& capture, std::vector<std::string>& violations)
     {
+        xpath::XPathValue value = assertValueOf(capture);
+
         for (const std::shared_ptr<const Assertion>& assertion : capture.type->assertions)
         {
             const std::string& test = assertion->test.getSource();
             try
             {
                 if (!xpath::detail::ExpressionAccess::evaluateAssertion(assertion->test, *capture.root,
-                    assertion->context, capture.types, nullptr))
+                    assertion->context, capture.types, &value))
                     violations.push_back(i18n::format(i18n::Message::XSD_ASSERTION_FAILED, {test}));
             }
             catch (const DomException& error)
