@@ -48,6 +48,25 @@ namespace
         TEST_ASSERT_THROWS(beresta::xsd::Regex("[^]"), beresta::DomException);
         TEST_ASSERT_THROWS(beresta::xsd::Regex("[a[:xyz:]"), beresta::DomException);
     }
+
+    /*
+    ** Средние варианты выбора из трёх и более ветвей достижимы. MSVC 14.44 /O2 собирал прежний
+    ** compileAlternation так, что «bb|cc|dd» не принимал «cc», а шаблон цвета Грани UI — «#172033».
+    **
+    ** The middle alternatives of a choice with three or more branches are reachable. MSVC 14.44 /O2
+    ** built the former compileAlternation so that "bb|cc|dd" rejected "cc", and the Gran UI color pattern — "#172033".
+    */
+    void testLongAlternation()
+    {
+        beresta::xsd::Regex pairs("bb|cc|dd|ee");
+        beresta::xsd::Regex color("#([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})");
+
+        TEST_ASSERT(pairs.matches("bb") && pairs.matches("cc") && pairs.matches("dd") && pairs.matches("ee"));
+        TEST_ASSERT(!pairs.matches("bc"));
+        TEST_ASSERT(color.matches("#fff") && color.matches("#ffff") && color.matches("#172033") && color.matches("#17203380"));
+        TEST_ASSERT(!color.matches("#12345"));
+        TEST_ASSERT(beresta::xsd::Regex("a{3}|a{6}|a{8}").matches("aaaaaa"));
+    }
 }
 
 namespace suites
@@ -58,5 +77,6 @@ namespace suites
     {
         runner.add("XSD regex: только экранирования XSD 1.0", testStrictEscapes);
         runner.add("XSD regex: синтаксис классов символов", testClassSyntax);
+        runner.add("XSD regex: средние ветви длинного выбора", testLongAlternation);
     }
 }

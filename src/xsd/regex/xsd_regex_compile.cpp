@@ -60,8 +60,19 @@ namespace beresta::xsd
         return result;
     }
 
-    // Выбор: цепочка ε-развилок, выходы всех вариантов объединяются
-    // A choice: a chain of ε-splits, the exits of all alternatives are merged
+    /*
+    ** Выбор: цепочка ε-развилок, выходы всех вариантов объединяются. Развилка варианта
+    ** заполняется целиком за один шаг (out и alternative), когда следующая развилка уже
+    ** создана: прежний вид цикла (out, break, затем alternative и split = next) MSVC 14.44 /O2
+    ** компилировал неверно — alternative второй развилки записывался в первую, и средние
+    ** варианты «a|b|c» становились недостижимы (найдено на стенде Грани UI 2026-11-08).
+    **
+    ** A choice: a chain of ε-splits, the exits of all alternatives are merged. The split of an
+    ** alternative is filled in one step (out and alternative) once the next split exists:
+    ** the former loop shape (out, break, then alternative and split = next) was miscompiled by
+    ** MSVC 14.44 /O2 — the alternative of the second split was written into the first one, and the
+    ** middle alternatives of "a|b|c" became unreachable (found on the Gran UI stand 2026-11-08).
+    */
     Regex::Fragment Regex::compileAlternation(const std::vector<RegexNode>& children)
     {
         Fragment result{addState(StateKind::SPLIT, 0), {}};
@@ -70,12 +81,14 @@ namespace beresta::xsd
         for (std::size_t index = 0; index < children.size(); ++index)
         {
             Fragment part = compileNode(children[index]);
+            long next = -1;
+
             result.exits.insert(result.exits.end(), part.exits.begin(), part.exits.end());
-            _states[static_cast<std::size_t>(split)].out = part.start;
-            if (index + 1 == children.size())
-                break;
-            long next = addState(StateKind::SPLIT, 0);
-            _states[static_cast<std::size_t>(split)].alternative = next;
+            if (index + 1 < children.size())
+                next = addState(StateKind::SPLIT, 0);
+            State& state = _states[static_cast<std::size_t>(split)];
+            state.out = part.start;
+            state.alternative = next;
             split = next;
         }
         return result;
