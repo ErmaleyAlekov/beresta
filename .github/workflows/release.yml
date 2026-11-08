@@ -101,7 +101,7 @@ jobs:
             build: msvc
             arch: ARM64
           - platform: macos-universal
-            runner: macos-14
+            runner: macos-15
             build: universal
     runs-on: ${{ matrix.runner }}
     steps:
