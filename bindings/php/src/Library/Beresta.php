@@ -12,7 +12,7 @@ use Beresta\Native\Strings;
 /**
  * Сведения о библиотеке и её загрузка для веб-сервера.
  *
- *     echo Beresta::version();    // 2.2.0
+ *     echo Beresta::version();    // 2.2.1
  *     echo Beresta::platform();   // linux-x86_64
  *
  * В opcache.preload (PHP-FPM, Apache с ffi.enable=preload):
@@ -26,8 +26,8 @@ use Beresta\Native\Strings;
 final class Beresta
 {
     /**
-     * Версия нативной библиотеки, например "2.2.0".
-     * The native library version, for example "2.2.0".
+     * Версия нативной библиотеки, например "2.2.1".
+     * The native library version, for example "2.2.1".
      */
     public static function version(): string
     {

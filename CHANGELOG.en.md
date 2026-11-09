@@ -5,6 +5,23 @@
 Versions follow [semantic versioning](https://semver.org/). The entire version section
 is included in the release description on GitHub and Gitverse.
 
+## 2.2.1 — 2026-11-09
+
+XML Schema fixes found in Gran UI. The W3C XML Schema Test Suite is unchanged (515 failures, no new ones).
+
+### XML Schema
+
+- A complex type `xs:assert` was evaluated without `$value` and failed with "the variable $value is not defined".
+  Now, per XSD 1.1 (part 1, 3.13.4.1, rule 3.1.2), for a type with simple content `$value` is the typed value of the
+  element (`xs:integer` is compared as a number); for other types it is the empty sequence.
+- MSVC 14.44 (Visual Studio 2022), release build `/O2`: in `pattern` facet regular expressions the middle branches of
+  a choice of three or more alternatives were unreachable (`bb|cc|dd` did not accept `cc`). A workaround for the
+  optimizer bug when compiling a choice; GCC, Clang, MSVC 14.51 and debug builds were not affected.
+
+### Build
+
+- GitHub CI: macOS 14 → macOS 15 (the `macos-14` image is no longer supported).
+
 ## 2.2.0 — 2026-10-26
 
 A new PHP binding and strict checking of the schema document: the W3C XML Schema Test Suite — **98.6 %**
