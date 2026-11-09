@@ -11,7 +11,7 @@ XML Schema fixes found in Gran UI. The W3C XML Schema Test Suite is unchanged (5
 
 ### XML Schema
 
-- A complex type `xs:assert` was evaluated without `$value` and failed with "the variable $value is not defined".
+- A complex type `xs:assert` was evaluated without `$value` and failed with "the variable `$value` is not defined".
   Now, per XSD 1.1 (part 1, 3.13.4.1, rule 3.1.2), for a type with simple content `$value` is the typed value of the
   element (`xs:integer` is compared as a number); for other types it is the empty sequence.
 - MSVC 14.44 (Visual Studio 2022), release build `/O2`: in `pattern` facet regular expressions the middle branches of
