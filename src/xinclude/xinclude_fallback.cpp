@@ -37,6 +37,24 @@ namespace beresta::xinclude::detail
             && element.getNamespaceURI().value_or("") == XINCLUDE_NAMESPACE_URI;
     }
 
+    // Сколько у xi:include детей xi:fallback и есть ли у него, что включать
+    // How many xi:fallback children the xi:include has and whether it has anything to include
+    void checkIncludeElement(const Element& include)
+    {
+        std::size_t fallbacks = 0;
+
+        for (const Node* child = include.getFirstChild(); child != nullptr; child = child->getNextSibling())
+        {
+            if (child->getType() == NodeType::ELEMENT
+                && isXIncludeElement(*static_cast<const Element*>(child), "fallback"))
+                ++fallbacks;
+        }
+        if (fallbacks > 1)
+            throw DomException(DomErrorCode::INVALID_CONTENT, i18n::format(i18n::Message::XINCLUDE_FALLBACK_MULTIPLE));
+        if (include.getAttribute("href").value_or("").empty() && !include.hasAttribute("xpointer"))
+            throw DomException(DomErrorCode::INVALID_CONTENT, i18n::format(i18n::Message::XINCLUDE_NO_LOCATION));
+    }
+
     /*
     ** <xi:fallback>: при ошибке загрузки xi:include заменяется копией его
     ** содержимого. Включения внутри fallback тоже обрабатываются.

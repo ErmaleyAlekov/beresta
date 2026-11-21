@@ -1,5 +1,9 @@
 #include "core/element.hpp"
 #include "utils/qualified_name.hpp"
+#include "i18n/i18n.hpp"
+#include "exception/dom_exception.hpp"
+
+#include <utility>
 
 namespace beresta
 {
@@ -68,5 +72,30 @@ namespace beresta
                 return element;
         }
         return nullptr;
+    }
+
+    /*
+    ** Объявление пространства имён, заданное через setAttributeNS. Раньше
+    ** setAttributeNS(XMLNS, "xmlns:p", "") записывало объявление с пустым URI
+    ** в обход проверки declareNamespace, а пара (XMLNS, "a:b") связывала
+    ** префикс a со служебным пространством xmlns.
+    **
+    ** A namespace declaration set through setAttributeNS. Previously
+    ** setAttributeNS(XMLNS, "xmlns:p", "") wrote a declaration with an empty URI
+    ** bypassing the declareNamespace check, and the pair (XMLNS, "a:b") bound
+    ** the prefix a to the reserved xmlns namespace.
+    */
+    void Element::setNamespaceDeclarationNS(std::string_view namespaceUri, std::string_view prefix,
+        std::string_view localName, std::string value)
+    {
+        bool declaration = prefix == "xmlns" || (prefix.empty() && localName == "xmlns");
+
+        if (!declaration || namespaceUri != XMLNS_NAMESPACE_URI)
+            throw DomException(DomErrorCode::NAMESPACE_ERROR,
+                i18n::format(i18n::Message::XMLNS_ATTRIBUTE_NAMESPACE));
+        if (prefix.empty())
+            declareNamespace("", std::move(value));
+        else
+            declareNamespace(localName, std::move(value));
     }
 }

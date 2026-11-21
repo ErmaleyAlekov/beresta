@@ -67,7 +67,7 @@ namespace beresta
         if (last != nullptr && last->getType() == NodeType::TEXT)
         {
             Text& previous = static_cast<Text&>(*last);
-            previous.setValue(previous.getValue() + std::string(text));
+            previous.appendValue(text);
             return;
         }
         attach(std::make_unique<Text>(std::string(text)));

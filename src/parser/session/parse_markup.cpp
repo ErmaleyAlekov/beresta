@@ -63,7 +63,14 @@ namespace beresta::detail
         scanner.advance(2);
         std::string_view target = scanner.readName();
         if (utils::equalsIgnoreCaseAscii(target, "xml"))
-            scanner.failAt(i18n::format(i18n::Message::XML_DECLARATION_PLACEMENT), _tokenStart);
+        {
+            // В самом начале документа это испорченная декларация (<?xml?>, <?XML ...?>), а не чужое место
+            // At the very start of the document this is a broken declaration (<?xml?>, <?XML ...?>), not a wrong place
+            i18n::Message problem = i18n::Message::XML_DECLARATION_PLACEMENT;
+            if (_tokenStart == 0 && _inputs.depth() == 0)
+                problem = i18n::Message::XML_DECLARATION_MALFORMED;
+            scanner.failAt(i18n::format(problem), _tokenStart);
+        }
         if (_options.namespaceAware && target.find(':') != std::string_view::npos)
             scanner.failAt(i18n::format(i18n::Message::PI_TARGET_COLON), _tokenStart,
                 DomErrorCode::NAMESPACE_ERROR);

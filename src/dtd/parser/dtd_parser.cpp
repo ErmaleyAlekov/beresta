@@ -6,7 +6,7 @@ namespace beresta::dtd
     // Парсер работает поверх лексического читателя
     // The parser works on top of the lexical reader
     DtdParser::DtdParser(DtdReader& reader) noexcept
-        : _reader(reader)
+        : _reader(reader), _sectionDepth(0)
     {
     }
 

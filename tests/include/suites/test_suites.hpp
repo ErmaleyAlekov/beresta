@@ -99,6 +99,13 @@ namespace suites
     void registerContentPlanTests(test::TestRunner& runner);
     void registerXIncludeTests(test::TestRunner& runner);
 
+    // ---- Регрессии ревью кода 2026-11-21 ----
+    // ---- Regressions of the code review of 2026-11-21 ----
+    void registerReviewParserTests(test::TestRunner& runner);
+    void registerReviewXIncludeTests(test::TestRunner& runner);
+    void registerReviewDtdContentTests(test::TestRunner& runner);
+    void registerReviewDomTests(test::TestRunner& runner);
+
     // ---- Си-интерфейс для других языков ----
     // ---- The C interface for other languages ----
     void registerCapiTests(test::TestRunner& runner);

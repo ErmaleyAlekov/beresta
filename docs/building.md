@@ -169,24 +169,28 @@ Linux-бинарники собираются на Ubuntu 22.04 и работа�
 <dependency>
     <groupId>io.github.ermaleyalekov</groupId>
     <artifactId>beresta</artifactId>
-    <version>2.2.1</version>
+    <version>2.3.0</version>
 </dependency>
 ```
 
-Gradle: `implementation("io.github.ermaleyalekov:beresta:2.2.1")`.
+Gradle: `implementation("io.github.ermaleyalekov:beresta:2.3.0")`.
 
 ### CI/CD в GitHub Actions
 
 - **`.github/workflows/ci.yml`** — на каждый push и pull request: Linux x64 и arm64 (Makefile с GCC, CMake с Clang, все обёртки), Windows x64 и arm64 (MSVC, `ctest`), macOS (`make universal`, проверка `lipo`, тесты C++ для arm64 и для x86_64 через Rosetta), WebAssembly (официальный образ `emscripten/emsdk`), санитайзеры ASan/UBSan/LSan и W3C XML Conformance Test Suite (прогон падает, если хотя бы один применимый случай не прошёл).
 - **`.github/workflows/release.yml`** — по тегу `vX.Y.Z`: проверяет, что версия тега совпадает с версиями в `CMakeLists.txt`, `package.json` и `pyproject.toml`; собирает нативные бинарники на пяти платформах; сводит их в одно дерево; собирает пакеты npm (`beresta`, `beresta-wasm`), колесо Python, NuGet, jar (с исходниками, javadoc и подписью GPG для Maven Central) и архивы SDK; ставит колесо и пакет npm в чистое окружение и проверяет, что они работают; создаёт GitHub Release со всеми файлами.
 
-Публикация в реестры включается секретами репозитория (Settings → Secrets and variables → Actions). Пока секрета нет, шаг пропускается, а пакеты всё равно лежат в GitHub Release:
+npm и NuGet публикуются **доверенной публикацией** (trusted publishing, OIDC): долгоживущих ключей нет, GitHub выдаёт задаче `packages` подписанный токен, а реестр проверяет, что он выдан файлу `release.yml` в репозитории `ErmaleyAlekov/beresta`, и меняет его на одноразовый ключ. Настраивается один раз на стороне реестра:
+
+- **npm** — на странице каждого пакета (`beresta`, `beresta-wasm`): Settings → Trusted Publisher → GitHub Actions; владелец `ErmaleyAlekov`, репозиторий `beresta`, файл `release.yml`, окружение пустое, в «Allowed actions» отмечено **`npm publish`** (новые издатели по умолчанию умеют только `npm stage publish` — отложенную публикацию с ручным одобрением). Новая настройка должна пройти первую публикацию за 2 дня, иначе истекает — тогда её удаляют и создают заново перед выпуском. Нужен npm 11.5.1+ (шаг ставит его сам); provenance подписывается автоматически. В форках шаг не запускается.
+- **NuGet** — nuget.org → профиль → Trusted Publishing → Add policy: владелец `ErmaleyAlekov`, репозиторий `beresta`, файл `release.yml`. В секрет `NUGET_USER` кладётся имя профиля nuget.org (не ключ); действие `NuGet/login` получает по нему ключ на 1 час. Без секрета шаг пропускается.
+
+Остальные реестры включаются секретами репозитория (Settings → Secrets and variables → Actions). Пока секрета нет, шаг пропускается, а пакеты всё равно лежат в GitHub Release:
 
 | Секрет | Куда |
 |---|---|
-| `NPM_TOKEN` | npm (`beresta`, `beresta-wasm`, с provenance) |
+| `NUGET_USER` | NuGet (`Beresta`): имя профиля nuget.org для доверенной публикации |
 | `PYPI_API_TOKEN` | PyPI (`beresta`) |
-| `NUGET_API_KEY` | NuGet (`Beresta`) |
 | `MAVEN_CENTRAL_USERNAME`, `MAVEN_CENTRAL_PASSWORD` | Maven Central (`io.github.ermaleyalekov:beresta`): токен пользователя Central Portal |
 | `MAVEN_GPG_PRIVATE_KEY`, `MAVEN_GPG_PASSPHRASE` | подпись артефактов Maven: закрытый ключ GPG (ASCII armor) и его пароль |
 
@@ -217,18 +221,18 @@ git remote add gitverse git@gitverse.ru:ermaleyalekov/beresta.git
 3. Тег — на GitHub, там соберутся пакеты и релиз (около 20–30 минут):
 
 ```bash
-git tag v2.2.1
+git tag v2.3.0
 ```
 ```bash
-git push origin main v2.2.1
+git push origin main v2.3.0
 ```
 
 4. Тот же тег — на Gitverse (через несколько минут после GitHub: задача `github` ждёт релиз GitHub не дольше 25 минут); Linux и Windows x86_64 Gitverse собирает сам:
 
 ```bash
-git push gitverse main v2.2.1
+git push gitverse main v2.3.0
 ```
 
-5. Проверка: [релизы GitHub](https://github.com/ErmaleyAlekov/beresta/releases) и [Actions](https://github.com/ErmaleyAlekov/beresta/actions), [релизы Gitverse](https://gitverse.ru/ermaleyalekov/beresta/releases) и раздел CI/CD репозитория на Gitverse; пакеты — на npm, PyPI, NuGet, Maven Central (если заданы секреты GitHub).
+5. Проверка: [релизы GitHub](https://github.com/ErmaleyAlekov/beresta/releases) и [Actions](https://github.com/ErmaleyAlekov/beresta/actions), [релизы Gitverse](https://gitverse.ru/ermaleyalekov/beresta/releases) и раздел CI/CD репозитория на Gitverse; пакеты — на npm, PyPI, NuGet, Maven Central (если настроена доверенная публикация и заданы секреты GitHub).
 
 Без токена Gitverse релиз создаётся вручную: Релизы → «Создать релиз», тег `vX.Y.Z`, название «Берёста X.Y.Z», описание — вывод `bash tools/release/release_notes.sh X.Y.Z notes.md`, файлы — из релиза GitHub (`bash tools/release/github_assets.sh vX.Y.Z dist 0`; в Windows — с `PYTHON=python`). С токеном то же самое делает `GV_API_TOKEN=… bash tools/release/gitverse_release.sh vX.Y.Z notes.md dist/*`.

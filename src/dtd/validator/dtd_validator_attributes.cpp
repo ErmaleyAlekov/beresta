@@ -77,7 +77,12 @@ namespace beresta::dtd
         bool isList = type == AttributeType::IDREFS || type == AttributeType::NMTOKENS
             || type == AttributeType::ENTITIES;
         if (tokens.empty() || (!isList && tokens.size() > 1))
+        {
+            // Неверное значение целиком не регистрируется: части "a b" у ID не должны стать идентификаторами
+            // An invalid value is not registered as a whole: the parts of "a b" of an ID must not become identifiers
             _reporter.reportValidity(i18n::format(i18n::Message::DTD_ATTRIBUTE_VALUE_INVALID, {declaration.name}));
+            return;
+        }
         for (std::string_view token : tokens)
             checkToken(declaration, token);
     }

@@ -95,7 +95,11 @@ namespace beresta
     void XmlSerializer::openPrettyElement(const Element& element, std::size_t depth,
         std::string& output, std::vector<PrettyFrame>& stack) const
     {
-        if (element.getChildCount() == 0 || hasTextualChild(element))
+        // Предков смотрим только у первого элемента: у остальных родитель уже выведен с отступами,
+        // значит, preserve на нём не действует
+        // The ancestors are checked only for the first element: for the others the parent is already written
+        // with indentation, so preserve does not apply to it
+        if (element.getChildCount() == 0 || hasTextualChild(element) || preservesSpace(element, stack.empty()))
         {
             element.serialize(output);
             return;

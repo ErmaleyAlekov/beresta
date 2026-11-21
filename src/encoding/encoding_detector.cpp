@@ -53,6 +53,10 @@ namespace beresta::encoding
             return std::string();
         std::string_view declaration = bytes.substr(0, bytes.find("?>"));
         std::size_t position = declaration.find("encoding");
+        // Псевдоатрибут начинается после пробела: "badencoding='...'" — не encoding
+        // A pseudo-attribute starts after a space: "badencoding='...'" is not encoding
+        while (position != std::string_view::npos && !utils::isWhitespace(declaration[position - 1]))
+            position = declaration.find("encoding", position + 1);
         if (position == std::string_view::npos)
             return std::string();
         position += 8;

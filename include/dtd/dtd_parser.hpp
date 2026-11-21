@@ -86,6 +86,9 @@ namespace beresta::dtd
         void checkGroupNesting(std::size_t openFrame);
 
         DtdReader& _reader;
+        // Вложенность <![INCLUDE[ (каждая — рекурсия parseDeclarations; ограничена, как и группы)
+        // The nesting of <![INCLUDE[ (each one is a recursion of parseDeclarations; limited, as groups are)
+        std::size_t _sectionDepth;
     };
 }
 

@@ -2,16 +2,11 @@
 #include "io/file_io.hpp"
 #include "exception/dom_exception.hpp"
 
+#include <system_error>
 #include <utility>
 
 namespace beresta
 {
-    // Виртуальный деструктор интерфейса
-    // The virtual destructor of the interface
-    ResourceResolver::~ResourceResolver()
-    {
-    }
-
     // Корень нормализуется один раз, чтобы сравнение префиксов было надёжным
     // The root is normalized once so that the prefix comparison is reliable
     FileResourceResolver::FileResourceResolver(std::filesystem::path rootDirectory)
@@ -30,12 +25,27 @@ namespace beresta
         return id.find('/') == std::string_view::npos || colon < id.find('/');
     }
 
+    // Лежит ли путь внутри корня (сравнение без обращения к диску)
+    // Whether the path lies inside the root (a comparison without touching the disk)
+    static bool liesInside(const std::filesystem::path& target, const std::filesystem::path& root)
+    {
+        std::filesystem::path relative = target.lexically_relative(root);
+
+        return !relative.empty() && *relative.begin() != std::filesystem::path("..");
+    }
+
     /*
     ** Относительный systemId разрешается от каталога базового документа.
     ** Итоговый путь обязан лежать внутри корня — иначе запрос отвергается.
+    ** Проверка двойная: по записи пути и по настоящему пути на диске
+    ** (weakly_canonical раскрывает символические ссылки) — иначе ссылка
+    ** "корень/external -> /outside" выводила бы чтение за пределы корня.
     **
     ** A relative systemId is resolved against the directory of the base document.
     ** The resulting path must lie inside the root — otherwise the request is rejected.
+    ** The check is twofold: by the spelling of the path and by the real path on disk
+    ** (weakly_canonical expands symbolic links) — otherwise the link
+    ** "root/external -> /outside" would lead reading outside the root.
     */
     std::optional<std::filesystem::path> FileResourceResolver::locate(
         const ResourceRequest& request) const
@@ -47,8 +57,11 @@ namespace beresta
             base = std::filesystem::absolute(std::filesystem::u8path(request.baseUri)).parent_path();
         std::filesystem::path target =
             (base / std::filesystem::u8path(request.systemId)).lexically_normal();
-        std::filesystem::path relative = target.lexically_relative(_root);
-        if (relative.empty() || *relative.begin() == std::filesystem::path(".."))
+        std::error_code targetError;
+        std::error_code rootError;
+        std::filesystem::path realTarget = std::filesystem::weakly_canonical(target, targetError);
+        std::filesystem::path realRoot = std::filesystem::weakly_canonical(_root, rootError);
+        if (!liesInside(target, _root) || targetError || rootError || !liesInside(realTarget, realRoot))
             return std::nullopt;
         return target;
     }

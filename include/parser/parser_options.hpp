@@ -84,16 +84,20 @@ namespace beresta
         // The maximum element nesting
         std::size_t maxDepth = 1024;
 
-        // Максимальное число раскрытий сущностей за документ
-        // The maximum number of entity expansions per document
+        // Максимальное число раскрытий сущностей за документ; с processXInclude — и предел
+        // повторных включений одного и того же ресурса (первая загрузка каждого не считается)
+        // The maximum number of entity expansions per document; with processXInclude it is also the limit
+        // of repeated inclusions of the same resource (the first load of each one is not counted)
         std::size_t maxEntityExpansions = 10000;
 
         // Максимальная вложенность раскрытия сущностей друг в друга
         // The maximum nesting of entity expansions into each other
         std::size_t maxEntityDepth = 16;
 
-        // Максимальный суммарный объём текста, полученного раскрытием сущностей (байт)
-        // The maximum total size of text produced by entity expansion (bytes)
+        // Максимальный суммарный объём текста, полученного раскрытием сущностей (байт);
+        // с processXInclude — и суммарный объём повторных включений
+        // The maximum total size of text produced by entity expansion (bytes);
+        // with processXInclude it is also the total size of repeated inclusions
         std::size_t maxExpandedSize = 10 * 1024 * 1024;
 
         // ---- Кодировка и ресурсы ----

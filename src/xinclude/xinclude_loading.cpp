@@ -26,6 +26,7 @@ namespace beresta::xinclude::detail
         std::vector<std::unique_ptr<Node>> nodes;
         Resource resource = fetch(include, baseUri);
 
+        charge(resource);
         if (parse == "text")
         {
             std::string encodingName = include.getAttribute("encoding").value_or("");
@@ -78,11 +79,41 @@ namespace beresta::xinclude::detail
         Document document = XmlParser(nested).parse(resource.content);
 
         _stack.push_back(resource.uri);
-        process(document, resource.uri);
+        // URI снимается со стека и при ошибке: иначе после перехода к xi:fallback следующее
+        // включение того же файла ложно считалось бы циклом
+        // The URI is removed from the stack on an error too: otherwise after falling back to xi:fallback
+        // the next inclusion of the same file would be falsely taken for a cycle
+        try
+        {
+            process(document, resource.uri);
+        }
+        catch (...)
+        {
+            _stack.pop_back();
+            throw;
+        }
         _stack.pop_back();
         std::optional<std::string> pointer = include.getAttribute("xpointer");
         if (pointer.has_value())
             return selectPointer(document, pointer.value());
         return document.releaseRoot();
+    }
+
+    // Повторная загрузка URI: число и байты сравниваются с остатком лимита, без переполнения
+    // A repeated load of a URI: the count and the bytes are compared with the rest of the limit, without overflow
+    void XIncludeProcessor::charge(const Resource& resource)
+    {
+        std::size_t size = resource.content.size();
+
+        if (_seen.insert(resource.uri).second)
+            return;
+        if (_repeats >= _options.maxEntityExpansions)
+            throw DomException(DomErrorCode::LIMIT_EXCEEDED,
+                i18n::format(i18n::Message::XINCLUDE_LIMIT_COUNT, {std::to_string(_options.maxEntityExpansions)}));
+        if (size > _options.maxExpandedSize - _repeatedBytes)
+            throw DomException(DomErrorCode::LIMIT_EXCEEDED,
+                i18n::format(i18n::Message::XINCLUDE_LIMIT_SIZE, {std::to_string(_options.maxExpandedSize)}));
+        ++_repeats;
+        _repeatedBytes += size;
     }
 }

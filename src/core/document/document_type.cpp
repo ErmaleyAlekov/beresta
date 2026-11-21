@@ -3,6 +3,7 @@
 #include "exception/dom_exception.hpp"
 #include "utils/xml_chars.hpp"
 #include "utils/xml_escape.hpp"
+#include "utils/xml_tokens.hpp"
 
 #include <utility>
 
@@ -31,6 +32,16 @@ namespace beresta
         if (!_publicId.empty() && _systemId.empty())
             throw DomException(DomErrorCode::INVALID_CONTENT,
                 i18n::format(i18n::Message::DOCTYPE_PUBLIC_WITHOUT_SYSTEM));
+        // Публичный идентификатор — только PubidChar, а подмножество не должно выходить за "[...]>":
+        // иначе serialize() выдал бы испорченный или подменённый документ
+        // The public identifier is PubidChar only, and the subset must not leave "[...]>":
+        // otherwise serialize() would produce a broken or spoofed document
+        if (!utils::isValidPublicId(_publicId))
+            throw DomException(DomErrorCode::INVALID_CONTENT,
+                i18n::format(i18n::Message::PUBLIC_ID_CHARACTER, {_publicId}));
+        if (!utils::isClosedInternalSubset(_internalSubset))
+            throw DomException(DomErrorCode::INVALID_CONTENT,
+                i18n::format(i18n::Message::DOCTYPE_SUBSET_UNCLOSED));
     }
 
     // Тип узла — объявление типа документа

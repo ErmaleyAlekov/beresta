@@ -1,6 +1,8 @@
 #include "xsd/internal/schema_builder.hpp"
 #include "i18n/i18n.hpp"
 
+#include <string>
+
 namespace beresta::xsd::detail
 {
     /*
@@ -61,5 +63,11 @@ namespace beresta::xsd::detail
             fail(definition, i18n::format(i18n::Message::SCHEMA_MAX_BELOW_MIN));
         if (isSchemaElement(definition, "all") && particle.maxOccurs > 1)
             fail(definition, i18n::format(i18n::Message::SCHEMA_ALL_OCCURS));
+        // Использованные частицы xs:all хранятся в 64-битной маске: больше 64 честно отвергается,
+        // иначе частицы после 64-й молча считались бы недопустимыми в документе
+        // The used particles of xs:all are kept in a 64-bit mask: more than 64 is rejected honestly,
+        // otherwise the particles past the 64th would be silently treated as not allowed in the document
+        if (particle.kind == content::ParticleKind::ALL && particle.children.size() > 64)
+            fail(definition, i18n::format(i18n::Message::SCHEMA_ALL_TOO_LARGE, {std::to_string(particle.children.size())}));
     }
 }

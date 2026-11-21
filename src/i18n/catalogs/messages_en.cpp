@@ -411,6 +411,14 @@ namespace beresta::i18n
         {Message::SCHEMA_VALUE_CONSTRAINT_INVALID, "the value {0}=\"{1}\" of the declaration \"{2}\" does not fit its type: {3}"},
         {Message::SCHEMA_VALUE_CONSTRAINT_CONTENT, "the element \"{0}\" cannot have {1}: its complex type has neither simple nor mixed content"},
         {Message::SCHEMA_NOTATION_NO_IDENTIFIER, "the notation \"{0}\" has neither public nor system"},
+        {Message::XML_DECLARATION_MALFORMED, "the XML declaration is malformed: it needs \"<?xml\" in lower case, a space and version"},
+        {Message::XINCLUDE_FALLBACK_MULTIPLE, "xi:include may have only one xi:fallback"},
+        {Message::XINCLUDE_NO_LOCATION, "xi:include has neither href nor xpointer"},
+        {Message::XINCLUDE_LIMIT_COUNT, "the allowed number of repeated xi:include inclusions ({0}) was exceeded"},
+        {Message::XINCLUDE_LIMIT_SIZE, "the allowed size of repeated xi:include inclusions ({0} bytes) was exceeded"},
+        {Message::DOCTYPE_SUBSET_UNCLOSED, "the DOCTYPE internal subset must consist of whole declarations: \"]\" outside literals, comments and instructions, an unclosed literal or comment are not allowed"},
+        {Message::SCHEMA_ALL_TOO_LARGE, "xs:all supports at most 64 particles, and here there are {0}"},
+        {Message::XMLNS_ATTRIBUTE_NAMESPACE, "the xmlns and xmlns:* attributes must be in the xmlns namespace, and only they"},
     };
 
     const Catalog ENGLISH_CATALOG{"en", "English", TEXTS, sizeof(TEXTS) / sizeof(TEXTS[0])};

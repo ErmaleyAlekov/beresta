@@ -169,24 +169,28 @@ The Maven dependency (the Java package stays `org.beresta`):
 <dependency>
     <groupId>io.github.ermaleyalekov</groupId>
     <artifactId>beresta</artifactId>
-    <version>2.2.1</version>
+    <version>2.3.0</version>
 </dependency>
 ```
 
-Gradle: `implementation("io.github.ermaleyalekov:beresta:2.2.1")`.
+Gradle: `implementation("io.github.ermaleyalekov:beresta:2.3.0")`.
 
 ### CI/CD in GitHub Actions
 
 - **`.github/workflows/ci.yml`** — on every push and pull request: Linux x64 and arm64 (the Makefile with GCC, CMake with Clang, all wrappers), Windows x64 and arm64 (MSVC, `ctest`), macOS (`make universal`, a `lipo` check, the C++ tests for arm64 and for x86_64 through Rosetta), WebAssembly (the official `emscripten/emsdk` image), the ASan/UBSan/LSan sanitizers and the W3C XML Conformance Test Suite (the run fails if even one applicable case does not pass).
 - **`.github/workflows/release.yml`** — on a `vX.Y.Z` tag: checks that the tag version matches the versions in `CMakeLists.txt`, `package.json` and `pyproject.toml`; builds the native binaries on five platforms; merges them into one tree; builds the npm packages (`beresta`, `beresta-wasm`), the Python wheel, NuGet, the jar (with sources, javadoc and a GPG signature for Maven Central) and the SDK archives; installs the wheel and the npm package into a clean environment and checks that they work; creates a GitHub Release with all files.
 
-Publishing to the registries is enabled by repository secrets (Settings → Secrets and variables → Actions). While a secret is missing, the step is skipped, and the packages still lie in the GitHub Release:
+npm and NuGet are published by **trusted publishing** (OIDC): there are no long-lived keys, GitHub issues a signed token to the `packages` job, and the registry checks that it was issued to the `release.yml` file in the `ErmaleyAlekov/beresta` repository and exchanges it for a one-time key. It is set up once on the registry side:
+
+- **npm** — on the page of each package (`beresta`, `beresta-wasm`): Settings → Trusted Publisher → GitHub Actions; owner `ErmaleyAlekov`, repository `beresta`, file `release.yml`, empty environment, **`npm publish`** checked in "Allowed actions" (new publishers can only do `npm stage publish` by default — staged publishing with manual approval). A new configuration must complete its first publish within 2 days, otherwise it expires — then it is deleted and created again before the release. npm 11.5.1+ is needed (the step installs it itself); provenance is signed automatically. In forks the step does not run.
+- **NuGet** — nuget.org → profile → Trusted Publishing → Add policy: owner `ErmaleyAlekov`, repository `beresta`, file `release.yml`. The `NUGET_USER` secret holds the nuget.org profile name (not a key); the `NuGet/login` action gets a 1-hour key with it. Without the secret the step is skipped.
+
+The other registries are enabled by repository secrets (Settings → Secrets and variables → Actions). While a secret is missing, the step is skipped, and the packages still lie in the GitHub Release:
 
 | Secret | Where |
 |---|---|
-| `NPM_TOKEN` | npm (`beresta`, `beresta-wasm`, with provenance) |
+| `NUGET_USER` | NuGet (`Beresta`): the nuget.org profile name for trusted publishing |
 | `PYPI_API_TOKEN` | PyPI (`beresta`) |
-| `NUGET_API_KEY` | NuGet (`Beresta`) |
 | `MAVEN_CENTRAL_USERNAME`, `MAVEN_CENTRAL_PASSWORD` | Maven Central (`io.github.ermaleyalekov:beresta`): a Central Portal user token |
 | `MAVEN_GPG_PRIVATE_KEY`, `MAVEN_GPG_PASSPHRASE` | signing the Maven artifacts: a GPG private key (ASCII armor) and its passphrase |
 
@@ -217,18 +221,18 @@ The order:
 3. The tag goes to GitHub; the packages and the release are built there (about 20–30 minutes):
 
 ```bash
-git tag v2.2.1
+git tag v2.3.0
 ```
 ```bash
-git push origin main v2.2.1
+git push origin main v2.3.0
 ```
 
 4. The same tag goes to Gitverse (a few minutes after GitHub: the `github` job waits for the GitHub release for at most 25 minutes); Gitverse builds Linux and Windows x86_64 itself:
 
 ```bash
-git push gitverse main v2.2.1
+git push gitverse main v2.3.0
 ```
 
-5. Checking: [GitHub releases](https://github.com/ErmaleyAlekov/beresta/releases) and [Actions](https://github.com/ErmaleyAlekov/beresta/actions), [Gitverse releases](https://gitverse.ru/ermaleyalekov/beresta/releases) and the CI/CD section of the repository on Gitverse; the packages — on npm, PyPI, NuGet, Maven Central (if the GitHub secrets are set).
+5. Checking: [GitHub releases](https://github.com/ErmaleyAlekov/beresta/releases) and [Actions](https://github.com/ErmaleyAlekov/beresta/actions), [Gitverse releases](https://gitverse.ru/ermaleyalekov/beresta/releases) and the CI/CD section of the repository on Gitverse; the packages — on npm, PyPI, NuGet, Maven Central (if trusted publishing is set up and the GitHub secrets are set).
 
 Without a Gitverse token the release is created by hand: Releases → "Create release", the tag `vX.Y.Z`, the title "Берёста X.Y.Z", the notes — the output of `bash tools/release/release_notes.sh X.Y.Z notes.md`, the files — from the GitHub release (`bash tools/release/github_assets.sh vX.Y.Z dist 0`; on Windows — with `PYTHON=python`). With a token `GV_API_TOKEN=… bash tools/release/gitverse_release.sh vX.Y.Z notes.md dist/*` does the same.

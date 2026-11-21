@@ -418,6 +418,14 @@ namespace beresta::i18n
         SCHEMA_VALUE_CONSTRAINT_INVALID,
         SCHEMA_VALUE_CONSTRAINT_CONTENT,
         SCHEMA_NOTATION_NO_IDENTIFIER,
+        XML_DECLARATION_MALFORMED,
+        XINCLUDE_FALLBACK_MULTIPLE,
+        XINCLUDE_NO_LOCATION,
+        XINCLUDE_LIMIT_COUNT,
+        XINCLUDE_LIMIT_SIZE,
+        DOCTYPE_SUBSET_UNCLOSED,
+        XMLNS_ATTRIBUTE_NAMESPACE,
+        SCHEMA_ALL_TOO_LARGE,
 
         // Число сообщений (не сообщение) / The number of messages (not a message)
         COUNT

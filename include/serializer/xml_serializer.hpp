@@ -107,6 +107,12 @@ namespace beresta
     // Есть ли среди детей текст или CDATA (смешанное содержимое выводится дословно)
     // Whether there is text or CDATA among the children (mixed content is written verbatim)
     bool hasTextualChild(const ContainerNode& container);
+
+    // Действует ли на элементе xml:space="preserve": свой атрибут, а с lookUp — и ближайший у предков
+    // (пробелы там значимы, отступы добавлять нельзя)
+    // Whether xml:space="preserve" applies to the element: its own attribute, and with lookUp — the nearest one
+    // of the ancestors too (spaces are significant there, indentation must not be added)
+    bool preservesSpace(const Element& element, bool lookUp);
 }
 
 #endif

@@ -126,3 +126,6 @@ desktop.ini
 # ---- Результаты проверочного стенда (tools/stand) / The test stand results (tools/stand)
 /stand_logs/
 /stand_report.txt
+
+# Копии файлов для ручного ревью кода (удаляются после разбора) / File copies for a manual code review (removed after the analysis)
+/tests/manual/review/

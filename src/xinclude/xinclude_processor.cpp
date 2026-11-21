@@ -10,7 +10,7 @@ namespace beresta::xinclude::detail
     // Процессор использует настройки разбора: резолвер, лимиты, базовый URI
     // The processor uses the parse settings: the resolver, the limits, the base URI
     XIncludeProcessor::XIncludeProcessor(const ParserOptions& options)
-        : _options(options), _stack(), _count(0)
+        : _options(options), _stack(), _count(0), _seen(), _repeats(0), _repeatedBytes(0)
     {
     }
 
@@ -38,6 +38,7 @@ namespace beresta::xinclude::detail
     {
         std::vector<std::unique_ptr<Node>> nodes;
 
+        checkIncludeElement(include);
         try
         {
             nodes = loadReplacement(include, baseUri);

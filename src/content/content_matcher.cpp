@@ -1,6 +1,7 @@
 #include "content/content_matcher.hpp"
 
 #include <algorithm>
+#include <utility>
 
 namespace beresta::content
 {
@@ -52,7 +53,16 @@ namespace beresta::content
                 current = addNew(result, members, current);
             if (current.empty() || (particle.maxOccurs != UNBOUNDED && count == particle.maxOccurs))
                 break;
-            current = matchOnce(particle, current);
+            PositionSet next = matchOnce(particle, current);
+            // Шаг не сдвинул множество позиций (частица может совпасть с пустотой) — дальше оно
+            // не изменится, и оставшиеся до minOccurs повторы пропускаются: иначе minOccurs="1000000000"
+            // у пустой или необязательной частицы означал бы миллиард пустых шагов.
+            // The step did not move the set of positions (the particle may match emptiness) — it will not
+            // change further, and the repeats left up to minOccurs are skipped: otherwise minOccurs="1000000000"
+            // on an empty or optional particle would mean a billion empty steps.
+            if (count + 1 < particle.minOccurs && next == current)
+                count = particle.minOccurs - 1;
+            current = std::move(next);
         }
         std::sort(result.begin(), result.end());
         return result;

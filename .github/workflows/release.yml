@@ -11,8 +11,10 @@
 #       dotnet add package Beresta, jar для Maven.
 #     Пользователю ничего не нужно компилировать.
 #  4. Публикация: GitHub Release всегда; npm, PyPI, NuGet и Maven Central —
-#     только на github.com и только если в настройках репозитория заданы их секреты (NPM_TOKEN,
-#     PYPI_API_TOKEN, NUGET_API_KEY, MAVEN_CENTRAL_*, MAVEN_GPG_*); без них
+#     только на github.com. npm и NuGet — доверенной публикацией (OIDC): ключей в секретах нет,
+#     реестр сам проверяет, что пакет собран этим файлом в репозитории ErmaleyAlekov/beresta
+#     (настройка на npmjs.com и nuget.org, для NuGet ещё секрет NUGET_USER — имя профиля).
+#     PyPI и Maven Central — по секретам (PYPI_API_TOKEN, MAVEN_CENTRAL_*, MAVEN_GPG_*); без них
 #     шаг пропускается, а пакеты лежат в релизе. Каждый шаг пропускает уже
 #     опубликованное, поэтому упавший релиз можно просто перезапустить.
 #
@@ -33,8 +35,10 @@
 #       dotnet add package Beresta, a jar for Maven.
 #     The user does not need to compile anything.
 #  4. Publishing: a GitHub Release always; npm, PyPI, NuGet and Maven Central
-#     only on github.com and only if the repository settings define their secrets (NPM_TOKEN,
-#     PYPI_API_TOKEN, NUGET_API_KEY, MAVEN_CENTRAL_*, MAVEN_GPG_*); without them
+#     only on github.com. npm and NuGet use trusted publishing (OIDC): there are no keys in secrets,
+#     the registry itself checks that the package was built by this file in the ErmaleyAlekov/beresta
+#     repository (set up on npmjs.com and nuget.org, NuGet also needs the NUGET_USER secret — the profile name).
+#     PyPI and Maven Central use secrets (PYPI_API_TOKEN, MAVEN_CENTRAL_*, MAVEN_GPG_*); without them
 #     the step is skipped, and the packages lie in the release. Every step skips what is
 #     already published, so a failed release can simply be re-run.
 #
@@ -189,9 +193,13 @@ jobs:
       # Registries — only from github.com: on Gitverse (or another server with this same file)
       # the publishing steps are skipped, even if the same secrets are set there
       ON_GITHUB: ${{ github.server_url == 'https://github.com' }}
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # Доверенная публикация npm привязана к этому репозиторию: в форке шаг не запускается
+      # npm trusted publishing is bound to this repository: in a fork the step does not run
+      MAIN_REPOSITORY: ${{ github.repository == 'ErmaleyAlekov/beresta' }}
       PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
-      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+      # Имя профиля nuget.org (не ключ): с ним NuGet/login меняет токен OIDC на ключ на 1 час
+      # The nuget.org profile name (not a key): with it NuGet/login exchanges the OIDC token for a 1-hour key
+      NUGET_USER: ${{ secrets.NUGET_USER }}
       MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
       MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
       MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
@@ -270,11 +278,14 @@ jobs:
       # принимает dist/имя.tgz за ссылку на GitHub-репозиторий «владелец/имя» и идёт в git
       # A version already in npm is not published again. The path starts with ./: otherwise npm
       # takes dist/name.tgz for a GitHub repository reference "owner/name" and goes to git
+      # Ключа нет: npm 11.5.1+ сам берёт токен OIDC задачи (id-token: write) и меняет его в реестре
+      # на одноразовый; provenance при этом подписывается автоматически
+      # There is no key: npm 11.5.1+ itself takes the job OIDC token (id-token: write) and exchanges it
+      # in the registry for a one-time one; provenance is then signed automatically
       - name: npm publish
-        if: github.ref_type == 'tag' && env.ON_GITHUB == 'true' && env.NPM_TOKEN != ''
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        if: github.ref_type == 'tag' && env.ON_GITHUB == 'true' && env.MAIN_REPOSITORY == 'true'
         run: |
+          npm install -g npm@^11.5.1
           for package in beresta beresta-wasm; do
             if npm view "${package}@${VERSION}" version > /dev/null 2>&1; then
               echo "${package}@${VERSION} уже в npm / already in npm"
@@ -287,8 +298,18 @@ jobs:
         run: |
           python -m pip install twine
           python -m twine upload --skip-existing -u __token__ -p "$PYPI_API_TOKEN" dist/*.whl
+      # Доверенная публикация NuGet: токен OIDC задачи меняется на временный ключ (живёт 1 час)
+      # NuGet trusted publishing: the job OIDC token is exchanged for a temporary key (lives 1 hour)
+      - name: NuGet login (OIDC)
+        id: nuget-login
+        if: github.ref_type == 'tag' && env.ON_GITHUB == 'true' && env.NUGET_USER != ''
+        uses: NuGet/login@v1
+        with:
+          user: ${{ secrets.NUGET_USER }}
       - name: NuGet
-        if: github.ref_type == 'tag' && env.ON_GITHUB == 'true' && env.NUGET_API_KEY != ''
+        if: steps.nuget-login.outcome == 'success'
+        env:
+          NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
         run: dotnet nuget push "dist/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
       # Тот же jar с бинарниками всех платформ, плюс исходники, javadoc и подписи GPG
       # The same jar with the binaries of all platforms, plus sources, javadoc and GPG signatures

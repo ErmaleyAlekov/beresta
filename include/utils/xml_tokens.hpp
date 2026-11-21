@@ -30,6 +30,14 @@ namespace beresta::utils
     // Публичный идентификатор: только символы PubidChar (продукция [13] XML 1.0)
     // A public identifier: only PubidChar characters (production [13] of XML 1.0)
     bool isValidPublicId(std::string_view text) noexcept;
+
+    // Не выходит ли внутреннее подмножество DOCTYPE за свои скобки при выводе "[...]>": нет «]»
+    // вне литералов, комментариев и инструкций, все они и объявления закрыты. Это не разбор DTD,
+    // а гарантия, что сериализация не даст испорченный или подменённый документ.
+    // Whether the DOCTYPE internal subset stays inside its brackets when written as "[...]>": no "]"
+    // outside literals, comments and instructions, all of them and the declarations are closed. This is not
+    // DTD parsing but a guarantee that serialization does not produce a broken or spoofed document.
+    bool isClosedInternalSubset(std::string_view subset) noexcept;
 }
 
 #endif

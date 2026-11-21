@@ -40,7 +40,9 @@ namespace
         suites::registerXsdAssertParallelTests, suites::registerXsdRegexUnicodeTests, suites::registerXsdRegexSyntaxTests, suites::registerXsdRegexTableTests,
         suites::registerContentCursorTests, suites::registerContentPlanTests, suites::registerXIncludeTests,
         suites::registerCapiTests, suites::registerCapiMoveTests, suites::registerCapiStreamTests,
-        suites::registerCapiParallelTests, suites::registerCapiBulkMoveTests, suites::registerI18nTests
+        suites::registerCapiParallelTests, suites::registerCapiBulkMoveTests, suites::registerI18nTests,
+        suites::registerReviewParserTests, suites::registerReviewXIncludeTests,
+        suites::registerReviewDtdContentTests, suites::registerReviewDomTests
     };
 }
 

@@ -73,6 +73,11 @@ namespace beresta
         if (!utils::isValidQualifiedName(qualifiedName))
             throw DomException(DomErrorCode::NAMESPACE_ERROR,
                 i18n::format(i18n::Message::QUALIFIED_NAME_INVALID, {qualifiedName}));
+        if (parts.prefix == "xmlns" || qualifiedName == "xmlns" || namespaceUri == XMLNS_NAMESPACE_URI)
+        {
+            setNamespaceDeclarationNS(namespaceUri, parts.prefix, parts.localName, std::move(value));
+            return;
+        }
         if (parts.prefix.empty() && !namespaceUri.empty())
             throw DomException(DomErrorCode::NAMESPACE_ERROR,
                 i18n::format(i18n::Message::UNPREFIXED_ATTRIBUTE_NAMESPACE));

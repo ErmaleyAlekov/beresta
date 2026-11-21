@@ -208,6 +208,13 @@ namespace beresta
         // Merging with the already present attributes through a name index (element_attributes_bulk.cpp)
         void mergeAttributes(std::vector<Attribute>& attributes);
 
+        // setAttributeNS для объявлений xmlns / xmlns:p: только в пространстве XMLNS и через
+        // declareNamespace (те же запреты: префиксы xml и xmlns, пустой URI у префикса)
+        // setAttributeNS for the xmlns / xmlns:p declarations: only in the XMLNS namespace and through
+        // declareNamespace (the same bans: the xml and xmlns prefixes, an empty URI for a prefix)
+        void setNamespaceDeclarationNS(std::string_view namespaceUri, std::string_view prefix,
+            std::string_view localName, std::string value);
+
         std::string _name;
         std::vector<Attribute> _attributes;
     };

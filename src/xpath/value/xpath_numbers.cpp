@@ -1,4 +1,5 @@
 #include "xpath/xpath_value.hpp"
+#include "utils/decimal.hpp"
 #include "utils/xml_chars.hpp"
 
 #include <cmath>
@@ -14,7 +15,6 @@ namespace beresta::xpath
     */
     static bool parseDecimal(std::string_view text, long double& result) noexcept
     {
-        long double scale = 1.0L;
         bool digits = false;
         bool fraction = false;
 
@@ -29,11 +29,10 @@ namespace beresta::xpath
             if (symbol < '0' || symbol > '9')
                 return false;
             digits = true;
-            if (fraction)
-                scale /= 10.0L;
-            result = result * 10.0L + (symbol - '0');
         }
-        result *= scale;
+        // Значение — тем же переводом, что и у xs:decimal: длинная дробь не превращается в NaN
+        // The value is computed by the same conversion as for xs:decimal: a long fraction does not turn into NaN
+        result = utils::digitsToLongDouble(text, 0);
         return digits;
     }
 

@@ -17,13 +17,15 @@ namespace beresta::detail
     void ExpansionBudget::charge(std::size_t bytes, std::size_t depth)
     {
         ++_expansions;
-        _bytes += bytes;
         if (_expansions > _maxExpansions)
             throw DomException(DomErrorCode::LIMIT_EXCEEDED,
                 i18n::format(i18n::Message::LIMIT_EXPANSIONS, {std::to_string(_maxExpansions)}));
-        if (_bytes > _maxBytes)
+        // Сравнение с остатком, а не сумма: _bytes + bytes могло бы переполниться (_bytes <= _maxBytes всегда)
+        // A comparison with the remainder, not a sum: _bytes + bytes could overflow (_bytes <= _maxBytes always)
+        if (bytes > _maxBytes - _bytes)
             throw DomException(DomErrorCode::LIMIT_EXCEEDED,
                 i18n::format(i18n::Message::LIMIT_EXPANDED_SIZE, {std::to_string(_maxBytes)}));
+        _bytes += bytes;
         if (depth > _maxDepth)
             throw DomException(DomErrorCode::LIMIT_EXCEEDED,
                 i18n::format(i18n::Message::LIMIT_ENTITY_DEPTH, {std::to_string(_maxDepth)}));

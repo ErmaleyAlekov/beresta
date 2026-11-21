@@ -81,10 +81,13 @@ namespace beresta::detail
 
         scanner.advance(5);
         readPseudoAttribute(scanner, "version", version);
-        if (!readPseudoAttribute(scanner, "encoding", encoding))
-            scanner.fail(i18n::format(i18n::Message::TEXT_DECLARATION_ENCODING));
+        bool hasEncoding = readPseudoAttribute(scanner, "encoding", encoding);
         scanner.skipWhitespace();
-        if (!scanner.startsWith("?>"))
+        // Нет encoding: сразу "?>" — его просто забыли, иначе на его месте чужой псевдоатрибут
+        // No encoding: "?>" right away means it was forgotten, otherwise a foreign pseudo-attribute is in its place
+        if (!hasEncoding && scanner.startsWith("?>"))
+            scanner.fail(i18n::format(i18n::Message::TEXT_DECLARATION_ENCODING));
+        if (!hasEncoding || !scanner.startsWith("?>"))
             scanner.fail(i18n::format(i18n::Message::TEXT_DECLARATION_ORDER));
         scanner.advance(2);
         validateTextDeclaration(scanner, version, encoding);

@@ -68,6 +68,14 @@ namespace beresta::utils
     // The nearest double (for mixed arithmetic with xs:double)
     double decimalToDouble(const Decimal& value) noexcept;
 
+    // Число из цифр с необязательной точкой ("12.5"), умноженное на 10^exponent. Берутся первые
+    // 36 значащих цифр, порядок применяется частями: ни длинная запись, ни большой порядок не дают
+    // переполнения промежуточных значений (раньше "0." + 400 цифр давало INF / INF = NaN).
+    // The number of digits with an optional point ("12.5") multiplied by 10^exponent. The first
+    // 36 significant digits are taken, the exponent is applied in parts: neither a long spelling nor a large exponent
+    // overflow the intermediate values (previously "0." + 400 digits gave INF / INF = NaN).
+    long double digitsToLongDouble(std::string_view digits, long long exponent) noexcept;
+
     // ---- Сравнение и арифметика (decimal_normalize.cpp, decimal_arithmetic.cpp) ----
     // ---- Comparison and arithmetic (decimal_normalize.cpp, decimal_arithmetic.cpp) ----
 

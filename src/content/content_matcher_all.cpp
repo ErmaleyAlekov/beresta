@@ -11,7 +11,9 @@ namespace beresta::content
     {
         for (std::size_t index = 0; index < group.children.size(); ++index)
         {
-            bool isUsed = (used >> index) & 1u;
+            // Частицы дальше 64-й в маску не входят (сдвиг на 64 и больше — неопределённое поведение)
+            // Particles past the 64th do not fit the mask (a shift by 64 or more is undefined behavior)
+            bool isUsed = index < 64 && ((used >> index) & 1u) != 0;
             if (group.children[index].minOccurs > 0 && !isUsed)
                 return false;
         }

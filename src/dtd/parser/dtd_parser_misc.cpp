@@ -64,7 +64,14 @@ namespace beresta::dtd
             _reader.getContext().model.addValidityNote(
                 i18n::format(i18n::Message::DTD_CONDITIONAL_SPLIT_PE));
         if (keyword == "INCLUDE")
+        {
+            // Тысячи вложенных секций во враждебном внешнем DTD переполнили бы стек
+            // Thousands of nested sections in a hostile external DTD would overflow the stack
+            if (++_sectionDepth > 64)
+                _reader.fail(i18n::format(i18n::Message::LIMIT_DEPTH, {"64"}));
             parseDeclarations(false, true);
+            --_sectionDepth;
+        }
         else if (keyword == "IGNORE")
             skipIgnoredSection();
         else

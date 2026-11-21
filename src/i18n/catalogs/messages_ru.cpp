@@ -410,6 +410,14 @@ namespace beresta::i18n
         {Message::SCHEMA_VALUE_CONSTRAINT_INVALID, "значение {0}=\"{1}\" у объявления \"{2}\" не подходит к его типу: {3}"},
         {Message::SCHEMA_VALUE_CONSTRAINT_CONTENT, "у элемента \"{0}\" не может быть {1}: его составной тип не имеет ни простого, ни смешанного содержимого"},
         {Message::SCHEMA_NOTATION_NO_IDENTIFIER, "у нотации \"{0}\" нет ни public, ни system"},
+        {Message::XML_DECLARATION_MALFORMED, "XML-декларация записана неверно: нужно «<?xml» строчными буквами, пробел и version"},
+        {Message::XINCLUDE_FALLBACK_MULTIPLE, "у xi:include может быть только один xi:fallback"},
+        {Message::XINCLUDE_NO_LOCATION, "у xi:include нет ни href, ни xpointer"},
+        {Message::XINCLUDE_LIMIT_COUNT, "превышено допустимое число повторных включений xi:include ({0})"},
+        {Message::XINCLUDE_LIMIT_SIZE, "превышен допустимый объём повторных включений xi:include ({0} байт)"},
+        {Message::DOCTYPE_SUBSET_UNCLOSED, "внутреннее подмножество DOCTYPE должно состоять из целых объявлений: «]» вне литералов, комментариев и инструкций, незакрытый литерал или комментарий недопустимы"},
+        {Message::SCHEMA_ALL_TOO_LARGE, "в xs:all поддерживается не больше 64 частиц, а здесь {0}"},
+        {Message::XMLNS_ATTRIBUTE_NAMESPACE, "атрибуты xmlns и xmlns:* должны быть в пространстве имён xmlns, и только они"},
     };
 
     const Catalog RUSSIAN_CATALOG{"ru", "Русский", TEXTS, sizeof(TEXTS) / sizeof(TEXTS[0])};

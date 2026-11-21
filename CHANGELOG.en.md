@@ -5,6 +5,63 @@
 Versions follow [semantic versioning](https://semver.org/). The entire version section
 is included in the release description on GitHub and Gitverse.
 
+## 2.3.0 — 2026-11-21
+
+Fixes from the code review (tasks T-2…T-14): protection against hostile input in XInclude, DTD and XML Schema,
+the resolver leaving its root through a symbolic link, correct serialization and number conversion.
+The W3C XML Schema Test Suite and the XML Conformance Test Suite are unchanged (XSTS: 515 failures, no new ones).
+
+### Security and limits
+
+- `FileResourceResolver` checks a path not only by its spelling but also by the real path on disk: a symbolic
+  link inside the root (`root/external -> /outside`) no longer opens reading files outside it.
+- XInclude: repeated inclusions of the same resource are limited by `maxEntityExpansions` (count) and
+  `maxExpandedSize` (bytes); the first load of each resource is not counted. A chain of files where each one
+  includes the next many times no longer exhausts memory.
+- DTD: the nesting of `<![INCLUDE[` conditional sections is limited to 64 levels — thousands of nested sections
+  in an external DTD overflowed the stack.
+- XML Schema: `minOccurs="1000000000"` on a particle matching emptiness inside a repeatable group was checked
+  by a billion empty steps (a hang); now it is checked at once.
+- The entity expansion budget compares the size with the rest of the limit — the sum does not overflow with a limit
+  near `SIZE_MAX`.
+
+### Standards conformance
+
+- XInclude: more than one `xi:fallback` is an error (the last one used to be taken silently); an `xi:include`
+  without `href` and `xpointer` is an error, not a fallback. After an error inside an included file and a fallback
+  the next inclusion of the same file is no longer taken for a cycle.
+- DTD: an invalid value of an ID attribute (`id="a b"`) does not register its parts as identifiers — a reference
+  to `b` is now an error too.
+- XML Schema: `xs:all` with more than 64 particles is the `SCHEMA_ALL_TOO_LARGE` schema error. Previously the
+  particles past the 64th were silently treated as not allowed, and a valid document was rejected.
+- The declaration `<?xml version="1.0" badencoding="…" encoding="utf-8"?>` no longer picks the encoding from a
+  foreign pseudo-attribute.
+
+### DOM and serialization
+
+- Pretty output (`prettyPrint`) does not add indentation inside `xml:space="preserve"` (own or inherited).
+- `DocumentType` checks `publicId` (PubidChar only) and the internal subset: it cannot leave `[...]>` on output
+  (`"]><injected/>"` and unclosed literals or comments are the `DOCTYPE_SUBSET_UNCLOSED` error).
+- `setAttributeNS` for `xmlns` and `xmlns:*` passes the `declareNamespace` checks: an empty URI for a prefix,
+  a foreign namespace and names like `a:b` in the XMLNS namespace are a `NAMESPACE_ERROR`.
+- The new method `CharacterNode::appendValue(std::string_view)` appends to the value with the same check as
+  `setValue`. The DOM builder uses it: thousands of consecutive CDATA sections (`coalesceCData`) or entity
+  references no longer take quadratic time.
+
+### Numbers and messages
+
+- Converting `xs:decimal` to `double` and XPath `number()`: a long fraction (`"0."` and hundreds of digits) gave
+  NaN — on MSVC, where `long double` is `double`, from 309 digits already. Now 36 significant digits are taken and
+  the exponent is applied in parts.
+- `<?xml?>` and `<?XML …?>` at the start of a document give a message about a broken declaration, not "the
+  declaration is out of place"; a foreign pseudo-attribute in a text declaration gives a message about the order,
+  not "no encoding".
+
+### Build and release
+
+- npm and NuGet are published by trusted publishing (OIDC) instead of the long-lived `NPM_TOKEN` and `NUGET_API_KEY` keys:
+  the registry issues a key for one job of the repository's `release.yml`; the npm step does not run in a fork.
+
 ## 2.2.1 — 2026-11-09
 
 XML Schema fixes found in Gran UI. The W3C XML Schema Test Suite is unchanged (515 failures, no new ones).
