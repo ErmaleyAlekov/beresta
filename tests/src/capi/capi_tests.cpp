@@ -151,7 +151,9 @@ namespace
         TEST_ASSERT(beresta_diagnostics_count(diagnostics) == 1);
         TEST_ASSERT(!support::takeCapiString(beresta_diagnostics_message(diagnostics, 0)).empty());
         TEST_ASSERT(beresta_document_parse("<n>12</n>", 9, 0, schema, &document) == BERESTA_OK);
-        TEST_ASSERT(beresta_document_parse("<n>x</n>", 8, 0, schema, &bad) == BERESTA_VALIDATION_ERROR);
+        beresta_document rejected = nullptr;
+        TEST_ASSERT(beresta_document_parse("<n>x</n>", 8, 0, schema, &rejected) == BERESTA_VALIDATION_ERROR);
+        TEST_ASSERT(rejected == nullptr);
         beresta_diagnostics_free(diagnostics);
         beresta_document_free(document);
         beresta_document_free(bad);

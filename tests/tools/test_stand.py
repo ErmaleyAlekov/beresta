@@ -38,7 +38,6 @@ class StandTests(unittest.TestCase):
 set -eu
 . ./tools/stand/lib/messages.sh
 . ./tools/stand/lib/report.sh
-local() { exit 99; }
 STAND_LANG=en
 STAND_FAILED=0
 STAND_LOGS=$(mktemp -d)
