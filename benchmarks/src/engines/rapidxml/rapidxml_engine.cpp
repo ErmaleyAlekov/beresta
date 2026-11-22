@@ -16,7 +16,7 @@ namespace bench
         _buffer.push_back('\0');
         try
         {
-            _document.parse<0>(_buffer.data());
+            _document.parse<rapidxml::parse_declaration_node>(_buffer.data());
         }
         catch (const rapidxml::parse_error& error)
         {

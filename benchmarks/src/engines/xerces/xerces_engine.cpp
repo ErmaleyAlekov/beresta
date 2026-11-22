@@ -37,11 +37,14 @@ namespace bench
     {
         xercesc::MemBufInputSource source(reinterpret_cast<const XMLByte*>(xml.data()), xml.size(), "bench");
 
-        release();
         _parser->parse(source);
         if (_parser->getErrorCount() != 0)
             throw BenchError("Xerces: документ отвергнут / the document is rejected");
-        _document = _parser->adoptDocument();
+        auto document = _parser->adoptDocument();
+        if (!document)
+            throw BenchError("Xerces: нет документа / missing document");
+        release();
+        _document = document;
     }
 
     // Освобождение дерева / Freeing the tree

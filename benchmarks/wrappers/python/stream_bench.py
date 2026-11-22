@@ -30,11 +30,21 @@ def beresta_once(schema, xml: bytes) -> int:
 
 
 def lxml_once(schema, xml: bytes) -> int:
-    """Одна проверка lxml: iterparse бросает исключение на первом нарушении.
-    One lxml validation: iterparse throws an exception on the first violation."""
+    """Потоковая проверка lxml с подсчётом нарушений схемы.
+    Streaming lxml validation with a count of schema violations."""
     from lxml import etree
-    for _, element in etree.iterparse(io.BytesIO(xml), events=("end",), schema=schema):
-        element.clear()
+    parser = etree.iterparse(io.BytesIO(xml), events=("end",), schema=schema)
+    try:
+        for _, element in parser:
+            element.clear()
+            parent = element.getparent()
+            while parent is not None and element.getprevious() is not None:
+                del parent[0]
+    except etree.XMLSyntaxError:
+        errors = list(parser.error_log)
+        if not errors or any(error.domain_name != "SCHEMASV" for error in errors):
+            raise
+        return len(errors)
     return 0
 
 
@@ -46,7 +56,10 @@ def speed(once, schema, xml: bytes) -> str:
         once(schema, xml)
         if run > 0:
             times.append(time.perf_counter() - start)
-    return "%.0f" % (len(xml) / 1e6 / statistics.median(times))
+    elapsed = statistics.median(times)
+    if elapsed <= 0:
+        return "—"
+    return "%.0f" % (len(xml) / 1e6 / elapsed)
 
 
 def main() -> None:
@@ -58,17 +71,19 @@ def main() -> None:
     xml = (data / "catalog.xml").read_bytes()
     xsd = (data / "catalog.xsd").read_text(encoding="utf-8")
     schema = beresta.Schema.from_string(xsd)
-    print("| Библиотека / Library | SAX + XSD, MB/s | Ошибки XSD / XSD errors |")
-    print("|---|---|---|")
-    print("| Берёста / Beresta %s (validate_bytes) | %s | %d |" % (
-        beresta.version(), speed(beresta_once, schema, xml), beresta_once(schema, xml)))
+    print("| Библиотека / Library | SAX + XSD, MB/s | Ошибки XSD / XSD errors | XSD valid |")
+    print("|---|---|---|---|")
+    beresta_errors = beresta_once(schema, xml)
+    print("| Берёста / Beresta %s (validate_bytes) | %s | %d | %s |" % (
+        beresta.version(), speed(beresta_once, schema, xml), beresta_errors, "yes" if beresta_errors == 0 else "no"))
     try:
         from lxml import etree
     except ImportError:
         return
     native = etree.XMLSchema(etree.fromstring(xsd.encode("utf-8")))
-    print("| lxml %s (iterparse + schema) | %s | %d |" % (
-        ".".join(map(str, etree.LXML_VERSION[:3])), speed(lxml_once, native, xml), lxml_once(native, xml)))
+    lxml_errors = lxml_once(native, xml)
+    print("| lxml %s (iterparse + schema) | %s | %d | %s |" % (
+        ".".join(map(str, etree.LXML_VERSION[:3])), speed(lxml_once, native, xml), lxml_errors, "yes" if lxml_errors == 0 else "no"))
 
 
 if __name__ == "__main__":

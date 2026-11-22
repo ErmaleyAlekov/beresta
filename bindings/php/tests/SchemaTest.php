@@ -75,10 +75,15 @@ final class SchemaTest extends TestCase
     {
         $schema = Schema::fromString('<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"><xs:element name="order"><xs:complexType><xs:sequence><xs:element name="qty" type="xs:int" maxOccurs="unbounded"/></xs:sequence></xs:complexType></xs:element></xs:schema>');
         $path = tempnam(sys_get_temp_dir(), 'beresta');
-        file_put_contents($path, "<order>\n<qty>x</qty>\n<qty>y</qty></order>");
-        $problems = $schema->validateFile($path);
-        $this->assertSame(2, count($problems));
-        unlink($path);
+        try {
+            file_put_contents($path, "<order>\n<qty>x</qty>\n<qty>y</qty></order>");
+            $problems = $schema->validateFile($path);
+            $this->assertSame(2, count($problems));
+        } finally {
+            unlink($path);
+        }
+        $error = $this->assertThrows(BerestaException::class, fn() => $schema->validateFile($path));
+        $this->assertSame(\Beresta\Status::IoError, $error->status());
     }
 
     /**

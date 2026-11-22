@@ -206,6 +206,16 @@ ifeq ($(PLATFORM_OS),macos)
 endif
 CXXFLAGS    += $(TARGET_FLAGS) $(MACOS_FLAGS)
 CFLAGS      += $(TARGET_FLAGS) $(MACOS_FLAGS)
+EMXX         ?= em++
+ifneq ($(CXX),$(EMXX))
+    CXXFLAGS += -fstack-protector-strong
+    CFLAGS   += -fstack-protector-strong
+    ifeq ($(PLATFORM_OS),linux)
+        CXXFLAGS += -D_FORTIFY_SOURCE=2
+        CFLAGS   += -D_FORTIFY_SOURCE=2
+        NATIVE_LINK_FLAGS := -Wl,-z,relro,-z,now
+    endif
+endif
 
 # ---- Платформенные особенности -------------------------------------------------
 # SHARED_NAME — каноническое имя бинарника, его же ищут загрузчики обёрток.
@@ -378,7 +388,6 @@ NODE_COPY   := $(NODE_NATIVE)/beresta.node
 #   ENVIRONMENT         a browser, a Web Worker (Cloudflare Workers included) and Node.js
 #   WASM_BIGINT         the int64 of the C interface is passed as a BigInt, without splitting
 #   FILESYSTEM=0        there is no file system: parsing strings and bytes, output to a string
-EMXX         ?= em++
 WASM_DIR     := $(BIND_DIR)/wasm
 WASM_DIST    := $(WASM_DIR)/dist
 WASM_CORE    := $(WASM_DIST)/beresta_core.mjs
@@ -448,27 +457,27 @@ $(LIB_BIN): $(LIB_OBJ) | $(BIN_DIR)
 # Динамическая библиотека: наружу экспортируется только Си-интерфейс
 # The shared library: only the C interface is exported
 $(SHARED_BIN): $(LIB_OBJ) | $(BIN_DIR)
-	$(CXX) $(CXXFLAGS) $(LIB_OBJ) $(SHARED_LDFLAGS) $(FS_LIBS) -o $@
+	$(CXX) $(CXXFLAGS) $(LIB_OBJ) $(SHARED_LDFLAGS) $(FS_LIBS) $(NATIVE_LINK_FLAGS) -o $@
 
 # Демонстрационная программа на C++ (статическая библиотека)
 # The C++ demo program (static library)
 $(DEMO_BIN): $(DEMO_OBJ) $(LIB_BIN) | $(BIN_DIR)
-	$(CXX) $(CXXFLAGS) $(DEMO_OBJ) $(LIB_BIN) $(FS_LIBS) -o $@
+	$(CXX) $(CXXFLAGS) $(DEMO_OBJ) $(LIB_BIN) $(FS_LIBS) $(NATIVE_LINK_FLAGS) -o $@
 
 # Демонстрационная программа на чистом C (динамическая библиотека)
 # The pure C demo program (shared library)
 $(CAPI_BIN): $(CAPI_OBJ) $(SHARED_BIN) | $(BIN_DIR)
-	$(CC) $(CFLAGS) $(CAPI_OBJ) -L$(BIN_DIR) -lberesta $(CAPI_LDFLAGS) -o $@
+	$(CC) $(CFLAGS) $(CAPI_OBJ) -L$(BIN_DIR) -lberesta $(CAPI_LDFLAGS) $(NATIVE_LINK_FLAGS) -o $@
 
 # Модульные тесты
 # Unit tests
 $(TEST_BIN): $(TEST_OBJ) $(LIB_BIN) | $(BIN_DIR)
-	$(CXX) $(CXXFLAGS) $(TEST_OBJ) $(LIB_BIN) $(FS_LIBS) $(THREAD_LIBS) -o $@
+	$(CXX) $(CXXFLAGS) $(TEST_OBJ) $(LIB_BIN) $(FS_LIBS) $(THREAD_LIBS) $(NATIVE_LINK_FLAGS) -o $@
 
 # Аддон Node.js: переходники Node-API + объекты ядра в одном файле beresta.node
 # The Node.js addon: the Node-API adapters + the core objects in one beresta.node file
 $(ADDON_BIN): $(ADDON_OBJ) $(LIB_OBJ) | $(BIN_DIR)
-	$(CXX) $(CXXFLAGS) $(ADDON_OBJ) $(LIB_OBJ) $(ADDON_LDFLAGS) $(FS_LIBS) -o $@
+	$(CXX) $(CXXFLAGS) $(ADDON_OBJ) $(LIB_OBJ) $(ADDON_LDFLAGS) $(FS_LIBS) $(NATIVE_LINK_FLAGS) -o $@
 
 # ---- Копирование бинарника в обёртки (пересоздаётся при изменении) ------------
 # Правило есть для всех трёх обёрток (make java-test работает и без JAVA=1),
@@ -650,6 +659,10 @@ clean:
 	@$(call RMDIR,$(DEP_DIR))
 
 fclean: clean
+ifeq ($(PLATFORM_OS),macos)
+	@$(foreach platform,$(UNIVERSAL_PLATFORMS),$(foreach base,$(JAVA_DIR)/src/main/resources/natives $(PYTHON_DIR)/beresta/_native $(NODE_DIR)/native $(PHP_DIR)/native,$(call RMDIR,$(base)/$(platform)) &&)) true
+	@$(foreach rid,$(UNIVERSAL_RIDS),$(call RMDIR,$(CSHARP_DIR)/Beresta/runtimes/$(rid)/native) &&) true
+endif
 	@$(call RMDIR,$(BIN_DIR))
 	@$(call RMDIR,$(JAVA_NATIVE))
 	@$(call RMDIR,$(JAVA_DIR)/target)

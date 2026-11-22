@@ -110,6 +110,9 @@ namespace beresta::xsd
         std::shared_ptr<const Schema> _schema;
         std::unique_ptr<detail::StreamValidator> _validator;
         ContentHandler* _downstream;
+        ValidationSettings _settings;
+        const Locator* _nextLocator = nullptr;
+        bool _started = false;
     };
 }
 

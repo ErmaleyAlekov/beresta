@@ -7,7 +7,8 @@ namespace
     // An external DTD with a parameter entity and a conditional section
     void testExternalDtd()
     {
-        std::filesystem::path root = support::makeTestDirectory("external_dtd");
+        const support::TestDirectory temporary("external_dtd");
+        const auto& root = temporary.path;
         support::writeTestFile(root / "doc.dtd",
             "<!ENTITY % content \"(#PCDATA)\"><![INCLUDE[<!ELEMENT doc %content;>]]>"
             "<![IGNORE[<!ELEMENT broken>]]><!ATTLIST doc v CDATA \"по умолчанию\">");
@@ -26,7 +27,8 @@ namespace
     // An external entity is substituted as markup
     void testExternalEntity()
     {
-        std::filesystem::path root = support::makeTestDirectory("external_entity");
+        const support::TestDirectory temporary("external_entity");
+        const auto& root = temporary.path;
         support::writeTestFile(root / "part.xml", "<?xml version=\"1.0\" encoding=\"UTF-8\"?><p>часть</p>");
         support::writeTestFile(root / "main.xml",
             "<!DOCTYPE r [<!ENTITY part SYSTEM \"part.xml\">]><r>&part;</r>");
@@ -42,7 +44,8 @@ namespace
     // Without a resolver nothing external is loaded; leaving the root and the network are forbidden
     void testResourceSecurity()
     {
-        std::filesystem::path root = support::makeTestDirectory("security");
+        const support::TestDirectory temporary("security");
+        const auto& root = temporary.path;
         beresta::FileResourceResolver resolver(root);
         beresta::ResourceRequest outside{beresta::ResourceKind::EXTERNAL_ENTITY, "", "../secret.txt", ""};
         beresta::ResourceRequest remote{beresta::ResourceKind::EXTERNAL_ENTITY, "", "http://evil/x", ""};

@@ -13,6 +13,12 @@ namespace beresta::io
     // The file is opened in binary mode and read whole through the stream buffer
     std::string readFile(const std::filesystem::path& path)
     {
+        // Некоторые реализации позволяют открыть каталог как поток.
+        // Some implementations allow a directory to be opened as a stream.
+        std::error_code status;
+        if (std::filesystem::is_directory(path, status))
+            throw DomException(DomErrorCode::IO_ERROR,
+                i18n::format(i18n::Message::FILE_OPEN_READ, {path.u8string()}));
         std::ifstream file(path, std::ios::binary);
 
         if (!file)

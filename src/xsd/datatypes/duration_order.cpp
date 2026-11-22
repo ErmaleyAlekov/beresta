@@ -1,154 +1,102 @@
 #include "xsd/internal/datatype_checks.hpp"
+#include "utils/decimal.hpp"
 
-#include <cmath>
+namespace beresta::xsd::detail {
 
-namespace beresta::xsd::detail
-{
-    /*
-    ** Значение длительности для сравнения: месяцы (годы * 12 + месяцы) и
-    ** секунды (дни, часы, минуты и секунды). Обе части со знаком длительности.
-    ** long double — потому что лексика не ограничивает величину чисел.
-    **
-    ** A duration value for comparison: months (years * 12 + months) and
-    ** seconds (days, hours, minutes and seconds). Both parts carry the duration sign.
-    ** long double — because the lexical form does not bound the size of the numbers.
-    */
-    struct DurationParts
-    {
-        long double months = 0.0L;
-        long double seconds = 0.0L;
+    using utils::Decimal;
+
+    // RU: РџРѕР»РЅС‹Рµ 400-Р»РµС‚РЅРёРµ С†РёРєР»С‹ РІС…РѕРґСЏС‚ РІ СЃРµРєСѓРЅРґС‹, РѕСЃС‚Р°С‚РѕРє С…СЂР°РЅРёС‚СЃСЏ РІ РјРµСЃСЏС†Р°С….
+    // EN: Seconds include complete Gregorian cycles, leaving a bounded month offset.
+    struct DurationParts {
+        Decimal seconds = utils::decimalFromInteger(0);
+        int months = 0;
     };
 
-    // Сколько единиц (месяцев или секунд) в одном обозначении; inTime — после 'T'
-    // How many units (months or seconds) one designator stands for; inTime — after 'T'
-    static void addComponent(DurationParts& parts, char designator, bool inTime, long double number) noexcept
-    {
-        if (designator == 'Y')
-            parts.months += number * 12.0L;
-        else if (designator == 'M' && !inTime)
-            parts.months += number;
-        else if (designator == 'D')
-            parts.seconds += number * 86400.0L;
-        else if (designator == 'H')
-            parts.seconds += number * 3600.0L;
-        else if (designator == 'M')
-            parts.seconds += number * 60.0L;
-        else
-            parts.seconds += number;
+    // RU: Деление на 4800 оставляет точный остаток даже для длинных значений.
+    // EN: Divide by 4800 to retain the exact remainder for arbitrarily long values.
+    static void splitCycles(Decimal months, DurationParts& parts) {
+        int remainder = 0;
+        for (char& digit : months.digits) {
+            const int value = remainder * 10 + (digit - '0');
+            digit = static_cast<char>('0' + value / 4800);
+            remainder = value % 4800;
+        }
+        Decimal cycles;
+        utils::readDecimal(months.digits, cycles);
+        parts.months = remainder;
+        const auto cycleSeconds = utils::decimalFromInteger(146097LL * 86400);
+        parts.seconds = utils::addDecimals(parts.seconds, utils::multiplyDecimals(cycles, cycleSeconds));
     }
 
-    // Очередная цифра числа: до точки — целая часть, после (scale > 0) — дробная
-    // The next digit of a number: before the point — the integer part, after it (scale > 0) — the fraction
-    static void addDigit(char symbol, long double& number, long double& scale) noexcept
-    {
-        if (scale == 0.0L)
-        {
-            number = number * 10.0L + (symbol - '0');
+    // RU: Накапливает месяцы и секунды отдельно до календарного сдвига.
+    // EN: Keep months and seconds separate until the calendar shift.
+    static void addComponent(char unit, bool inTime, Decimal value, Decimal& months, DurationParts& parts) {
+        if (unit == 'Y' || (unit == 'M' && !inTime)) {
+            if (unit == 'Y') value = utils::multiplyDecimals(value, utils::decimalFromInteger(12));
+            months = utils::addDecimals(months, value);
             return;
         }
-        scale /= 10.0L;
-        number += (symbol - '0') * scale;
+        int factor = 1;
+        if (unit == 'D') factor = 86400;
+        else if (unit == 'H') factor = 3600;
+        else if (unit == 'M') factor = 60;
+        parts.seconds = utils::addDecimals(parts.seconds,
+            utils::multiplyDecimals(value, utils::decimalFromInteger(factor)));
     }
 
-    /*
-    ** Разбор уже проверенной лексики (isDurationLexical): числа копятся
-    ** цифра за цифрой, буква-обозначение отдаёт накопленное число в addComponent.
-    **
-    ** Parsing an already checked lexical form (isDurationLexical): numbers accumulate
-    ** digit by digit, a designator letter hands the accumulated number to addComponent.
-    */
-    static bool parseDuration(std::string_view value, DurationParts& parts) noexcept
-    {
-        if (!isDurationLexical(value))
-            return false;
-        bool negative = value[0] == '-';
+    // RU: Считывает величины из проверенной лексической формы длительности.
+    // EN: Read component values from a validated duration literal.
+    static bool parseDuration(std::string_view value, DurationParts& parts) {
+        if (!isDurationLexical(value)) return false;
+        Decimal months = utils::decimalFromInteger(0);
         bool inTime = false;
-        long double number = 0.0L;
-        long double scale = 0.0L;
-        for (char symbol : value)
-        {
-            if (symbol >= '0' && symbol <= '9')
-                addDigit(symbol, number, scale);
-            else if (symbol == '.')
-                scale = 1.0L;
-            else if (symbol == 'T')
-                inTime = true;
-            else if (symbol != '-' && symbol != 'P')
-            {
-                addComponent(parts, symbol, inTime, number);
-                number = 0.0L;
-                scale = 0.0L;
+        std::size_t start = value.find('P') + 1;
+        for (std::size_t i = start; i < value.size(); ++i) {
+            const char symbol = value[i];
+            if ((symbol >= '0' && symbol <= '9') || symbol == '.') continue;
+            if (symbol == 'T') inTime = true;
+            else {
+                Decimal number;
+                if (!utils::readDecimal(value.substr(start, i - start), number)) return false;
+                addComponent(symbol, inTime, number, months, parts);
             }
+            start = i + 1;
         }
-        if (negative)
-            parts = DurationParts{-parts.months, -parts.seconds};
+        splitCycles(months, parts);
+        if (value.front() == '-') {
+            parts.months = -parts.months;
+            parts.seconds = utils::negateDecimal(parts.seconds);
+        }
         return true;
     }
 
-    /*
-    ** Момент «опорная дата (1-е число месяца) + длительность» в секундах от
-    ** 1970-01-01 (пролептический григорианский календарь, алгоритм days_from_civil
-    ** Г. Хиннанта). Сначала прибавляются месяцы, затем секунды: день опорной даты —
-    ** первое число, поэтому «прижимать» день к концу месяца (приложение E) не нужно,
-    ** а прибавление дней и секунд с переносами равно прибавлению на прямой времени.
-    **
-    ** The moment "reference date (the 1st of a month) + duration" in seconds since
-    ** 1970-01-01 (the proleptic Gregorian calendar, H. Hinnant's days_from_civil
-    ** algorithm). Months are added first, then seconds: the reference day is the
-    ** first of the month, so the day need not be "pinned" to the month end (appendix E),
-    ** and adding days and seconds with carries equals adding on the time line.
-    */
-    static long double shiftedMoment(long double year, int month, const DurationParts& parts) noexcept
-    {
-        long double total = year * 12.0L + (month - 1) + parts.months;
-        long double shiftedYear = std::floor(total / 12.0L);
-        long double shiftedMonth = total - shiftedYear * 12.0L + 1.0L;
-
-        if (shiftedMonth <= 2.0L)
-            shiftedYear -= 1.0L;
-        long double era = std::floor(shiftedYear / 400.0L);
-        long double yearOfEra = shiftedYear - era * 400.0L;
-        long double monthIndex = std::fmod(shiftedMonth + 9.0L, 12.0L);
-        long double dayOfYear = std::floor((153.0L * monthIndex + 2.0L) / 5.0L);
-        long double dayOfEra = yearOfEra * 365.0L + std::floor(yearOfEra / 4.0L)
-            - std::floor(yearOfEra / 100.0L) + dayOfYear;
-        long double days = era * 146097.0L + dayOfEra - 719468.0L;
-        return days * 86400.0L + parts.seconds;
+    // RU: РћРїРѕСЂРЅС‹Рµ РґР°С‚С‹ РѕСЃС‚Р°СЋС‚СЃСЏ РІ РїРѕР»РѕР¶РёС‚РµР»СЊРЅС‹С… РіРѕРґР°С… РїСЂРё СЃРґРІРёРіРµ РґРѕ 4799 РјРµСЃСЏС†РµРІ.
+    // EN: The reference years stay positive for residual shifts up to 4799 months.
+    static Decimal shiftedMoment(int year, int month, const DurationParts& parts) {
+        const int total = year * 12 + month - 1 + parts.months;
+        const int shiftedMonth = total % 12 + 1;
+        const int shiftedYear = total / 12 - (shiftedMonth <= 2);
+        const int dayOfYear = (153 * ((shiftedMonth + 9) % 12) + 2) / 5;
+        const int days = shiftedYear * 365 + shiftedYear / 4 - shiftedYear / 100
+                       + shiftedYear / 400 + dayOfYear;
+        return utils::addDecimals(utils::decimalFromInteger(days * 86400LL), parts.seconds);
     }
 
-    /*
-    ** Частичный порядок duration (XSD 1.0, 3.2.6.2): длительности прибавляются
-    ** к четырём опорным датам 1696-09-01, 1697-02-01, 1903-03-01 и 1903-07-01
-    ** (на них расходятся длины месяцев и високосные годы). Порядок определён,
-    ** только если все четыре сравнения согласны; иначе — 2 («несравнимы»).
-    **
-    ** The partial order of duration (XSD 1.0, 3.2.6.2): the durations are added
-    ** to the four reference dates 1696-09-01, 1697-02-01, 1903-03-01 and 1903-07-01
-    ** (where month lengths and leap years differ). The order is defined
-    ** only if all four comparisons agree; otherwise 2 ("incomparable").
-    */
-    int compareDurations(std::string_view left, std::string_view right) noexcept
-    {
+    // RU: Все четыре опорные даты должны дать один порядок.
+    // EN: All four reference dates must agree on the ordering.
+    int compareDurations(std::string_view left, std::string_view right) {
         static const int REFERENCES[4][2] = {{1696, 9}, {1697, 2}, {1903, 3}, {1903, 7}};
         DurationParts a;
         DurationParts b;
+        if (!parseDuration(left, a) || !parseDuration(right, b)) return 2;
         int agreed = 3;
-
-        if (!parseDuration(left, a) || !parseDuration(right, b))
-            return 2;
-        for (const int* reference : REFERENCES)
-        {
-            long double difference = shiftedMoment(reference[0], reference[1], a)
-                - shiftedMoment(reference[0], reference[1], b);
-            int order = 0;
-            if (difference < 0.0L)
-                order = -1;
-            else if (difference > 0.0L)
-                order = 1;
-            if (agreed != 3 && agreed != order)
-                return 2;
+        for (const auto& date : REFERENCES) {
+            const int order = utils::compareDecimals(shiftedMoment(date[0], date[1], a),
+                                                      shiftedMoment(date[0], date[1], b));
+            if (agreed != 3 && agreed != order) return 2;
             agreed = order;
         }
         return agreed;
     }
-}
+
+} // namespace beresta::xsd::detail

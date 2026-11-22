@@ -6,6 +6,7 @@ namespace BerestaBench;
 
 use Beresta\Beresta;
 use Beresta\Element;
+use Beresta\BerestaException;
 use Beresta\Parser;
 use Beresta\Schema;
 use Beresta\XPath;
@@ -66,7 +67,14 @@ final class BerestaEngine extends Engine
      */
     public function parseValidated(string $xml): ?int
     {
-        $this->validating->parseString($xml);
-        return 0;
+        try {
+            $this->validating->parseString($xml);
+            return 0;
+        } catch (BerestaException $failure) {
+            if ($failure->statusName() !== 'VALIDATION_ERROR') {
+                throw $failure;
+            }
+            return 1;
+        }
     }
 }

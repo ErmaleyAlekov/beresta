@@ -6,7 +6,7 @@ namespace conformance
     {
         // Позиция после ведущих инструкций обработки <?...?> (0 — если их нет)
         // The position after the leading processing instructions <?...?> (0 if there are none)
-        std::size_t skipLeadingInstructions(const std::string& text)
+        std::size_t skipLeadingInstructions(const std::string& text, std::string& instructions)
         {
             std::size_t position = 0;
 
@@ -16,7 +16,10 @@ namespace conformance
 
                 if (end == std::string::npos)
                     return position;
-                position = end + 2;
+                instructions.append(text, position, end + 2 - position);
+                position = text.find_first_not_of(" \t\r\n", end + 2);
+                if (position == std::string::npos)
+                    return text.size();
             }
             return position;
         }
@@ -73,7 +76,8 @@ namespace conformance
         */
         std::string stripCanonicalDoctype(const std::string& expected, bool dropDtdPis)
         {
-            std::size_t start = skipLeadingInstructions(expected);
+            std::string instructions;
+            std::size_t start = skipLeadingInstructions(expected, instructions);
 
             if (expected.compare(start, 9, "<!DOCTYPE") != 0)
                 return expected;
@@ -81,11 +85,13 @@ namespace conformance
             if (end == std::string::npos)
                 return expected;
             end += 2;
+            if (end < expected.size() && expected[end] == '\r')
+                ++end;
             if (end < expected.size() && expected[end] == '\n')
                 ++end;
             if (dropDtdPis)
                 return expected.substr(end);
-            return expected.substr(0, start) + expected.substr(end);
+            return instructions + expected.substr(end);
         }
     }
 }

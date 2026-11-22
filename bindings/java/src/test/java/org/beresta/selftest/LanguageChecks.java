@@ -24,13 +24,12 @@ final class LanguageChecks
         try
         {
             englishParseError();
+            closedDocumentMessage();
         }
-        catch (RuntimeException failure)
+        finally
         {
             Languages.use("ru");
-            throw failure;
         }
-        closedDocumentMessage();
     }
 
     // Ошибка разбора приходит по-английски / The parse error arrives in English
@@ -47,8 +46,8 @@ final class LanguageChecks
         }
     }
 
-    // Сообщение обёртки о закрытом документе; язык возвращается к ru
-    // The binding message about a closed document; the language goes back to ru
+    // Сообщение обёртки о закрытом документе
+    // The binding message about a closed document
     private static void closedDocumentMessage()
     {
         XmlDocument document = Xml.parse("<a/>");
@@ -62,10 +61,6 @@ final class LanguageChecks
         catch (IllegalStateException expected)
         {
             Expect.isTrue(expected.getMessage().contains("the document is already closed"), expected.getMessage());
-        }
-        finally
-        {
-            Languages.use("ru");
         }
     }
 

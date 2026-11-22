@@ -39,7 +39,7 @@ while [ "$#" -gt 0 ]; do
             usage
             ;;
         *)
-            echo "Unknown option: $1"
+            stand_text unknown_option "$1" >&2
             exit 1
             ;;
     esac

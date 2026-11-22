@@ -22,7 +22,8 @@ namespace
     */
     void testConditionalDepth()
     {
-        std::filesystem::path root = support::makeTestDirectory("review_conditional");
+        const support::TestDirectory temporary("review_conditional");
+        const auto& root = temporary.path;
         beresta::FileResourceResolver resolver(root);
         beresta::ParserOptions options;
         options.resolver = &resolver;

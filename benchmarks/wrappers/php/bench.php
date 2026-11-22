@@ -22,6 +22,8 @@ require_once __DIR__ . '/BerestaEngine.php';
 require_once __DIR__ . '/DomEngine.php';
 require_once __DIR__ . '/SimpleXmlEngine.php';
 require_once __DIR__ . '/Measure.php';
+require_once __DIR__ . '/BenchInput.php';
+require_once __DIR__ . '/XsdOutcome.php';
 
 /**
  * Библиотеки в порядке строк таблицы. / The libraries in the table row order.
@@ -40,13 +42,15 @@ function row(Engine $engine, string $xml): string
 {
     $document = $engine->parse($xml);
     $errors = $engine->parseValidated($xml);
+    // Готовим контекст XPath до замера. / Prepare the XPath context before timing.
+    $matched = $engine->xpath($document);
     $validated = '—';
     if ($errors !== null) {
         $validated = Measure::timed([$engine, 'parseValidated'], $xml, strlen($xml));
     }
     $cells = [$engine->name, Measure::timed([$engine, 'parse'], $xml, strlen($xml)),
         Measure::timed([$engine, 'walk'], $document), Measure::timed([$engine, 'xpath'], $document), $validated,
-        (string) $engine->walk($document), (string) $engine->xpath($document), (string) ($errors ?? '—')];
+        (string) $engine->walk($document), (string) $matched, (string) ($errors ?? '—'), XsdOutcome::validity($errors)];
     return '| ' . implode(' | ', $cells) . ' |';
 }
 
@@ -58,21 +62,28 @@ function row(Engine $engine, string $xml): string
 function main(array $arguments): void
 {
     $data = $arguments[1] ?? 'data';
-    $xml = (string) file_get_contents($data . '/catalog.xml');
-    $xsd = (string) file_get_contents($data . '/catalog.xsd');
-    $query = trim((string) file_get_contents($data . '/query.txt'));
+    $xml = BenchInput::read($data . '/catalog.xml');
+    $xsd = BenchInput::read($data . '/catalog.xsd');
+    $query = trim(BenchInput::read($data . '/query.txt'));
+    $available = engines($xsd, $query);
     if (($arguments[2] ?? '') === '--memory') {
         // Режим памяти: одна библиотека в этом процессе / The memory mode: one library in this process
-        echo Measure::memoryLine(engines($xsd, $query)[(int) $arguments[3]], $xml), PHP_EOL;
+        $index = BenchInput::memoryIndex($arguments, count($available));
+        echo Measure::memoryLine($available[$index], $xml), PHP_EOL;
         return;
     }
     printf("### PHP %s, %d MB\n\n", PHP_VERSION, intdiv(strlen($xml), 1000000));
     echo '| Библиотека / Library | Разбор / Parse, MB/s | Обход / Walk, ms | XPath, ms | Разбор + XSD / Parse + XSD, MB/s ',
-        '| Элементы / Elements | XPath: узлы / nodes | Ошибки XSD / XSD errors |', PHP_EOL;
-    echo '|---|---|---|---|---|---|---|---|', PHP_EOL;
-    foreach (engines($xsd, $query) as $engine) {
+        '| Элементы / Elements | XPath: узлы / nodes | Ошибки XSD / XSD errors | XSD valid |', PHP_EOL;
+    echo '|---|---|---|---|---|---|---|---|---|', PHP_EOL;
+    foreach ($available as $engine) {
         echo row($engine, $xml), PHP_EOL;
     }
 }
 
-main($argv);
+try {
+    main($argv);
+} catch (\RuntimeException $failure) {
+    fwrite(STDERR, $failure->getMessage() . PHP_EOL);
+    exit(2);
+}

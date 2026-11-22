@@ -69,15 +69,7 @@ namespace Beresta
             if (pointer == document.Address)
                 return document;
             bool element = NativeMethods.beresta_node_type(pointer) == (int)NodeType.Element;
-            XmlNode? node = document.Registry.Find(pointer, element);
-            if (node != null)
-                return node;
-            if (element)
-                node = new XmlElement(pointer, document);
-            else
-                node = new XmlNode(pointer, document);
-            document.Registry.Store(pointer, node);
-            return node;
+            return document.Registry.GetOrCreate(pointer, element, document);
         }
 
         /// <summary>Результат, который по контракту обязан существовать (append_*).

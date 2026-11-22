@@ -59,6 +59,8 @@ class Node implements \IteratorAggregate, \Countable, \Stringable
     use NodeQueries;
     use NodeInternals;
 
+    protected bool $removed = false;
+
     /**
      * Создаётся только фабрикой NodeFactory и классом Document. У самого
      * документа $document — null: владелец документа он сам (Document::document).
@@ -83,6 +85,9 @@ class Node implements \IteratorAggregate, \Countable, \Stringable
      */
     public function handle(): CData
     {
+        if ($this->removed) {
+            throw ClosedException::removed();
+        }
         if ($this->document()->isClosed()) {
             throw ClosedException::document();
         }
@@ -104,7 +109,8 @@ class Node implements \IteratorAggregate, \Countable, \Stringable
      */
     public function equals(Node $other): bool
     {
-        return $this->address() === $other->address();
+        return $this === $other || (!$this->removed && !$other->removed
+            && $this->address() === $other->address());
     }
 
     /**

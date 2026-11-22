@@ -18,6 +18,7 @@ from engine_etree import available_engines
 from memory_probe import measure
 
 RUNS = 5
+MEMORY_INDEX_ERROR = "--memory: нужен номер доступной библиотеки / expected an available library index"
 
 
 def median_ms(operation, argument) -> float:
@@ -42,6 +43,8 @@ def timed(operation, argument, megabytes: float = 0.0) -> str:
         return "—"
     milliseconds = median_ms(operation, argument)
     if megabytes > 0:
+        if milliseconds <= 0:
+            return "—"
         return "%.0f" % (megabytes / milliseconds * 1000)
     return "%.1f" % milliseconds
 
@@ -51,7 +54,12 @@ def counted(operation, argument) -> str:
     The operation result for checking the libraries against each other; "—" means there is no operation."""
     if operation is None:
         return "—"
-    return str(operation(argument))
+    result = operation(argument)
+    try:
+        return str(result)
+    finally:
+        if hasattr(result, "close"):
+            result.close()
 
 
 def row(engine, xml: bytes) -> str:
@@ -60,10 +68,17 @@ def row(engine, xml: bytes) -> str:
     megabytes = len(xml) / 1e6
     cells = [engine.name, timed(engine.parse, xml, megabytes)]
     document = engine.parse(xml)
-    cells += [timed(engine.walk, document), timed(engine.xpath, document), timed(engine.parse_validated, xml, megabytes)]
-    cells += [counted(engine.walk, document), counted(engine.xpath, document), counted(engine.parse_validated, xml)]
-    if hasattr(document, "close"):
-        document.close()
+    try:
+        cells += [timed(engine.walk, document), timed(engine.xpath, document), timed(engine.parse_validated, xml, megabytes)]
+        errors = counted(engine.parse_validated, xml)
+        cells += [counted(engine.walk, document), counted(engine.xpath, document), errors]
+        validity = "—"
+        if errors != "—":
+            validity = "yes" if errors == "0" else "no"
+        cells.append(validity)
+    finally:
+        if hasattr(document, "close"):
+            document.close()
     return "| " + " | ".join(cells) + " |"
 
 
@@ -76,15 +91,24 @@ def main() -> None:
     xml = (data / "catalog.xml").read_bytes()
     xsd = (data / "catalog.xsd").read_text(encoding="utf-8")
     query = (data / "query.txt").read_text(encoding="utf-8")
-    if len(sys.argv) > 3 and sys.argv[2] == "--memory":
+    engines = available_engines(xsd, query)
+    if len(sys.argv) > 2 and sys.argv[2] == "--memory":
         # Режим памяти: одна библиотека в этом процессе / The memory mode: one library in this process
-        print(measure(available_engines(xsd, query)[int(sys.argv[3])], xml))
+        if len(sys.argv) != 4 or not sys.argv[3].isascii() or not sys.argv[3].isdecimal():
+            raise SystemExit(MEMORY_INDEX_ERROR)
+        try:
+            index = int(sys.argv[3])
+        except ValueError:
+            raise SystemExit(MEMORY_INDEX_ERROR) from None
+        if index >= len(engines):
+            raise SystemExit(MEMORY_INDEX_ERROR)
+        print(measure(engines[index], xml))
         return
     print("### Python %s, %d MB\n" % (platform.python_version(), len(xml) // 1000000))
     print("| Библиотека / Library | Разбор / Parse, MB/s | Обход / Walk, ms | XPath, ms | Разбор + XSD / Parse + XSD, MB/s "
-          "| Элементы / Elements | XPath: узлы / nodes | Ошибки XSD / XSD errors |")
-    print("|---|---|---|---|---|---|---|---|")
-    for engine in available_engines(xsd, query):
+          "| Элементы / Elements | XPath: узлы / nodes | Ошибки XSD / XSD errors | XSD valid |")
+    print("|---|---|---|---|---|---|---|---|---|")
+    for engine in engines:
         print(row(engine, xml))
 
 

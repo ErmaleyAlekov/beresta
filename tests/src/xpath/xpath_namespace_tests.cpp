@@ -81,6 +81,17 @@ namespace
         TEST_ASSERT_EQ(beresta::xpath::XPathExpression("count(/d:root/namespace::d:*)").evaluate(document, context)
             .toString(), "0");
     }
+
+    // Владелец предшествует атрибуту, а атрибут — потомкам и следующим элементам.
+    // The owner precedes its attribute, and the attribute precedes descendants and later elements.
+    void testAttributeDocumentOrder()
+    {
+        const auto document = beresta::XmlParser().parse("<a x='root'><b x='child'/><c/></a>");
+
+        TEST_ASSERT_EQ(evaluate(document, "name((/a/@x | /a)[1])"), "a");
+        TEST_ASSERT_EQ(evaluate(document, "name((/a/b | /a/@x)[1])"), "x");
+        TEST_ASSERT_EQ(evaluate(document, "name((/a/c | /a/b/@x)[1])"), "x");
+    }
 }
 
 namespace suites
@@ -92,5 +103,6 @@ namespace suites
         runner.add("XPath: состав оси namespace", testNamespaceAxisContents);
         runner.add("XPath: имя, URI и родитель узла пространства имён", testNamespaceNodeProperties);
         runner.add("XPath: узлы пространств имён во множествах", testNamespaceNodeSets);
+        runner.add("XPath: атрибуты в порядке документа", testAttributeDocumentOrder);
     }
 }

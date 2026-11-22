@@ -78,10 +78,10 @@ public final class JdkEngine extends Engine
     }
 
     @Override
-    public int parseValidated(byte[] xml) throws Exception
+    public Validated parseValidated(byte[] xml) throws Exception
     {
         errors.reset();
-        validating.parse(new ByteArrayInputStream(xml));
-        return errors.count();
+        Object document = validating.parse(new ByteArrayInputStream(xml));
+        return new Validated(document, errors.count());
     }
 }

@@ -36,8 +36,7 @@ PYTHON="${PYTHON:-python3}"
 # Печатает ссылки на файлы релиза из API; не 200 — печатает код в stderr и возвращает 1
 # Prints the release file links from the API; not 200 — prints the code to stderr and returns 1
 api_urls() {
-    local tag="$1" json code
-    json="$(mktemp)"
+    local tag="$1" json="$mirror_tmp/release.json" code
     code=$(curl -s -o "$json" -w '%{http_code}' -H 'Accept: application/vnd.github+json' \
         "https://api.github.com/repos/${GH_REPOSITORY}/releases/tags/${tag}" || true)
     if [ "$code" != "200" ]; then
@@ -47,9 +46,8 @@ api_urls() {
     fi
     # Python в Windows завершает строки CR LF — tr срезает CR
     # Python on Windows ends lines with CR LF — tr cuts the CR off
-    "$PYTHON" -c 'import json,sys; [print(a["browser_download_url"]) for a in json.load(open(sys.argv[1]))["assets"]]' "$json" |
+    "$PYTHON" -c 'import json,sys; [print(a["browser_download_url"], a.get("digest") or "-") for a in json.load(open(sys.argv[1]))["assets"]]' "$json" |
     tr -d '\r'
-    rm -f "$json"
 }
 
 # Печатает ссылки на файлы со страницы expanded_assets; пусто — возвращает 1
@@ -85,15 +83,23 @@ wait_urls() {
 # Точка входа: тег, каталог, минуты ожидания (по умолчанию 20); каждый файл — по ссылке
 # The entry point: tag, directory, minutes to wait (20 by default); every file by its link
 main() {
-    local tag="$1" dir="$2" minutes="${3:-20}" list url
-    list="$(mktemp)"
+    local tag="$1" dir="$2" minutes="${3:-20}" list url digest name file
+    mirror_tmp="$(mktemp -d)"
+    trap 'rm -rf -- "$mirror_tmp"' EXIT
+    list="$mirror_tmp/urls"
+    mkdir "$mirror_tmp/files"
     wait_urls "$tag" "$list" "$minutes"
-    mkdir -p "$dir"
-    while read -r url; do
-        echo "↓ ${url##*/}"
-        curl -sfL -o "${dir}/${url##*/}" "$url"
+    while read -r url digest; do
+        name="${url##*/}"
+        [[ "$name" =~ ^[a-zA-Z0-9_][a-zA-Z0-9_.+-]*$ ]] || return 1
+        echo "↓ ${name}"
+        curl -sfL -o "$mirror_tmp/files/$name" "$url"
     done < "$list"
-    rm -f "$list"
+    "$PYTHON" "$(dirname "$0")/verify_assets.py" "$list" "$mirror_tmp/files"
+    mkdir -p "$dir"
+    for file in "$mirror_tmp"/files/*; do
+        [[ "${file##*/}" = SHA256SUMS.txt ]] || mv -- "$file" "$dir/"
+    done
 }
 
 main "$@"

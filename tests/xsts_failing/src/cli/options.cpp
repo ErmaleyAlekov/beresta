@@ -1,6 +1,8 @@
 #include "failing/options.hpp"
 #include "failing/list_error.hpp"
 
+#include <limits>
+
 namespace failing
 {
     /*
@@ -26,7 +28,7 @@ namespace failing
                 options.run.stopOnFirst = true;
             else if (current == "--regenerate")
                 options.regenerate = true;
-            else if (index + 1 < argc && detail::parseValueOption(current, argv[index + 1], options))
+            else if (detail::parseValueOption(current, index + 1 < argc ? argv[index + 1] : "", options))
                 ++index;
             else if (!current.empty() && current[0] != '-')
                 options.run.prefix = current;
@@ -53,6 +55,9 @@ namespace failing
         // Returns false if the name is not an argument with a value
         bool parseValueOption(const std::string& name, const std::string& value, Options& options)
         {
+            if ((name == "--case" || name == "--list" || name == "--suite" || name == "--limitations")
+                && (value.empty() || value.compare(0, 2, "--") == 0))
+                throw ListError("нет значения для " + name);
             if (name == "--case")
                 options.run.caseNumber = parseNumber(value);
             else if (name == "--list")
@@ -76,7 +81,10 @@ namespace failing
             {
                 if (symbol < '0' || symbol > '9')
                     throw ListError("номер случая должен быть целым числом: " + text);
-                number = number * 10 + static_cast<std::size_t>(symbol - '0');
+                auto digit = static_cast<std::size_t>(symbol - '0');
+                if (number > (std::numeric_limits<std::size_t>::max() - digit) / 10)
+                    throw ListError("слишком большой номер случая: " + text);
+                number = number * 10 + digit;
             }
             if (number == 0)
                 throw ListError("номер случая начинается с 1: " + text);

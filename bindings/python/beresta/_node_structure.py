@@ -18,7 +18,23 @@ class NodeStructureMixin:
         Removes the node with its descendants. After the call this object and the
         wrappers of its descendants are invalid — they must not be used.
         """
+        registry = self.document._wrappers
+        pending = [self.handle]
+        affected = []
+        while pending:
+            current = pending.pop()
+            wrapper = registry.get(current)
+            if wrapper is not None:
+                affected.append(wrapper)
+            child = LIB.beresta_node_first_child(current)
+            while child is not None:
+                pending.append(child)
+                child = LIB.beresta_node_next_sibling(child)
         check(LIB.beresta_node_remove(self.handle))
+        self._removed = True
+        for wrapper in affected:
+            wrapper._removed = True
+            registry.pop(wrapper._pointer, None)
 
     def copy_to(self, parent):
         """Глубокая копия в конец детей parent (можно в другой документ).

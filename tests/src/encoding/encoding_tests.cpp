@@ -41,12 +41,16 @@ namespace
         TEST_ASSERT_EQ(beresta::XmlParser(options).parse(bytes).getRoot()->getTextContent(), "Привет");
     }
 
-    // Битый UTF-8, управляющий символ и неизвестная кодировка — ENCODING_ERROR
-    // Broken UTF-8, a control character and an unknown encoding — ENCODING_ERROR
+    // Битые UTF-8 и UTF-16, управляющий символ и неизвестная кодировка — ENCODING_ERROR
+    // Malformed UTF-8 and UTF-16, a control character and an unknown encoding — ENCODING_ERROR
     void testEncodingErrors()
     {
         TEST_ASSERT(support::errorCodeOf("<a>\xC3</a>") == beresta::DomErrorCode::ENCODING_ERROR);
         TEST_ASSERT(support::errorCodeOf("<a>\x01</a>") == beresta::DomErrorCode::ENCODING_ERROR);
+        TEST_ASSERT(support::errorCodeOf(std::string_view("\xFF\xFE\x00\xD8", 4))
+            == beresta::DomErrorCode::ENCODING_ERROR);
+        TEST_ASSERT(support::errorCodeOf(std::string_view("\xFF\xFE\x00\xDC", 4))
+            == beresta::DomErrorCode::ENCODING_ERROR);
         TEST_ASSERT(support::errorCodeOf("<?xml version=\"1.0\" encoding=\"x-unknown\"?><a/>")
             == beresta::DomErrorCode::ENCODING_ERROR);
         TEST_ASSERT(beresta::encoding::findCharset("CP1251") != nullptr);

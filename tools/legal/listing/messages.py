@@ -26,8 +26,20 @@ CATALOG = {
         "en": "The font {0} does not fit: {1}",
     },
     "font_restricted": {
-        "ru": "лицензия шрифта запрещает встраивание",
-        "en": "the font license forbids embedding",
+        "ru": "лицензия шрифта запрещает встраивание векторных глифов",
+        "en": "the font license forbids embedding outlines",
+    },
+    "font_invalid_table": {
+        "ru": "повреждена таблица {0}",
+        "en": "the {0} table is malformed",
+    },
+    "font_truncated": {
+        "ru": "данные таблицы усечены",
+        "en": "table data is truncated",
+    },
+    "font_column_width": {
+        "ru": "ширина символа шрифта не подходит для страницы",
+        "en": "the font character width does not fit the page",
     },
     "font_no_cmap": {
         "ru": "нет таблицы cmap формата 4 для Unicode",

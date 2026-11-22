@@ -1,5 +1,6 @@
 #include "suites/test_suites.hpp"
 #include "support/schema_helpers.hpp"
+#include "xsd/internal/datatype_checks.hpp"
 
 #include <string>
 
@@ -11,6 +12,9 @@ namespace
         "<xs:element name=\"maxD\" type=\"maxDType\"/>"
         "<xs:element name=\"lowX\" type=\"lowXType\"/>"
         "<xs:element name=\"nan\" type=\"nanType\"/>"
+        "<xs:element name=\"negative\"><xs:simpleType><xs:restriction base=\"xs:duration\">"
+        "<xs:minInclusive value=\"-P2D\"/><xs:maxInclusive value=\"-P1D\"/>"
+        "</xs:restriction></xs:simpleType></xs:element>"
         "<xs:simpleType name=\"minYType\">"
         "<xs:restriction base=\"xs:duration\">"
         "<xs:minInclusive value=\"P1Y\"/>"
@@ -52,6 +56,10 @@ namespace
         TEST_ASSERT(support::agreedSchemaErrors(XSD, "<minY>-P2Y</minY>").size() == 1);
         TEST_ASSERT(support::agreedSchemaErrors(XSD, "<lowX>PT61M</lowX>").empty());
         TEST_ASSERT(support::agreedSchemaErrors(XSD, "<lowX>PT3600S</lowX>").size() == 1);
+        TEST_ASSERT(support::agreedSchemaErrors(XSD, "<negative>-PT48H</negative>").empty());
+        TEST_ASSERT(support::agreedSchemaErrors(XSD, "<negative>-PT24H</negative>").empty());
+        TEST_ASSERT(support::agreedSchemaErrors(XSD, "<negative>-PT49H</negative>").size() == 1);
+        TEST_ASSERT(support::agreedSchemaErrors(XSD, "<negative>-PT23H</negative>").size() == 1);
     }
 
     void testIncomparableDurations()
@@ -66,6 +74,24 @@ namespace
         TEST_ASSERT(support::agreedSchemaErrors(XSD, "<nan>NaN</nan>").size() == 1);
         TEST_ASSERT(support::agreedSchemaErrors(XSD, "<nan>1.5</nan>").empty());
     }
+
+    // Точный порядок больших и дробных длительностей и отрицательного цикла календаря.
+    // Exact ordering for large and fractional durations and a negative calendar cycle.
+    void testExactDurationOrder()
+    {
+        using beresta::xsd::detail::compareDurations;
+        const std::string prefix = "PT" + std::string(4999, '9');
+        const std::string smaller = prefix + "8S";
+        const std::string larger = prefix + "9S";
+
+        TEST_ASSERT(compareDurations(smaller, larger) == -1);
+        TEST_ASSERT(compareDurations(larger, smaller) == 1);
+        TEST_ASSERT(compareDurations(larger, larger) == 0);
+        TEST_ASSERT(compareDurations("PT24H", "P1D") == 0);
+        TEST_ASSERT(compareDurations("-P400Y", "-P146097D") == 0);
+        TEST_ASSERT(compareDurations("-P400YT1S", "-P146097D") == -1);
+        TEST_ASSERT(compareDurations("PT0.00000000000000000000000000000000000001S", "PT0S") == 1);
+    }
 }
 
 namespace suites
@@ -77,5 +103,6 @@ namespace suites
         runner.add("XSD: сравнимые значения xs:duration", testComparableDurations);
         runner.add("XSD: неприводимые значения xs:duration", testIncomparableDurations);
         runner.add("XSD: NaN и границы xs:duration", testNaNBreaksBound);
+        runner.add("XSD: точный порядок xs:duration", testExactDurationOrder);
     }
 }

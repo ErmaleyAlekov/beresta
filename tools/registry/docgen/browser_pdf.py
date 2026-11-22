@@ -31,17 +31,15 @@ BROWSER_PATHS = (
     "/Applications/Chromium.app/Contents/MacOS/Chromium",
 )
 BROWSER_NAMES = ("chromium", "chromium-browser", "google-chrome", "google-chrome-stable", "microsoft-edge", "yandex-browser")
+PRINT_TIMEOUT = 180
 
 
 def find_browser(explicit: str) -> str:
     """Путь к браузеру: --browser, переменная BROWSER, известные пути, затем PATH.
     The browser path: --browser, the BROWSER variable, the known paths, then PATH."""
-    for candidate in (explicit, os.environ.get("BROWSER", "")):
-        if candidate and Path(candidate).is_file():
-            return candidate
-    for candidate in BROWSER_PATHS:
-        if Path(candidate).is_file():
-            return candidate
+    for candidate in (explicit, os.environ.get("BROWSER", ""), *BROWSER_PATHS):
+        if candidate and os.path.isfile(candidate) and os.access(candidate, os.X_OK):
+            return str(Path(candidate).absolute())
     for name in BROWSER_NAMES:
         found = shutil.which(name)
         if found:
@@ -52,12 +50,20 @@ def find_browser(explicit: str) -> str:
 def print_pdf(browser: str, page: Path, output: Path) -> None:
     """Печать страницы в PDF без колонтитулов браузера (номер страницы ставит @page из CSS).
     Prints the page to PDF without the browser headers (the page number comes from @page in CSS)."""
-    # Отдельный временный профиль: печать не трогает профиль пользователя и не ждёт его окон
-    # A separate temporary profile: printing does not touch the user profile or wait for its windows
-    with tempfile.TemporaryDirectory() as profile:
+    # Отдельный профиль и новый PDF исключают конфликт с открытым браузером и старым результатом.
+    # An isolated profile and a fresh PDF avoid conflicts with the running browser and any old output.
+    with tempfile.TemporaryDirectory(dir=output.parent.resolve()) as temporary:
+        profile = Path(temporary) / "profile"
+        staged_pdf = Path(temporary) / output.name
         command = [browser, "--headless=new", "--disable-gpu", "--no-first-run", "--no-pdf-header-footer",
-                   "--user-data-dir=" + profile, "--print-to-pdf=" + str(output.resolve()),
+                   "--user-data-dir=" + str(profile), "--print-to-pdf=" + str(staged_pdf),
                    page.resolve().as_uri()]
-        result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=180)
-    if result.returncode != 0 or not output.is_file():
-        raise DocsError("print_failed", output, result.returncode)
+        try:
+            result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=PRINT_TIMEOUT)
+        except subprocess.TimeoutExpired as error:
+            raise DocsError("browser_timeout", output, PRINT_TIMEOUT) from error
+        except OSError as error:
+            raise DocsError("browser_start_failed", browser, error) from error
+        if result.returncode != 0 or not staged_pdf.is_file():
+            raise DocsError("print_failed", output, result.returncode)
+        staged_pdf.replace(output)

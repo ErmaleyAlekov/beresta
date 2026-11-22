@@ -20,11 +20,10 @@ namespace beresta::xsd::detail
     ** Schema::anyTypeDefinition (any children and attributes, lax). The attribute
     ** types are remembered for keys and assertions (an analog of the PSVI).
     */
-    void StreamValidator::beginValidation(const SaxElement& element, const ElementDecl& declaration)
+    void StreamValidator::beginValidation(const SaxElement& element, const ElementDecl& declaration, const XsiValues& xsi)
     {
         ElementFrame& frame = _frames[_depth - 1];
         TypeRef type = declaration.type;
-        XsiValues xsi = findXsi(element);
 
         frame.declaration = &declaration;
         frame.mode = FrameMode::OPAQUE;

@@ -1,6 +1,7 @@
 #include "suites/test_suites.hpp"
 #include "support/dom_helpers.hpp"
 #include "support/parse_helpers.hpp"
+#include "support/schema_helpers.hpp"
 
 namespace
 {
@@ -23,6 +24,14 @@ namespace
     void testDateTypes()
     {
         TEST_ASSERT(support::acceptsBuiltin("date", "2024-02-29") && !support::acceptsBuiltin("date", "2023-02-29"));
+        // Лексика встроенных типов соответствует XSD 1.0, где год 0000 не допускается.
+        // Built-in type lexical spaces follow XSD 1.0, where year 0000 is disallowed.
+        TEST_ASSERT(!support::acceptsBuiltin("date", "0000-01-01"));
+        TEST_ASSERT(support::acceptsBuiltin("date", "-0001-01-01"));
+        TEST_ASSERT(support::acceptsBuiltin("date", "2024-01-01+14:00"));
+        TEST_ASSERT(support::acceptsBuiltin("date", "2024-01-01-14:00"));
+        TEST_ASSERT(!support::acceptsBuiltin("date", "2024-01-01+14:01"));
+        TEST_ASSERT(!support::acceptsBuiltin("date", "2024-01-01-14:01"));
         TEST_ASSERT(support::acceptsBuiltin("dateTime", "2026-10-17T12:30:00.5+03:00") && !support::acceptsBuiltin("dateTime", "2026-10-17"));
         TEST_ASSERT(support::acceptsBuiltin("time", "24:00:00") && !support::acceptsBuiltin("time", "24:00:01"));
         TEST_ASSERT(support::acceptsBuiltin("gYearMonth", "2026-10") && support::acceptsBuiltin("gMonthDay", "--02-29"));
@@ -41,6 +50,13 @@ namespace
         TEST_ASSERT(support::acceptsBuiltin("NMTOKENS", "a b c") && !support::acceptsBuiltin("NMTOKENS", "   "));
         TEST_ASSERT(support::acceptsBuiltin("token", "  много   пробелов  "));
         TEST_ASSERT(!support::acceptsBuiltin("QName", "p:name") && support::acceptsBuiltin("QName", "name"));
+
+        // Проверяем разрешение префикса QName в контексте элемента во всех режимах проверки.
+        // Check QName prefix resolution in the element's context in all validation modes.
+        const char* const schema = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">"
+            "<xs:element name=\"name\" type=\"xs:QName\"/></xs:schema>";
+        TEST_ASSERT(support::agreedSchemaErrors(schema, "<name xmlns:p=\"urn:names\">p:name</name>").empty());
+        TEST_ASSERT(support::agreedSchemaErrors(schema, "<name>p:name</name>").size() == 1);
     }
 
     // Сравнение значений: 1.0 = 1 для decimal, порядок дат с учётом часового пояса

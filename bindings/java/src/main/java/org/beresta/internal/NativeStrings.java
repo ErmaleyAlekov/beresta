@@ -1,6 +1,8 @@
 package org.beresta.internal;
 
 import java.lang.foreign.MemorySegment;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Чтение строк, которые вернула библиотека. Две разновидности по
@@ -13,6 +15,8 @@ import java.lang.foreign.MemorySegment;
  */
 public final class NativeStrings
 {
+    private static final Pattern PLACEHOLDER = Pattern.compile("\\{([0-9]+)\\}");
+
     private NativeStrings()
     {
     }
@@ -28,7 +32,10 @@ public final class NativeStrings
      */
     public static String borrowed(Object result)
     {
-        return ((MemorySegment) result).reinterpret(Long.MAX_VALUE).getString(0);
+        MemorySegment pointer = (MemorySegment) result;
+        if (pointer == null || pointer.address() == 0)
+            throw new IllegalStateException("Берёста: строка отсутствует / Beresta: missing native string");
+        return pointer.reinterpret(Long.MAX_VALUE).getString(0);
     }
 
     /**
@@ -39,11 +46,13 @@ public final class NativeStrings
      */
     public static String message(int message, Object... arguments)
     {
-        String text = borrowed(NativeCalls.invoke(LibraryFunctions.MESSAGE_TEXT, message));
+        String text = borrowed(NativeCalls.handle(NativeCalls.invoke(LibraryFunctions.MESSAGE_TEXT, message)));
 
-        for (int index = 0; index < arguments.length; ++index)
-            text = text.replace("{" + index + "}", String.valueOf(arguments[index]));
-        return text;
+        return PLACEHOLDER.matcher(text).replaceAll(match -> {
+            int index = Integer.parseInt(match.group(1));
+            String value = index < arguments.length ? String.valueOf(arguments[index]) : match.group();
+            return Matcher.quoteReplacement(value);
+        });
     }
 
     /**

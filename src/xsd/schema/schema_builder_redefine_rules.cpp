@@ -61,9 +61,9 @@ namespace beresta::xsd::detail
             fail(*references[1], i18n::format(i18n::Message::SCHEMA_REDEFINE_SELF_REFERENCES, {key.second}));
         if (references.empty() || !group)
             return;
-        bool once = attributeOr(*references.front(), "minOccurs", "1") == "1"
-            && attributeOr(*references.front(), "maxOccurs", "1") == "1";
-        if (!once)
+        content::Particle bounds;
+        readOccurs(*references.front(), bounds);
+        if (bounds.minOccurs != 1 || bounds.maxOccurs != 1)
             fail(*references.front(), i18n::format(i18n::Message::SCHEMA_REDEFINE_SELF_OCCURS, {key.second}));
     }
 

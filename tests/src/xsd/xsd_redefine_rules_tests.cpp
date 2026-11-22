@@ -1,4 +1,5 @@
 #include "suites/test_suites.hpp"
+#include "i18n/i18n.hpp"
 #include "support/dom_helpers.hpp"
 
 #include <map>
@@ -24,7 +25,8 @@ namespace
     */
     std::shared_ptr<const beresta::xsd::Schema> loadFiles(const std::map<std::string, std::string>& files)
     {
-        std::filesystem::path root = support::makeTestDirectory("xsd_redefine_rules");
+        const support::TestDirectory temporary("xsd_redefine_rules");
+        const auto& root = temporary.path;
         beresta::FileResourceResolver resolver(root);
         beresta::xsd::SchemaLoadOptions options;
 
@@ -74,10 +76,32 @@ namespace
     ** (main redefines b, which redefined c) and nesting too
     ** (main includes h, both redefine c — the cases schU3…schU5).
     */
+    std::string redefineGroup(const std::string& location)
+    {
+        return "<xs:redefine schemaLocation=\"" + location + "\"><xs:group name=\"G\"><xs:sequence>"
+            "<xs:group ref=\"G\"/><xs:element name=\"b\"/></xs:sequence></xs:group></xs:redefine>";
+    }
+
+    void checkRepeatedInSource()
+    {
+        auto main = std::string(XS) + redefineGroup("c.xsd") + redefineGroup("b.xsd") + "</xs:schema>";
+        auto nested = std::string(XS) + redefineGroup("main.xsd") + "</xs:schema>";
+        try
+        {
+            loadFiles({{"main.xsd", main}, {"b.xsd", nested}});
+            TEST_ASSERT(false);
+        }
+        catch (const beresta::DomException& error)
+        {
+            auto expected = beresta::i18n::format(beresta::i18n::Message::SCHEMA_REDEFINE_TWICE, {"group", "G"});
+            TEST_ASSERT(error.getMessage().find(expected) != std::string::npos);
+        }
+    }
+
     void testRepeatedRedefinition()
     {
-        std::string body = "<xs:redefine schemaLocation=\"c.xsd\"><xs:group name=\"G\"><xs:sequence>"
-            "<xs:group ref=\"G\"/><xs:element name=\"b\"/></xs:sequence></xs:group></xs:redefine>";
+        checkRepeatedInSource();
+        std::string body = redefineGroup("c.xsd");
         std::string redefineC = std::string(XS) + body;
 
         TEST_ASSERT_THROWS(loadFiles({{"a.xsd", redefineC + "</xs:schema>"}, {"b.xsd", redefineC + "</xs:schema>"},
@@ -118,6 +142,13 @@ namespace
 
         TEST_ASSERT(validator.isValid(beresta::XmlParser().parse("<o>12</o>")));
         TEST_ASSERT(!validator.isValid(beresta::XmlParser().parse("<o>x</o>")));
+        auto cycle = loadFiles({{"main.xsd", std::string(XS) + "<xs:redefine schemaLocation='other.xsd'/>"
+            "<xs:element name='o' type='T'/></xs:schema>"}, {"other.xsd", std::string(XS)
+            + "<xs:redefine schemaLocation='main.xsd'/><xs:simpleType name='T'><xs:restriction base='xs:int'/>"
+            "</xs:simpleType></xs:schema>"}});
+        beresta::xsd::SchemaValidator cycled(cycle);
+        TEST_ASSERT(cycled.isValid(beresta::XmlParser().parse("<o>12</o>")));
+        TEST_ASSERT(!cycled.isValid(beresta::XmlParser().parse("<o>x</o>")));
     }
 }
 

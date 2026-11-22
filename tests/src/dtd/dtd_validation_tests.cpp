@@ -27,7 +27,7 @@ namespace
             "</book><book id=\"b1\" ref=\"none\"><title>T</title><extra/></book>"
             "<book><title>X</title></book></library>");
 
-        TEST_ASSERT(errors >= 6);
+        TEST_ASSERT(errors == 6);
     }
 
     // Без ErrorHandler первая ошибка валидности прерывает разбор

@@ -248,7 +248,7 @@ namespace beresta::xsd::detail
         // ---- Names (schema_builder_names.cpp) ----
         QualifiedKey resolveQName(const Element& context, std::string_view value) const;
         std::string chameleonNamespace(const Element& context) const;
-        TypeRef resolveType(const QualifiedKey& key);
+        TypeRef resolveType(const QualifiedKey& key, const Element* where = nullptr);
         std::string localNamespace(const Element& definition, const SchemaSource& source,
             bool attribute) const;
         [[noreturn]] void fail(const Element& where, const std::string& message) const;
@@ -276,7 +276,7 @@ namespace beresta::xsd::detail
 
         // ---- Элементы (schema_builder_elements.cpp) ----
         // ---- Elements (schema_builder_elements.cpp) ----
-        const ElementDecl* globalElement(const QualifiedKey& key);
+        const ElementDecl* globalElement(const QualifiedKey& key, const Element* where = nullptr);
         ElementDecl* buildElement(const Element& definition, const SchemaSource& source, bool global);
         void readElementFlags(const Element& definition, const SchemaSource& source,
             ElementDecl& declaration) const;
@@ -386,6 +386,7 @@ namespace beresta::xsd::detail
         std::vector<PendingType> _pendingTypes;
         std::map<const Element*, IdentityConstraint*> _builtIdentities;
         std::map<const Element*, Redefinition> _redefinitions;
+        std::map<const Element*, std::set<std::pair<std::string, QualifiedKey>>> _redefinedByDocument;
         std::map<const Element*, TypeRef> _builtOriginals;
         std::set<std::pair<std::string, QualifiedKey>> _overridden;
         std::set<const ElementDecl*> _headTyped;

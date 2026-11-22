@@ -1,5 +1,6 @@
 #include "xpath/internal/xpath_axes.hpp"
 #include "core/container_node.hpp"
+#include <algorithm>
 
 namespace beresta::xpath::detail
 {
@@ -56,12 +57,10 @@ namespace beresta::xpath::detail
     // A subtree in reverse document order: the deep last ones first, the root at the end
     static void appendSubtreeReversed(const Node* node, std::vector<XPathItem>& output)
     {
-        std::vector<XPathItem> forward;
-
-        appendDescendants(node, forward);
-        for (std::size_t index = forward.size(); index > 0; --index)
-            output.push_back(forward[index - 1]);
+        const auto begin = static_cast<std::vector<XPathItem>::difference_type>(output.size());
         output.push_back(nodeItem(node));
+        appendDescendants(node, output);
+        std::reverse(output.begin() + begin, output.end());
     }
 
     /*

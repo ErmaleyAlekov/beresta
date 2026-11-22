@@ -62,9 +62,9 @@ namespace beresta::xsd
     // \p{Name} — a category or a block; \P{Name} — the complement
     CharSet RegexParser::parseProperty(bool complement)
     {
-        std::size_t close = _pattern.find('}', _position);
+        std::size_t close = _pattern.find_first_of("{}\\ \t\r\n", _position + 1);
 
-        if (atEnd() || peekCode() != '{' || close == std::string_view::npos)
+        if (atEnd() || peekCode() != '{' || close == std::string_view::npos || _pattern[close] != '}')
             fail(i18n::format(i18n::Message::PATTERN_PROPERTY_SYNTAX));
         std::string_view name = _pattern.substr(_position + 1, close - _position - 1);
         _position = close + 1;

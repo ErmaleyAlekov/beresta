@@ -29,7 +29,7 @@ function convertScalar(binding, kind, value, position)
     {
         if (value === null || value === undefined)
             return 0;
-        if (typeof value !== 'bigint')
+        if (typeof value !== 'bigint' || value < 0n || value > 0xffffffffn)
             rejectArgument(binding, position, 'BigInt');
         return Number(value);
     }
@@ -39,14 +39,14 @@ function convertScalar(binding, kind, value, position)
         rejectArgument(binding, position, 'number');
     if (kind === 'index')
     {
-        if (!Number.isFinite(value))
-            return 0n;
-        return BigInt(Math.trunc(value));
+        if (!Number.isInteger(value) || value < -(2 ** 63) || value >= 2 ** 63)
+            rejectArgument(binding, position, 'int64');
+        return BigInt(value);
     }
-    if (kind === 'flags')
-        return value >>> 0;
-    if (kind === 'int')
-        return value | 0;
+    if (kind === 'flags' && (!Number.isInteger(value) || value < 0 || value > 0xffffffff))
+        rejectArgument(binding, position, 'uint32');
+    if (kind === 'int' && (!Number.isInteger(value) || value < -0x80000000 || value > 0x7fffffff))
+        rejectArgument(binding, position, 'int32');
     return value;
 }
 

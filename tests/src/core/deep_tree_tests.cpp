@@ -1,5 +1,6 @@
 #include "suites/test_suites.hpp"
 #include "support/tree_helpers.hpp"
+#include "support/dom_helpers.hpp"
 
 namespace
 {
@@ -13,6 +14,22 @@ namespace
     ** thread stack both on Windows (1 MB) and on Linux (8 MB).
     */
     const std::size_t DEEP = 100000;
+
+    // Два владельца с одним именем изолированы и убирают свои файлы.
+    // Two owners with the same name are isolated and clean up their files.
+    void testDirectoryLifetime()
+    {
+        const support::TestDirectory first("lifetime");
+        std::filesystem::path secondPath;
+        {
+            const support::TestDirectory second("lifetime");
+            secondPath = second.path;
+            TEST_ASSERT(first.path != secondPath);
+            support::writeTestFile(secondPath / "marker", "test");
+        }
+        TEST_ASSERT(!std::filesystem::exists(secondPath));
+        TEST_ASSERT(std::filesystem::is_directory(first.path));
+    }
 
     /*
     ** Копирование, сравнение, текст и разрушение глубокого дерева: каждая
@@ -33,6 +50,7 @@ namespace
         std::unique_ptr<beresta::Node> subtree = original.releaseRoot();
         subtree.reset();
         TEST_ASSERT(original.getRoot() == nullptr);
+        TEST_ASSERT(support::deepestElement(original) == nullptr);
     }
 
     /*
@@ -87,6 +105,7 @@ namespace suites
     // Registers the deep tree tests (absence of recursion)
     void registerDeepTreeTests(test::TestRunner& runner)
     {
+        runner.add("Временные каталоги изолированы и удаляются", testDirectoryLifetime);
         runner.add("Глубокое дерево: копирование, сравнение, разрушение", testDeepCopyCompareDestroy);
         runner.add("Глубокое дерево: вывод, разбор, нормализация", testDeepSerializeParseNormalize);
         runner.add("Глубокое дерево: XSD и XPath", testDeepValidationAndXPath);

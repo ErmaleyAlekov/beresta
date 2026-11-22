@@ -3,6 +3,7 @@
 
 #include "core/element.hpp"
 #include "xsd/simple_type.hpp"
+#include "xsd/prefix_resolver.hpp"
 
 #include <optional>
 #include <string>
@@ -25,10 +26,11 @@ namespace beresta::xsd::detail
     ** only the fact of a declaration: "p:abc" and "q:abc" are equal if p and q are declared
     ** with one URI.
     */
-    class NamespaceLookup
+    class NamespaceLookup : public PrefixResolver
     {
     public:
-        virtual ~NamespaceLookup();
+        ~NamespaceLookup() override;
+        bool isBound(std::string_view prefix) const override;
 
         // URI префикса ("" — пространство по умолчанию); nullopt — префикс не объявлен
         // The URI of a prefix ("" — the default namespace); nullopt — the prefix is not declared

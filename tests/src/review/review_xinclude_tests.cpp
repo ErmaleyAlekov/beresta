@@ -36,7 +36,8 @@ namespace
     */
     void testFallbackRules()
     {
-        std::filesystem::path root = support::makeTestDirectory("review_xinclude_rules");
+        const support::TestDirectory temporary("review_xinclude_rules");
+        const auto& root = temporary.path;
         support::writeTestFile(root / "part.xml", "<part/>");
         support::writeTestFile(root / "two.xml", std::string("<r ") + XI + "><xi:include href=\"part.xml\">"
             "<xi:fallback>1</xi:fallback><xi:fallback>2</xi:fallback></xi:include></r>");
@@ -63,7 +64,8 @@ namespace
     */
     void testRepeatedIncludes()
     {
-        std::filesystem::path root = support::makeTestDirectory("review_xinclude_repeats");
+        const support::TestDirectory temporary("review_xinclude_repeats");
+        const auto& root = temporary.path;
         std::string five;
         for (int index = 0; index < 5; ++index)
             five += "<xi:include href=\"leaf.xml\"/>";
@@ -88,7 +90,8 @@ namespace
     */
     void testResolverSymlink()
     {
-        std::filesystem::path base = support::makeTestDirectory("review_symlink");
+        const support::TestDirectory temporary("review_symlink");
+        const auto& base = temporary.path;
         std::filesystem::path root = base / "root";
         std::filesystem::path outside = base / "outside";
         std::error_code error;

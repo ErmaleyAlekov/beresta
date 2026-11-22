@@ -33,6 +33,9 @@ namespace xsts
 
     namespace detail
     {
+        // Путь внутри каталога набора с учётом символьных ссылок / A suite path after resolving symlinks
+        std::filesystem::path suitePath(const std::filesystem::path& path, const std::filesystem::path& root);
+
         // Контекст чтения одного файла метаданных
         // The context of reading one metadata file
         struct SetScope
@@ -40,6 +43,7 @@ namespace xsts
             std::filesystem::path root;         // корень набора / the suite root
             std::filesystem::path metaDir;      // папка файла метаданных / the metadata file folder
             std::string testSet;                // имя набора / the set name
+            std::string version;
             std::string description;            // описание текущей группы / the description of the current group
         };
 

@@ -51,9 +51,27 @@ namespace
     {
         beresta::Element element("ok");
 
-        TEST_ASSERT_THROWS(beresta::Element("1bad"), beresta::DomException);
-        TEST_ASSERT_THROWS(beresta::Element(""), beresta::DomException);
-        TEST_ASSERT_THROWS(element.setAttribute("a b", "v"), beresta::DomException);
+        for (const char* name : {"1bad", ""})
+        {
+            try
+            {
+                beresta::Element invalid(name);
+                TEST_ASSERT(false);
+            }
+            catch (const beresta::DomException& error)
+            {
+                TEST_ASSERT(error.getCode() == beresta::DomErrorCode::INVALID_NAME);
+            }
+        }
+        try
+        {
+            element.setAttribute("a b", "v");
+            TEST_ASSERT(false);
+        }
+        catch (const beresta::DomException& error)
+        {
+            TEST_ASSERT(error.getCode() == beresta::DomErrorCode::INVALID_NAME);
+        }
         TEST_ASSERT_THROWS(element.setName("x<y"), beresta::DomException);
         beresta::Element cyrillic("элемент");
         TEST_ASSERT_EQ(cyrillic.toString(), "<элемент/>");

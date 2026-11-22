@@ -1,5 +1,6 @@
 #include "xsd/internal/assertion_recorder.hpp"
 #include "core/text.hpp"
+#include "xsd/internal/validation_budget.hpp"
 #include "i18n/i18n.hpp"
 #include "exception/dom_exception.hpp"
 #include "xpath/internal/xpath_assertion.hpp"
@@ -38,8 +39,13 @@ namespace beresta::xsd::detail
 
         for (const PrefixBinding& binding : prefixes.inScope())
         {
-            if (!binding.namespaceUri.empty())
+            if (binding.prefix.empty() || !binding.namespaceUri.empty())
+            {
+                chargeValidation(_captureBytes, sizeof(Attribute), "xs:assert");
+                chargeValidation(_captureBytes, binding.prefix.size(), "xs:assert");
+                chargeValidation(_captureBytes, binding.namespaceUri.size(), "xs:assert");
                 root->declareNamespace(binding.prefix, binding.namespaceUri);
+            }
         }
         _captures.push_back(AssertionCapture{level, &type, std::move(root), current, AssertionTypes()});
     }
@@ -58,7 +64,11 @@ namespace beresta::xsd::detail
         const std::vector<Attribute>& attributes = element.getAttributes();
 
         if (!end.defaultText.empty() && element.getFirstChild() == nullptr)
+        {
+            chargeValidation(_captureBytes, sizeof(Text), "xs:assert");
+            chargeValidation(_captureBytes, end.defaultText.size(), "xs:assert");
             element.appendChild(std::make_unique<Text>(std::string(end.defaultText)));
+        }
         capture.types.annotate(&element, end.typing);
         for (std::size_t index = 0; index < attributes.size() && index < end.attributeTypes.size(); ++index)
         {
@@ -110,7 +120,10 @@ namespace beresta::xsd::detail
         AssertionTypes types = std::move(_captures.back().types);
         _captures.pop_back();
         if (_captures.empty())
+        {
+            _captureBytes = 0;
             return;
+        }
         AssertionCapture& outer = _captures.back();
         outer.current->appendChild(std::unique_ptr<Node>(std::move(root)));
         outer.types.absorb(types);

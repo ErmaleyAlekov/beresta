@@ -1,8 +1,11 @@
 #include "suites/test_suites.hpp"
 #include "support/capi_helpers.hpp"
+#include "parser/parser_options.hpp"
+#include "i18n/i18n.hpp"
 
 #include <cmath>
 #include <cstring>
+#include <initializer_list>
 #include <string>
 
 namespace
@@ -20,10 +23,21 @@ namespace
 
         TEST_ASSERT(beresta_document_parse("<a><b></a>", 10, 0, nullptr, &document) == BERESTA_PARSE_ERROR);
         TEST_ASSERT(document == nullptr);
-        TEST_ASSERT(std::string(beresta_last_error_message()).find("строка 1") == 0);
+        auto mismatch = beresta::i18n::format(beresta::i18n::Message::END_TAG_MISMATCH, {"b", "a"});
+        TEST_ASSERT_EQ(beresta_last_error_message(),
+            beresta::i18n::format(beresta::i18n::Message::AT_LINE_COLUMN, {"1", "7", mismatch}));
         TEST_ASSERT_EQ(std::string(beresta_status_name(BERESTA_PARSE_ERROR)), "PARSE_ERROR");
         TEST_ASSERT(beresta_node_type(nullptr) == -1);
         TEST_ASSERT(beresta_last_error_code() == BERESTA_INVALID_ARGUMENT);
+        // Освобождение пустого дескриптора сохраняет текущий код ошибки.
+        // Freeing a null handle preserves the current error code.
+        const auto freeFunctions = {beresta_document_free, beresta_xpath_free, beresta_schema_free,
+            beresta_nodeset_free, beresta_diagnostics_free};
+        for (auto freeHandle : freeFunctions)
+        {
+            freeHandle(nullptr);
+            TEST_ASSERT(beresta_last_error_code() == BERESTA_INVALID_ARGUMENT);
+        }
         document = support::parseCapi("<a>текст</a>");
         TEST_ASSERT(beresta_last_error_code() == BERESTA_OK);
         TEST_ASSERT(beresta_element_get_attribute(beresta_node_first_child(beresta_document_root(document)), "x") == nullptr);
@@ -31,6 +45,39 @@ namespace
         TEST_ASSERT(beresta_node_append_element(beresta_document_root(document), "1bad") == nullptr);
         TEST_ASSERT(beresta_last_error_code() == BERESTA_INVALID_NAME);
         beresta_document_free(document);
+    }
+
+    // Ошибка разбора обнуляет выходной указатель.
+    // A parse error clears the output pointer.
+    void testFailureClearsOutput()
+    {
+        beresta_document document = nullptr;
+        TEST_ASSERT(beresta_document_create("test", &document) == BERESTA_OK);
+        beresta_document out = document;
+        int result = beresta_document_parse("<invalid>", 9, 0, nullptr, &out);
+        bool cleared = out == nullptr;
+        beresta_document_free(document);
+        TEST_ASSERT(result == BERESTA_PARSE_ERROR);
+        TEST_ASSERT(cleared);
+        TEST_ASSERT(beresta_document_parse("<a/>", 4, 0, nullptr, nullptr) == BERESTA_INVALID_ARGUMENT);
+    }
+
+    // Защитный лимит глубины возвращается как статус Си-интерфейса.
+    // The depth limit is reported as a C API status.
+    void testDepthLimitStatus()
+    {
+        const std::size_t depth = beresta::ParserOptions{}.maxDepth + 1;
+        std::string xml;
+        beresta_document document = nullptr;
+
+        for (std::size_t level = 0; level < depth; ++level)
+            xml += "<a>";
+        for (std::size_t level = 0; level < depth; ++level)
+            xml += "</a>";
+        TEST_ASSERT(beresta_document_parse(xml.data(), static_cast<int64_t>(xml.size()), 0, nullptr, &document)
+            == BERESTA_LIMIT_EXCEEDED);
+        TEST_ASSERT(document == nullptr);
+        TEST_ASSERT(beresta_last_error_code() == BERESTA_LIMIT_EXCEEDED);
     }
 
     // Построение, навигация, атрибуты, копирование между документами, удаление
@@ -119,6 +166,8 @@ namespace suites
     void registerCapiTests(test::TestRunner& runner)
     {
         runner.add("Си-интерфейс: коды ошибок", testErrors);
+        runner.add("Си-интерфейс: выходной указатель при ошибке", testFailureClearsOutput);
+        runner.add("Си-интерфейс: статус при превышении глубины", testDepthLimitStatus);
         runner.add("Си-интерфейс: построение и изменение дерева", testTreeEditing);
         runner.add("Си-интерфейс: XPath", testXPath);
         runner.add("Си-интерфейс: XML Schema", testSchema);

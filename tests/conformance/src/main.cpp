@@ -36,20 +36,28 @@ namespace
     Arguments parseArguments(int argc, char** argv)
     {
         Arguments arguments;
+        bool rootSeen = false;
 
         for (int index = 1; index < argc; ++index)
         {
             std::string current = argv[index];
             bool hasValue = index + 1 < argc;
 
-            if (current == "--report" && hasValue)
+            if ((current == "--report" || current == "--only") && (!hasValue || argv[index + 1][0] == '-'))
+                throw conformance::ConformanceError("нет значения для " + current);
+            if (current == "--report")
                 arguments.reportFile = std::filesystem::u8path(argv[++index]);
             else if (current == "--only" && hasValue)
                 arguments.onlyId = argv[++index];
             else if (current == "--verbose")
                 arguments.verbose = true;
             else if (!current.empty() && current[0] != '-')
+            {
+                if (rootSeen)
+                    throw conformance::ConformanceError("лишний путь: " + current);
                 arguments.suiteRoot = std::filesystem::u8path(current);
+                rootSeen = true;
+            }
             else
                 throw conformance::ConformanceError("неизвестный аргумент: " + current);
         }
@@ -95,11 +103,11 @@ namespace
 
 /*
 ** Прогонщик W3C XML Conformance Test Suite.
-** Код возврата: 0 — прогон выполнен (провалы описаны в отчёте),
+** Код возврата: 0 — все применимые случаи прошли, 1 — есть расхождения,
 ** 2 — сбой инфраструктуры (нет набора, неверные аргументы).
 **
 ** The W3C XML Conformance Test Suite runner.
-** The exit code: 0 — the run is done (the failures are described in the report),
+** The exit code: 0 — all applicable cases passed, 1 — deviations,
 ** 2 — an infrastructure failure (no suite, invalid arguments).
 */
 int main(int argc, char** argv)
@@ -116,11 +124,11 @@ int main(int argc, char** argv)
         std::cout << "  Случаев в каталоге: " << catalog.size() << "\n";
         conformance::printSummary(summary, std::cout);
         saveReport(summary, results, arguments.reportFile);
+        return summary.total.failed == 0 ? 0 : 1;
     }
-    catch (const conformance::ConformanceError& problem)
+    catch (const std::exception& problem)
     {
         std::cerr << "conformance: " << problem.what() << "\n";
         return 2;
     }
-    return 0;
 }

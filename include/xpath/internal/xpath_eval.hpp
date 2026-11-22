@@ -67,6 +67,10 @@ namespace beresta::xpath::detail
     // =, !=, <, <=, >, >= with the XPath rules for node sets
     bool compareValues(BinaryOperator op, const XPathValue& left, const XPathValue& right);
 
+    // Сравнение множеств с однократным вычислением строкового значения каждого узла.
+    // Compares sets while computing each node's string value only once.
+    bool compareNodeSets(BinaryOperator op, const XPathValue& left, const XPathValue& right);
+
     // Сравнение чисел по IEEE 754 (NaN ни с чем не равен)
     // Comparing numbers by IEEE 754 (NaN equals nothing)
     bool compareNumbers(BinaryOperator op, double left, double right) noexcept;

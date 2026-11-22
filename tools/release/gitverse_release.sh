@@ -43,29 +43,32 @@ gv_api() {
 # Prints the release id by tag; no release — creates it from the notes file
 release_id() {
     local tag="$1" notes="$2" out code body
-    out="$(mktemp)"
-    code=$(gv_api GET "/releases/tags/${tag}" "$out")
-    if [ "$code" != "200" ]; then
-        body=$("$PYTHON" -c 'import json,sys; print(json.dumps({"tag_name": sys.argv[1], "name": "Берёста " + sys.argv[1].lstrip("v"), "body": open(sys.argv[2], encoding="utf-8").read()}))' "$tag" "$notes")
-        code=$(gv_api POST "/releases" "$out" -H 'Content-Type: application/json' --data "$body")
+    out="$release_tmp/release.json"
+    code=$(gv_api GET "/releases/tags/${tag}" "$out") || return 1
+    if [ "$code" = "404" ]; then
+        body=$("$PYTHON" -c 'import json,sys; print(json.dumps({"tag_name": sys.argv[1], "name": "Берёста " + sys.argv[1].lstrip("v"), "body": open(sys.argv[2], encoding="utf-8").read()}))' "$tag" "$notes") || return 1
+        code=$(gv_api POST "/releases" "$out" -H 'Content-Type: application/json' --data "$body") || return 1
         if [ "$code" != "201" ]; then
             echo "Релиз не создан, HTTP ${code} / The release was not created: $(cat "$out")" >&2
             return 1
         fi
+    elif [ "$code" != "200" ]; then
+        echo "Ошибка поиска релиза / Release lookup failed: HTTP ${code}" >&2
+        return 1
     fi
     "$PYTHON" -c 'import json,sys; print(json.load(open(sys.argv[1]))["id"])' "$out" | tr -d '\r'
-    rm -f "$out"
 }
 
 # Удаляет у релиза файл с тем же именем, если он уже прикреплён
 # Deletes a release file with the same name if it is already attached
 drop_asset() {
-    local id="$1" name="$2" out asset
-    out="$(mktemp)"
-    gv_api GET "/releases/${id}/assets" "$out" > /dev/null
-    asset=$("$PYTHON" -c 'import json,sys; d=json.load(open(sys.argv[1])); d=d if isinstance(d, list) else d.get("assets", []); print(next((str(a["id"]) for a in d if a.get("name") == sys.argv[2]), ""))' "$out" "$name" 2> /dev/null | tr -d '\r' || true)
+    local id="$1" name="$2" out="$release_tmp/assets.json" asset code
+    code=$(gv_api GET "/releases/${id}/assets" "$out")
+    [ "$code" = "200" ] || return 1
+    asset=$("$PYTHON" -c 'import json,sys; d=json.load(open(sys.argv[1])); d=d if isinstance(d, list) else d["assets"]; print(next((str(a["id"]) for a in d if a.get("name") == sys.argv[2]), ""))' "$out" "$name" | tr -d '\r')
     if [ -n "$asset" ]; then
-        gv_api DELETE "/releases/${id}/assets/${asset}" "$out" > /dev/null
+        code=$(gv_api DELETE "/releases/${id}/assets/${asset}" "$out")
+        [[ "$code" == 2?? ]] || return 1
     fi
     rm -f "$out"
 }
@@ -80,11 +83,14 @@ upload_asset() {
     # is not there: such a file is put into a zip — Beresta.X.Y.Z.nupkg.zip
     case "$file" in
         *.zip|*.tgz|*.gz|*.7z|*.whl|*.jar|*.md|*.txt|*.pdf) ;;
-        *) zip -qj "${file}.zip" "$file" && file="${file}.zip" ;;
+        *) local archive="$release_tmp/$(basename "$file").zip"
+           rm -f "$archive"
+           zip -qj "$archive" "$file"
+           file="$archive" ;;
     esac
     name="$(basename "$file")"
     drop_asset "$id" "$name"
-    out="$(mktemp)"
+    out="$release_tmp/upload.json"
     code=$(gv_api POST "/releases/${id}/assets?name=${name}" "$out" -F "attachment=@${file}")
     if [ "$code" != "201" ]; then
         echo "Файл ${name} не загружен, HTTP ${code} / The file was not uploaded: $(head -c 300 "$out")" >&2
@@ -104,6 +110,8 @@ main() {
         echo "Нет GV_API_TOKEN / GV_API_TOKEN is not set" >&2
         return 1
     fi
+    release_tmp="$(mktemp -d)"
+    trap 'rm -rf -- "$release_tmp"' EXIT
     id=$(release_id "$tag" "$notes")
     for file in "$@"; do
         upload_asset "$id" "$file"

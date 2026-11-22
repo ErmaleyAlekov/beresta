@@ -139,6 +139,7 @@ namespace beresta::xsd::detail
 
         std::vector<AssertionCapture> _captures;
         std::string _pendingText;
+        std::size_t _captureBytes = 0;
     };
 
     // Копия начала элемента SAX как автономного элемента DOM (имя и все атрибуты, включая xmlns)

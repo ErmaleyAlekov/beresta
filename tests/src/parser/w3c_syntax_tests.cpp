@@ -69,15 +69,15 @@ namespace
             "<!DOCTYPE d [<?xml version=\"1.0\"?>]><d/>",
             "<!DOCTYPE d [<!-- a -- b -->]><d/>",
             "<!DOCTYPE d [<?bad+ x?>]><d/>",
-            "<?a:b x?><d/>",
             "<!DOCTYPE d [<!ENTITY a:b \"x\">]><d/>",
-            "<!DOCTYPE d [<!NOTATION a:b SYSTEM \"n\">]><d/>",
-            "<xmlns:a/>"
+            "<!DOCTYPE d [<!NOTATION a:b SYSTEM \"n\">]><d/>"
         };
         beresta::ParserOptions plain;
 
         for (const char* document : rejected)
-            TEST_ASSERT(support::errorCodeOf(document) != beresta::DomErrorCode::NOT_FOUND);
+            TEST_ASSERT(support::errorCodeOf(document) == beresta::DomErrorCode::PARSE_ERROR);
+        TEST_ASSERT(support::errorCodeOf("<?a:b x?><d/>") == beresta::DomErrorCode::NAMESPACE_ERROR);
+        TEST_ASSERT(support::errorCodeOf("<xmlns:a/>") == beresta::DomErrorCode::NAMESPACE_ERROR);
         plain.namespaceAware = false;
         TEST_ASSERT(beresta::XmlParser(plain).parse("<?a:b x?><d/>").getRoot() != nullptr);
         TEST_ASSERT(beresta::XmlParser().parse("<!DOCTYPE d [<!ENTITY e SYSTEM \"\">]><d/>").getRoot()

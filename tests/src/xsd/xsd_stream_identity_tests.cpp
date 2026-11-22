@@ -111,6 +111,27 @@ namespace
         TEST_ASSERT(document.getRoot() != nullptr && document.getRoot()->getLocalName() == "lib");
         TEST_ASSERT(manual.size() == 3);
         TEST_ASSERT(support::sameDiagnostics(manual, support::runSchemaModes(LIBRARY_XSD, xml).parsed));
+        beresta::SaxParser(options).parse(library("<shelf><book id='1'/></shelf>"), validator);
+        document = builder.takeDocument();
+        validator.checkIdentity(document);
+        TEST_ASSERT(validator.takeDiagnostics().empty());
+    }
+    // Вложенные цели получают значения собственных дочерних элементов.
+    // Nested targets receive the values of their own child elements.
+    void testNestedElementFields()
+    {
+        const std::string xsd =
+            "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">"
+            "<xs:complexType name=\"itemType\"><xs:sequence><xs:element name=\"value\" type=\"xs:int\"/>"
+            "<xs:element name=\"item\" type=\"itemType\" minOccurs=\"0\"/>"
+            "</xs:sequence></xs:complexType><xs:element name=\"root\"><xs:complexType><xs:sequence>"
+            "<xs:element name=\"item\" type=\"itemType\"/></xs:sequence></xs:complexType>"
+            "<xs:key name=\"values\"><xs:selector xpath=\".//item\"/><xs:field xpath=\"value\"/></xs:key>"
+            "</xs:element></xs:schema>";
+        TEST_ASSERT(support::agreedSchemaErrors(xsd,
+            "<root><item><value>1</value><item><value>2</value></item></item></root>").empty());
+        TEST_ASSERT(support::agreedSchemaErrors(xsd,
+            "<root><item><value>1</value><item><value>1</value></item></item></root>").size() == 1);
     }
 }
 
@@ -120,6 +141,7 @@ namespace suites
     // Registers the tests of streaming identity constraints
     void registerXsdStreamIdentityTests(test::TestRunner& runner)
     {
+        runner.add("XSD: поля вложенных целей", testNestedElementFields);
         runner.add("XSD поток: ключи SAX совпадают с ключами по дереву", testStreamingKeysAgree);
         runner.add("XSD поток: ограничение вне грамматики XSD", testUnstreamableConstraint);
         runner.add("XSD поток: ValidatingHandler перед DomBuilder", testHandlerBeforeDomBuilder);

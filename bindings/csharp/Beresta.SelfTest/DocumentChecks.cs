@@ -14,13 +14,25 @@ namespace Beresta.SelfTest
         /// Parsing and navigation: children, siblings, parents, node types.</summary>
         internal static void ParseAndNavigate()
         {
-            using XmlDocument document = Xml.Parse("<shop><item code='A1'>Чай</item><!--x--><item>Кофе</item></shop>");
+            using XmlDocument document = Xml.Parse("<shop><item code='A1'>Чай</item><!--x--><item>Кофе 🌲</item></shop>");
             XmlElement root = document.Root!;
 
+            try
+            {
+                using var invalid = Xml.Parse((byte[])null!);
+                throw Expect.MissingError("null byte[]");
+            }
+            catch (ArgumentNullException error)
+            {
+                Expect.Equal("data", error.ParamName, "null byte[]");
+            }
+            var children = new XmlNode?[32];
+            System.Threading.Tasks.Parallel.For(0, children.Length, i => children[i] = root.FirstChild);
+            Expect.True(children.All(node => ReferenceEquals(node, children[0])), "identity map");
             Expect.Equal("shop", root.Name, "имя корня");
             Expect.Equal(3L, root.ChildCount, "число детей");
             Expect.Equal("A1", ((XmlElement)root.FirstChild!).GetAttribute("code"), "атрибут");
-            Expect.Equal("Кофе", root.LastChild!.Text, "текст");
+            Expect.Equal("Кофе 🌲", root.LastChild!.Text, "текст");
             Expect.Equal(NodeType.Comment, root.Child(1).Type, "тип комментария");
             Expect.True(ReferenceEquals(root.FirstChild!.NextSibling!.Parent!.Parent, document), "родитель корня — документ");
             Expect.Equal(3, root.Children.Count(), "перечисление детей");
@@ -91,12 +103,18 @@ namespace Beresta.SelfTest
             string folder = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), "beresta-cs-" + Guid.NewGuid())).FullName;
             string file = Path.Combine(folder, "документ.xml");
 
-            using (XmlDocument document = Xml.Parse("<текст>Привет</текст>"))
-                document.Save(file, WriteFlags.Default, "windows-1251");
-            Expect.True(Encoding.ASCII.GetString(File.ReadAllBytes(file)).Contains("windows-1251"), "декларация кодировки");
-            using (XmlDocument loaded = Xml.ParseFile(file))
-                Expect.Equal("Привет", loaded.Root!.Text, "текст после перекодирования");
-            Directory.Delete(folder, true);
+            try
+            {
+                using (XmlDocument document = Xml.Parse("<текст>Привет</текст>"))
+                    document.Save(file, WriteFlags.Default, "windows-1251");
+                Expect.True(Encoding.ASCII.GetString(File.ReadAllBytes(file)).Contains("windows-1251"), "декларация кодировки");
+                using (XmlDocument loaded = Xml.ParseFile(file))
+                    Expect.Equal("Привет", loaded.Root!.Text, "текст после перекодирования");
+            }
+            finally
+            {
+                Directory.Delete(folder, true);
+            }
         }
     }
 }

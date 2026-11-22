@@ -3,8 +3,13 @@
 
 #include <memory>
 #include <string>
-#include <thread>
 #include <vector>
+
+#if !defined(__EMSCRIPTEN__)
+#include <condition_variable>
+#include <mutex>
+#include <thread>
+#endif
 
 namespace
 {
@@ -12,6 +17,18 @@ namespace
     // The number of threads and of validations in each
     const int WORKERS = 8;
     const int ROUNDS = 20;
+
+#if !defined(__EMSCRIPTEN__)
+    // Все потоки доходят до начала проверки перед выпуском; отмена нужна при сбое запуска.
+    // All workers reach the start of validation before release; cancellation handles launch failure.
+    struct StartGate
+    {
+        std::mutex mutex;
+        std::condition_variable changed;
+        int ready = 0;
+        bool cancelled = false;
+    };
+#endif
 
     /*
     ** Счёт с утверждением xs:assert (сумма строк) и фасетом xs:assertion
@@ -48,7 +65,7 @@ namespace
     ** documents ROUNDS times; each wrong result increments failures
     ** (each thread has its own counter — there is no race for a shared counter).
     */
-    void validateInvoices(std::shared_ptr<const beresta::xsd::Schema> schema, int* failures)
+    void validateInvoices(const std::shared_ptr<const beresta::xsd::Schema>& schema, int* failures)
     {
         beresta::xsd::SchemaValidator validator(schema);
         beresta::ParserOptions options;
@@ -62,11 +79,65 @@ namespace
                 ++*failures;
             if (validator.validate(beresta::XmlParser().parse(BAD_INVOICE)).size() != 2)
                 ++*failures;
+            beresta::XmlParser(options).parse(GOOD_INVOICE);
+            if (!errors.getDiagnostics().empty())
+                ++*failures;
+            errors.clear();
             beresta::XmlParser(options).parse(BAD_INVOICE);
             if (errors.getDiagnostics().size() != 2)
                 ++*failures;
         }
     }
+
+#if !defined(__EMSCRIPTEN__)
+    // Встречаемся у барьера перед созданием валидаторов; исключение проверки считается сбоем.
+    // Meet at the barrier before creating validators; a validation exception counts as a failure.
+    void runWorker(const std::shared_ptr<const beresta::xsd::Schema>& schema, int* failures, StartGate* gate)
+    {
+        try
+        {
+            std::unique_lock<std::mutex> lock(gate->mutex);
+            ++gate->ready;
+            gate->changed.notify_all();
+            while (gate->ready < WORKERS && !gate->cancelled)
+                gate->changed.wait(lock);
+            if (gate->cancelled)
+                return;
+            lock.unlock();
+            validateInvoices(schema, failures);
+        }
+        catch (...)
+        {
+            ++*failures;
+        }
+    }
+
+    // При сбое запуска освобождаем ожидающие потоки перед их присоединением.
+    // If launching a worker fails, release the waiting workers before joining them.
+    void runWorkers(const std::shared_ptr<const beresta::xsd::Schema>& schema, std::vector<int>& failures)
+    {
+        StartGate gate;
+        std::vector<std::thread> threads;
+        threads.reserve(WORKERS);
+        try
+        {
+            for (int worker = 0; worker < WORKERS; ++worker)
+                threads.emplace_back(runWorker, schema, &failures[worker], &gate);
+        }
+        catch (...)
+        {
+            std::unique_lock<std::mutex> lock(gate.mutex);
+            gate.cancelled = true;
+            lock.unlock();
+            gate.changed.notify_all();
+            for (std::thread& thread : threads)
+                thread.join();
+            throw;
+        }
+        for (std::thread& thread : threads)
+            thread.join();
+    }
+#endif
 
     /*
     ** WORKERS потоков на одной схеме: скомпилированные утверждения
@@ -86,11 +157,7 @@ namespace
         for (int worker = 0; worker < WORKERS; ++worker)
             validateInvoices(schema, &failures[worker]);
 #else
-        std::vector<std::thread> threads;
-        for (int worker = 0; worker < WORKERS; ++worker)
-            threads.emplace_back(validateInvoices, schema, &failures[worker]);
-        for (std::thread& thread : threads)
-            thread.join();
+        runWorkers(schema, failures);
 #endif
         for (int count : failures)
             TEST_ASSERT(count == 0);

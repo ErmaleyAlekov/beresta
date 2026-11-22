@@ -33,13 +33,13 @@ static int report_failure(const char* step)
 
 /* Печать строки, полученной от библиотеки, с её освобождением */
 /* Prints a string received from the library and frees it */
-static void print_owned(const char* label, char* text)
+static int print_owned(const char* label, char* text)
 {
     if (text == NULL)
-        printf("%s: (нет)\n", label);
-    else
-        printf("%s: %s\n", label, text);
+        return report_failure(label);
+    printf("%s: %s\n", label, text);
     beresta_string_free(text);
+    return 0;
 }
 
 /* Разбор, навигация по дереву и вычисление XPath / Parsing, tree navigation and XPath evaluation */
@@ -48,20 +48,25 @@ static int show_parsing(void)
     const char* xml = "<shop><item code=\"A1\">Чай</item><item code=\"B2\">Кофе</item></shop>";
     beresta_document document = NULL;
     beresta_xpath xpath = NULL;
+    int status = 1;
 
     if (beresta_document_parse(xml, (int64_t)strlen(xml), BERESTA_PARSE_DEFAULT, NULL, &document) != BERESTA_OK)
         return report_failure("разбор");
-    print_owned("первый товар", beresta_node_text(beresta_node_first_child(beresta_document_root(document))));
-    if (beresta_xpath_compile("//item[@code = $code]", &xpath) != BERESTA_OK)
-    {
-        beresta_document_free(document);
-        return report_failure("XPath");
-    }
-    beresta_xpath_set_string(xpath, "code", "B2");
-    print_owned("товар B2", beresta_xpath_string(xpath, document));
+    beresta_node root = beresta_document_root(document);
+    beresta_node first = root ? beresta_node_first_child(root) : NULL;
+    if (!first)
+        status = report_failure("первый товар");
+    else if (print_owned("первый товар", beresta_node_text(first)) != 0)
+        status = 1;
+    else if (beresta_xpath_compile("//item[@code = $code]", &xpath) != BERESTA_OK)
+        status = report_failure("XPath");
+    else if (beresta_xpath_set_string(xpath, "code", "B2") != BERESTA_OK)
+        report_failure("привязка XPath");
+    else
+        status = print_owned("товар B2", beresta_xpath_string(xpath, document));
     beresta_xpath_free(xpath);
     beresta_document_free(document);
-    return 0;
+    return status;
 }
 
 /* Построение документа с нуля и сериализация с отступами */
@@ -70,15 +75,19 @@ static int show_building(void)
 {
     beresta_document document = NULL;
     beresta_node item;
+    int status;
 
     if (beresta_document_create("order", &document) != BERESTA_OK)
         return report_failure("создание");
-    item = beresta_node_append_element(beresta_document_root(document), "item");
-    beresta_element_set_attribute(item, "qty", "2");
-    beresta_node_append_text(item, "Мёд & орехи");
-    print_owned("документ", beresta_node_to_string(document, BERESTA_WRITE_PRETTY));
+    beresta_node root = beresta_document_root(document);
+    item = root ? beresta_node_append_element(root, "item") : NULL;
+    if (!item || beresta_element_set_attribute(item, "qty", "2") != BERESTA_OK
+        || !beresta_node_append_text(item, "Мёд & орехи"))
+        status = report_failure("построение документа");
+    else
+        status = print_owned("документ", beresta_node_to_string(document, BERESTA_WRITE_PRETTY));
     beresta_document_free(document);
-    return 0;
+    return status;
 }
 
 /* Точка входа: версия, два сценария и пример обработки ошибки */
@@ -98,5 +107,10 @@ int main(void)
     if (beresta_document_parse("<a><b></a>", 10, BERESTA_PARSE_DEFAULT, NULL, &broken) != BERESTA_OK)
         printf("ожидаемая ошибка: [%s] %s\n", beresta_status_name(beresta_last_error_code()),
             beresta_last_error_message());
+    else
+    {
+        beresta_document_free(broken);
+        return 1;
+    }
     return 0;
 }

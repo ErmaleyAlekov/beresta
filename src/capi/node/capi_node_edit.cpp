@@ -75,6 +75,8 @@ extern "C" BERESTA_API int beresta_node_remove(beresta_node node)
 extern "C" BERESTA_API int beresta_node_copy_to(beresta_node source, beresta_node parent, beresta_node* out)
 {
     BERESTA_CAPI_TRY
+        if (out != nullptr)
+            *out = nullptr;
         std::unique_ptr<beresta::Node> copy = beresta::capi::toNode(source).clone();
         beresta::Node* added = beresta::capi::appendNode(parent, std::move(copy));
 

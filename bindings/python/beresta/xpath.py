@@ -11,16 +11,17 @@ and documents. Prefixes and variables are set in the constructor or later.
 
 from __future__ import annotations
 
-import weakref
 from typing import Dict, Optional
 
+from ._owned_handle import OwnedHandle
+from .languages import XPATH_CLOSED
 from ._native import LIB, encode, out_handle
 from ._wrapping import wrap_node
 from ._xpath_scalars import XPathScalarsMixin
 from .errors import check, take_text
 
 
-class XPath(XPathScalarsMixin):
+class XPath(XPathScalarsMixin, OwnedHandle):
     """Пример: XPath("//s:item[@code = $c]", {"s": "urn:shop"}, {"c": "B2"}).
     Example: XPath("//s:item[@code = $c]", {"s": "urn:shop"}, {"c": "B2"})."""
 
@@ -28,8 +29,7 @@ class XPath(XPathScalarsMixin):
                  variables: Optional[Dict[str, object]] = None) -> None:
         result = out_handle()
         check(LIB.beresta_xpath_compile(encode(expression), result))
-        self.handle = result.value
-        self._finalizer = weakref.finalize(self, LIB.beresta_xpath_free, self.handle)
+        self._own(result.value, LIB.beresta_xpath_free, XPATH_CLOSED)
         for prefix, uri in (namespaces or {}).items():
             self.bind(prefix, uri)
         for name, value in (variables or {}).items():

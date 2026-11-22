@@ -2,28 +2,29 @@
 #include "utils/decimal.hpp"
 
 #include <cmath>
+#include <limits>
 
 namespace beresta::xsd::detail
 {
-    // Беззнаковое число с необязательной точкой (знаки и прочее пропускаются)
-    // An unsigned number with an optional point (signs and the rest are skipped)
-    static long double parseUnsigned(std::string_view text) noexcept
+    // Порядок насыщается до безопасной границы: промежуточная мантисса не переполняется.
+    // The exponent saturates at a safe bound: the intermediate mantissa cannot overflow.
+    static long long parseExponent(std::string_view text) noexcept
     {
-        long double result = 0.0L;
-        long double scale = 1.0L;
-        bool fraction = false;
+        long long result = 0;
+        const long long limit = std::numeric_limits<long long>::max() / 2;
 
         for (char symbol : text)
         {
-            if (symbol == '.')
-                fraction = true;
             if (symbol < '0' || symbol > '9')
                 continue;
-            result = result * 10.0L + (symbol - '0');
-            if (fraction)
-                scale /= 10.0L;
+            if (result > (limit - (symbol - '0')) / 10)
+                result = limit;
+            else
+                result = result * 10 + (symbol - '0');
         }
-        return result * scale;
+        if (!text.empty() && text.front() == '-')
+            return -result;
+        return result;
     }
 
     // float / double в long double: INF, -INF, NaN и мантисса с экспонентой
@@ -38,16 +39,14 @@ namespace beresta::xsd::detail
             return std::nan("");
         std::size_t exponentAt = value.find_first_of("eE");
         std::string_view mantissa = value.substr(0, exponentAt);
-        long double result = parseUnsigned(mantissa);
+        long long exponent = 0;
         if (exponentAt != std::string_view::npos)
-        {
-            std::string_view exponent = value.substr(exponentAt + 1);
-            long double power = parseUnsigned(exponent);
-            if (!exponent.empty() && exponent[0] == '-')
-                power = -power;
-            result *= std::pow(10.0L, power);
-        }
-        if (!mantissa.empty() && mantissa[0] == '-')
+            exponent = parseExponent(value.substr(exponentAt + 1));
+        bool negative = !mantissa.empty() && mantissa.front() == '-';
+        if (!mantissa.empty() && (negative || mantissa.front() == '+'))
+            mantissa.remove_prefix(1);
+        long double result = utils::digitsToLongDouble(mantissa, exponent);
+        if (negative)
             return -result;
         return result;
     }

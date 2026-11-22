@@ -25,8 +25,8 @@ final class DocumentTest extends TestCase
         $document = Document::create('order');
         $item = $document->root()->appendElement('item');
         $item->setAttribute('qty', '2');
-        $item->appendText('Мёд & орехи');
-        $this->assertSame('<order><item qty="2">Мёд &amp; орехи</item></order>', $document->toXml());
+        $item->appendText('Мёд & орехи 🌲');
+        $this->assertSame('<order><item qty="2">Мёд &amp; орехи 🌲</item></order>', $document->toXml());
     }
 
     /**
@@ -78,9 +78,12 @@ final class DocumentTest extends TestCase
     public function testCloseMethod(): void
     {
         $document = Document::create('root');
+        $root = $document->root();
+        $document->close();
         $document->close();
         $this->assertTrue($document->isClosed());
         $this->assertThrows(ClosedException::class, fn() => $document->root());
+        $this->assertThrows(ClosedException::class, fn() => $root->text());
     }
 
     /**
@@ -115,10 +118,13 @@ final class DocumentTest extends TestCase
         $document = Document::create('root');
         $document->root()->appendText('Test');
         $path = tempnam(sys_get_temp_dir(), 'beresta');
-        $document->save($path);
-        $parsed = (new Parser())->parseFile($path);
-        $this->assertSame('root', $parsed->root()->name());
-        unlink($path);
+        try {
+            $document->save($path);
+            $parsed = (new Parser())->parseFile($path);
+            $this->assertSame('root', $parsed->root()->name());
+        } finally {
+            unlink($path);
+        }
     }
 
     /**

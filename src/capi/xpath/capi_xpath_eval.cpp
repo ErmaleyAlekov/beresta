@@ -27,14 +27,14 @@ namespace
 extern "C" BERESTA_API int beresta_xpath_select(beresta_xpath xpath, beresta_node context, beresta_nodeset* out)
 {
     BERESTA_CAPI_TRY
-        if (out == nullptr)
-            throw beresta::capi::InvalidArgumentException(beresta::i18n::format(beresta::i18n::Message::ARGUMENT_NULL, {"out"}));
+        beresta::capi::clearOutput(out);
         beresta::xpath::XPathValue value = evaluate(xpath, context);
 
         if (value.getType() != beresta::xpath::ValueType::NODE_SET)
             throw beresta::DomException(beresta::DomErrorCode::XPATH_ERROR,
                 beresta::i18n::format(beresta::i18n::Message::XPATH_RESULT_NOT_NODESET));
-        *out = new beresta::capi::NodeSetHandle{value.getNodes()};
+        *out = beresta::capi::publishHandle(std::make_unique<beresta::capi::NodeSetHandle>(
+            beresta::capi::NodeSetHandle{value.getNodes()}));
         return BERESTA_OK;
     BERESTA_CAPI_CATCH_STATUS
 }

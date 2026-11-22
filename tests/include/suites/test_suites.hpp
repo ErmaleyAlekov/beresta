@@ -105,6 +105,10 @@ namespace suites
     void registerReviewXIncludeTests(test::TestRunner& runner);
     void registerReviewDtdContentTests(test::TestRunner& runner);
     void registerReviewDomTests(test::TestRunner& runner);
+    void registerReviewXPathTests(test::TestRunner& runner);
+    void registerReviewXsdTests(test::TestRunner& runner);
+    void registerReviewXsdFollowupTests(test::TestRunner& runner);
+    void registerReviewXsdStreamFollowupTests(test::TestRunner& runner);
 
     // ---- Си-интерфейс для других языков ----
     // ---- The C interface for other languages ----

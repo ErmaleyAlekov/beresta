@@ -54,8 +54,15 @@ namespace WrapperBench
         /// <summary>Проверка идёт во время разбора; ошибка проверки — исключение. / Validation runs during parsing; a validation error is an exception.</summary>
         public override int ParseValidated(byte[] xml)
         {
-            using (XmlDocument document = Xml.Parse(xml, ParseFlags.Default, schema))
+            try
+            {
+                using XmlDocument document = Xml.Parse(xml, ParseFlags.Default, schema);
                 return 0;
+            }
+            catch (BerestaException failure) when (failure.CodeName == "VALIDATION_ERROR")
+            {
+                return 1;
+            }
         }
     }
 }

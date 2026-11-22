@@ -1,6 +1,6 @@
 #include "xsd/internal/stream_validator.hpp"
 #include "i18n/i18n.hpp"
-#include "utils/xml_tokens.hpp"
+#include "xsd/internal/validation_budget.hpp"
 #include "xsd/internal/datatype_checks.hpp"
 
 namespace beresta::xsd::detail
@@ -57,11 +57,24 @@ namespace beresta::xsd::detail
         if (type.form == LexicalForm::ID && !_ids.insert(normalized))
             report(_depth - 1, phase, i18n::format(i18n::Message::ID_DUPLICATE, {normalized}));
         if (type.form == LexicalForm::IDREF)
-            _references.emplace_back(std::string(normalized), _paths.pin(_depth - 1));
+            recordReference(normalized);
         if (!referenceList)
             return;
-        for (std::string_view token : utils::splitTokens(normalized))
-            _references.emplace_back(std::string(token), _paths.pin(_depth - 1));
+        while (!normalized.empty())
+        {
+            std::size_t space = normalized.find(' ');
+            recordReference(normalized.substr(0, space));
+            if (space == std::string_view::npos)
+                break;
+            normalized.remove_prefix(space + 1);
+        }
+    }
+
+    void StreamValidator::recordReference(std::string_view value)
+    {
+        chargeValidation(_referenceBytes, sizeof(_references.front()), "IDREF");
+        chargeValidation(_referenceBytes, value.size(), "IDREF");
+        _references.emplace_back(std::string(value), _paths.pin(_depth - 1));
     }
 
     // Висячие ссылки — после всего документа, с позицией корня (как у обхода дерева)
@@ -77,6 +90,7 @@ namespace beresta::xsd::detail
                 reference.second, i18n::format(i18n::Message::IDREF_DANGLING, {reference.first}), _rootPosition);
         }
         _references.clear();
+        _referenceBytes = 0;
     }
 
     /*

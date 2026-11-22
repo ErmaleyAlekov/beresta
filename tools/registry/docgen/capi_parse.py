@@ -16,8 +16,8 @@ import re
 
 CYRILLIC = re.compile(r"[А-Яа-яЁё]")
 PROTOTYPE_NAME = re.compile(r"(\w+)\s*\(")
-ENUM_ENTRY = re.compile(r"^\s+(BERESTA_[A-Z_]+)\s*=\s*(\d+),?\s*(?:/\*(.*?)\*/)?")
-FLAG_DEFINE = re.compile(r"^#define\s+(BERESTA_(?:PARSE|WRITE)_[A-Z_]+)\s+(\S+(?:\s<<\s\d+\))?)\s*(.*)$")
+ENUM_ENTRY = re.compile(r"^\s+(BERESTA_[A-Z0-9_]+)\s*=\s*(\d+),?\s*(?:/\*(.*?)\*/)?")
+FLAG_DEFINE = re.compile(r"^#define\s+(BERESTA_(?:PARSE|WRITE)_[A-Z0-9_]+)\s+(\S+(?:\s<<\s\d+\))?)\s*(.*)$")
 
 
 def russian(text: str) -> str:
@@ -59,7 +59,10 @@ def parse_functions(lines: list) -> list:
             while ";" not in lines[index]:
                 index += 1
             signature = " ".join(" ".join(lines[start:index + 1]).replace("BERESTA_API", "").split()).rstrip(";")
-            groups[-1][1].append((signature, PROTOTYPE_NAME.search(signature).group(1), russian(comment)))
+            name = PROTOTYPE_NAME.search(signature)
+            if name is not None:
+                groups[-1][1].append((signature, name.group(1), russian(comment)))
+            comment = ""
         elif not line.strip():
             comment = ""
         index += 1

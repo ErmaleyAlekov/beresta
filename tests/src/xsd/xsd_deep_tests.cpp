@@ -1,7 +1,9 @@
 #include "suites/test_suites.hpp"
 #include "support/schema_helpers.hpp"
 
-#include "capi/beresta_c.h"
+#include "support/capi_helpers.hpp"
+
+#include <memory>
 
 #include <cstdint>
 #include <string>
@@ -114,14 +116,15 @@ namespace
     void testDeepDocumentLimitInCapi()
     {
         std::string xml = deepChain(false);
-        beresta_schema schema = nullptr;
+        std::unique_ptr<void, decltype(&beresta_schema_free)> schema(support::loadCapiSchema(DEEP_XSD), beresta_schema_free);
         beresta_diagnostics out = nullptr;
 
-        TEST_ASSERT(beresta_schema_load(DEEP_XSD, static_cast<int64_t>(std::string(DEEP_XSD).size()), &schema) == BERESTA_OK);
-        TEST_ASSERT(beresta_schema_validate_bytes(xml.data(), static_cast<int64_t>(xml.size()),
-            BERESTA_PARSE_DEFAULT, schema, &out) == BERESTA_LIMIT_EXCEEDED);
+        TEST_ASSERT(schema != nullptr);
+        auto status = beresta_schema_validate_bytes(xml.data(), static_cast<int64_t>(xml.size()),
+            BERESTA_PARSE_DEFAULT, schema.get(), &out);
+        std::unique_ptr<void, decltype(&beresta_diagnostics_free)> diagnostics(out, beresta_diagnostics_free);
+        TEST_ASSERT(status == BERESTA_LIMIT_EXCEEDED);
         TEST_ASSERT(out == nullptr);
-        beresta_schema_free(schema);
     }
 }
 

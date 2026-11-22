@@ -28,7 +28,8 @@ namespace
     // The schema main.xsd with the directive directive and its content, loaded from a temporary directory
     std::shared_ptr<const beresta::xsd::Schema> loadWith(const std::string& directive, const std::string& body)
     {
-        std::filesystem::path root = support::makeTestDirectory("xsd_redefine");
+        const support::TestDirectory temporary("xsd_redefine");
+        const auto& root = temporary.path;
         support::writeTestFile(root / "base.xsd", BASE_XSD);
         support::writeTestFile(root / "main.xsd", "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\""
             " xmlns=\"urn:m\" targetNamespace=\"urn:m\"><xs:" + directive + " schemaLocation=\"base.xsd\">"

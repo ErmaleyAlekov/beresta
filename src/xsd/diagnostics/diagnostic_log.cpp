@@ -1,4 +1,5 @@
 #include "xsd/internal/diagnostic_log.hpp"
+#include "xsd/internal/validation_budget.hpp"
 
 #include <algorithm>
 #include <utility>
@@ -17,6 +18,8 @@ namespace beresta::xsd::detail
     void DiagnosticLog::add(const DiagnosticOrder& order, std::size_t step, std::string message,
         const EventPosition& position)
     {
+        chargeValidation(_bytes, sizeof(PendingDiagnostic), "diagnostics");
+        chargeValidation(_bytes, message.size(), "diagnostics");
         _pending.push_back(PendingDiagnostic{order, step, std::string(), std::move(message), position});
     }
 
@@ -25,6 +28,9 @@ namespace beresta::xsd::detail
     void DiagnosticLog::addAtPath(const DiagnosticOrder& order, std::string path, std::string message,
         const EventPosition& position)
     {
+        chargeValidation(_bytes, sizeof(PendingDiagnostic), "diagnostics");
+        chargeValidation(_bytes, path.size(), "diagnostics");
+        chargeValidation(_bytes, message.size(), "diagnostics");
         _pending.push_back(PendingDiagnostic{order, NO_STEP, std::move(path), std::move(message), position});
     }
 
@@ -71,6 +77,7 @@ namespace beresta::xsd::detail
                 ParsePosition{0, pending.position.location.line, pending.position.location.column}});
         }
         _pending.clear();
+        _bytes = 0;
         return result;
     }
 }

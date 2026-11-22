@@ -53,6 +53,8 @@ final class NodeSets
         try
         {
             long size = (long) NativeCalls.invoke(XPathFunctions.NODESET_SIZE, set);
+            if (size < 0)
+                throw NativeCalls.lastError();
             for (long index = 0; index < size; ++index)
             {
                 XmlNode node = NodeFactory.wrap(NodeCalls.indexed(XPathFunctions.NODESET_NODE, set, index), context.document());
@@ -76,6 +78,8 @@ final class NodeSets
         try
         {
             long size = (long) NativeCalls.invoke(XPathFunctions.NODESET_SIZE, set);
+            if (size < 0)
+                throw NativeCalls.lastError();
             for (long index = 0; index < size; ++index)
                 result.add(NativeStrings.take(NativeCalls.invoke(XPathFunctions.NODESET_VALUE, set, index)));
             return result;

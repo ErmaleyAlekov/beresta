@@ -59,9 +59,10 @@ final class Language
     public static function message(Message $message, string ...$arguments): string
     {
         $text = Strings::borrowed(Library::ffi()->beresta_message_text($message->value));
+        $values = [];
         foreach ($arguments as $index => $argument) {
-            $text = str_replace('{' . $index . '}', $argument, $text);
+            $values['{' . $index . '}'] = $argument;
         }
-        return $text;
+        return strtr($text, $values);
     }
 }

@@ -22,7 +22,8 @@ namespace
     */
     void testMappedFileBytes()
     {
-        std::filesystem::path directory = support::makeTestDirectory("mapped_file");
+        const support::TestDirectory temporary("mapped_file");
+        const auto& directory = temporary.path;
         std::filesystem::path file = directory / std::filesystem::u8path("данные.bin");
         const char raw[] = "<a>берёста</a>\0\x01\xff";
         std::string content(raw, sizeof(raw) - 1);
@@ -38,6 +39,15 @@ namespace
         TEST_ASSERT(!empty.isMapped());
         TEST_ASSERT(empty.getBytes().empty());
         TEST_ASSERT_THROWS(beresta::io::MappedFile(directory / "missing.xml"), beresta::DomException);
+        try
+        {
+            beresta::io::MappedFile invalid(directory);
+            TEST_ASSERT(false);
+        }
+        catch (const beresta::DomException& error)
+        {
+            TEST_ASSERT(error.getCode() == beresta::DomErrorCode::IO_ERROR);
+        }
     }
 
     /*
@@ -51,7 +61,8 @@ namespace
     */
     void testParseMappedFile()
     {
-        std::filesystem::path directory = support::makeTestDirectory("mapped_parse");
+        const support::TestDirectory temporary("mapped_parse");
+        const auto& directory = temporary.path;
         std::string utf8 = "<?xml version='1.0'?>\n<shop>\n<item code='A1'>Чай</item>\n</shop>";
         std::string cp1251 = "<?xml version='1.0' encoding='windows-1251'?>\r\n<shop>\r\n<item code='A1'>\xD7\xE0\xE9</item>\r\n</shop>";
 
@@ -74,7 +85,8 @@ namespace
     */
     void testSaxMappedFileWithSchema()
     {
-        std::filesystem::path directory = support::makeTestDirectory("mapped_sax");
+        const support::TestDirectory temporary("mapped_sax");
+        const auto& directory = temporary.path;
         const std::string xsd = "<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'>"
             "<xs:element name='list'><xs:complexType><xs:sequence>"
             "<xs:element name='v' type='xs:int' maxOccurs='unbounded'/></xs:sequence></xs:complexType></xs:element></xs:schema>";

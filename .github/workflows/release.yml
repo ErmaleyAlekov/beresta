@@ -66,7 +66,7 @@ jobs:
     outputs:
       version: ${{ steps.read.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - id: read
         name: Версия из CMakeLists.txt / The version from CMakeLists.txt
         run: |
@@ -109,8 +109,8 @@ jobs:
             build: universal
     runs-on: ${{ matrix.runner }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '22'
       - name: Linux (make)
@@ -143,7 +143,7 @@ jobs:
           done
           cd sdk
           if command -v zip > /dev/null; then zip -qr "$sdk.zip" "$sdk"; else 7z a -tzip "$sdk.zip" "$sdk" > /dev/null; fi
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: natives-${{ matrix.platform }}
           if-no-files-found: error
@@ -152,7 +152,7 @@ jobs:
             bindings/csharp/Beresta/runtimes/
             bindings/python/beresta/_native/
             bindings/node/native/
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: sdk-${{ matrix.platform }}
           path: sdk/*.zip
@@ -164,7 +164,7 @@ jobs:
     runs-on: ubuntu-24.04
     container: emscripten/emsdk:3.1.69
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       # В образе emsdk в PATH есть каталог /emsdk с подкаталогом node: bash его
       # пропускает, а GNU make пытается запустить каталог и падает с «Permission
       # denied». Поэтому make получает абсолютный путь к node
@@ -172,7 +172,7 @@ jobs:
       # skips it, but GNU make tries to run the directory and fails with "Permission
       # denied". That is why make gets the absolute path to node
       - run: make -j"$(nproc)" NODE_EXE="$(command -v node)" wasm-test
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: wasm
           path: bindings/wasm/dist/
@@ -204,12 +204,12 @@ jobs:
       MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
       MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       # server-id central — учётные данные Central Portal в settings.xml (из переменных выше),
       # gpg-private-key — импорт ключа подписи (пустой секрет — импорт пропускается)
       # server-id central — the Central Portal credentials in settings.xml (from the variables above),
       # gpg-private-key — importing the signing key (an empty secret skips the import)
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
         with:
           distribution: temurin
           java-version: '25'
@@ -218,28 +218,28 @@ jobs:
           server-password: MAVEN_CENTRAL_PASSWORD
           gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
         with:
           dotnet-version: '9.0.x'
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: '3.12'
       # Каждый артефакт хранит пути от bindings/, поэтому они сливаются в одно дерево
       # Every artifact keeps the paths from bindings/, so they merge into one tree
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           pattern: natives-*
           path: bindings
           merge-multiple: true
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: wasm
           path: bindings/wasm/dist
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           pattern: sdk-*
           path: dist
@@ -264,13 +264,20 @@ jobs:
         if: github.ref_type == 'tag'
         env:
           GH_TOKEN: ${{ github.token }}
-        # Релиз уже есть (перезапуск) — файлы заменяются / The release exists (a re-run) — the files are replaced
+        # При повторе публикуем в реестры те же байты / Reuse the released bytes on retry
         # Описание — раздел версии из CHANGELOG.md и CHANGELOG.en.md, за ним — список изменений GitHub
         # The notes — the version section from CHANGELOG.md and CHANGELOG.en.md, then the GitHub list of changes
         run: |
           if gh release view "${GITHUB_REF_NAME}" > /dev/null 2>&1; then
-            gh release upload "${GITHUB_REF_NAME}" dist/* --clobber
+            gh release download "${GITHUB_REF_NAME}" --dir "${RUNNER_TEMP}/released"
+            (cd "${RUNNER_TEMP}/released" && sha256sum --check --strict SHA256SUMS.txt)
+            (cd dist && printf '%s\n' * SHA256SUMS.txt | sort) > "${RUNNER_TEMP}/expected-assets"
+            (cd "${RUNNER_TEMP}/released" && printf '%s\n' * | sort) > "${RUNNER_TEMP}/released-assets"
+            diff "${RUNNER_TEMP}/expected-assets" "${RUNNER_TEMP}/released-assets"
+            cp "${RUNNER_TEMP}/released/"* dist/
           else
+            (cd dist && sha256sum -- * > "${RUNNER_TEMP}/SHA256SUMS.txt")
+            cp "${RUNNER_TEMP}/SHA256SUMS.txt" dist/
             bash tools/release/release_notes.sh "${VERSION}" "${RUNNER_TEMP}/notes.md"
             gh release create "${GITHUB_REF_NAME}" dist/* --title "Берёста ${VERSION}" --notes-file "${RUNNER_TEMP}/notes.md" --generate-notes
           fi
@@ -303,7 +310,7 @@ jobs:
       - name: NuGet login (OIDC)
         id: nuget-login
         if: github.ref_type == 'tag' && env.ON_GITHUB == 'true' && env.NUGET_USER != ''
-        uses: NuGet/login@v1
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1
         with:
           user: ${{ secrets.NUGET_USER }}
       - name: NuGet

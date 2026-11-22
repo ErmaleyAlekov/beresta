@@ -1,5 +1,6 @@
 #include "addon/call_frame.hpp"
 #include "addon/errors.hpp"
+#include "capi/beresta_c.h"
 
 #include <cstdint>
 
@@ -26,14 +27,16 @@ namespace beresta::node
 
     // Одна функция в объекте exports; data — описание для переходника
     // One function in the exports object; data is the description for the adapter
-    static bool exportFunction(napi_env env, napi_value exports, const char* name, napi_callback callback,
+    static napi_status exportFunction(napi_env env, napi_value exports, const char* name, napi_callback callback,
         const void* data) noexcept
     {
         napi_value function = nullptr;
 
-        if (napi().createFunction(env, name, NAPI_AUTO_LENGTH, callback, const_cast<void*>(data), &function) != NAPI_OK)
-            return false;
-        return napi().setNamedProperty(env, exports, name, function) == NAPI_OK;
+        const napi_status status = napi().createFunction(env, name, NAPI_AUTO_LENGTH, callback,
+            const_cast<void*>(data), &function);
+        if (status != NAPI_OK)
+            return status;
+        return napi().setNamedProperty(env, exports, name, function);
     }
 
     /*
@@ -48,11 +51,14 @@ namespace beresta::node
         std::size_t count = 0;
         const Binding* table = bindingTable(count);
 
-        if (!exportFunction(env, exports, "init", initialize, nullptr))
+        napi_status status = exportFunction(env, exports, "init", initialize, nullptr);
+        for (std::size_t index = 0; status == NAPI_OK && index < count; ++index)
+            status = exportFunction(env, exports, table[index].name, table[index].adapter, &table[index]);
+        if (status == NAPI_OK)
             return exports;
-        for (std::size_t index = 0; index < count; ++index)
-            exportFunction(env, exports, table[index].name, table[index].adapter, &table[index]);
-        return exports;
+        if (status != NAPI_PENDING_EXCEPTION)
+            napi().throwError(env, nullptr, beresta_message_text(BERESTA_MESSAGE_NATIVE_CALL_FAILED));
+        return nullptr;
     }
 }
 

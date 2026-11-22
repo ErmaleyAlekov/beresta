@@ -15,6 +15,7 @@ from __future__ import annotations
 import html
 import re
 
+from .errors import DocsError
 from .md_inline import render_inline
 
 LIST_ITEM = re.compile(r"^\s*([-*]|\d+\.)\s+(.*)$")
@@ -32,12 +33,15 @@ def starts_block(line: str) -> bool:
 def code_block(lines: list, index: int) -> tuple:
     """Блок кода между строками ``` (язык после ``` становится классом).
     A code block between ``` lines (the language after ``` becomes a class)."""
+    opening = index
     language = lines[index].strip()[3:].strip()
     body = []
     index += 1
-    while index < len(lines) and not lines[index].strip().startswith("```"):
+    while index < len(lines) and lines[index].strip() != "```":
         body.append(lines[index])
         index += 1
+    if index == len(lines):
+        raise DocsError("unclosed_code_block", opening + 1)
     attribute = ""
     if language:
         attribute = ' class="language-%s"' % html.escape(language)

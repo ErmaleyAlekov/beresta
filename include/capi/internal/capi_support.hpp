@@ -2,6 +2,7 @@
 #define CAPI_SUPPORT_HPP
 
 #include "capi/beresta_c.h"
+#include "capi/internal/handle_registry.hpp"
 #include "i18n/i18n.hpp"
 #include "core/container_node.hpp"
 #include "core/document.hpp"
@@ -183,15 +184,6 @@ namespace beresta::capi
     // A document in dynamic memory: a handle for the outside world
     beresta_document releaseDocument(Document&& document);
 
-    // Дескриптор объекта-обёртки (XPathHandle, SchemaHandle и т.п.)
-    // The handle of a wrapper object (XPathHandle, SchemaHandle and so on)
-    template <typename Handle>
-    Handle& requireHandle(void* handle, const char* what)
-    {
-        if (handle == nullptr)
-            throw InvalidArgumentException(beresta::i18n::format(beresta::i18n::Message::ARGUMENT_NULL, {what}));
-        return *static_cast<Handle*>(handle);
-    }
 }
 
 /*

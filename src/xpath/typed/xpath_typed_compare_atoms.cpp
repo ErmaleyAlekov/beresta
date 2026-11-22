@@ -1,5 +1,6 @@
 #include "xpath/internal/xpath_typed.hpp"
 #include "xpath/internal/xpath_eval.hpp"
+#include "i18n/i18n.hpp"
 
 namespace beresta::xpath::detail
 {
@@ -53,11 +54,14 @@ namespace beresta::xpath::detail
         return orderMatches(op, order);
     }
 
-    // С логическим значением сравнивается логическое: другой операнд приводится к xs:boolean
-    // A boolean is compared with a boolean: the other operand is cast to xs:boolean
+    // С boolean совместимы только boolean и нетипизированный атом общего сравнения.
+    // A boolean is compatible only with a boolean or an untyped atom in a general comparison.
     static bool compareBooleanAtoms(BinaryOperator op, const XPathValue& left, const XPathValue& right,
         const EvalContext& context)
     {
+        if ((left.getType() != ValueType::BOOLEAN && !left.isUntypedAtomic())
+            || (right.getType() != ValueType::BOOLEAN && !right.isUntypedAtomic()))
+            failEvaluation(i18n::format(i18n::Message::XPATH_INCOMPATIBLE_TYPES));
         int a = static_cast<int>(castAtomic(AtomicType::BOOLEAN, left, context).toBoolean());
         int b = static_cast<int>(castAtomic(AtomicType::BOOLEAN, right, context).toBoolean());
 

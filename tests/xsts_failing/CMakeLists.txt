@@ -59,7 +59,8 @@ list(REMOVE_ITEM XSTS_SOURCES "${XSTS_DIR}/src/main.cpp")
 add_executable(xsts_failing ${FAILING_SOURCES} ${FAILING_HEADERS} ${XSTS_SOURCES})
 target_include_directories(xsts_failing PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/include" "${XSTS_DIR}/include")
-target_link_libraries(xsts_failing PRIVATE beresta_static)
+find_package(Threads REQUIRED)
+target_link_libraries(xsts_failing PRIVATE beresta_static Threads::Threads)
 # Папка с failing_cases.tsv: IDE запускает программу из папки сборки
 # The folder with failing_cases.tsv: an IDE starts the program from the build folder
 target_compile_definitions(xsts_failing PRIVATE XSTS_FAILING_HOME="${CMAKE_CURRENT_SOURCE_DIR}")

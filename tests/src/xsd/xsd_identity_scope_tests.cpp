@@ -1,6 +1,7 @@
 #include "suites/test_suites.hpp"
 #include "support/dom_helpers.hpp"
 #include "support/parse_helpers.hpp"
+#include "support/schema_helpers.hpp"
 
 namespace
 {
@@ -18,8 +19,23 @@ namespace
             "<xs:selector xpath=\"ref\"/><xs:field xpath=\"@to\"/></xs:keyref></xs:element></xs:schema>";
         std::string books = "<lib><books><book id=\"a\"/><book id=\"b\"/></books>";
 
-        TEST_ASSERT(support::schemaErrors(xsd, books + "<ref to=\"b\"/></lib>").empty());
-        TEST_ASSERT(support::schemaErrors(xsd, books + "<ref to=\"c\"/></lib>").size() == 1);
+        TEST_ASSERT(support::agreedSchemaErrors(xsd, books + "<ref to=\"b\"/></lib>").empty());
+        TEST_ASSERT(support::agreedSchemaErrors(xsd, books + "<ref to=\"c\"/></lib>").size() == 1);
+    }
+
+    // Повторный разбор не наследует ID и висячие ссылки прошлого документа.
+    // Parsing again starts with fresh IDs and unresolved references.
+    void testHandlerReuse()
+    {
+        const std::string xsd = "<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'>"
+            "<xs:element name='r'><xs:complexType><xs:attribute name='id' type='xs:ID'/>"
+            "<xs:attribute name='ref' type='xs:IDREF'/></xs:complexType></xs:element></xs:schema>";
+        beresta::xsd::ValidatingHandler handler(beresta::xsd::Schema::fromString(xsd));
+        beresta::SaxParser parser;
+        parser.parse("<r id='s1' ref='missing'/>", handler);
+        TEST_ASSERT(handler.takeDiagnostics().size() == 1);
+        parser.parse("<r id='s1' ref='s1'/>", handler);
+        TEST_ASSERT(handler.takeDiagnostics().empty());
     }
 
     // Ошибки схемы: ключ refer не объявлен, разное число полей, повтор имени, неверный xpath
@@ -47,6 +63,7 @@ namespace suites
     // Registers the tests of key scopes and constraint errors in the schema
     void registerXsdIdentityScopeTests(test::TestRunner& runner)
     {
+        runner.add("XSD: повторное использование обработчика SAX", testHandlerReuse);
         runner.add("XSD: keyref к ключу из области-потомка", testKeyFromDescendantScope);
         runner.add("XSD: ошибки ограничений идентичности в схеме", testIdentitySchemaErrors);
     }

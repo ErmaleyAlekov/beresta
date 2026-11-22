@@ -80,7 +80,7 @@ namespace beresta::xsd::detail
 
     // Частичный порядок duration по четырём опорным датам: -1, 0, 1 или 2 — несравнимы (duration_order.cpp)
     // The partial order of duration by the four reference dates: -1, 0, 1 or 2 — incomparable (duration_order.cpp)
-    int compareDurations(std::string_view left, std::string_view right) noexcept;
+    int compareDurations(std::string_view left, std::string_view right);
 
     // Нарушает ли результат сравнения границу (нижнюю/верхнюю, включающую/исключающую)
     // Whether the comparison result violates a bound (lower/upper, inclusive/exclusive)

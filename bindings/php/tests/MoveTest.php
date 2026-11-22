@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Beresta\Tests;
 
 use Beresta\BerestaException;
+use Beresta\ClosedException;
 use Beresta\Document;
 use Beresta\Status;
 use Beresta\Tests\Support\TestCase;
@@ -28,12 +29,17 @@ final class MoveTest extends TestCase
         $target = Document::create('b');
         $moved = $source->root()->appendElement('x');
         $child = $moved->appendElement('y');
+        $error = $this->assertThrows(BerestaException::class, fn() => $moved->moveTo($child));
+        $this->assertSame(Status::HierarchyViolation, $error->status());
         $moved->moveTo($target->root());
         $source->close();
         $this->assertTrue($moved->document() === $target);
         $this->assertTrue($child->document() === $target);
         $this->assertSame('y', $child->name());
         $this->assertSame('<b><x><y/></x></b>', $target->toXml());
+        $target->close();
+        $this->assertThrows(ClosedException::class, fn() => $moved->name());
+        $this->assertThrows(ClosedException::class, fn() => $child->name());
     }
 
     /**

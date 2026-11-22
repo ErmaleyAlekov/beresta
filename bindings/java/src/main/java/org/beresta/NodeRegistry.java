@@ -120,7 +120,7 @@ final class NodeRegistry
 
         synchronized (this)
         {
-            deep = wrappers.size() > 1;
+            deep = wrappers.size() > (wrappers.containsKey(root.address()) ? 1 : 0);
         }
         moved.owner = target;
         pending.push(root);
@@ -128,6 +128,8 @@ final class NodeRegistry
         {
             MemorySegment current = pending.pop();
             XmlNode node = take(current.address());
+            if (node == null && current.address() == root.address())
+                node = moved;
 
             if (node != null)
             {

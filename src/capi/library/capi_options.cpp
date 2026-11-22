@@ -14,7 +14,12 @@ namespace beresta::capi
     */
     std::filesystem::path pathFromUtf8(const char* path)
     {
-        return std::filesystem::u8path(requireText(path, "path"));
+        std::string_view text = requireText(path, "path");
+#if defined(__cpp_char8_t)
+        return std::filesystem::path(std::u8string(text.begin(), text.end()));
+#else
+        return std::filesystem::u8path(text);
+#endif
     }
 
     // Проверка одного бита маски

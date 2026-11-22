@@ -39,15 +39,18 @@ final class NodeFactory
         if (pointer.address() == document.address())
             return document;
         boolean element = NodeCalls.type(pointer) == NodeType.ELEMENT.ordinal();
-        XmlNode node = document.registry.find(pointer.address(), element);
-        if (node != null)
+        synchronized (document.registry)
+        {
+            XmlNode node = document.registry.find(pointer.address(), element);
+            if (node != null)
+                return node;
+            if (element)
+                node = new XmlElement(pointer, document);
+            else
+                node = new XmlNode(pointer, document);
+            document.registry.store(pointer.address(), node);
             return node;
-        if (element)
-            node = new XmlElement(pointer, document);
-        else
-            node = new XmlNode(pointer, document);
-        document.registry.store(pointer.address(), node);
-        return node;
+        }
     }
 
     /**
@@ -58,6 +61,6 @@ final class NodeFactory
     {
         if (schema == null)
             return MemorySegment.NULL;
-        return schema.pointer;
+        return schema.handle();
     }
 }

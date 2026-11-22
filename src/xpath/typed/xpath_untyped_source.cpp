@@ -12,7 +12,7 @@ namespace beresta::xpath::detail
     // Without a schema a node has only its string value (xs:untypedAtomic)
     XPathValue UntypedValueSource::atomize(const XPathItem& item) const
     {
-        return XPathValue::fromString(stringValue(item));
+        return XPathValue::fromUntypedString(stringValue(item));
     }
 
     // Без типов данных XSD даты не разбираются: конструктор xs:date даст ошибку приведения

@@ -22,7 +22,7 @@ namespace beresta::xsd
     // The handler shares the schema (it is immutable) and does not own the next handler
     ValidatingHandler::ValidatingHandler(std::shared_ptr<const Schema> schema, ContentHandler* downstream,
         const ValidationSettings& settings)
-        : _schema(std::move(schema)), _validator(), _downstream(downstream)
+        : _schema(std::move(schema)), _validator(), _downstream(downstream), _settings(settings)
     {
         _validator = std::make_unique<detail::StreamValidator>(*_schema, settings);
     }

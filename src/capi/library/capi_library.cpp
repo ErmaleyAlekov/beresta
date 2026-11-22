@@ -28,7 +28,7 @@ namespace beresta::capi
         if (!text.empty())
             std::memcpy(copy, text.data(), text.size());
         copy[text.size()] = '\0';
-        return copy;
+        return publishHandle(std::unique_ptr<char, decltype(&std::free)>(copy, &std::free));
     }
 
     // Обязательная строка: NULL — ошибка аргумента с именем параметра
@@ -72,5 +72,10 @@ extern "C" BERESTA_API const char* beresta_status_name(int status)
 // Frees a string allocated by duplicateString()
 extern "C" BERESTA_API void beresta_string_free(char* text)
 {
-    std::free(text);
+    if (text == nullptr)
+        return;
+    try {
+        beresta::capi::checkHandle(text, typeid(char), "text", true);
+        std::free(text);
+    BERESTA_CAPI_CATCH_VOID
 }

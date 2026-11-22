@@ -43,19 +43,17 @@ namespace Beresta
         private readonly Dictionary<IntPtr, WeakReference<XmlNode>> wrappers = new Dictionary<IntPtr, WeakReference<XmlNode>>();
         private int sweepAt = MinimalSweepSize;
 
-        /// <summary>Живая обёртка узла нужного вида или null.
-        /// A live wrapper of the node of the required kind or null.</summary>
-        internal XmlNode? Find(IntPtr pointer, bool element)
+        /// <summary>Поиск или создание под одной блокировкой. / Looks up or creates a wrapper under one lock.</summary>
+        internal XmlNode GetOrCreate(IntPtr pointer, bool element, XmlDocument document)
         {
             lock (wrappers)
             {
-                if (!wrappers.TryGetValue(pointer, out WeakReference<XmlNode>? reference))
-                    return null;
-                if (!reference.TryGetTarget(out XmlNode? node))
-                    return null;
-                if ((node is XmlElement) != element)
-                    return null;
-                return node;
+                if (wrappers.TryGetValue(pointer, out var reference) && reference.TryGetTarget(out var node)
+                    && (node is XmlElement) == element)
+                    return node;
+                XmlNode created = element ? new XmlElement(pointer, document) : new XmlNode(pointer, document);
+                Store(pointer, created);
+                return created;
             }
         }
 
@@ -118,7 +116,7 @@ namespace Beresta
             Stack<IntPtr> pending = new Stack<IntPtr>();
 
             lock (wrappers)
-                deep = wrappers.Count > 1;
+                deep = wrappers.Count > 1 || (wrappers.Count == 1 && !wrappers.ContainsKey(root));
 
             pending.Push(root);
             while (pending.Count > 0)

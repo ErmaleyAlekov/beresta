@@ -393,6 +393,7 @@ namespace beresta::i18n
         BINDING_UNKNOWN_NODE_TYPE,
         BINDING_INVALID_ARGUMENT,
         BINDING_NO_FILE_SYSTEM,
+        BINDING_NODE_REMOVED,
         LANGUAGE_UNKNOWN,
         SCHEMA_ANNOTATION_POSITION,
         SCHEMA_CHILD_NOT_ALLOWED,
@@ -426,6 +427,11 @@ namespace beresta::i18n
         DOCTYPE_SUBSET_UNCLOSED,
         XMLNS_ATTRIBUTE_NAMESPACE,
         SCHEMA_ALL_TOO_LARGE,
+        XPATH_INCOMPATIBLE_TYPES,
+        SCHEMA_REQUIRED_ATTRIBUTE,
+        SCHEMA_INVALID_ATTRIBUTE,
+        XSD_RESOURCE_LIMIT,
+        HANDLE_WRONG_TYPE,
 
         // Число сообщений (не сообщение) / The number of messages (not a message)
         COUNT

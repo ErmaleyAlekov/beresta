@@ -56,7 +56,8 @@ namespace
     */
     void testStreamFile()
     {
-        std::filesystem::path directory = support::makeTestDirectory("capi_stream");
+        const support::TestDirectory temporary("capi_stream");
+        const auto& directory = temporary.path;
         std::filesystem::path file = directory / std::filesystem::u8path("выгрузка.xml");
         std::string empty = (directory / "empty.xml").u8string();
         std::string missing = (directory / "missing.xml").u8string();

@@ -23,16 +23,22 @@ final class FileChecks
         Path folder = Files.createTempDirectory("beresta-java-");
         Path file = folder.resolve("документ.xml");
 
-        try (XmlDocument document = Xml.parse("<текст>Привет</текст>"))
+        try
         {
-            document.save(file, WriteFlags.DEFAULT, "windows-1251");
+            try (XmlDocument document = Xml.parse("<текст>Привет</текст>"))
+            {
+                document.save(file, WriteFlags.DEFAULT, "windows-1251");
+            }
+            Expect.isTrue(new String(Files.readAllBytes(file), "ISO-8859-1").contains("windows-1251"), "декларация кодировки");
+            try (XmlDocument loaded = Xml.parseFile(file, 0, null))
+            {
+                Expect.equal("Привет", loaded.root().text(), "текст после перекодирования");
+            }
         }
-        Expect.isTrue(new String(Files.readAllBytes(file), "ISO-8859-1").contains("windows-1251"), "декларация кодировки");
-        try (XmlDocument loaded = Xml.parseFile(file, 0, null))
+        finally
         {
-            Expect.equal("Привет", loaded.root().text(), "текст после перекодирования");
+            Files.deleteIfExists(file);
+            Files.delete(folder);
         }
-        Files.delete(file);
-        Files.delete(folder);
     }
 }

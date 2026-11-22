@@ -102,14 +102,19 @@ namespace beresta::xsd
         // ---- Building and stepping the automaton (xsd_regex_build.cpp) ----
         void appendOptionalCopies(Fragment& result, const RegexNode& node);
         long addState(StateKind kind, std::size_t setIndex);
+
+        struct MatchScratch {
+            std::vector<std::size_t> marks;
+            std::vector<long> stack;
+            std::size_t generation = 1;
+        };
         void advanceStates(std::uint32_t code, const std::vector<long>& current,
-            std::vector<long>& next, std::vector<std::size_t>& marks, std::size_t generation) const;
+            std::vector<long>& next, MatchScratch& scratch) const;
         bool acceptsAny(const std::vector<long>& states) const noexcept;
 
         // ---- Моделирование (xsd_regex_match.cpp) ----
         // ---- Simulation (xsd_regex_match.cpp) ----
-        void addReachable(long state, std::vector<long>& list, std::vector<std::size_t>& marks,
-            std::size_t generation) const;
+        void addReachable(long state, std::vector<long>& list, MatchScratch& scratch) const;
 
         std::string _pattern;
         std::vector<CharSet> _sets;

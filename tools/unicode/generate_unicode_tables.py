@@ -30,6 +30,39 @@ OUT_DIR = os.path.join(ROOT, "src", "xsd", "regex")
 # The XSD 1.0 2nd edition table does not include the "Private Use" blocks outside the BMP in IsPrivateUse
 SKIPPED_BLOCKS = {(0xF0000, 0xFFFFD), (0x100000, 0x10FFFD)}
 
+INVALID_RANGE = "{0}:{1}: invalid First>/Last> range in UnicodeData"
+
+
+class UnicodeDataError(ValueError):
+    """Несогласованные границы диапазона UnicodeData.
+    Inconsistent boundaries of a UnicodeData range."""
+
+
+def _category_ranges(source, path):
+    """Разворачивает записи диапазонов и проверяет, что границы образуют пары.
+    Expands range records and checks that their boundaries form pairs."""
+    first = None
+    for line_number, line in enumerate(source, 1):
+        fields = line.strip().split(";")
+        if len(fields) < 3:
+            continue
+        code = int(fields[0], 16)
+        name, category = fields[1:3]
+        if first is not None:
+            start, first_name, first_category, _ = first
+            if name != first_name or category != first_category or start >= code:
+                raise UnicodeDataError(INVALID_RANGE.format(path, line_number))
+            first = None
+            yield start, code, category
+        elif name.endswith(", First>"):
+            first = code, name[:-len("First>")] + "Last>", category, line_number
+        elif name.endswith("Last>"):
+            raise UnicodeDataError(INVALID_RANGE.format(path, line_number))
+        else:
+            yield code, code, category
+    if first is not None:
+        raise UnicodeDataError(INVALID_RANGE.format(path, first[3]))
+
 
 def load_categories(path):
     """
@@ -40,23 +73,12 @@ def load_categories(path):
     are merged; the <..., First>/<..., Last> pairs define a solid range.
     """
     ranges = []
-    first = None
     with open(path, encoding="utf-8") as source:
-        for line in source:
-            fields = line.strip().split(";")
-            if len(fields) < 3:
-                continue
-            code = int(fields[0], 16)
-            if fields[1].endswith("First>"):
-                first = code
-                continue
-            start = code
-            if fields[1].endswith("Last>"):
-                start = first
-            if ranges and ranges[-1][1] == start - 1 and ranges[-1][2] == fields[2]:
+        for start, code, category in _category_ranges(source, path):
+            if ranges and ranges[-1][1] == start - 1 and ranges[-1][2] == category:
                 ranges[-1][1] = code
             else:
-                ranges.append([start, code, fields[2]])
+                ranges.append([start, code, category])
     return ranges
 
 
@@ -108,7 +130,10 @@ def main():
     """
     if len(sys.argv) != 2:
         sys.exit("usage: generate_unicode_tables.py <UCD folder>")
-    categories = load_categories(os.path.join(sys.argv[1], "UnicodeData-3.1.0.txt"))
+    try:
+        categories = load_categories(os.path.join(sys.argv[1], "UnicodeData-3.1.0.txt"))
+    except UnicodeDataError as error:
+        sys.exit(str(error))
     blocks = load_blocks(os.path.join(sys.argv[1], "Blocks-4.txt"))
     write_table("unicode_category_table.cpp", [
         "// Сгенерировано tools/unicode/generate_unicode_tables.py из UnicodeData-3.1.0.txt; не править вручную",

@@ -5,10 +5,17 @@
 #include "xsd/schema.hpp"
 
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 namespace beresta::xsd::detail
 {
+    struct IdentityKeyHash
+    {
+        std::size_t operator()(const std::vector<std::string>& fields) const noexcept;
+    };
+    using IdentityKeys = std::unordered_set<std::vector<std::string>, IdentityKeyHash>;
+
     // Значения полей ключа через запятую (для сообщений об ошибках): "A1, 2026"
     // The key field values separated by commas (for error messages): "A1, 2026"
     std::string joinKeyValues(const std::vector<std::string>& values);

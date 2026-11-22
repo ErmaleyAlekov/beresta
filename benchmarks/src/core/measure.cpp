@@ -43,6 +43,8 @@ namespace bench
     // Медиана: устойчива к единичным задержкам планировщика ОС / The median: robust to single OS scheduler delays
     static double median(std::vector<double> values)
     {
+        if (values.empty())
+            throw BenchError("нет замеров / no measurements");
         std::sort(values.begin(), values.end());
         return values[values.size() / 2];
     }

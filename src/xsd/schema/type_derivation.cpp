@@ -1,6 +1,8 @@
 #include "xsd/internal/type_derivation.hpp"
 
 #include <cstddef>
+#include <unordered_set>
+#include <vector>
 
 namespace beresta::xsd::detail
 {
@@ -19,42 +21,40 @@ namespace beresta::xsd::detail
     ** from anySimpleType (it is the base of list and union). A union
     ** also accepts the types derived from any of its members.
     */
-    static bool simpleDerivedFrom(const SimpleType* derived, const SimpleType* base, DerivationSet blocked,
-        std::size_t depth) noexcept
+    static bool simpleDerivedFrom(const SimpleType* derived, const SimpleType* base, DerivationSet blocked)
     {
         if (derived == base)
             return true;
-        if ((blocked & DERIVATION_RESTRICTION) != 0 || depth > MAX_DERIVATION_DEPTH)
+        if ((blocked & DERIVATION_RESTRICTION) != 0)
             return false;
-        if (base->primitive == Primitive::ANY_SIMPLE && base->baseType == nullptr)
-            return true;
-        std::size_t steps = 0;
-        for (const SimpleType* step = derived->baseType; step != nullptr && steps < MAX_DERIVATION_DEPTH;
-            step = step->baseType)
+        std::unordered_set<const SimpleType*> ancestors;
+        for (const SimpleType* step = derived; step != nullptr && ancestors.insert(step).second; step = step->baseType)
+            ;
+        std::unordered_set<const SimpleType*> visited;
+        std::vector<const SimpleType*> pending{base};
+        while (!pending.empty())
         {
-            if (step == base)
+            const SimpleType* current = pending.back();
+            pending.pop_back();
+            if (current == nullptr || !visited.insert(current).second)
+                continue;
+            if (ancestors.count(current) != 0 || (current->primitive == Primitive::ANY_SIMPLE && current->baseType == nullptr))
                 return true;
-            ++steps;
-        }
-        if (base->variety != Variety::UNION)
-            return false;
-        for (const SimpleType* member : base->memberTypes)
-        {
-            if (simpleDerivedFrom(derived, member, blocked, depth + 1))
-                return true;
+            if (current->variety == Variety::UNION)
+                pending.insert(pending.end(), current->memberTypes.begin(), current->memberTypes.end());
         }
         return false;
     }
 
     // Шаг цепочки дошёл до простого типа: составной базовый недостижим, xs:anyType — достижим ограничением
     // The chain step reached a simple type: a complex base is unreachable, xs:anyType is reachable by restriction
-    static bool simpleStepDerived(const SimpleType* derived, TypeRef base, DerivationSet blocked) noexcept
+    static bool simpleStepDerived(const SimpleType* derived, TypeRef base, DerivationSet blocked)
     {
         if (base.complex != nullptr)
             return false;
         if (base.simple == nullptr)
             return (blocked & DERIVATION_RESTRICTION) == 0;
-        return simpleDerivedFrom(derived, base.simple, blocked, 0);
+        return simpleDerivedFrom(derived, base.simple, blocked);
     }
 
     // Ссылки равны, если указывают на один и тот же простой или составной тип
@@ -75,7 +75,7 @@ namespace beresta::xsd::detail
     ** be in blocked. Reaching xs:anyType without meeting base means not derived;
     ** reaching a simple type (simpleContent) — the simple type rule goes on from there.
     */
-    bool isDerivedFrom(TypeRef derived, TypeRef base, DerivationSet blocked) noexcept
+    bool isDerivedFrom(TypeRef derived, TypeRef base, DerivationSet blocked)
     {
         TypeRef step = derived;
 

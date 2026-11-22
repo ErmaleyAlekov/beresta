@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,16 +54,38 @@ namespace Beresta.SelfTest
             using XmlSchema schema = XmlSchema.FromString(StreamingChecks.OrderXsd);
             using XPath xpath = new XPath("concat(count(//item), ':', //item[2])");
             ConcurrentBag<string> answers = new ConcurrentBag<string>();
-            List<Thread> threads = new List<Thread>();
-
-            for (int worker = 0; worker < 8; ++worker)
-                threads.Add(new Thread(new ValidationWorker(schema, xpath, data, answers).Run));
-            foreach (Thread thread in threads)
-                thread.Start();
-            foreach (Thread thread in threads)
-                thread.Join();
+            const int workers = 8;
+            using CountdownEvent ready = new CountdownEvent(workers);
+            using ManualResetEventSlim start = new ManualResetEventSlim(false);
+            ValidationWorker workload = new ValidationWorker(schema, xpath, data, answers);
+            RunWorkers(workers, workload, ready, start);
+            if (!workload.Failures.IsEmpty)
+                throw new AggregateException(workload.Failures);
             Expect.Equal(320, answers.Count, "число ответов");
             Expect.Equal("1/2000:2", string.Join(",", answers.Distinct()), "одинаковые ответы");
+        }
+        /// <summary>Дожидается готовности всех потоков, затем запускает запросы одновременно.
+        /// Waits until all threads are ready, then starts their requests together.</summary>
+        private static void RunWorkers(int workers, ValidationWorker workload, CountdownEvent ready, ManualResetEventSlim start)
+        {
+            List<Thread> threads = new List<Thread>(workers);
+            ThreadStart run = workload.StartTogether(ready, start);
+            try
+            {
+                for (int worker = 0; worker < workers; ++worker)
+                {
+                    Thread thread = new Thread(run);
+                    thread.Start();
+                    threads.Add(thread);
+                }
+                ready.Wait();
+            }
+            finally
+            {
+                start.Set();
+                foreach (Thread thread in threads)
+                    thread.Join();
+            }
         }
     }
 }

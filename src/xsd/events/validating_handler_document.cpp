@@ -8,14 +8,20 @@ namespace beresta::xsd
     void ValidatingHandler::setDocumentLocator(const Locator& locator)
     {
         _validator->setLocator(&locator);
+        _nextLocator = &locator;
         if (_downstream != nullptr)
             _downstream->setDocumentLocator(locator);
     }
 
-    // Начало документа проверке не нужно — только передаётся дальше
-    // The document start is not needed by the validation — it is only passed on
+    // Новый документ получает собственные таблицы ID, ключей и ошибок.
+    // A new document gets fresh ID, key and diagnostic tables.
     void ValidatingHandler::startDocument()
     {
+        if (_started)
+            _validator = std::make_unique<detail::StreamValidator>(*_schema, _settings);
+        _validator->setLocator(_nextLocator);
+        _nextLocator = nullptr;
+        _started = true;
         if (_downstream != nullptr)
             _downstream->startDocument();
     }

@@ -35,6 +35,8 @@ namespace beresta::xsd
         // The grammar forbids an empty class [] or [^]: posCharGroup is at least one item
         if (atEnd() || peekCode() == ']')
             fail(i18n::format(i18n::Message::PATTERN_CLASS_EMPTY));
+        if (_pattern.substr(_position, 2) == "-[")
+            fail(i18n::format(i18n::Message::PATTERN_CLASS_EMPTY));
         while (!atEnd() && peekCode() != ']')
         {
             if (applySubtraction(set, negated))
@@ -75,6 +77,7 @@ namespace beresta::xsd
     {
         bool single = true;
         std::uint32_t first = 0;
+        bool escapedStart = peekCode() == '\\';
 
         if (peekCode() == '\\')
         {
@@ -94,6 +97,8 @@ namespace beresta::xsd
             set.add(first, first);
             return;
         }
+        if (first == '-' && !escapedStart)
+            fail(i18n::format(i18n::Message::PATTERN_UNEXPECTED_META));
         takeCode();
         set.add(first, parseRangeEnd(first));
     }
@@ -113,7 +118,11 @@ namespace beresta::xsd
         std::uint32_t last = 0;
 
         if (peekCode() != '\\')
+        {
             last = takeCode();
+            if (last == '-' || last == '[' || last == ']')
+                fail(i18n::format(i18n::Message::PATTERN_UNEXPECTED_META));
+        }
         else
             parseEscape(single, last);
         if (!single)

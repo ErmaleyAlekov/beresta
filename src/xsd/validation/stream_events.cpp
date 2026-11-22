@@ -33,8 +33,11 @@ namespace beresta::xsd::detail
             declaration = admitRoot(element);
         else
             declaration = admitChild(element);
+        const XsiValues xsi = findXsi(element);
+        if (!xsi.duplicate.empty())
+            report(_depth - 1, CheckPhase::XSI_TYPE, i18n::format(i18n::Message::ATTRIBUTE_DUPLICATE, {xsi.duplicate}));
         if (declaration != nullptr)
-            beginValidation(element, *declaration);
+            beginValidation(element, *declaration, xsi);
         if (_identity != nullptr)
             notifyIdentityStart(element);
         notifyAssertionStart(element);
@@ -51,6 +54,8 @@ namespace beresta::xsd::detail
     */
     void StreamValidator::endElement()
     {
+        if (_depth == 0)
+            return;
         ElementFrame& frame = _frames[_depth - 1];
         const SimpleType* valueType = nullptr;
 

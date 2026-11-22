@@ -21,6 +21,8 @@ namespace bench
     // Обход по явному стеку / A walk with an explicit stack
     std::size_t XercesEngine::traverse() const
     {
+        if (!_document)
+            return 0;
         std::vector<const xercesc::DOMNode*> stack{_document};
         std::size_t sum = 0;
 
@@ -44,20 +46,22 @@ namespace bench
     */
     std::optional<std::size_t> XercesEngine::serialize() const
     {
+        if (!_document)
+            return 0;
         static const XMLCh LS[] = {u'L', u'S', 0};
         static const XMLCh UTF8[] = {u'U', u'T', u'F', u'-', u'8', 0};
         auto* implementation = static_cast<xercesc::DOMImplementationLS*>(
             xercesc::DOMImplementationRegistry::getDOMImplementation(LS));
-        xercesc::DOMLSSerializer* serializer = implementation->createLSSerializer();
-        xercesc::DOMLSOutput* output = implementation->createLSOutput();
         xercesc::MemBufFormatTarget target;
+        auto release = [](auto* object) { object->release(); };
+        std::unique_ptr<xercesc::DOMLSSerializer, decltype(release)> serializer(
+            implementation->createLSSerializer(), release);
+        std::unique_ptr<xercesc::DOMLSOutput, decltype(release)> output(implementation->createLSOutput(), release);
 
         output->setByteStream(&target);
         output->setEncoding(UTF8);
-        serializer->write(_document, output);
-        std::size_t size = target.getLen();
-        output->release();
-        serializer->release();
-        return size;
+        if (!serializer->write(_document, output.get()))
+            throw BenchError("Xerces: ошибка записи / serialization failed");
+        return target.getLen();
     }
 }

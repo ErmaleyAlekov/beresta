@@ -14,9 +14,13 @@ namespace bench
     {
         if (_schema == nullptr)
         {
-            xmlSchemaParserCtxtPtr parser = xmlSchemaNewMemParserCtxt(xsd.data(), static_cast<int>(xsd.size()));
+            xmlSchemaParserCtxtPtr parser = xmlSchemaNewMemParserCtxt(xsd.data(), bufferLength(xsd.size()));
+            if (!parser)
+                throw BenchError("libxml2: нет контекста / missing schema context");
             _schema = xmlSchemaParse(parser);
             xmlSchemaFreeParserCtxt(parser);
+            if (!_schema)
+                throw BenchError("libxml2: схема отвергнута / schema rejected");
         }
         return _schema;
     }
@@ -33,13 +37,23 @@ namespace bench
     std::optional<std::size_t> Libxml2Engine::streamValidated(const std::string& xml, const std::string& xsd)
     {
         std::size_t errors = 0;
+        int length = bufferLength(xml.size());
         xmlSchemaValidCtxtPtr validator = xmlSchemaNewValidCtxt(schemaFor(xsd));
-        xmlParserInputBufferPtr input = xmlParserInputBufferCreateMem(xml.data(), static_cast<int>(xml.size()),
+        if (!validator)
+            throw BenchError("libxml2: нет контекста / missing validation context");
+        xmlParserInputBufferPtr input = xmlParserInputBufferCreateMem(xml.data(), length,
             XML_CHAR_ENCODING_NONE);
 
+        if (!input)
+        {
+            xmlSchemaFreeValidCtxt(validator);
+            throw BenchError("libxml2: нет буфера / missing input buffer");
+        }
         xmlSchemaSetValidStructuredErrors(validator, countLibxml2Error, &errors);
-        xmlSchemaValidateStream(validator, input, XML_CHAR_ENCODING_NONE, nullptr, nullptr);
+        int status = xmlSchemaValidateStream(validator, input, XML_CHAR_ENCODING_NONE, nullptr, nullptr);
         xmlSchemaFreeValidCtxt(validator);
+        if (status < 0)
+            throw BenchError("libxml2: сбой проверки / validation failed");
         return errors;
     }
 }

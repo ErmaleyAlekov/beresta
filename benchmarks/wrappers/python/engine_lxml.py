@@ -31,6 +31,11 @@ class LxmlEngine:
         return len(self.query(document))
 
     def parse_validated(self, xml: bytes) -> int:
-        # Ошибка проверки — исключение XMLSyntaxError / A validation error is an XMLSyntaxError exception
-        etree.fromstring(xml, self.validating)
+        try:
+            etree.fromstring(xml, self.validating)
+        except etree.XMLSyntaxError:
+            errors = list(self.validating.error_log)
+            if not errors or any(error.domain_name != "SCHEMASV" for error in errors):
+                raise
+            return len(errors)
         return 0

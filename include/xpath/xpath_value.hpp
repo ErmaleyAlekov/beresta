@@ -81,6 +81,11 @@ namespace beresta::xpath
         static XPathValue fromNumber(double value);
         static XPathValue fromString(std::string value);
 
+        // Нетипизированный атом узла допускает неявное приведение при общем сравнении.
+        // An untyped node atom permits implicit conversion in a general comparison.
+        static XPathValue fromUntypedString(std::string value);
+        bool isUntypedAtomic() const noexcept;
+
         // Точное десятичное число (xs:decimal, xs:integer)
         // An exact decimal number (xs:decimal, xs:integer)
         static XPathValue fromDecimal(utils::Decimal value);
@@ -124,6 +129,7 @@ namespace beresta::xpath
         std::string _string;
         utils::Decimal _decimal;
         long double _dateKey;
+        bool _untyped = false;
     };
 
     // Строковое значение узла (string-value из спецификации XPath)

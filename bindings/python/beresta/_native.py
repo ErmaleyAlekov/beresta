@@ -33,7 +33,10 @@ def encode(text: Optional[str]) -> Optional[bytes]:
     A Python string -> UTF-8 bytes for a const char* parameter (None -> NULL)."""
     if text is None:
         return None
-    return str(text).encode("utf-8")
+    value = str(text)
+    if "\0" in value:
+        raise ValueError("Нулевой байт в строке / Embedded null byte in string")
+    return value.encode("utf-8")
 
 
 def out_handle() -> c_void_p:

@@ -30,12 +30,14 @@ namespace WrapperBench
             using Beresta.XmlSchema beresta = Beresta.XmlSchema.FromString(xsd);
             ErrorCounter reader = new ErrorCounter(xsd);
 
-            Console.WriteLine("| Библиотека / Library | SAX + XSD, MB/s | Ошибки XSD / XSD errors |");
-            Console.WriteLine("|---|---|---|");
-            Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "| Берёста / Beresta {0} (Validate(bytes)) | {1:F0} | {2} |",
-                BerestaLibrary.Version, megabytes / Median(xml, beresta, null) * 1000, Once(xml, beresta, null)));
-            Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "| .NET {0} XmlReader (Schema) | {1:F0} | {2} |",
-                Environment.Version, megabytes / Median(xml, null, reader) * 1000, Once(xml, null, reader)));
+            Console.WriteLine("| Библиотека / Library | SAX + XSD, MB/s | Ошибки XSD / XSD errors | XSD valid |");
+            Console.WriteLine("|---|---|---|---|");
+            int berestaErrors = Once(xml, beresta, null);
+            int readerErrors = Once(xml, null, reader);
+            Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "| Берёста / Beresta {0} (Validate(bytes)) | {1} | {2} | {3} |",
+                BerestaLibrary.Version, BenchRate.Format(megabytes, Median(xml, beresta, null)), berestaErrors, BenchRate.Validity(berestaErrors)));
+            Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "| .NET {0} XmlReader (Schema) | {1} | {2} | {3} |",
+                Environment.Version, BenchRate.Format(megabytes, Median(xml, null, reader)), readerErrors, BenchRate.Validity(readerErrors)));
         }
 
         // Медиана времени в мс; задана одна из двух проверок / The median time in ms; one of the two validations is given

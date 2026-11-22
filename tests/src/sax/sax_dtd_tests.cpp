@@ -42,7 +42,8 @@ namespace
     // PIs of the internal and external subsets arrive in SAX before the DOCTYPE and in text order
     void testSaxReceivesDtdInstructions()
     {
-        std::filesystem::path root = support::makeTestDirectory("sax_dtd_pi");
+        const support::TestDirectory temporary("sax_dtd_pi");
+        const auto& root = temporary.path;
         support::writeTestFile(root / "d.dtd", "<?ext из-внешнего?><!ELEMENT d ANY>");
         support::writeTestFile(root / "doc.xml",
             "<?top a?><!DOCTYPE d SYSTEM \"d.dtd\" [<?in b ?><!ENTITY % p \"<?pe c?>\"> %p;]><d><?body z?></d>");

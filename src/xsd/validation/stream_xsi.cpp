@@ -41,6 +41,8 @@ namespace beresta::xsd::detail
                 xsi.nil = trimXmlSpaces(attribute.value);
                 xsi.hasNil = true;
             }
+            else if (attribute.localName == "type" || attribute.localName == "nil")
+                xsi.duplicate = attribute.name;
         }
         return xsi;
     }

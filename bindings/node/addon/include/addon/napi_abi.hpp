@@ -41,6 +41,7 @@ namespace beresta::node
 {
     // Успешный код состояния Node-API / The successful Node-API status code
     constexpr napi_status NAPI_OK = 0;
+    constexpr napi_status NAPI_PENDING_EXCEPTION = 10;
 
     // Длина строки «до завершающего нуля» / The string length "up to the terminating zero"
     constexpr std::size_t NAPI_AUTO_LENGTH = SIZE_MAX;

@@ -78,7 +78,8 @@ namespace
     void testExternalParameterEntities()
     {
         std::string document = "<!DOCTYPE d [<!ENTITY % e SYSTEM \"e.ent\"> %e;]><d/>";
-        std::filesystem::path root = support::makeTestDirectory("w3c_entity_base");
+        const support::TestDirectory temporary("w3c_entity_base");
+        const auto& root = temporary.path;
 
         TEST_ASSERT(!support::parseWithFiles(document, {{"e.ent", "<![INCLUDE[<!ELEMENT d EMPTY>]]>"}},
             true).fatal);

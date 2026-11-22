@@ -47,7 +47,7 @@ namespace
         "<xs:sequence>"
         "<xs:element name=\"item\" type=\"xs:string\" minOccurs=\"0\"/>"
         "</xs:sequence>"
-        "<xs:assert test=\"empty($value)\"/>"
+        "<xs:assert test=\"empty($value) and count($value) = 0\"/>"
         "</xs:complexType>"
         "</xs:element>"
         "</xs:sequence>"
@@ -83,6 +83,8 @@ namespace
         TEST_ASSERT_EQ(errors[0].message, "/root/N: не выполнено утверждение $value gt 10");
     }
 
+    // XSD 1.1 §3.13.4.1 связывает $value с пустой последовательностью для сложного содержимого.
+    // XSD 1.1 §3.13.4.1 binds $value to the empty sequence for complex content.
     void testComplexContentValue()
     {
         std::vector<beresta::Diagnostic> errors = support::agreedSchemaErrors(XSD_ASSERT_VALUE,

@@ -71,6 +71,10 @@ DEPFLAGS     = -MMD -MP -MF $(call dep_of,$@) -MT $@
 
 # ---- Команды оболочки под ОС --------------------------------------------------
 # ---- Shell commands for the OS --------------------------------------------------
+ifneq ($(OS),Windows_NT)
+    CXXFLAGS += -pthread
+endif
+
 ifeq ($(OS),Windows_NT)
     SHELL       := cmd.exe
     .SHELLFLAGS := /C

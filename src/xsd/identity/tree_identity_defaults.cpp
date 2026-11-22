@@ -84,9 +84,11 @@ namespace beresta::xsd::detail
 
         if (found == _defaultAttributes.end())
             return;
-        for (const Element* current = &element; current != nullptr; current = static_cast<const Element*>(
-            current->getParent()))
+        for (const Node* node = &element; ; node = node->getParent())
         {
+            if (node == nullptr || node->getType() != NodeType::ELEMENT)
+                return;
+            const Element* current = static_cast<const Element*>(node);
             names.push_back(LevelName{current->getNamespaceURI().value_or(std::string()),
                 std::string(current->getLocalName())});
             if (current == &target)

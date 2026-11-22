@@ -21,6 +21,7 @@ namespace WrapperBench
     {
         private const int Warmup = 3;
         private const int Runs = 5;
+        private const string MemoryIndexError = "--memory: нужен номер доступной библиотеки / expected an available library index";
 
         private enum Operation { Parse, Walk, XPath, Validate }
 
@@ -37,9 +38,16 @@ namespace WrapperBench
 
             // Режим памяти: --memory N меряет одну библиотеку в этом процессе
             // The memory mode: --memory N measures one library in this process
-            if (args.Length > 2 && args[1] == "--memory")
+            if (args.Length > 1 && args[1] == "--memory")
             {
-                Console.WriteLine(MemoryProbe.Measure(engines[int.Parse(args[2], CultureInfo.InvariantCulture)], xml));
+                if (args.Length != 3 || !int.TryParse(args[2], NumberStyles.None, CultureInfo.InvariantCulture, out int index) ||
+                    index < 0 || index >= engines.Length)
+                {
+                    Console.Error.WriteLine(MemoryIndexError);
+                    Environment.ExitCode = 2;
+                    return;
+                }
+                Console.WriteLine(MemoryProbe.Measure(engines[index], xml));
                 return;
             }
             // Режим --stream: потоковая проверка без дерева (StreamBench)
@@ -50,8 +58,8 @@ namespace WrapperBench
                 return;
             }
             Console.WriteLine("### .NET " + Environment.Version + ", " + (xml.Length / 1000000) + " MB\n");
-            Console.WriteLine("| Библиотека / Library | Разбор / Parse, MB/s | Обход / Walk, ms | XPath, ms | Разбор + XSD / Parse + XSD, MB/s | Элементы / Elements | XPath: узлы / nodes | Ошибки XSD / XSD errors |");
-            Console.WriteLine("|---|---|---|---|---|---|---|---|");
+            Console.WriteLine("| Библиотека / Library | Разбор / Parse, MB/s | Обход / Walk, ms | XPath, ms | Разбор + XSD / Parse + XSD, MB/s | Элементы / Elements | XPath: узлы / nodes | Ошибки XSD / XSD errors | XSD valid |");
+            Console.WriteLine("|---|---|---|---|---|---|---|---|---|");
             foreach (Engine engine in engines)
                 Console.WriteLine(Row(engine, xml));
         }
@@ -62,14 +70,21 @@ namespace WrapperBench
             double megabytes = xml.Length / 1e6;
             double parse = Median(engine, Operation.Parse, xml, null);
             object document = engine.Parse(xml);
-            double walk = Median(engine, Operation.Walk, xml, document);
-            double xpath = Median(engine, Operation.XPath, xml, document);
-            double validate = Median(engine, Operation.Validate, xml, null);
-            string counts = engine.Walk(document) + " | " + engine.XPath(document) + " | " + engine.ParseValidated(xml);
+            try
+            {
+                double walk = Median(engine, Operation.Walk, xml, document);
+                double xpath = Median(engine, Operation.XPath, xml, document);
+                double validate = Median(engine, Operation.Validate, xml, null);
+                int errors = engine.ParseValidated(xml);
+                string counts = engine.Walk(document) + " | " + engine.XPath(document) + " | " + errors;
 
-            Release(document);
-            return string.Format(System.Globalization.CultureInfo.InvariantCulture, "| {0} | {1:F0} | {2:F1} | {3:F1} | {4:F0} | {5} |",
-                engine.Name, megabytes / parse * 1000, walk, xpath, megabytes / validate * 1000, counts);
+                return string.Format(CultureInfo.InvariantCulture, "| {0} | {1} | {2:F1} | {3:F1} | {4} | {5} | {6} |",
+                    engine.Name, BenchRate.Format(megabytes, parse), walk, xpath, BenchRate.Format(megabytes, validate), counts, BenchRate.Validity(errors));
+            }
+            finally
+            {
+                Release(document);
+            }
         }
 
         // Медиана времени операции в миллисекундах / The median operation time in milliseconds

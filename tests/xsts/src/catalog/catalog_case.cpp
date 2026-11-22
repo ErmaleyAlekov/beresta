@@ -12,11 +12,23 @@ namespace xsts
     {
         // <expected validity="valid|invalid"/>; другое значение — ошибка метаданных
         // <expected validity="valid|invalid"/>; another value is a metadata error
-        Expectation readExpectation(const beresta::Element& test)
+        Expectation readExpectation(const beresta::Element& test, const std::string& version)
         {
+            const beresta::Element* choice = nullptr;
             for (const beresta::Element* expected : detail::childElements(test, "expected"))
             {
-                std::string validity = detail::attributeOrEmpty(*expected, "validity");
+                std::string target = detail::attributeOrEmpty(*expected, "version");
+                if (target == version)
+                {
+                    choice = expected;
+                    break;
+                }
+                if (target.empty())
+                    choice = expected;
+            }
+            if (choice)
+            {
+                std::string validity = detail::attributeOrEmpty(*choice, "validity");
 
                 if (validity == "valid")
                     return Expectation::VALID;
@@ -58,7 +70,7 @@ namespace xsts
                 std::optional<std::string> href = document->getAttributeNS(XLINK_NAMESPACE, "href");
 
                 if (href.has_value())
-                    documents.push_back((scope.metaDir / std::filesystem::u8path(*href)).lexically_normal());
+                    documents.push_back(detail::suitePath(scope.metaDir / std::filesystem::u8path(*href), scope.root));
             }
             if (documents.empty())
                 throw XstsError("у случая " + detail::attributeOrEmpty(test, "name") + " нет документов");
@@ -81,13 +93,20 @@ namespace xsts
             testCase.description = scope.description;
             testCase.id = scope.testSet + "/" + groupName + "/" + testCase.name;
             testCase.kind = kind;
-            testCase.expected = readExpectation(test);
             testCase.status = readStatus(test);
-            testCase.version = attributeOrEmpty(test, "version");
-            testCase.documents = readDocuments(test, kind, scope);
-            testCase.location = testCase.documents.front().lexically_relative(scope.root).generic_u8string();
-            testCase.directory = dataDirectory(testCase.documents.front(), scope.root);
-            testCase.features = detectFeatures(testCase.documents);
+            testCase.version = test.getAttribute("version").value_or(scope.version);
+            testCase.expected = readExpectation(test, testCase.version == "1.1" ? "1.1" : "1.0");
+            try
+            {
+                testCase.documents = readDocuments(test, kind, scope);
+                testCase.location = testCase.documents.front().lexically_relative(scope.root).generic_u8string();
+                testCase.directory = dataDirectory(testCase.documents.front(), scope.root);
+                testCase.features = detectFeatures(testCase.documents);
+            }
+            catch (const std::exception& error)
+            {
+                testCase.inputError = error.what();
+            }
             return testCase;
         }
     }

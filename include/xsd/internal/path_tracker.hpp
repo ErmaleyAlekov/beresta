@@ -111,6 +111,7 @@ namespace beresta::xsd::detail
         std::vector<PathLevel> _levels;
         std::size_t _depth;
         std::vector<PathStep> _steps;
+        std::size_t _retainedBytes = 0;
         std::deque<std::string> _names;
         std::unordered_map<std::string_view, std::string_view, utils::SeededHash> _nameIndex;
     };

@@ -3,17 +3,6 @@
 #include "parser/resource_resolver.hpp"
 #include "parser/xml_parser.hpp"
 
-namespace
-{
-    // Проверка выходного параметра: без него результат некуда записать
-    // Checks the output parameter: without it there is nowhere to write the result
-    void requireOutput(const void* out)
-    {
-        if (out == nullptr)
-            throw beresta::capi::InvalidArgumentException(beresta::i18n::format(beresta::i18n::Message::ARGUMENT_NULL, {"out"}));
-    }
-}
-
 /*
 ** Разбор байтов. Кодировку определяет ядро (BOM, XML-декларация), поэтому
 ** обёртки передают сырые байты — например, содержимое файла или сетевого
@@ -27,7 +16,7 @@ extern "C" BERESTA_API int beresta_document_parse(const void* data, int64_t size
     beresta_schema schema, beresta_document* out)
 {
     BERESTA_CAPI_TRY
-        requireOutput(out);
+        beresta::capi::clearOutput(out);
         if (size < 0 || (data == nullptr && size != 0))
             throw beresta::capi::InvalidArgumentException(beresta::i18n::format(beresta::i18n::Message::ARGUMENT_BAD_BUFFER, {"data/size"}));
         std::string_view bytes(static_cast<const char*>(data), static_cast<std::size_t>(size));
@@ -53,7 +42,7 @@ extern "C" BERESTA_API int beresta_document_parse_file(const char* path, uint32_
     beresta_schema schema, beresta_document* out)
 {
     BERESTA_CAPI_TRY
-        requireOutput(out);
+        beresta::capi::clearOutput(out);
         std::filesystem::path file = std::filesystem::absolute(beresta::capi::pathFromUtf8(path));
         beresta::ParserOptions options = beresta::capi::parserOptions(flags, schema);
         beresta::FileResourceResolver resolver(file.parent_path());

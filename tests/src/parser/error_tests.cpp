@@ -12,16 +12,32 @@ namespace
 
         TEST_ASSERT(position.line == 3);
         TEST_ASSERT(position.column == 3);
+        position = support::parseErrorPosition("<root>\r\n  <item>\r\n  </itme></root>");
+        TEST_ASSERT(position.line == 3);
+        TEST_ASSERT(position.column == 3);
     }
 
-    // Столбец считается в символах, а не в байтах UTF-8
-    // The column is counted in characters, not in UTF-8 bytes
-    void testColumnCountsUtf8Characters()
+    // Столбец считается в символах, а ошибки в сущности отмечаются у ссылки.
+    // The column counts characters, and entity errors point to the reference.
+    void testErrorPositions()
     {
         beresta::ParsePosition position = support::parseErrorPosition("<я>ёж&bad;</я>");
 
         TEST_ASSERT(position.line == 1);
         TEST_ASSERT(position.column == 6);
+        // Ошибка раскрытия значения относится к открывающему тегу.
+        // A value expansion error is anchored at its opening tag.
+        const auto value = support::parseErrorPosition("<root>\r\n  <a x=\"1\r\n    &bad;\"/></root>");
+        const auto attribute = support::parseErrorPosition("<a x=\"1\n  2\"\n  x=\"3\"/>");
+        const auto entity = support::parseErrorPosition(
+            "<!DOCTYPE r [<!ENTITY e \"<x></y>\">]>\n<r>\n  &e;\n</r>");
+
+        TEST_ASSERT(value.line == 2);
+        TEST_ASSERT(value.column == 3);
+        TEST_ASSERT(attribute.line == 3);
+        TEST_ASSERT(attribute.column == 3);
+        TEST_ASSERT(entity.line == 3);
+        TEST_ASSERT(entity.column == 3);
     }
 
     // Структурные ошибки: незакрытый тег, лишний закрывающий, второй корень, пустота
@@ -63,7 +79,7 @@ namespace suites
     void registerErrorTests(test::TestRunner& runner)
     {
         runner.add("ошибки: позиция несовпадающего тега", testMismatchedTagPosition);
-        runner.add("ошибки: столбец в символах UTF-8", testColumnCountsUtf8Characters);
+        runner.add("ошибки: UTF-8, атрибут и ссылка на сущность", testErrorPositions);
         runner.add("ошибки: структурные", testStructuralErrors);
         runner.add("ошибки: лексические", testLexicalErrors);
     }

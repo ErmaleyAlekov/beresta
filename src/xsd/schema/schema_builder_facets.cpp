@@ -42,6 +42,8 @@ namespace beresta::xsd::detail
             std::string raw = facet->getAttribute("value").value_or("");
             if (isFacetlessChild(kind))
                 continue;
+            if (!facet->hasAttribute("value"))
+                fail(*facet, i18n::format(i18n::Message::SCHEMA_REQUIRED_ATTRIBUTE, {"value"}));
             if (kind == "pattern")
                 patterns.push_back(std::make_shared<Regex>(raw));
             else if (kind == "enumeration")

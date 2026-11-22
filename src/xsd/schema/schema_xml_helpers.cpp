@@ -1,4 +1,6 @@
 #include "xsd/internal/schema_builder.hpp"
+#include "exception/dom_exception.hpp"
+#include "i18n/i18n.hpp"
 
 namespace beresta::xsd::detail
 {
@@ -66,6 +68,9 @@ namespace beresta::xsd::detail
             return ProcessContents::LAX_CHECK;
         if (process == "skip")
             return ProcessContents::SKIP_CHECK;
+        if (process != "strict")
+            throw DomException(DomErrorCode::SCHEMA_ERROR,
+                i18n::format(i18n::Message::SCHEMA_INVALID_ATTRIBUTE, {"processContents", process}));
         return ProcessContents::STRICT_CHECK;
     }
 }

@@ -22,6 +22,7 @@ from .errors import check
 DOCUMENT_CLOSED = 1
 XPATH_CLOSED = 2
 SCHEMA_CLOSED = 3
+NODE_REMOVED = 8
 
 
 def set_language(code: str) -> None:

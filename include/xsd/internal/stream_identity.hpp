@@ -7,7 +7,7 @@
 #include "xsd/internal/path_tracker.hpp"
 
 #include <cstddef>
-#include <set>
+#include "xsd/internal/identity_common.hpp"
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -41,7 +41,6 @@ namespace beresta::xsd::detail
     {
         std::size_t matches = 0;
         bool fromElement = false;
-        std::size_t elementOrdinal = 0;
         bool complex = false;
         bool untyped = false;
         std::string value;
@@ -98,7 +97,7 @@ namespace beresta::xsd::detail
         const IdentityConstraint* constraint;
         std::size_t first;
         std::size_t last;
-        std::set<std::vector<std::string>> keys;
+        IdentityKeys keys;
     };
 
     /*
@@ -135,7 +134,7 @@ namespace beresta::xsd::detail
         // ---- Selectors and fields (stream_identity_match.cpp) ----
         const CompiledConstraint& compile(const IdentityConstraint& constraint);
         void selectTargets(const IdentityStart& start);
-        bool matchFields(ActiveTarget& target, const IdentityStart& start);
+        bool matchFields(std::size_t targetIndex, const IdentityStart& start);
 
         // ---- Атрибуты в полях (stream_identity_fields.cpp) ----
         // ---- Attributes in fields (stream_identity_fields.cpp) ----
@@ -166,6 +165,9 @@ namespace beresta::xsd::detail
         std::vector<LevelName> _names;
         std::vector<StreamScope> _scopes;
         std::vector<ActiveTarget> _targets;
+        // Поля, ожидающие текст элемента на данном уровне.
+        // Fields waiting for element text at this level.
+        std::vector<std::vector<std::pair<std::size_t, std::size_t>>> _selectedFields;
         std::size_t _targetCount;
         std::vector<StreamTable> _tables;
         std::size_t _lastOrdinal;

@@ -40,10 +40,10 @@ namespace
 
     // Полный прогон набора и запись нового списка провалов со сводкой
     // A full suite run and writing a new failure list with a summary
-    int regenerateList(const failing::SuiteView& suite, const failing::Options& options)
+    int regenerateList(const failing::SuiteView& suite, const failing::Options& options, xsts::CaseTimeout& timeout)
     {
         xsts::Limitations limitations = xsts::Limitations::load(options.limitationsFile);
-        std::vector<failing::FailingEntry> entries = failing::collectFailing(suite, limitations, std::cout);
+        std::vector<failing::FailingEntry> entries = failing::collectFailing(suite, limitations, std::cout, timeout);
 
         failing::writeFailingList(options.listFile, entries);
         std::cout << "\n  Провалов: " << entries.size() << ", список: " << options.listFile.u8string() << "\n\n";
@@ -66,17 +66,24 @@ int main(int argc, char** argv)
     xsts::enableUtf8Console();
     try
     {
-        failing::Options options = failing::parseOptions(argc, argv);
+        bool worker = argc >= 3 && std::string(argv[1]) == "--worker";
+        int offset = worker ? 2 : 0;
+        failing::Options options = failing::parseOptions(argc - offset, argv + offset);
+        if (options.regenerate && !worker)
+            return xsts::runSupervised(argc, argv);
         std::filesystem::path root = std::filesystem::absolute(options.suiteRoot).lexically_normal();
         xsts::Catalog catalog = xsts::loadSuite(root);
         failing::CaseIndex index = failing::indexCatalog(catalog);
         failing::SuiteView suite{catalog, index, root};
 
         if (options.regenerate)
-            return regenerateList(suite, options);
+        {
+            xsts::CaseTimeout timeout(std::filesystem::u8path(argv[2]));
+            return regenerateList(suite, options, timeout);
+        }
         return runDebug(suite, options);
     }
-    catch (const xsts::XstsError& problem)
+    catch (const std::exception& problem)
     {
         std::cerr << "xsts_failing: " << problem.what() << "\n";
         return 2;

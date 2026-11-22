@@ -5,11 +5,17 @@
 Versions follow [semantic versioning](https://semver.org/). The entire version section
 is included in the release description on GitHub and Gitverse.
 
-## 2.3.0 — 2026-11-21
+## 2.3.0 — 2026-11-22
 
-Fixes from the code review (tasks T-2…T-14): protection against hostile input in XInclude, DTD and XML Schema,
-the resolver leaving its root through a symbolic link, correct serialization and number conversion.
-The W3C XML Schema Test Suite and the XML Conformance Test Suite are unchanged (XSTS: 515 failures, no new ones).
+During manual code review, Aleksei Ermakov found that symbolic links could take the resolver outside its root
+and that XML Schema validation could stall on empty repetitions. Tasks T-2…T-54 document the fixes and checks.
+
+- Fixed XPath string parsing and typed comparisons, XSD assertions and identity constraints.
+- Corrected argument validation and object lifetime handling in the C API and language bindings.
+- The XSTS runner continues after an individual case times out. This release also corrects benchmark
+  measurements and error-handling examples, and verifies SHA-256 checksums when mirroring release assets.
+- All 276 unit tests and 2,001 applicable XML Conformance cases passed, with 584 cases skipped.
+  Across 39,420 XSTS cases, 452 discrepancies remain. Of the previous 515, 63 were resolved with no new IDs.
 
 ### Security and limits
 

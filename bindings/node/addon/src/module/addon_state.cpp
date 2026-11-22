@@ -48,8 +48,11 @@ namespace beresta::node
         napi_value constructor = nullptr;
         AddonState* state = currentState(env);
 
-        if (napi().getCbInfo(env, info, &count, &constructor, nullptr, nullptr) != NAPI_OK || count < 1)
+        if (napi().getCbInfo(env, info, &count, &constructor, nullptr, nullptr) != NAPI_OK)
             return nullptr;
+        int type{};
+        if (count < 1 || napi().typeOf(env, constructor, &type) != NAPI_OK || type != static_cast<int>(ValueType::FUNCTION))
+            return throwArgumentError(env, 1, "init", "function");
         if (state == nullptr)
         {
             state = new (std::nothrow) AddonState{nullptr};
@@ -61,10 +64,12 @@ namespace beresta::node
                 return nullptr;
             }
         }
+        napi_ref next = nullptr;
+        if (napi().createReference(env, constructor, 1, &next) != NAPI_OK)
+            return throwArgumentError(env, 1, "init", "constructor");
         if (state->errorClass != nullptr)
             napi().deleteReference(env, state->errorClass);
-        state->errorClass = nullptr;
-        napi().createReference(env, constructor, 1, &state->errorClass);
+        state->errorClass = next;
         return makeUndefined(env);
     }
 

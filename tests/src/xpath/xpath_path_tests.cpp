@@ -42,8 +42,12 @@ namespace
         const beresta::Element* dune = document.getElementsByTagName("title")[1];
 
         TEST_ASSERT_EQ(eval(*dune, "count(ancestor::*)"), "2");
+        TEST_ASSERT_EQ(eval(*dune, "name(ancestor::*[1])"), "book");
         TEST_ASSERT_EQ(eval(*dune, "name(following::*[1])"), "price");
         TEST_ASSERT_EQ(eval(*dune, "count(preceding::title)"), "1");
+        TEST_ASSERT_EQ(eval(*dune, "name(preceding::*[1])"), "price");
+        TEST_ASSERT_EQ(eval(*dune, "name(preceding::*[2])"), "title");
+        TEST_ASSERT_EQ(eval(*dune, "name(preceding::*[3])"), "book");
         TEST_ASSERT_EQ(eval(document, "count(//title | //price)"), "6");
         TEST_ASSERT_EQ(eval(document, "count(/descendant::*)"), "10");
         TEST_ASSERT_EQ(eval(document, "count(//@*)"), "6");

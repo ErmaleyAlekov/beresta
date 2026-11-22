@@ -32,7 +32,15 @@ namespace support
 
     // Чистый временный каталог для тестов с файлами
     // A clean temporary directory for tests with files
-    std::filesystem::path makeTestDirectory(const std::string& name);
+    class TestDirectory
+    {
+    public:
+        explicit TestDirectory(const std::string& name);
+        ~TestDirectory();
+        TestDirectory(const TestDirectory&) = delete;
+        TestDirectory& operator=(const TestDirectory&) = delete;
+        const std::filesystem::path path;
+    };
 
     // Записывает файл с указанным содержимым (UTF-8)
     // Writes a file with the given content (UTF-8)

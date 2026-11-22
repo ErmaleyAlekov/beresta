@@ -37,9 +37,9 @@ namespace failing
     ** the set changes — a full run takes minutes, the progress must be visible.
     */
     std::vector<FailingEntry> collectFailing(const SuiteView& suite, const xsts::Limitations& limitations,
-        std::ostream& progress)
+        std::ostream& progress, xsts::CaseTimeout& timeout)
     {
-        xsts::GroupRunner runner(suite.root, limitations);
+        xsts::GroupRunner runner(suite.root, limitations, &timeout);
         std::vector<FailingEntry> entries;
         std::string currentSet;
 
@@ -66,11 +66,11 @@ namespace failing
     {
         /*
         ** Сообщение — причина из прогонщика (как в xsts_report.md), факт —
-        ** из отдельного выполнения случая. Указатель testCase смотрит в
+        ** из того же выполнения случая. Указатель testCase смотрит в
         ** Catalog::cases, поэтому разность указателей — индекс случая.
         **
         ** The message is the reason from the runner (as in xsts_report.md), the fact is
-        ** from a separate run of the case. The testCase pointer points into
+        ** from the same run of the case. The testCase pointer points into
         ** Catalog::cases, so the pointer difference is the case index.
         */
         FailingEntry makeEntry(const SuiteView& suite, const xsts::CaseResult& result)
@@ -83,7 +83,7 @@ namespace failing
             entry.id = testCase.id;
             entry.kind = kindWord(testCase);
             entry.expected = expectationWord(testCase);
-            entry.actual = executeCase(suite, position).actual;
+            entry.actual = result.actual;
             entry.documents = joinDocuments(testCase.documents, suite.root);
             entry.schema = "-";
             if (testCase.kind == xsts::CaseKind::INSTANCE && group.hasSchema)

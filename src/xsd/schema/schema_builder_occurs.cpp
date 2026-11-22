@@ -22,11 +22,13 @@ namespace beresta::xsd::detail
     ** A document never has that many occurrences anyway, and the automaton counts
     ** occurrences with a counter and does not unroll the particle.
     */
-    static bool parseOccurs(const std::string& text, std::size_t& value) noexcept
+    static bool parseOccurs(std::string_view text, std::size_t& value) noexcept
     {
         const std::size_t OCCURS_LIMIT = content::UNBOUNDED - 1;
 
         value = 0;
+        if (!text.empty() && text.front() == '+')
+            text.remove_prefix(1);
         if (text.empty())
             return false;
         for (char symbol : text)
@@ -59,10 +61,10 @@ namespace beresta::xsd::detail
         particle.maxOccurs = content::UNBOUNDED;
         if (maximum != "unbounded" && !parseOccurs(maximum, particle.maxOccurs))
             fail(definition, i18n::format(i18n::Message::SCHEMA_MAX_OCCURS, {maximum}));
+        if (isSchemaElement(definition, "all") && (particle.minOccurs > 1 || particle.maxOccurs > 1))
+            fail(definition, i18n::format(i18n::Message::SCHEMA_ALL_OCCURS));
         if (particle.maxOccurs < particle.minOccurs)
             fail(definition, i18n::format(i18n::Message::SCHEMA_MAX_BELOW_MIN));
-        if (isSchemaElement(definition, "all") && particle.maxOccurs > 1)
-            fail(definition, i18n::format(i18n::Message::SCHEMA_ALL_OCCURS));
         // Использованные частицы xs:all хранятся в 64-битной маске: больше 64 честно отвергается,
         // иначе частицы после 64-й молча считались бы недопустимыми в документе
         // The used particles of xs:all are kept in a 64-bit mask: more than 64 is rejected honestly,

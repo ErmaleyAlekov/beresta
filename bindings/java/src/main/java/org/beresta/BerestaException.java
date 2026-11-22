@@ -25,9 +25,14 @@ public final class BerestaException extends RuntimeException
 
     public BerestaException(int code, String detail)
     {
-        super("[" + nameOf(code) + "] " + detail);
+        this(code, nameOf(code), detail);
+    }
+
+    private BerestaException(int code, String name, String detail)
+    {
+        super("[" + name + "] " + detail);
         this.code = code;
-        this.codeName = nameOf(code);
+        this.codeName = name;
         this.detail = detail;
     }
 

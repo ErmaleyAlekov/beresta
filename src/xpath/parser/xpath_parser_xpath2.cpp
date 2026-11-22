@@ -96,17 +96,22 @@ namespace beresta::xpath::detail
         bool every = take().text == "every";
         std::vector<std::pair<std::string, ExprPtr>> bindings;
 
-        do
+        for (;;)
         {
             if (peek().type != TokenType::VARIABLE)
                 fail(i18n::format(i18n::Message::XPATH_EXPECTED_FOUND, {"'$'", peek().text}));
             std::string variable = take().text;
             expectKeyword("in");
             bindings.emplace_back(std::move(variable), parseExprSingle());
+            if (!accept(TokenType::COMMA))
+                break;
+            // Каждая следующая привязка добавляет узел квантора вокруг остатка выражения.
+            // Each subsequent binding adds a quantifier node around the remaining expression.
+            ++_depth;
         }
-        while (accept(TokenType::COMMA));
         expectKeyword("satisfies");
         ExprPtr condition = parseExprSingle();
+        _depth -= bindings.size() - 1;
         for (std::size_t index = bindings.size(); index > 0; --index)
             condition = std::make_unique<QuantifiedExpr>(every, std::move(bindings[index - 1].first),
                 std::move(bindings[index - 1].second), std::move(condition));

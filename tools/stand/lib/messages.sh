@@ -124,6 +124,10 @@ stand_text() {
             ru='Использование: sh tools/stand/run_stand.sh. Переменные: CXX, CC — компиляторы; STAND_LANG=ru|en — язык'
             en='Usage: sh tools/stand/run_stand.sh. Variables: CXX, CC — compilers; STAND_LANG=ru|en — language'
             ;;
+        unknown_option)
+            ru="Неизвестный параметр: $2"
+            en="Unknown option: $2"
+            ;;
         *)
             ru="Неизвестное сообщение: $1"
             en="Unknown message: $1"

@@ -7,22 +7,6 @@
 namespace
 {
     /*
-    ** Общая проверка аргументов: без схемы проверять не по чему, без out
-    ** результат некуда записать. Возвращается сама схема (shared_ptr):
-    ** валидатор держит её, пока идёт разбор.
-    **
-    ** The common argument check: without a schema there is nothing to validate
-    ** against, without out there is nowhere to write the result. The schema itself
-    ** is returned (shared_ptr): the validator holds it while parsing goes on.
-    */
-    std::shared_ptr<const beresta::xsd::Schema> requireSchema(beresta_schema schema, const void* out)
-    {
-        if (out == nullptr)
-            throw beresta::capi::InvalidArgumentException(beresta::i18n::format(beresta::i18n::Message::ARGUMENT_NULL, {"out"}));
-        return beresta::capi::requireHandle<beresta::capi::SchemaHandle>(schema, "schema").schema;
-    }
-
-    /*
     ** Источник для разбора: байты в памяти или файл. Структура вместо
     ** двух почти одинаковых функций (DRY): цепочка «валидатор -> SAX» одна.
     **
@@ -62,7 +46,8 @@ namespace
             parser.parseFile(*source.file, validator);
         else
             parser.parse(source.bytes, validator);
-        return new beresta::capi::DiagnosticsHandle{validator.takeDiagnostics()};
+        return beresta::capi::publishHandle(std::make_unique<beresta::capi::DiagnosticsHandle>(
+            beresta::capi::DiagnosticsHandle{validator.takeDiagnostics()}));
     }
 }
 
@@ -72,7 +57,8 @@ extern "C" BERESTA_API int beresta_schema_validate_bytes(const void* data, int64
     beresta_schema schema, beresta_diagnostics* out)
 {
     BERESTA_CAPI_TRY
-        std::shared_ptr<const beresta::xsd::Schema> loaded = requireSchema(schema, out);
+        beresta::capi::clearOutput(out);
+        auto loaded = beresta::capi::requireHandle<beresta::capi::SchemaHandle>(schema, "schema").schema;
 
         if (size < 0 || (data == nullptr && size != 0))
             throw beresta::capi::InvalidArgumentException(beresta::i18n::format(beresta::i18n::Message::ARGUMENT_BAD_BUFFER, {"data/size"}));
@@ -95,7 +81,8 @@ extern "C" BERESTA_API int beresta_schema_validate_file(const char* path, uint32
     beresta_schema schema, beresta_diagnostics* out)
 {
     BERESTA_CAPI_TRY
-        std::shared_ptr<const beresta::xsd::Schema> loaded = requireSchema(schema, out);
+        beresta::capi::clearOutput(out);
+        auto loaded = beresta::capi::requireHandle<beresta::capi::SchemaHandle>(schema, "schema").schema;
         std::filesystem::path file = std::filesystem::absolute(beresta::capi::pathFromUtf8(path));
         beresta::ParserOptions options = beresta::capi::parserOptions(flags, nullptr);
         beresta::FileResourceResolver resolver(file.parent_path());

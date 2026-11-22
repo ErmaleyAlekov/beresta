@@ -38,5 +38,10 @@ class BerestaEngine:
     def parse_validated(self, xml: bytes) -> int:
         # Проверка идёт во время разбора; ошибка — исключение
         # Validation runs during parsing; an error is an exception
-        with beresta.parse(xml, schema=self.schema):
-            return 0
+        try:
+            with beresta.parse(xml, schema=self.schema):
+                return 0
+        except beresta.BerestaError as failure:
+            if failure.name != "VALIDATION_ERROR":
+                raise
+            return 1

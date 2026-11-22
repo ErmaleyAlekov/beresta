@@ -4,6 +4,7 @@
 #include "conformance/test_case.hpp"
 
 #include <filesystem>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -38,7 +39,7 @@ namespace conformance
         struct EntityFile
         {
             std::filesystem::path directory;
-            std::string text;
+            std::set<std::string> ids;
         };
 
         // Состояние обхода каталога: корень набора, текущая база и имя набора

@@ -44,6 +44,7 @@ namespace beresta::i18n
 
         // ---- Си-интерфейс / C interface ----
         {Message::ARGUMENT_NULL, "{0}: NULL was passed"},
+        {Message::HANDLE_WRONG_TYPE, "{0}: incorrect handle type"},
         {Message::ARGUMENT_BAD_BUFFER, "{0}: invalid buffer"},
         {Message::UNEXPECTED_EXCEPTION, "an unexpected exception"},
         {Message::HANDLE_EXPECTED_NODE, "a node was expected, NULL was passed"},
@@ -385,6 +386,7 @@ namespace beresta::i18n
         {Message::BINDING_NATIVE_CALL_FAILED, "a native call failed"},
         {Message::BINDING_UNKNOWN_NODE_TYPE, "an unknown node type {0}"},
         {Message::BINDING_INVALID_ARGUMENT, "invalid argument #{0} of {1}: {2} expected"},
+        {Message::BINDING_NODE_REMOVED, "the node has been removed"},
         {Message::BINDING_NO_FILE_SYSTEM, "WebAssembly has no file system: {0} is unavailable, pass a string or bytes"},
         {Message::LANGUAGE_UNKNOWN, "an unknown message language \"{0}\"; available: {1}"},
         {Message::SCHEMA_ANNOTATION_POSITION, "xs:annotation in xs:{0} must be the first and the only one"},
@@ -409,7 +411,7 @@ namespace beresta::i18n
         {Message::SCHEMA_FACET_WIDENS, "the facet xs:{0}=\"{1}\" weakens the restriction of the base type xs:{2}=\"{3}\""},
         {Message::SCHEMA_ELEMENT_PARTS_CONFLICT, "xs:element \"{0}\" cannot have {1} together with {2}"},
         {Message::SCHEMA_VALUE_CONSTRAINT_INVALID, "the value {0}=\"{1}\" of the declaration \"{2}\" does not fit its type: {3}"},
-        {Message::SCHEMA_VALUE_CONSTRAINT_CONTENT, "the element \"{0}\" cannot have {1}: its complex type has neither simple nor mixed content"},
+        {Message::SCHEMA_VALUE_CONSTRAINT_CONTENT, "the element \"{0}\" cannot have {1}: it requires simple content or mixed content that allows an empty sequence of child elements"},
         {Message::SCHEMA_NOTATION_NO_IDENTIFIER, "the notation \"{0}\" has neither public nor system"},
         {Message::XML_DECLARATION_MALFORMED, "the XML declaration is malformed: it needs \"<?xml\" in lower case, a space and version"},
         {Message::XINCLUDE_FALLBACK_MULTIPLE, "xi:include may have only one xi:fallback"},
@@ -418,6 +420,10 @@ namespace beresta::i18n
         {Message::XINCLUDE_LIMIT_SIZE, "the allowed size of repeated xi:include inclusions ({0} bytes) was exceeded"},
         {Message::DOCTYPE_SUBSET_UNCLOSED, "the DOCTYPE internal subset must consist of whole declarations: \"]\" outside literals, comments and instructions, an unclosed literal or comment are not allowed"},
         {Message::SCHEMA_ALL_TOO_LARGE, "xs:all supports at most 64 particles, and here there are {0}"},
+        {Message::XPATH_INCOMPATIBLE_TYPES, "XPTY0004: the operand types are incompatible for comparison"},
+        {Message::SCHEMA_REQUIRED_ATTRIBUTE, "the required schema attribute {0} is missing"},
+        {Message::SCHEMA_INVALID_ATTRIBUTE, "invalid schema attribute {0}: {1}"},
+        {Message::XSD_RESOURCE_LIMIT, "the XML Schema validation resource limit was exceeded: {0}"},
         {Message::XMLNS_ATTRIBUTE_NAMESPACE, "the xmlns and xmlns:* attributes must be in the xmlns namespace, and only they"},
     };
 

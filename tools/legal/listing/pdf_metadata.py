@@ -14,6 +14,7 @@ the system; if there is none, the file stays an ordinary PDF without the PDF/A m
 
 from __future__ import annotations
 
+import re
 from datetime import datetime
 from pathlib import Path
 from xml.sax.saxutils import escape
@@ -30,6 +31,7 @@ ICC_CANDIDATES = (
 )
 
 PRODUCER = "Beresta tools/legal/make_listing.py"
+TITLE_CONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f\ud800-\udfff\ufffe\uffff]")
 
 
 def pdf_text(value: str) -> str:
@@ -54,6 +56,7 @@ def xmp_packet(title: str, moment: datetime, pdfa: bool) -> bytes:
     """Пакет XMP: название, даты, программа-создатель и (если pdfa) отметка PDF/A-1b.
     The XMP packet: the title, the dates, the producer and (if pdfa) the PDF/A-1b mark."""
     stamp = moment.strftime("%Y-%m-%dT%H:%M:%S+00:00")
+    xml_title = escape(TITLE_CONTROL.sub("\ufffd", title), {"\r": "&#13;"})
     mark = ""
     if pdfa:
         mark = ('<rdf:Description rdf:about="" xmlns:pdfaid="http://www.aiim.org/pdfa/ns/id/">'
@@ -62,7 +65,7 @@ def xmp_packet(title: str, moment: datetime, pdfa: bool) -> bytes:
         '<?xpacket begin="\ufeff" id="W5M0MpCehiHzreSzNTczkc9d"?>'
         '<x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">'
         '<rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/">'
-        '<dc:title><rdf:Alt><rdf:li xml:lang="x-default">' + escape(title) + "</rdf:li></rdf:Alt></dc:title>"
+        '<dc:title><rdf:Alt><rdf:li xml:lang="x-default">' + xml_title + "</rdf:li></rdf:Alt></dc:title>"
         "<dc:format>application/pdf</dc:format></rdf:Description>"
         '<rdf:Description rdf:about="" xmlns:xmp="http://ns.adobe.com/xap/1.0/">'
         "<xmp:CreateDate>" + stamp + "</xmp:CreateDate><xmp:ModifyDate>" + stamp + "</xmp:ModifyDate>"
@@ -77,6 +80,7 @@ def xmp_packet(title: str, moment: datetime, pdfa: bool) -> bytes:
 def write_metadata(writer: PdfWriter, title: str, moment: datetime, icc: Path) -> dict:
     """Объекты /Info, XMP и (при наличии профиля) OutputIntent; номера — в словаре.
     The /Info, XMP and (when a profile exists) OutputIntent objects; the numbers are in a dictionary."""
+    title = TITLE_CONTROL.sub("\ufffd", title)
     stamp = moment.strftime("D:%Y%m%d%H%M%S+00'00'")
     numbers = {"intent": None}
     numbers["info"] = writer.add((

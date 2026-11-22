@@ -63,7 +63,7 @@ namespace beresta::xsd::detail
         if (original == nullptr)
             original = originalFor(context, "simpleType", key);
         if (original == nullptr)
-            return resolveType(key);
+            return resolveType(key, &context);
         auto built = _builtOriginals.find(original->element);
         if (built != _builtOriginals.end())
             return built->second;

@@ -18,12 +18,12 @@ class DocumentTests(unittest.TestCase):
     """Документы и узлы. / Documents and nodes."""
 
     def test_parse_and_navigate(self):
-        with beresta.parse("<shop><item code='A1'>Чай</item><!--x--><item>Кофе</item></shop>") as document:
+        with beresta.parse("<shop><item code='A1'>Чай</item><!--x--><item>Кофе 🌲</item></shop>") as document:
             root = document.root
             self.assertEqual(root.name, "shop")
             self.assertEqual(len(root), 3)
             self.assertEqual(root[0].get_attribute("code"), "A1")
-            self.assertEqual(root[-1].text, "Кофе")
+            self.assertEqual(root[-1].text, "Кофе 🌲")
             self.assertEqual(root[1].type, NodeType.COMMENT)
             self.assertIs(root[0].next_sibling.next_sibling.parent.parent, document)
             self.assertEqual([child.name for child in root], ["item", "#comment", "item"])
@@ -51,6 +51,7 @@ class DocumentTests(unittest.TestCase):
         self.assertTrue(target.closed)
 
     def test_errors(self):
+        beresta.set_language("ru")
         with self.assertRaises(BerestaError) as caught:
             beresta.parse("<a><b></a>")
         self.assertEqual(caught.exception.name, "PARSE_ERROR")
@@ -60,7 +61,7 @@ class DocumentTests(unittest.TestCase):
             document.root.append_element("1bad")
         root = document.root
         document.close()
-        with self.assertRaises(RuntimeError):
+        with self.assertRaisesRegex(RuntimeError, r"документ уже закрыт"):
             root.text
 
     def test_files_and_encodings(self):

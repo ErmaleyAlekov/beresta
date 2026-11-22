@@ -28,12 +28,12 @@ namespace
     ** Что видит утверждение: пустой элемент со значением по умолчанию —
     ** это значение (как в PSVI); нетипизированный текст "0.10" складывается
     ** точно; xs:boolean "1" равен true(); xs:double считается в double.
-    ** У элемента только из элементов типизированного значения нет — ошибка.
+    ** Сравнение box = 1 атомизирует узел box; у узла с таким содержимым нет типизированного значения.
     **
     ** What an assertion sees: an empty element with a default value is
     ** that value (as in the PSVI); an untyped text "0.10" is added
     ** exactly; xs:boolean "1" equals true(); xs:double is computed in double.
-    ** An element-only element has no typed value — an error.
+    ** The comparison box = 1 atomizes the box node; a node with this content has no typed value.
     */
     void testTypedValues()
     {

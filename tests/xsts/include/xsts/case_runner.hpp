@@ -60,10 +60,11 @@ namespace xsts
     ** The suite root is needed by the resolver: include/import are read only from inside
     ** the suite, the resolver does not let network addresses through.
     */
+    class CaseTimeout;
     class GroupRunner
     {
     public:
-        GroupRunner(std::filesystem::path suiteRoot, const Limitations& limitations);
+        GroupRunner(std::filesystem::path suiteRoot, const Limitations& limitations, CaseTimeout* timeout = nullptr);
 
         // Прогоняет группу и дописывает результаты всех её случаев
         // Runs a group and appends the results of all its cases
@@ -81,6 +82,7 @@ namespace xsts
 
         std::filesystem::path _suiteRoot;
         const Limitations& _limitations;
+        CaseTimeout* _timeout;
     };
 
     // Загружает схему из документов случая через Schema::fromDocuments

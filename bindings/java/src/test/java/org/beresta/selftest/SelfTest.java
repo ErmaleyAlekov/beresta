@@ -58,6 +58,10 @@ public final class SelfTest
         run("8 потоков на общих схеме и XPath", Check.PARALLEL_SHARED);
         run("языки сообщений / message languages", Check.LANGUAGES);
         run("неизвестный язык / unknown language", Check.UNKNOWN_LANGUAGE);
+        run("неизвестный код сообщения / unknown message code", Check.INVALID_MESSAGE_CODE);
+        run("аргументы сообщений / message arguments", Check.MESSAGE_ARGUMENTS);
+        run("закрытая схема / closed schema", Check.CLOSED_SCHEMA);
+        run("равенство закрытых узлов / closed node equality", Check.CLOSED_NODES);
         System.out.println("Итого упало: " + failures);
         System.exit(Math.min(failures, 1));
     }

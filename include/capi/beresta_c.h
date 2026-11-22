@@ -303,7 +303,8 @@ typedef enum beresta_message
     BERESTA_MESSAGE_NATIVE_CALL_FAILED = 4, /* сбой вызова / a native call failed             */
     BERESTA_MESSAGE_UNKNOWN_NODE_TYPE = 5, /* неизвестный тип узла {0} / unknown node type {0} */
     BERESTA_MESSAGE_INVALID_ARGUMENT  = 6, /* неверный аргумент №{0} функции {1} / invalid argument #{0} of {1} */
-    BERESTA_MESSAGE_NO_FILE_SYSTEM    = 7  /* нет файловой системы для {0} / no file system for {0} */
+    BERESTA_MESSAGE_NO_FILE_SYSTEM    = 7, /* нет файловой системы для {0} / no file system for {0} */
+    BERESTA_MESSAGE_NODE_REMOVED      = 8  /* узел удалён / the node has been removed */
 } beresta_message;
 
 /* Текст сообщения на текущем языке (заимствованная строка; {0} — место аргумента)

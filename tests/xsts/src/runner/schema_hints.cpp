@@ -1,6 +1,7 @@
 #include "xsts/case_runner.hpp"
 
 #include "beresta.hpp"
+#include "xsts/catalog.hpp"
 
 #include <algorithm>
 #include <sstream>
@@ -64,7 +65,8 @@ namespace xsts
         ** takes precedence over a hint in the instance.
         */
         std::vector<std::filesystem::path> hintedDocuments(const beresta::Document& instance,
-            const std::filesystem::path& file, const std::vector<std::string>& known)
+            const std::filesystem::path& file, const std::vector<std::string>& known,
+            const std::filesystem::path& suiteRoot)
         {
             std::vector<std::filesystem::path> documents;
 
@@ -75,7 +77,7 @@ namespace xsts
                     || std::find(known.begin(), known.end(), hint.first) != known.end();
 
                 if (!skipped && std::find(documents.begin(), documents.end(), path) == documents.end())
-                    documents.push_back(path);
+                    documents.push_back(detail::suitePath(path, suiteRoot));
             }
             return documents;
         }
@@ -107,7 +109,7 @@ namespace xsts
     SchemaAttempt loadHintedSchema(const beresta::Document& instance,
         const std::filesystem::path& file, const std::filesystem::path& suiteRoot)
     {
-        std::vector<std::filesystem::path> documents = hintedDocuments(instance, file, {});
+        std::vector<std::filesystem::path> documents = hintedDocuments(instance, file, {}, suiteRoot);
 
         if (!documents.empty())
             return loadSchema(documents, suiteRoot);
@@ -136,7 +138,7 @@ namespace xsts
     {
         std::vector<std::filesystem::path> extra;
 
-        for (const std::filesystem::path& document : hintedDocuments(instance, file, {}))
+        for (const std::filesystem::path& document : hintedDocuments(instance, file, {}, suiteRoot))
         {
             if (std::find(groupDocuments.begin(), groupDocuments.end(), document) == groupDocuments.end())
                 extra.push_back(document);
@@ -144,7 +146,7 @@ namespace xsts
         if (extra.empty() || groupDocuments.empty())
             return SchemaAttempt();
         std::vector<std::filesystem::path> combined = groupDocuments;
-        for (const std::filesystem::path& document : hintedDocuments(instance, file, targetNamespaces(groupDocuments)))
+        for (const std::filesystem::path& document : hintedDocuments(instance, file, targetNamespaces(groupDocuments), suiteRoot))
         {
             if (std::find(combined.begin(), combined.end(), document) == combined.end())
                 combined.push_back(document);

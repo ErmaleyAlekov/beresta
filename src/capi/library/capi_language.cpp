@@ -21,7 +21,8 @@ namespace
         beresta::i18n::Message::BINDING_NATIVE_CALL_FAILED,
         beresta::i18n::Message::BINDING_UNKNOWN_NODE_TYPE,
         beresta::i18n::Message::BINDING_INVALID_ARGUMENT,
-        beresta::i18n::Message::BINDING_NO_FILE_SYSTEM
+        beresta::i18n::Message::BINDING_NO_FILE_SYSTEM,
+        beresta::i18n::Message::BINDING_NODE_REMOVED
     };
 
     // Коды языков через запятую: "ru,en" / Language codes separated by commas: "ru,en"

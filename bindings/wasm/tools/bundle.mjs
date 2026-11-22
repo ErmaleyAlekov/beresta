@@ -24,6 +24,7 @@
  * is an error, not a silent breakage in a browser.
  */
 import fs from 'node:fs';
+import { dependencies } from './dependencies.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -32,8 +33,6 @@ const NODE_LIB = path.resolve(WASM_DIR, '..', 'node', 'lib');
 const ENTRY = path.join(NODE_LIB, 'index.js');
 const BACKEND = path.join(WASM_DIR, 'lib', 'native_wasm.js');
 const ALIASES = new Map([[path.join(NODE_LIB, 'internal', 'native.js'), BACKEND]]);
-const REQUIRE = /require\('([^']+)'\)/g;
-
 // Абсолютный путь подключаемого модуля с учётом подмены бэкенда
 // The absolute path of a required module taking the backend substitution into account
 function resolveModule(fromFile, specifier)
@@ -57,9 +56,9 @@ function collectModules()
     for (let index = 0; index < order.length; ++index)
     {
         const source = fs.readFileSync(order[index], 'utf8');
-        for (const match of source.matchAll(REQUIRE))
+        for (const match of dependencies(source))
         {
-            const target = resolveModule(order[index], match[1]);
+            const target = resolveModule(order[index], match[2]);
             if (ids.has(target))
                 continue;
             ids.set(target, order.length);
@@ -77,9 +76,9 @@ function rewriteModule(file, ids)
     let result = '';
     let last = 0;
 
-    for (const match of source.matchAll(REQUIRE))
+    for (const match of dependencies(source))
     {
-        result += source.slice(last, match.index) + 'require(' + ids.get(resolveModule(file, match[1])) + ')';
+        result += source.slice(last, match.index) + 'require(' + ids.get(resolveModule(file, match[2])) + ')';
         last = match.index + match[0].length;
     }
     return result + source.slice(last);

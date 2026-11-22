@@ -19,7 +19,8 @@ namespace
     // Including XML, text and a fragment by xpointer; nested inclusions
     void testIncludes()
     {
-        std::filesystem::path root = support::makeTestDirectory("xinclude");
+        const support::TestDirectory temporary("xinclude");
+        const auto& root = temporary.path;
         const char* xi = "xmlns:xi=\"http://www.w3.org/2001/XInclude\"";
         support::writeTestFile(root / "chapter.xml", std::string("<chapter ") + xi
             + "><title>Глава</title><xi:include href=\"note.txt\" parse=\"text\"/></chapter>");
@@ -37,7 +38,8 @@ namespace
     // An unavailable resource is replaced with the content of xi:fallback
     void testFallback()
     {
-        std::filesystem::path root = support::makeTestDirectory("xinclude_fallback");
+        const support::TestDirectory temporary("xinclude_fallback");
+        const auto& root = temporary.path;
         support::writeTestFile(root / "main.xml", "<r xmlns:xi=\"http://www.w3.org/2001/XInclude\">"
             "<xi:include href=\"missing.xml\"><xi:fallback><p>нет файла</p></xi:fallback></xi:include></r>");
 
@@ -49,7 +51,8 @@ namespace
     // A circular inclusion and a missing resolver are clear errors
     void testIncludeErrors()
     {
-        std::filesystem::path root = support::makeTestDirectory("xinclude_cycle");
+        const support::TestDirectory temporary("xinclude_cycle");
+        const auto& root = temporary.path;
         support::writeTestFile(root / "a.xml", "<a xmlns:xi=\"http://www.w3.org/2001/XInclude\">"
             "<xi:include href=\"b.xml\"/></a>");
         support::writeTestFile(root / "b.xml", "<b xmlns:xi=\"http://www.w3.org/2001/XInclude\">"

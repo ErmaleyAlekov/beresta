@@ -22,7 +22,7 @@ namespace beresta::xsd::detail
     ** Used both at schema loading (substitution groups, final) and at
     ** document validation (xsi:type, block) — the rule is one.
     */
-    bool isDerivedFrom(TypeRef derived, TypeRef base, DerivationSet blocked) noexcept;
+    bool isDerivedFrom(TypeRef derived, TypeRef base, DerivationSet blocked);
 
     // Одинаковы ли две ссылки на тип (xs:anyType равен только себе)
     // Whether two type references are the same (xs:anyType equals only itself)

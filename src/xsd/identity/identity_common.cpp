@@ -33,7 +33,8 @@ namespace beresta::xsd::detail
         std::size_t index = 0;
         std::size_t total = 0;
 
-        for (const Node* node = child.getParent()->getFirstChild(); node != nullptr; node = node->getNextSibling())
+        const auto* parent = child.getParent();
+        for (const Node* node = parent ? parent->getFirstChild() : nullptr; node != nullptr; node = node->getNextSibling())
         {
             if (node->getType() != NodeType::ELEMENT || static_cast<const Element*>(node)->getName() != child.getName())
                 continue;

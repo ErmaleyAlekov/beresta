@@ -100,6 +100,8 @@ namespace beresta::node
         bool handle(std::size_t index, void*& out) noexcept;
         bool string(std::size_t index, ArgString& out) noexcept;
         bool number(std::size_t index, double& out) noexcept;
+        // TypeError «неверный аргумент»; всегда false / TypeError "invalid argument"; always false
+        bool reject(std::size_t index, const char* expected) noexcept;
         bool integer(std::size_t index, std::int64_t& out) noexcept;
         bool flags(std::size_t index, std::uint32_t& out) noexcept;
 
@@ -110,9 +112,6 @@ namespace beresta::node
         // Тип аргумента; недостающий аргумент считается undefined
         // The argument type; a missing argument counts as undefined
         ValueType typeAt(std::size_t index) const noexcept;
-
-        // TypeError «неверный аргумент»; всегда false / TypeError "invalid argument"; always false
-        bool reject(std::size_t index, const char* expected) noexcept;
 
         napi_env _env;
         napi_value _arguments[MAX_ARGUMENTS];

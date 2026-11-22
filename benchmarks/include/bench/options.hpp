@@ -13,6 +13,7 @@ namespace bench
         std::size_t items = 100000;
         std::size_t paragraphs = 25000;
         std::string report;
+        std::string memoryOutput;
         long memoryEngine = -1;
         std::string memoryWorkload;
     };

@@ -64,8 +64,9 @@ namespace beresta::xsd::detail
     ** in an XPath node set). The element value becomes known when it is
     ** closed, so its text has to be accumulated.
     */
-    bool StreamIdentity::matchFields(ActiveTarget& target, const IdentityStart& start)
+    bool StreamIdentity::matchFields(std::size_t targetIndex, const IdentityStart& start)
     {
+        ActiveTarget& target = _targets[targetIndex];
         const CompiledConstraint& compiled = *_scopes[target.scope].constraints[target.constraint].compiled;
         bool needText = false;
 
@@ -78,7 +79,7 @@ namespace beresta::xsd::detail
             if (reached && ++field.matches == 1)
             {
                 field.fromElement = true;
-                field.elementOrdinal = start.ordinal;
+                _selectedFields[start.level].emplace_back(targetIndex, index);
                 needText = true;
             }
             matchAttributes(field, compiled.fields[index], target, start);

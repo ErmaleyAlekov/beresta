@@ -21,7 +21,7 @@ beresta.setLanguage('ru');
 
 test('разбор и навигация / parsing and navigation', function parsingAndNavigation()
 {
-    const document = beresta.parse("<shop><item code='A1'>Чай</item><!--x--><item>Кофе</item></shop>");
+    const document = beresta.parse("<shop><item code='A1'>Чай</item><!--x--><item>Кофе 🌲</item></shop>");
     const root = document.root;
     const names = [];
 
@@ -31,7 +31,7 @@ test('разбор и навигация / parsing and navigation', function par
     assert.equal(root.name, 'shop');
     assert.equal(root.childCount, 3);
     assert.equal(root.child(0).getAttribute('code'), 'A1');
-    assert.equal(root.child(-1).text, 'Кофе');
+    assert.equal(root.child(-1).text, 'Кофе 🌲');
     assert.equal(root.child(1).type, beresta.NodeType.COMMENT);
     assert.ok(root.firstChild.nextSibling.nextSibling.parent.isSameNode(root));
     assert.equal(root.parent, document);
@@ -94,6 +94,7 @@ test('ошибки / errors', function errors()
     assert.equal(caught[0].code, 'PARSE_ERROR');
     assert.equal(caught[0].status, 6);
     assert.match(caught[0].message, /^строка 1, столбец 7/);
+    assert.ok(caught[1] instanceof beresta.BerestaError);
     assert.equal(caught[1].code, 'INVALID_NAME');
     assert.ok(caught[2] instanceof TypeError);
     assert.ok(caught[3] instanceof beresta.BerestaClosedError);
@@ -102,17 +103,36 @@ test('ошибки / errors', function errors()
 test('файлы и кодировки / files and encodings', function filesAndEncodings()
 {
     const folder = fs.mkdtempSync(path.join(os.tmpdir(), 'beresta-'));
-    const file = path.join(folder, 'документ.xml');
-    const document = beresta.parse('<текст>Привет</текст>');
+    try {
+        const file = path.join(folder, 'документ.xml');
+        const document = beresta.parse('<текст>Привет</текст>');
 
-    document.save(file, { encoding: 'windows-1251' });
-    document.close();
-    assert.ok(fs.readFileSync(file).includes('windows-1251'));
-    const loaded = beresta.parseFile(file, { flags: beresta.ParseFlags.DISCARD_COMMENTS });
-    assert.equal(loaded.root.text, 'Привет');
-    loaded.close();
-    const bytes = beresta.parse(fs.readFileSync(file));
-    assert.equal(bytes.root.name, 'текст');
-    bytes.close();
-    fs.rmSync(folder, { recursive: true, force: true });
+        document.save(file, { encoding: 'windows-1251' });
+        document.close();
+        assert.ok(fs.readFileSync(file).includes('windows-1251'));
+        const loaded = beresta.parseFile(file, { flags: beresta.ParseFlags.DISCARD_COMMENTS });
+        assert.equal(loaded.root.text, 'Привет');
+        loaded.close();
+        const bytes = beresta.parse(fs.readFileSync(file));
+        assert.equal(bytes.root.name, 'текст');
+        bytes.close();
+    } finally {
+        fs.rmSync(folder, { recursive: true, force: true });
+    }
+});
+
+test('границы аргументов и удаление поддерева / argument bounds and subtree removal', () => {
+    const doc = beresta.parse('<r><a><b/></a></r>', null);
+    try {
+        const parent = doc.root.firstChild;
+        const child = parent.firstChild;
+        assert.throws(() => doc.root.child(NaN), { code: 'INVALID_ARGUMENT' });
+        assert.throws(() => beresta.parse('<r/>', { flags: -1 }), { code: 'INVALID_ARGUMENT' });
+        parent.remove();
+        assert.throws(() => parent.handle, beresta.BerestaClosedError);
+        assert.throws(() => child.handle, beresta.BerestaClosedError);
+        assert.equal(doc.root.childCount, 0);
+    } finally {
+        doc.close();
+    }
 });

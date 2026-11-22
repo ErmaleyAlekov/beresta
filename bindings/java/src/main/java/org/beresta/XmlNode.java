@@ -57,7 +57,8 @@ public class XmlNode implements NodeContent, NodeOutput, NodeNavigation, NodeChi
     @Override
     public boolean equals(Object other)
     {
-        return other instanceof XmlNode node && node.pointer.address() == pointer.address();
+        return this == other || (other instanceof XmlNode node && !document().isClosed()
+            && !node.document().isClosed() && node.pointer.address() == pointer.address());
     }
 
     @Override

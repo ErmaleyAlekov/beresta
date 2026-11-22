@@ -68,6 +68,11 @@ namespace beresta::xpath::detail
         value = numberArgument(call, 0);
         if (std::isnan(value) || std::isinf(value))
             return XPathValue::fromNumber(value);
-        return XPathValue::fromNumber(std::floor(value + 0.5));
+        if (value >= -0.5 && value <= 0.0)
+            return XPathValue::fromNumber(std::copysign(0.0, value));
+        double lower = std::floor(value);
+        if (value - lower >= 0.5)
+            lower += 1.0;
+        return XPathValue::fromNumber(lower);
     }
 }

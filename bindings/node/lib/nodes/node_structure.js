@@ -16,7 +16,20 @@ class NodeStructure
      *  wrappers of its descendants are invalid — they must not be used. */
     remove()
     {
+        const registry = this.document[REGISTRY];
+        const pending = [this.handle];
+        const removed = [];
+        while (pending.length)
+        {
+            const handle = pending.pop();
+            if (registry.wrappers.has(handle))
+                removed.push(handle);
+            for (let child = native.node_first_child(handle); child !== null; child = native.node_next_sibling(child))
+                pending.push(child);
+        }
         native.node_remove(this.handle);
+        for (const handle of removed)
+            registry.invalidate(handle);
     }
 
     /** Глубокая копия в конец детей parent (можно в другой документ); возвращает копию.

@@ -24,6 +24,8 @@ use Beresta\Schema;
 require_once __DIR__ . '/../../../bindings/php/autoload.php';
 require_once __DIR__ . '/Engine.php';
 require_once __DIR__ . '/Measure.php';
+require_once __DIR__ . '/BenchInput.php';
+require_once __DIR__ . '/XsdOutcome.php';
 
 /**
  * Одна проверка XMLReader до конца файла: число нарушений.
@@ -32,18 +34,30 @@ require_once __DIR__ . '/Measure.php';
 function readerErrors(string $path, string $xsdPath): int
 {
     $previous = libxml_use_internal_errors(true);
-    $reader = new \XMLReader();
-    $reader->open($path);
-    $reader->setSchema($xsdPath);
-    while ($reader->read()) {
-        // Только чтение: проверку делает сам XMLReader
-        // Reading only: XMLReader itself does the validation
-    }
-    $reader->close();
-    $errors = count(libxml_get_errors());
     libxml_clear_errors();
-    libxml_use_internal_errors($previous);
-    return $errors;
+    try {
+        $reader = new \XMLReader();
+        if (!$reader->open($path)) {
+            throw new \RuntimeException(BenchInput::READ_FAILED . $path);
+        }
+        try {
+            if (!$reader->setSchema($xsdPath)) {
+                throw new \RuntimeException(BenchInput::INVALID_XSD . $xsdPath);
+            }
+            while ($reader->read()) {
+                // Проверку делает XMLReader. / XMLReader performs validation.
+            }
+            if ($reader->isValid()) {
+                return 0;
+            }
+            return max(1, XsdOutcome::libxmlErrors());
+        } finally {
+            $reader->close();
+        }
+    } finally {
+        libxml_clear_errors();
+        libxml_use_internal_errors($previous);
+    }
 }
 
 /**
@@ -75,19 +89,27 @@ function readerFile(array $job): int
  */
 function main(array $arguments): void
 {
-    $data = realpath($arguments[1] ?? 'data');
+    $data = $arguments[1] ?? 'data';
     $path = $data . '/catalog.xml';
     $xsdPath = $data . '/catalog.xsd';
-    $xml = (string) file_get_contents($path);
-    $schema = Schema::fromString((string) file_get_contents($xsdPath));
+    $xml = BenchInput::read($path);
+    $schema = Schema::fromString(BenchInput::read($xsdPath));
     $bytes = strlen($xml);
-    echo '| Библиотека / Library | Поток + XSD / Stream + XSD, MB/s | Ошибки XSD / XSD errors |', PHP_EOL, '|---|---|---|', PHP_EOL;
-    printf("| Берёста / Beresta %s (validateString) | %s | %d |\n", Beresta::version(),
-        Measure::timed([$schema, 'validateString'], $xml, $bytes), count($schema->validateString($xml)));
-    printf("| Берёста / Beresta %s (validateFile) | %s | %d |\n", Beresta::version(),
-        Measure::timed('BerestaBench\\berestaFile', [$schema, $path], $bytes), berestaFile([$schema, $path]));
-    printf("| XMLReader + setSchema (libxml2 %s) | %s | %d |\n", LIBXML_DOTTED_VERSION,
-        Measure::timed('BerestaBench\\readerFile', [$xsdPath, $path], $bytes), readerFile([$xsdPath, $path]));
+    echo '| Библиотека / Library | Поток + XSD / Stream + XSD, MB/s | Ошибки XSD / XSD errors | XSD valid |', PHP_EOL, '|---|---|---|---|', PHP_EOL;
+    $stringErrors = count($schema->validateString($xml));
+    printf("| Берёста / Beresta %s (validateString) | %s | %d | %s |\n", Beresta::version(),
+        Measure::timed([$schema, 'validateString'], $xml, $bytes), $stringErrors, XsdOutcome::validity($stringErrors));
+    $fileErrors = berestaFile([$schema, $path]);
+    printf("| Берёста / Beresta %s (validateFile) | %s | %d | %s |\n", Beresta::version(),
+        Measure::timed('BerestaBench\\berestaFile', [$schema, $path], $bytes), $fileErrors, XsdOutcome::validity($fileErrors));
+    $readerErrors = readerFile([$xsdPath, $path]);
+    printf("| XMLReader + setSchema (libxml2 %s) | %s | %d | %s |\n", LIBXML_DOTTED_VERSION,
+        Measure::timed('BerestaBench\\readerFile', [$xsdPath, $path], $bytes), $readerErrors, XsdOutcome::validity($readerErrors));
 }
 
-main($argv);
+try {
+    main($argv);
+} catch (\RuntimeException $failure) {
+    fwrite(STDERR, $failure->getMessage() . PHP_EOL);
+    exit(2);
+}

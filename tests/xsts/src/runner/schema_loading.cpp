@@ -108,6 +108,12 @@ namespace xsts
         options.resolver = &resolver;
         try
         {
+            if (documents.empty())
+            {
+                attempt.unexpected = true;
+                attempt.message = "нет документов схемы";
+                return attempt;
+            }
             attempt.schema = compile(documents, options);
         }
         catch (const beresta::DomException& problem)

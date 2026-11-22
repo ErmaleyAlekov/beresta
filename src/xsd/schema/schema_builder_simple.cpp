@@ -128,7 +128,7 @@ namespace beresta::xsd::detail
         std::string members = attributeOr(*unionElement, "memberTypes", "");
         for (std::string_view member : utils::splitTokens(members))
         {
-            TypeRef resolved = resolveType(resolveQName(*unionElement, member));
+            TypeRef resolved = resolveType(resolveQName(*unionElement, member), unionElement);
             if (resolved.simple == nullptr)
                 fail(*unionElement, i18n::format(i18n::Message::SCHEMA_UNION_MEMBER));
             if (_incomplete.count(resolved.simple) != 0)

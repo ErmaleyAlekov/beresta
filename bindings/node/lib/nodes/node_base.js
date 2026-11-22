@@ -27,7 +27,7 @@ class NodeBase
      *  The handle for addon calls; throws BerestaClosedError if the document is closed. */
     get handle()
     {
-        if (this[OWNER].closed)
+        if (this[HANDLE] === null || this[OWNER].closed)
             throw new BerestaClosedError(messageText(Messages.DOCUMENT_CLOSED));
         return this[HANDLE];
     }
@@ -49,7 +49,7 @@ class NodeBase
      *  A short representation for console.log and util.inspect: "XmlElement <item>". */
     [Symbol.for('nodejs.util.inspect.custom')]()
     {
-        if (this[OWNER].closed)
+        if (this[HANDLE] === null || this[OWNER].closed)
             return this.constructor.name + ' (closed)';
         return this.constructor.name + ' <' + this.name + '>';
     }

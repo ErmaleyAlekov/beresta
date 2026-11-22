@@ -1,7 +1,10 @@
 #include "xsd/internal/id_registry.hpp"
 #include "utils/seeded_hash.hpp"
+#include "exception/dom_exception.hpp"
+#include "i18n/i18n.hpp"
 
 #include <cstring>
+#include <limits>
 #include <utility>
 
 namespace beresta::xsd::detail
@@ -21,15 +24,19 @@ namespace beresta::xsd::detail
     // A new value is appended to the common buffer; the slot keeps its place and hash
     bool IdRegistry::insert(std::string_view value)
     {
+        if (value.size() >= std::numeric_limits<std::uint32_t>::max())
+            throw DomException(DomErrorCode::SCHEMA_ERROR,
+                i18n::format(i18n::Message::XSD_RESOURCE_LIMIT, {"ID"}));
         if ((_count + 1) * 2 > _slots.size())
             grow();
         std::size_t hash = utils::SeededHash()(value);
         std::size_t index = findSlot(value, hash);
         if (_slots[index].lengthPlusOne != 0)
             return false;
-        _slots[index] = IdSlot{_bytes.size(), static_cast<std::uint32_t>(value.size() + 1),
-            static_cast<std::uint32_t>(hash >> 32)};
+        std::size_t offset = _bytes.size();
         _bytes.append(value.data(), value.size());
+        _slots[index] = IdSlot{offset, static_cast<std::uint32_t>(value.size() + 1),
+            static_cast<std::uint32_t>(static_cast<std::uint64_t>(hash) >> 32)};
         ++_count;
         return true;
     }
@@ -38,7 +45,7 @@ namespace beresta::xsd::detail
     // A lookup without changes
     bool IdRegistry::contains(std::string_view value) const
     {
-        if (_slots.empty())
+        if (_slots.empty() || value.size() >= std::numeric_limits<std::uint32_t>::max())
             return false;
         return _slots[findSlot(value, utils::SeededHash()(value))].lengthPlusOne != 0;
     }
@@ -62,7 +69,7 @@ namespace beresta::xsd::detail
         while (_slots[index].lengthPlusOne != 0)
         {
             const IdSlot& slot = _slots[index];
-            if (slot.tag == static_cast<std::uint32_t>(hash >> 32) && slot.lengthPlusOne == value.size() + 1
+            if (slot.tag == static_cast<std::uint32_t>(static_cast<std::uint64_t>(hash) >> 32) && slot.lengthPlusOne == value.size() + 1
                 && std::memcmp(_bytes.data() + slot.offset, value.data(), value.size()) == 0)
                 return index;
             index = (index + 1) & mask;

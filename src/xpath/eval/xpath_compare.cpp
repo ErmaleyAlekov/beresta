@@ -97,14 +97,7 @@ namespace beresta::xpath::detail
         bool rightSet = right.getType() == ValueType::NODE_SET;
 
         if (leftSet && rightSet)
-        {
-            for (const XPathItem& item : left.getNodes())
-            {
-                if (compareSetWith(op, right, XPathValue::fromString(stringValue(item)), false))
-                    return true;
-            }
-            return false;
-        }
+            return compareNodeSets(op, left, right);
         if (leftSet)
             return compareSetWith(op, left, right, true);
         if (rightSet)

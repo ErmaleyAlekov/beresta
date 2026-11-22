@@ -45,6 +45,12 @@ namespace beresta::xpath::detail
 
         if (!singleAtom(left, context, a) || !singleAtom(right, context, b))
             return false;
+        // В сравнении значений untypedAtomic приводится к string, а не к типу соседа.
+        // In a value comparison untypedAtomic becomes string, not the other operand's type.
+        if (a.isUntypedAtomic())
+            a = XPathValue::fromString(a.toString());
+        if (b.isUntypedAtomic())
+            b = XPathValue::fromString(b.toString());
         return compareTypedAtoms(generalOperator(op), a, b, context);
     }
 

@@ -32,7 +32,8 @@ namespace WrapperBench
         // Обработчик события проверки / The validation event handler
         private void Count(object? sender, ValidationEventArgs problem)
         {
-            ++Errors;
+            if (problem.Severity == XmlSeverityType.Error)
+                ++Errors;
         }
     }
 }

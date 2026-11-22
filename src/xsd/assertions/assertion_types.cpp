@@ -37,7 +37,7 @@ namespace beresta::xsd::detail
             key = item.attribute;
         auto found = _typings.find(key);
         if (item.isNamespace || found == _typings.end() || (found->second.type == nullptr && !found->second.elementOnly))
-            return xpath::XPathValue::fromString(xpath::stringValue(item));
+            return xpath::XPathValue::fromUntypedString(xpath::stringValue(item));
         if (found->second.elementOnly)
             xpath::detail::failEvaluation(i18n::format(i18n::Message::XPATH_ELEMENT_ONLY,
                 {static_cast<const Element*>(item.node)->getName()}));

@@ -1,5 +1,6 @@
 #include "xsts/case_runner.hpp"
 #include "xsts/catalog.hpp"
+#include "xsts/case_timeout.hpp"
 #include "xsts/console.hpp"
 #include "xsts/limitations.hpp"
 #include "xsts/report.hpp"
@@ -114,11 +115,11 @@ namespace
 
 /*
 ** Прогонщик W3C XML Schema Test Suite.
-** Код возврата: 0 — прогон выполнен (расхождения описаны в отчёте),
+** Код возврата: 0 — все применимые случаи прошли, 1 — есть расхождения,
 ** 2 — сбой инфраструктуры (нет набора, неверные аргументы).
 **
 ** The W3C XML Schema Test Suite runner.
-** The exit code: 0 — the run is done (the deviations are described in the report),
+** The exit code: 0 — all applicable cases passed, 1 — deviations,
 ** 2 — an infrastructure failure (no suite, invalid arguments).
 */
 int main(int argc, char** argv)
@@ -126,21 +127,24 @@ int main(int argc, char** argv)
     xsts::enableUtf8Console();
     try
     {
-        Arguments arguments = parseArguments(argc, argv);
+        if (argc < 3 || std::string(argv[1]) != "--worker")
+            return xsts::runSupervised(argc, argv);
+        xsts::CaseTimeout timeout(std::filesystem::u8path(argv[2]));
+        Arguments arguments = parseArguments(argc - 2, argv + 2);
         std::filesystem::path root = std::filesystem::absolute(arguments.suiteRoot).lexically_normal();
         xsts::Catalog catalog = xsts::loadSuite(root);
         xsts::Limitations limitations = xsts::Limitations::load(arguments.limitationsFile);
-        std::vector<xsts::CaseResult> results = runSuite(catalog, arguments, xsts::GroupRunner(root, limitations));
+        std::vector<xsts::CaseResult> results = runSuite(catalog, arguments, xsts::GroupRunner(root, limitations, &timeout));
         xsts::Summary summary = xsts::summarize(results);
 
         std::cout << "  Случаев в наборе: " << catalog.cases.size() << ", групп: " << catalog.groups.size() << "\n";
         xsts::printSummary(summary, std::cout);
         saveReport(summary, results, arguments.reportFile);
+        return summary.total.failed == 0 ? 0 : 1;
     }
-    catch (const xsts::XstsError& problem)
+    catch (const std::exception& problem)
     {
         std::cerr << "xsts: " << problem.what() << "\n";
         return 2;
     }
-    return 0;
 }

@@ -21,13 +21,13 @@ final class DocumentChecks
      */
     static void parseAndNavigate()
     {
-        try (XmlDocument document = Xml.parse("<shop><item code='A1'>Чай</item><!--x--><item>Кофе</item></shop>"))
+        try (XmlDocument document = Xml.parse("<shop><item code='A1'>Чай</item><!--x--><item>Кофе 🌲</item></shop>"))
         {
             XmlElement root = document.root();
             Expect.equal("shop", root.name(), "имя корня");
             Expect.equal(3L, root.childCount(), "число детей");
             Expect.equal("A1", ((XmlElement) root.firstChild()).getAttribute("code"), "атрибут");
-            Expect.equal("Кофе", root.lastChild().text(), "текст");
+            Expect.equal("Кофе 🌲", root.lastChild().text(), "текст");
             Expect.equal(NodeType.COMMENT, root.child(1).type(), "тип комментария");
             Expect.isTrue(root.firstChild().nextSibling().parent().parent() == document, "родитель корня — документ");
             Expect.equal(3, root.children().size(), "список детей");
@@ -84,6 +84,7 @@ final class DocumentChecks
             Expect.equal("PARSE_ERROR", error.codeName(), "код ошибки разбора");
             Expect.isTrue(error.detail().startsWith("строка 1"), "текст ошибки: " + error.detail());
         }
+        invalidElementName();
         XmlDocument document = Xml.parse("<a/>");
         XmlElement root = document.root();
         document.close();
@@ -95,6 +96,20 @@ final class DocumentChecks
         catch (IllegalStateException expected)
         {
             Expect.isTrue(document.isClosed(), "документ закрыт");
+        }
+    }
+
+    /** Недопустимое имя элемента. / An invalid element name. */
+    private static void invalidElementName()
+    {
+        try (XmlDocument document = Xml.parse("<a/>"))
+        {
+            document.root().appendElement("1bad");
+            throw Expect.missingError("недопустимое имя / invalid name");
+        }
+        catch (BerestaException error)
+        {
+            Expect.equal("INVALID_NAME", error.codeName(), "код ошибки имени / name error code");
         }
     }
 }

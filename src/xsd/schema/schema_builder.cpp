@@ -11,7 +11,7 @@ namespace beresta::xsd::detail
         : _schema(schema), _options(options), _sources(), _loaded(), _loadedUris(), _loadedBy(),
           _definitions(), _builtElements(), _builtLocals(), _builtTypes(), _incomplete(), _pendingTypes(),
           _builtIdentities(),
-          _redefinitions(), _builtOriginals(), _overridden(), _headTyped(), _valueChecks()
+          _redefinitions(), _redefinedByDocument(), _builtOriginals(), _overridden(), _headTyped(), _valueChecks()
     {
     }
 

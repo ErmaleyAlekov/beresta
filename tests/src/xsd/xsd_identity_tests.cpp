@@ -1,6 +1,7 @@
 #include "suites/test_suites.hpp"
 #include "support/dom_helpers.hpp"
 #include "support/parse_helpers.hpp"
+#include "support/schema_helpers.hpp"
 
 namespace
 {
@@ -77,10 +78,10 @@ namespace
             "<xs:field xpath=\"@b\"/></xs:key><xs:unique name=\"single\"><xs:selector xpath=\"box\"/>"
             "<xs:field xpath=\"*\"/></xs:unique></xs:element></xs:schema>";
 
-        TEST_ASSERT(support::schemaErrors(xsd, "<r><item a=\"1\" b=\"x\"/><g><item a=\"1\" b=\"y\"/></g></r>").empty());
-        TEST_ASSERT(support::schemaErrors(xsd, "<r><item a=\"1\" b=\"x\"/><g><item a=\"1\" b=\"x\"/></g></r>").size() == 1);
-        TEST_ASSERT(support::schemaErrors(xsd, "<r><item a=\"1\"/></r>").size() == 1);
-        TEST_ASSERT(support::schemaErrors(xsd, "<r><box><p/><q/></box></r>").size() == 1);
+        TEST_ASSERT(support::agreedSchemaErrors(xsd, "<r><item a=\"1\" b=\"x\"/><g><item a=\"1\" b=\"y\"/></g></r>").empty());
+        TEST_ASSERT(support::agreedSchemaErrors(xsd, "<r><item a=\"1\" b=\"x\"/><g><item a=\"1\" b=\"x\"/></g></r>").size() == 1);
+        TEST_ASSERT(support::agreedSchemaErrors(xsd, "<r><item a=\"1\"/></r>").size() == 1);
+        TEST_ASSERT(support::agreedSchemaErrors(xsd, "<r><box><p/><q/></box></r>").size() == 1);
     }
 }
 

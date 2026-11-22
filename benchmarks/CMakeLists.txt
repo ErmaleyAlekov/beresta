@@ -35,13 +35,16 @@ add_subdirectory("${BERESTA_ROOT}" "${CMAKE_CURRENT_BINARY_DIR}/beresta")
 # ---- Программа замеров / The benchmark program --------------------------------
 file(GLOB_RECURSE BENCH_CORE CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/core/*.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/engines/beresta/*.cpp")
-add_executable(beresta_bench "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp" ${BENCH_CORE})
-target_include_directories(beresta_bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_link_libraries(beresta_bench PRIVATE beresta_static)
+add_library(bench_core OBJECT ${BENCH_CORE})
+target_include_directories(bench_core PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_link_libraries(bench_core PUBLIC beresta_static)
+add_executable(beresta_bench "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
+target_link_libraries(beresta_bench PRIVATE bench_core)
 if(WIN32)
-    target_link_libraries(beresta_bench PRIVATE psapi)
+    target_link_libraries(bench_core PUBLIC psapi)
 endif()
 # Функция объявлена корневым CMakeLists.txt / The function is declared by the root CMakeLists.txt
+beresta_apply_compile_options(bench_core)
 beresta_apply_compile_options(beresta_bench)
 
 # ---- Сравниваемые библиотеки / The compared libraries ---------------------------
@@ -58,9 +61,9 @@ function(bench_add_engine option package directory macro)
         return()
     endif()
     file(GLOB sources "${CMAKE_CURRENT_SOURCE_DIR}/src/engines/${directory}/*.cpp")
-    target_sources(beresta_bench PRIVATE ${sources})
-    target_compile_definitions(beresta_bench PRIVATE ${macro})
-    target_link_libraries(beresta_bench PRIVATE PkgConfig::${macro}_PKG)
+    target_sources(bench_core PRIVATE ${sources})
+    target_compile_definitions(bench_core PRIVATE ${macro})
+    target_link_libraries(bench_core PUBLIC PkgConfig::${macro}_PKG)
     message(STATUS "Берёста, замеры: подключена / benchmark: enabled ${package}")
 endfunction()
 
@@ -74,10 +77,20 @@ option(BENCH_WITH_RAPIDXML "Сравнивать с RapidXML / Compare with Rapi
 find_path(BENCH_RAPIDXML_INCLUDE rapidxml/rapidxml.hpp)
 if(BENCH_WITH_RAPIDXML AND BENCH_RAPIDXML_INCLUDE)
     file(GLOB rapidxml_sources "${CMAKE_CURRENT_SOURCE_DIR}/src/engines/rapidxml/*.cpp")
-    target_sources(beresta_bench PRIVATE ${rapidxml_sources})
-    target_include_directories(beresta_bench PRIVATE "${BENCH_RAPIDXML_INCLUDE}")
-    target_compile_definitions(beresta_bench PRIVATE BENCH_WITH_RAPIDXML)
+    target_sources(bench_core PRIVATE ${rapidxml_sources})
+    target_include_directories(bench_core PRIVATE "${BENCH_RAPIDXML_INCLUDE}")
+    target_compile_definitions(bench_core PRIVATE BENCH_WITH_RAPIDXML)
     message(STATUS "Берёста, замеры: подключена / benchmark: enabled RapidXML")
+endif()
+
+# Проверки адаптеров на найденных движках / Adapter checks for the detected engines
+option(BENCH_BUILD_TESTS "Собирать проверки адаптеров / Build adapter checks" OFF)
+if(BENCH_BUILD_TESTS)
+    enable_testing()
+    add_executable(bench_engine_checks tests/engine_checks.cpp)
+    target_link_libraries(bench_engine_checks PRIVATE bench_core)
+    beresta_apply_compile_options(bench_engine_checks)
+    add_test(NAME bench_engine_checks COMMAND bench_engine_checks)
 endif()
 
 # ---- Замер с отчётом / The measurement with a report --------------------------

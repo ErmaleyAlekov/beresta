@@ -49,7 +49,7 @@ namespace conformance
                 return primary;
             for (const detail::EntityFile& file : *scope.entityFiles)
             {
-                bool declaresCase = file.text.find("\"" + id + "\"") != std::string::npos;
+                bool declaresCase = file.ids.count(id) != 0;
 
                 if (declaresCase)
                     return (file.directory / std::filesystem::u8path(uri)).lexically_normal();

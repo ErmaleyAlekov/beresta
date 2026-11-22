@@ -1,6 +1,6 @@
 #include "demo/demo_scenarios.hpp"
 #include "platform/console.hpp"
-#include "beresta.hpp"
+#include <exception>
 
 #include <iostream>
 
@@ -27,7 +27,7 @@ int main()
         demo::showSaxStreaming();
         demo::showEncodings();
     }
-    catch (const beresta::DomException& error)
+    catch (const std::exception& error)
     {
         std::cerr << "Непредвиденная ошибка: " << error.what() << '\n';
         return 1;

@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import org.beresta.internal.NativeCalls;
 import org.beresta.internal.NativeMemory;
 import org.beresta.internal.NativeRelease;
+import org.beresta.internal.NativeStrings;
 import org.beresta.internal.SchemaFunctions;
 
 /**
@@ -26,7 +27,8 @@ import org.beresta.internal.SchemaFunctions;
  */
 public final class XmlSchema implements SchemaValidation, AutoCloseable
 {
-    final MemorySegment pointer;
+    private final MemorySegment pointer;
+    private boolean closed;
     private final Cleaner.Cleanable cleanable;
 
     private XmlSchema(MemorySegment out)
@@ -72,12 +74,15 @@ public final class XmlSchema implements SchemaValidation, AutoCloseable
     @Override
     public MemorySegment handle()
     {
+        if (closed)
+            throw new IllegalStateException("Берёста / Beresta: " + NativeStrings.message(3));
         return pointer;
     }
 
     @Override
     public void close()
     {
+        closed = true;
         cleanable.clean();
     }
 }

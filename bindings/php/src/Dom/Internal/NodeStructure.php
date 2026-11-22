@@ -24,11 +24,24 @@ trait NodeStructure
      */
     public function remove(): void
     {
-        $address = $this->address();
+        $registry = $this->document()->wrappers();
+        $pending = [$this->handle()];
+        $affected = [];
+        while ($pending !== []) {
+            $current = array_pop($pending);
+            $address = Handles::address($current);
+            $wrapper = $registry->find($address);
+            if ($wrapper !== null) {
+                $affected[$address] = $wrapper;
+            }
+            WrapperTransfer::pushChildren($current, $pending);
+        }
         Calls::check(Library::ffi()->beresta_node_remove($this->handle()));
-        // Адрес может достаться новому узлу — запись о старом больше не нужна
-        // The address may go to a new node — the entry of the old one is no longer needed
-        $this->document()->wrappers()->forget($address);
+        $this->removed = true;
+        foreach ($affected as $address => $wrapper) {
+            $wrapper->removed = true;
+            $registry->forget($address);
+        }
     }
 
     /**

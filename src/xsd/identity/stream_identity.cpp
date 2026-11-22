@@ -62,8 +62,10 @@ namespace beresta::xsd::detail
         _names[start.level].namespaceUri.assign(start.element.namespaceUri.data(), start.element.namespaceUri.size());
         _names[start.level].localName.assign(start.element.localName.data(), start.element.localName.size());
         selectTargets(start);
+        if (_selectedFields.size() <= start.level)
+            _selectedFields.resize(start.level + 1);
         for (std::size_t index = 0; index < _targetCount; ++index)
-            needText = matchFields(_targets[index], start) || needText;
+            needText = matchFields(index, start) || needText;
         return needText;
     }
 
@@ -93,6 +95,10 @@ namespace beresta::xsd::detail
             closeScope(_scopes.back());
             _scopes.pop_back();
         }
+        // После закрытия всех областей предки уже не могут ссылаться на таблицы.
+        // Once every scope closes, no ancestor can reference these tables.
+        if (_scopes.empty())
+            _tables.clear();
     }
 
     // Все области закрылись вместе со своими элементами, а метки их сообщений переведёт журнал

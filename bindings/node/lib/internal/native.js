@@ -68,7 +68,14 @@ function loadNative()
     {
         if (!fs.existsSync(file))
             continue;
-        const native = require(file);
+        let native;
+        try { native = require(file); }
+        catch (cause)
+        {
+            const error = new BerestaLoadError(file + ": " + cause.message);
+            error.cause = cause;
+            throw error;
+        }
         if (typeof native.init !== 'function')
             throw new BerestaLoadError('Аддон не зарегистрировал функции Node-API / '
                 + 'The addon did not register its Node-API functions: ' + file);

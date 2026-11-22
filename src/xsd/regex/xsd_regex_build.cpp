@@ -53,14 +53,14 @@ namespace beresta::xsd
     // Один шаг моделирования: из каждого активного состояния — по символу code
     // One simulation step: from each active state — by the character code
     void Regex::advanceStates(std::uint32_t code, const std::vector<long>& current,
-        std::vector<long>& next, std::vector<std::size_t>& marks, std::size_t generation) const
+        std::vector<long>& next, MatchScratch& scratch) const
     {
         next.clear();
         for (long state : current)
         {
             const State& node = _states[static_cast<std::size_t>(state)];
             if (node.kind == StateKind::CONSUME && _sets[node.setIndex].contains(code))
-                addReachable(node.out, next, marks, generation);
+                addReachable(node.out, next, scratch);
         }
     }
 

@@ -28,13 +28,16 @@ test('смена языка / switching the language', function switchLanguage()
     const caught = [];
 
     beresta.setLanguage('en');
-    try { beresta.parse('<a><b></a>'); } catch (error) { caught.push(error); }
-    document.close();
-    try { document.root; } catch (error) { caught.push(error); }
-    beresta.setLanguage('ru');
-    assert.equal(caught[0].message, 'line 1, column 7: expected </b>, found </a>');
-    assert.equal(caught[0].code, 'PARSE_ERROR');
-    assert.match(caught[1].message, /the document is already closed/);
+    try {
+        try { beresta.parse('<a><b></a>'); } catch (error) { caught.push(error); }
+        document.close();
+        try { document.root; } catch (error) { caught.push(error); }
+        assert.equal(caught[0].message, 'line 1, column 7: expected </b>, found </a>');
+        assert.equal(caught[0].code, 'PARSE_ERROR');
+        assert.match(caught[1].message, /the document is already closed/);
+    } finally {
+        beresta.setLanguage('ru');
+    }
     assert.equal(beresta.language(), 'ru');
 });
 

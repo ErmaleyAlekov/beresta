@@ -21,7 +21,7 @@ namespace support
     {
         beresta::Element* cursor = document.getRoot();
 
-        while (cursor->getFirstChild() != nullptr && cursor->getFirstChild()->getType() == beresta::NodeType::ELEMENT)
+        while (cursor != nullptr && cursor->getFirstChild() != nullptr && cursor->getFirstChild()->getType() == beresta::NodeType::ELEMENT)
             cursor = static_cast<beresta::Element*>(cursor->getFirstChild());
         return cursor;
     }

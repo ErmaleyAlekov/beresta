@@ -60,20 +60,29 @@ namespace xsts
 
         if (!std::filesystem::is_regular_file(index))
             throw XstsError("нет файла " + index.u8string() + " (сначала make fetch)");
-        beresta::Document document = parseMetadata(index);
+        beresta::Document document = parseMetadata(detail::suitePath(index, suiteRoot));
         Catalog catalog;
 
         for (const beresta::Element* reference : detail::childElements(*document.getRoot(), "testSetRef"))
         {
             std::filesystem::path file = suiteRoot / std::filesystem::u8path(hrefOf(*reference));
 
-            detail::loadTestSet(file.lexically_normal(), suiteRoot, catalog);
+            detail::loadTestSet(detail::suitePath(file, suiteRoot), suiteRoot, catalog);
         }
         return catalog;
     }
 
     namespace detail
     {
+        std::filesystem::path suitePath(const std::filesystem::path& path, const std::filesystem::path& root)
+        {
+            auto candidate = std::filesystem::weakly_canonical(path);
+            auto relative = candidate.lexically_relative(std::filesystem::weakly_canonical(root));
+            if (relative.empty() || *relative.begin() == "..")
+                throw XstsError("путь вне набора: " + path.u8string());
+            return candidate;
+        }
+
         // Имя набора — атрибут name корневого testSet: оно и есть категория отчёта
         // The set name is the name attribute of the root testSet: it is the report category
         void loadTestSet(const std::filesystem::path& file, const std::filesystem::path& root,
@@ -81,7 +90,7 @@ namespace xsts
         {
             beresta::Document document = parseMetadata(file);
             const beresta::Element& testSet = *document.getRoot();
-            SetScope scope{root, file.parent_path(), attributeOrEmpty(testSet, "name"), ""};
+            SetScope scope{root, file.parent_path(), attributeOrEmpty(testSet, "name"), attributeOrEmpty(testSet, "version"), ""};
 
             for (const beresta::Element* group : childElements(testSet, "testGroup"))
                 readGroup(*group, scope, catalog);
@@ -102,6 +111,7 @@ namespace xsts
             SetScope groupScope = scope;
             std::vector<std::string> inherited;
 
+            groupScope.version = group.getAttribute("version").value_or(scope.version);
             groupScope.description = groupDescription(group);
 
             for (const beresta::Element* test : childElements(group, "schemaTest"))

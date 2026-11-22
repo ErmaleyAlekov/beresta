@@ -6,6 +6,20 @@
 
 namespace
 {
+    // Восстанавливает исходный язык даже при прерванной проверке.
+    // Restores the original language even if an assertion interrupts the test.
+    class LanguageGuard
+    {
+    public:
+        ~LanguageGuard()
+        {
+            beresta::i18n::setLanguage(_original);
+        }
+
+    private:
+        std::string_view _original = beresta::i18n::language();
+    };
+
     // Номера меток {N} в шаблоне (метки в двойных скобках {{N}} — тоже метки)
     // Placeholder numbers {N} in a template (placeholders inside {{N}} count too)
     std::set<char> placeholders(const char* text)
@@ -40,7 +54,8 @@ namespace
             TEST_ASSERT(placeholders(russian) == placeholders(english));
         }
         std::vector<std::string_view> languages = beresta::i18n::availableLanguages();
-        TEST_ASSERT(languages.size() >= 2 && languages[0] == "ru" && languages[1] == "en");
+        const std::set<std::string_view> codes(languages.begin(), languages.end());
+        TEST_ASSERT(codes.count("ru") == 1 && codes.count("en") == 1);
     }
 
     /*
@@ -52,6 +67,8 @@ namespace
     */
     void testSwitchLanguage()
     {
+        LanguageGuard language;
+
         TEST_ASSERT(beresta::i18n::setLanguage("en"));
         TEST_ASSERT_EQ(std::string(beresta::i18n::language()), "en");
         try
@@ -66,21 +83,22 @@ namespace
         TEST_ASSERT_THROWS(beresta::Element("1bad"), beresta::DomException);
         TEST_ASSERT(!beresta::i18n::setLanguage("xx"));
         TEST_ASSERT_EQ(std::string(beresta::i18n::language()), "en");
-        TEST_ASSERT(beresta::i18n::setLanguage("ru"));
     }
 
     // Подстановка: порядок меток свободный, {{N}} даёт фигурные скобки, лишняя метка видна
     // Substitution: placeholders in any order, {{N}} yields braces, a missing argument stays visible
     void testFormatting()
     {
+        LanguageGuard language;
+
+        TEST_ASSERT(beresta::i18n::setLanguage("ru"));
         TEST_ASSERT_EQ(beresta::i18n::format(beresta::i18n::Message::SCHEMA_ELEMENT_UNDECLARED, {"urn:x", "a"}),
             "элемент {urn:x}a не объявлен");
         TEST_ASSERT_EQ(beresta::i18n::format(beresta::i18n::Message::END_TAG_MISMATCH, {"b"}),
             "ожидался </b>, найден </{1}>");
-        beresta::i18n::setLanguage("en");
+        TEST_ASSERT(beresta::i18n::setLanguage("en"));
         TEST_ASSERT_EQ(beresta::i18n::format(beresta::i18n::Message::AT_LINE_COLUMN, {"3", "5", "x"}),
             "line 3, column 5: x");
-        beresta::i18n::setLanguage("ru");
     }
 }
 

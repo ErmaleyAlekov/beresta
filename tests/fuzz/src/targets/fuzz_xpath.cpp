@@ -33,7 +33,10 @@ namespace
     // The document from the input or the built-in one (if the input is empty or invalid)
     beresta::Document loadDocument(std::string_view text)
     {
-        beresta::XmlParser parser;
+        fuzz::MemoryResolver resolver("");
+        auto options = fuzz::optionsFromFlags(0x41);
+        options.resolver = &resolver;
+        beresta::XmlParser parser(options);
 
         if (!text.empty())
         {

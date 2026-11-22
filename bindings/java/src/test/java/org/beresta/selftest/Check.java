@@ -27,7 +27,11 @@ enum Check
     BULK_MOVE,
     PARALLEL_SHARED,
     LANGUAGES,
-    UNKNOWN_LANGUAGE;
+    UNKNOWN_LANGUAGE,
+    INVALID_MESSAGE_CODE,
+    MESSAGE_ARGUMENTS,
+    CLOSED_SCHEMA,
+    CLOSED_NODES;
 
     /** Выполнение проверки, соответствующей константе. / Runs the check that matches the constant. */
     void run() throws Exception
@@ -51,6 +55,10 @@ enum Check
             case PARALLEL_SHARED -> LoadChecks.parallelShared();
             case LANGUAGES -> LanguageChecks.languages();
             case UNKNOWN_LANGUAGE -> LanguageChecks.unknownLanguage();
+            case INVALID_MESSAGE_CODE -> ReviewBindingChecks.messageNegativeCode();
+            case MESSAGE_ARGUMENTS -> ReviewBindingChecks.messageWithParameters();
+            case CLOSED_SCHEMA -> ReviewBindingChecks.closedSchema();
+            case CLOSED_NODES -> ReviewBindingChecks.closedNodes();
         }
     }
 }

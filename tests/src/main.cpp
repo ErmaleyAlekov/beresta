@@ -42,7 +42,9 @@ namespace
         suites::registerCapiTests, suites::registerCapiMoveTests, suites::registerCapiStreamTests,
         suites::registerCapiParallelTests, suites::registerCapiBulkMoveTests, suites::registerI18nTests,
         suites::registerReviewParserTests, suites::registerReviewXIncludeTests,
-        suites::registerReviewDtdContentTests, suites::registerReviewDomTests
+        suites::registerReviewDtdContentTests, suites::registerReviewDomTests, suites::registerReviewXPathTests,
+        suites::registerReviewXsdTests, suites::registerReviewXsdFollowupTests,
+        suites::registerReviewXsdStreamFollowupTests
     };
 }
 

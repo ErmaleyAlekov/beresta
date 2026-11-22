@@ -30,7 +30,7 @@ const SLOW_MS = 2000;
  * The median time (ms) of several runs of action; the first run is a warm-up.
  * A very slow operation (longer than SLOW_MS) is measured with a single run.
  */
-function medianTime(action, argument)
+function medianTime(action, argument, release)
 {
     const times = [];
     let result = null;
@@ -44,6 +44,8 @@ function medianTime(action, argument)
             return { ms: elapsed, result };
         if (run > 0)
             times.push(elapsed);
+        if (release && run < RUNS)
+            release(result);
     }
     times.sort(compareNumbers);
     return { ms: times[Math.floor(times.length / 2)], result };
@@ -66,17 +68,26 @@ function compareNumbers(left, right)
  */
 function measureEngine(engine, text)
 {
-    const parsed = medianTime(engine.parse.bind(engine), text);
-    const walked = medianTime(engine.walk.bind(engine), parsed.result);
-    let xpath = '—';
+    const release = engine.release?.bind(engine);
+    const parsed = medianTime(engine.parse.bind(engine), text, release);
+    try
+    {
+        const walked = medianTime(engine.walk.bind(engine), parsed.result);
+        let xpath = '—';
+        let speed = '—';
 
-    if (engine.xpath)
-        xpath = medianTime(engine.xpath.bind(engine, parsed.result), QUERY).ms.toFixed(1);
-    if (engine.release)
-        engine.release(parsed.result);
-    const megabytes = Buffer.byteLength(text) / 1e6;
-    return '| ' + engine.name + ' | ' + (megabytes / parsed.ms * 1000).toFixed(0) + ' | '
-        + walked.ms.toFixed(1) + ' | ' + xpath + ' | ' + walked.result + ' |';
+        if (engine.xpath)
+            xpath = medianTime(engine.xpath.bind(engine, parsed.result), QUERY).ms.toFixed(1);
+        if (parsed.ms > 0)
+            speed = (Buffer.byteLength(text) / parsed.ms / 1000).toFixed(0);
+        return '| ' + engine.name + ' | ' + speed + ' | '
+            + walked.ms.toFixed(1) + ' | ' + xpath + ' | ' + walked.result + ' |';
+    }
+    finally
+    {
+        if (release)
+            release(parsed.result);
+    }
 }
 
 // Точка входа: таблица Markdown в stdout / The entry point: a Markdown table to stdout
@@ -92,4 +103,7 @@ function main()
         console.log(measureEngine(engine, text));
 }
 
-main();
+if (require.main === module)
+    main();
+
+module.exports = { measureEngine };

@@ -38,7 +38,8 @@ namespace
     // A file in UTF-16 with a BOM is read back without loss
     void testFileRoundTrip()
     {
-        std::filesystem::path directory = support::makeTestDirectory("serializer");
+        const support::TestDirectory temporary("serializer");
+        const auto& directory = temporary.path;
         beresta::Document document = beresta::XmlParser().parse("<книга автор=\"Пушкин\">Онегин</книга>");
         beresta::SerializerOptions options;
         options.encoding = "UTF-16";
@@ -47,6 +48,35 @@ namespace
         beresta::Document back = beresta::XmlParser().parseFile(directory / "out.xml");
         TEST_ASSERT(back.getRoot()->isEqualNode(*document.getRoot()));
         TEST_ASSERT_EQ(back.getDeclaration()->encoding, "UTF-16");
+    }
+
+    // Запись возвращает разные коды для отсутствующего каталога и неизвестной кодировки.
+    // Writing reports distinct codes for a missing directory and an unknown encoding.
+    void testFileErrors()
+    {
+        const support::TestDirectory temporary("serializer_errors");
+        const beresta::Element element("a");
+        beresta::SerializerOptions options;
+
+        try
+        {
+            beresta::XmlSerializer().writeFile(element, temporary.path / "missing_dir" / "out.xml");
+            TEST_ASSERT(false);
+        }
+        catch (const beresta::DomException& error)
+        {
+            TEST_ASSERT(error.getCode() == beresta::DomErrorCode::IO_ERROR);
+        }
+        options.encoding = "x-unknown";
+        try
+        {
+            beresta::XmlSerializer(options).writeFile(element, temporary.path / "out.xml");
+            TEST_ASSERT(false);
+        }
+        catch (const beresta::DomException& error)
+        {
+            TEST_ASSERT(error.getCode() == beresta::DomErrorCode::ENCODING_ERROR);
+        }
     }
 }
 
@@ -59,5 +89,6 @@ namespace suites
         runner.add("сериализатор: форматированный вывод", testPrettyPrint);
         runner.add("сериализатор: вывод в windows-1251", testEncodedOutput);
         runner.add("сериализатор: файл в UTF-16", testFileRoundTrip);
+        runner.add("сериализатор: ошибки записи файла", testFileErrors);
     }
 }

@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Concurrent;
+using System.Threading;
 using Beresta;
 
 namespace Beresta.SelfTest
@@ -21,6 +23,8 @@ namespace Beresta.SelfTest
         private readonly byte[] data;
         private readonly ConcurrentBag<string> answers;
 
+        internal ConcurrentBag<Exception> Failures { get; } = new ConcurrentBag<Exception>();
+
         internal ValidationWorker(XmlSchema schema, XPath xpath, byte[] data, ConcurrentBag<string> answers)
         {
             this.schema = schema;
@@ -29,8 +33,29 @@ namespace Beresta.SelfTest
             this.answers = answers;
         }
 
-        /// <summary>Тело потока. / The thread body.</summary>
-        internal void Run()
+        /// <summary>Возвращает точку входа с общим барьером старта.
+        /// Returns the entry point with a shared start gate.</summary>
+        internal ThreadStart StartTogether(CountdownEvent ready, ManualResetEventSlim start)
+        {
+            return Run;
+
+            void Run()
+            {
+                ready.Signal();
+                start.Wait();
+                try
+                {
+                    Validate();
+                }
+                catch (Exception failure)
+                {
+                    Failures.Add(failure);
+                }
+            }
+        }
+
+        /// <summary>Проверки и запросы одного потока. / The checks and queries of one thread.</summary>
+        private void Validate()
         {
             for (int round = 0; round < Rounds; ++round)
             {

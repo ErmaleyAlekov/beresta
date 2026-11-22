@@ -27,4 +27,5 @@ enum Message: int
     case UnknownNodeType = 5;
     case InvalidArgument = 6;
     case NoFileSystem = 7;
+    case NodeRemoved = 8;
 }

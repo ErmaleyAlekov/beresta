@@ -1,3 +1,4 @@
+#include <climits>
 #include "addon/adapters.hpp"
 #include "addon/call_frame.hpp"
 #include "addon/results.hpp"
@@ -23,6 +24,11 @@ namespace beresta::node
 
         if (!call.isValid() || !call.integer(0, value))
             return nullptr;
+        if (value < INT_MIN || value > INT_MAX)
+        {
+            call.reject(0, "int");
+            return nullptr;
+        }
         BorrowedOfInt function = reinterpret_cast<BorrowedOfInt>(call.target());
         return makeBorrowedString(env, function(static_cast<int>(value)));
     }

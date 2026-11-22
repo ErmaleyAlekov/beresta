@@ -2,6 +2,8 @@
 #include "exception/dom_exception.hpp"
 #include "xsd/regex/xsd_regex.hpp"
 
+#include <vector>
+
 namespace
 {
     /*
@@ -67,6 +69,32 @@ namespace
         TEST_ASSERT(!color.matches("#12345"));
         TEST_ASSERT(beresta::xsd::Regex("a{3}|a{6}|a{8}").matches("aaaaaa"));
     }
+
+    // Проверяем обе границы диапазона повторов и переход к следующему атому.
+    // Check both ends of the repetition range and the transition to the next atom.
+    void testRepetitionBounds()
+    {
+        const beresta::xsd::Regex range("a{2,4}b");
+
+        TEST_ASSERT(!range.matches("ab"));
+        TEST_ASSERT(range.matches("aab"));
+        TEST_ASSERT(range.matches("aaaab"));
+        TEST_ASSERT(!range.matches("aaaaab"));
+        TEST_ASSERT(!range.matches("aaaac"));
+        TEST_ASSERT_THROWS(beresta::xsd::Regex("a{4,2}"), beresta::DomException);
+
+        const beresta::xsd::Regex choice("(a|ab){1,2}c");
+        TEST_ASSERT(choice.matches("abac"));
+        TEST_ASSERT(!choice.matches("abad"));
+
+        // Проверяем предел числа при разборе, до построения автомата.
+        // Check the numerical limit during parsing, before constructing the automaton.
+        std::vector<beresta::xsd::CharSet> sets;
+        const beresta::xsd::RegexNode parsed = beresta::xsd::RegexParser("a{100000}", sets).parse();
+        TEST_ASSERT(parsed.children.size() == 1);
+        TEST_ASSERT(parsed.children.front().maximum == 100000);
+        TEST_ASSERT_THROWS(beresta::xsd::RegexParser("a{100001}", sets).parse(), beresta::DomException);
+    }
 }
 
 namespace suites
@@ -78,5 +106,6 @@ namespace suites
         runner.add("XSD regex: только экранирования XSD 1.0", testStrictEscapes);
         runner.add("XSD regex: синтаксис классов символов", testClassSyntax);
         runner.add("XSD regex: средние ветви длинного выбора", testLongAlternation);
+        runner.add("XSD regex: границы квантификатора", testRepetitionBounds);
     }
 }

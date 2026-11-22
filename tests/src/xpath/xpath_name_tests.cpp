@@ -24,6 +24,19 @@ namespace
         TEST_ASSERT_THROWS(beresta::xpath::XPathExpression("/a\xC3\x97"), beresta::DomException);
         TEST_ASSERT_THROWS(beresta::xpath::XPathExpression("/\xC2\xB7"), beresta::DomException);
     }
+
+    // Звёздочка зависит от позиции, а имена элементов могут совпадать с операторами.
+    // The meaning of an asterisk depends on its position, and names may match operators.
+    void testOperatorNames()
+    {
+        const auto document = beresta::XmlParser().parse(
+            "<div><mod><and><or>3</or></and></mod></div>");
+        const auto& root = *document.getRoot();
+
+        TEST_ASSERT_EQ(beresta::xpath::evaluateString(root, "* * *"), "9");
+        TEST_ASSERT_EQ(beresta::xpath::evaluateString(root, "mod/* * 2"), "6");
+        TEST_ASSERT_EQ(beresta::xpath::evaluateString(document, "/div/mod/and/or"), "3");
+    }
 }
 
 namespace suites
@@ -33,5 +46,6 @@ namespace suites
     void registerXPathNameTests(test::TestRunner& runner)
     {
         runner.add("XPath: имена по таблицам 5-й редакции", testUnicodeNames);
+        runner.add("XPath: имена операторов и звёздочка", testOperatorNames);
     }
 }

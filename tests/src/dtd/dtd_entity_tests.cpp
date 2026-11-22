@@ -61,6 +61,22 @@ namespace
         TEST_ASSERT_THROWS(parser.parse(laughs), beresta::ParseException);
         TEST_ASSERT_THROWS(parser.parse("<!DOCTYPE r [<!ENTITY e \"<a>\">]><r>&e;</r>"),
             beresta::ParseException);
+
+        // Два раскрытия по два байта точно заполняют бюджет, третье превышает его.
+        // Two two-byte expansions exactly fill the budget, and the third exceeds it.
+        options.maxExpandedSize = 4;
+        const beresta::XmlParser smallBudget(options);
+        const std::string dtd = "<!DOCTYPE r [<!ENTITY a \"xy\">]>";
+        TEST_ASSERT_EQ(smallBudget.parse(dtd + "<r>&a;&a;</r>").getRoot()->getTextContent(), "xyxy");
+        try
+        {
+            smallBudget.parse(dtd + "<r>&a;&a;&a;</r>");
+            TEST_ASSERT(false);
+        }
+        catch (const beresta::ParseException& error)
+        {
+            TEST_ASSERT(error.getCode() == beresta::DomErrorCode::LIMIT_EXCEEDED);
+        }
     }
 }
 

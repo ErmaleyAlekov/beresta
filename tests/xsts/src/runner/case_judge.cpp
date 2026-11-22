@@ -20,12 +20,12 @@ namespace xsts
         if (testCase.expected == Expectation::VALID)
         {
             if (attempt.rejected)
-                return CaseResult{&testCase, Verdict::FAILED, "корректная схема отвергнута: " + attempt.message};
+                return CaseResult{&testCase, Verdict::FAILED, "корректная схема отвергнута: " + attempt.message, "invalid"};
             return CaseResult{&testCase, Verdict::PASSED, "схема загружена"};
         }
         if (attempt.rejected)
             return CaseResult{&testCase, Verdict::PASSED, "схема отвергнута: " + attempt.message};
-        return CaseResult{&testCase, Verdict::FAILED, "ошибочная схема принята"};
+        return CaseResult{&testCase, Verdict::FAILED, "ошибочная схема принята", "valid"};
     }
 
     /*
@@ -44,18 +44,18 @@ namespace xsts
         if (attempt.unexpected)
             return CaseResult{&testCase, Verdict::FAILED, "сбой библиотеки: " + attempt.message};
         if (attempt.schemaFailed)
-            return CaseResult{&testCase, Verdict::FAILED, attempt.message};
+            return CaseResult{&testCase, Verdict::FAILED, attempt.message, "нет схемы"};
         bool invalid = attempt.rejected || attempt.errors > 0;
         if (testCase.expected == Expectation::VALID)
         {
             if (attempt.rejected)
-                return CaseResult{&testCase, Verdict::FAILED, "экземпляр не разобран: " + attempt.message};
+                return CaseResult{&testCase, Verdict::FAILED, "экземпляр не разобран: " + attempt.message, "invalid"};
             if (invalid)
-                return CaseResult{&testCase, Verdict::FAILED, "ложная ошибка: " + attempt.message};
+                return CaseResult{&testCase, Verdict::FAILED, "ложная ошибка: " + attempt.message, "invalid"};
             return CaseResult{&testCase, Verdict::PASSED, "экземпляр валиден"};
         }
         if (invalid)
             return CaseResult{&testCase, Verdict::PASSED, "ошибка найдена: " + attempt.message};
-        return CaseResult{&testCase, Verdict::FAILED, "невалидный экземпляр принят"};
+        return CaseResult{&testCase, Verdict::FAILED, "невалидный экземпляр принят", "valid"};
     }
 }

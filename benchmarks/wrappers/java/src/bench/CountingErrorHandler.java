@@ -4,11 +4,9 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXParseException;
 
 /**
- * Счётчик ошибок проверки для JDK: ошибки и предупреждения считаются, а
- * не бросаются, — как у «Берёсты» со сбором диагностик.
+ * Счётчик нарушений схемы JDK. Предупреждения не влияют на валидность.
  *
- * A validation error counter for the JDK: errors and warnings are counted, not
- * thrown — as in Beresta with diagnostics collection.
+ * JDK schema violation counter. Warnings do not affect validity.
  */
 public final class CountingErrorHandler implements ErrorHandler
 {
@@ -29,7 +27,6 @@ public final class CountingErrorHandler implements ErrorHandler
     @Override
     public void warning(SAXParseException problem)
     {
-        ++count;
     }
 
     @Override

@@ -1,11 +1,13 @@
 #include "xsts/case_runner.hpp"
 
+#include "xsts/case_timeout.hpp"
+
 #include <utility>
 
 namespace xsts
 {
-    GroupRunner::GroupRunner(std::filesystem::path suiteRoot, const Limitations& limitations)
-        : _suiteRoot(std::move(suiteRoot)), _limitations(limitations)
+    GroupRunner::GroupRunner(std::filesystem::path suiteRoot, const Limitations& limitations, CaseTimeout* timeout)
+        : _suiteRoot(std::move(suiteRoot)), _limitations(limitations), _timeout(timeout)
     {
     }
 
@@ -29,8 +31,18 @@ namespace xsts
         if (group.hasSchema)
         {
             const TestCase& schemaCase = catalog.cases[group.schemaCase];
-            schema = loadSchema(schemaCase.documents, _suiteRoot);
-            schemaResult = finish(schemaCase, judgeSchema(schemaCase, schema));
+            bool expired = _timeout && !_timeout->start(group.schemaCase);
+            if (!expired && schemaCase.inputError.empty())
+                schema = loadSchema(schemaCase.documents, _suiteRoot);
+            else
+            {
+                schema.unexpected = true;
+                schema.message = expired ? _timeout->failure(group.schemaCase) : schemaCase.inputError;
+            }
+            if (_timeout) _timeout->finish();
+            schemaResult = judgeSchema(schemaCase, schema);
+            if (!schema.unexpected)
+                schemaResult = finish(schemaCase, schemaResult);
             results.push_back(schemaResult);
         }
         for (std::size_t index : group.instanceCases)
@@ -38,7 +50,11 @@ namespace xsts
             const CaseResult* owner = nullptr;
             if (group.hasSchema)
                 owner = &schemaResult;
-            results.push_back(runInstance(catalog.cases[index], schema, owner));
+            if (_timeout && !_timeout->start(index))
+                results.push_back({&catalog.cases[index], Verdict::FAILED, _timeout->failure(index)});
+            else
+                results.push_back(runInstance(catalog.cases[index], schema, owner));
+            if (_timeout) _timeout->finish();
         }
     }
 
@@ -61,17 +77,24 @@ namespace xsts
         static const std::vector<std::filesystem::path> NO_DOCUMENTS;
         const std::vector<std::filesystem::path>* groupDocuments = &NO_DOCUMENTS;
 
+        if (!testCase.inputError.empty())
+            return CaseResult{&testCase, Verdict::FAILED, testCase.inputError};
+        if (schema.unexpected)
+            return CaseResult{&testCase, Verdict::FAILED, "сбой загрузки схемы: " + schema.message, "нет схемы"};
         if (schemaResult != nullptr)
             groupDocuments = &schemaResult->testCase->documents;
         if (schemaResult == nullptr || schema.schema != nullptr)
-            return finish(testCase, judgeInstance(testCase, validateInstance(testCase.documents.front(),
-                schema.schema, *groupDocuments, _suiteRoot)));
-        if (schemaResult->testCase->expected == Expectation::INVALID)
+        {
+            auto attempt = validateInstance(testCase.documents.front(), schema.schema, *groupDocuments, _suiteRoot);
+            auto judged = judgeInstance(testCase, attempt);
+            return attempt.unexpected ? judged : finish(testCase, judged);
+        }
+        if (schema.rejected && schemaResult->testCase->expected == Expectation::INVALID)
             return CaseResult{&testCase, Verdict::SKIPPED, "схема группы ожидаемо невалидна"};
         if (schemaResult->verdict == Verdict::SKIPPED || schemaResult->verdict == Verdict::LIMITED)
             return CaseResult{&testCase, schemaResult->verdict, schemaResult->reason};
         return finish(testCase, CaseResult{&testCase, Verdict::FAILED,
-            "схема группы не загрузилась: " + schema.message});
+            "схема группы не загрузилась: " + schema.message, "нет схемы"});
     }
 
     // Спорные случаи пропускаются; провал случая из списка ограничений — отдельная графа

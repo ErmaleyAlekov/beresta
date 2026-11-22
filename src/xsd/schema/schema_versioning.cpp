@@ -1,6 +1,8 @@
 #include "xsd/internal/schema_builder.hpp"
 #include "xsd/internal/datatype_checks.hpp"
 #include "utils/decimal.hpp"
+#include "exception/dom_exception.hpp"
+#include "i18n/i18n.hpp"
 
 namespace beresta::xsd::detail
 {
@@ -14,11 +16,11 @@ namespace beresta::xsd::detail
 
     /*
     ** Сравнение атрибута-версии с версией процессора: -1, 0, 1 или 2, если
-    ** атрибута нет (или он не число xs:decimal — тогда он не учитывается).
+    ** атрибута нет. Некорректная запись xs:decimal — ошибка схемы.
     ** Версии сравниваются точно, как десятичные числа ("1.10" = "1.1").
     **
     ** Comparing a version attribute with the processor version: -1, 0, 1 or 2 if
-    ** there is no attribute (or it is not an xs:decimal number — then it is ignored).
+    ** there is no attribute. Invalid xs:decimal lexis is a schema error.
     ** Versions are compared exactly, as decimal numbers ("1.10" = "1.1").
     */
     static int compareVersion(const Element& element, std::string_view localName)
@@ -29,7 +31,8 @@ namespace beresta::xsd::detail
             return 2;
         std::string value = normalizeWhiteSpace(raw.value(), WhiteSpace::COLLAPSE);
         if (!isDecimalLexical(value, false))
-            return 2;
+            throw DomException(DomErrorCode::SCHEMA_ERROR,
+                i18n::format(i18n::Message::SCHEMA_INVALID_ATTRIBUTE, {localName, value}));
         return utils::compareDecimalText(value, PROCESSOR_VERSION);
     }
 

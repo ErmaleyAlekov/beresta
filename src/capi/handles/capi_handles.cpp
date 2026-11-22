@@ -3,21 +3,14 @@
 
 namespace beresta::capi
 {
-    /*
-    ** Все дескрипторы документов и узлов хранят указатель Node*,
-    ** приведённый к void*. Обратное приведение static_cast<Node*>(void*)
-    ** поэтому всегда корректно, а конкретный тип узнаётся через
-    ** dynamic_cast — безопасно, без доверия к внешнему коду.
-    **
-    ** All document and node handles keep a Node* pointer cast to void*.
-    ** The reverse cast static_cast<Node*>(void*) is therefore always correct,
-    ** and the concrete type is determined through dynamic_cast — safely,
-    ** without trusting external code.
-    */
+    // Живой дескриптор другого типа отсекается до обращения к Node.
+    // Reject a live handle of another type before accessing Node.
     Node& toNode(void* handle)
     {
         if (handle == nullptr)
             throw InvalidArgumentException(beresta::i18n::format(beresta::i18n::Message::HANDLE_EXPECTED_NODE));
+        if (isRegisteredHandle(handle))
+            throw InvalidArgumentException(i18n::format(i18n::Message::HANDLE_WRONG_TYPE, {"node"}));
         return *static_cast<Node*>(handle);
     }
 

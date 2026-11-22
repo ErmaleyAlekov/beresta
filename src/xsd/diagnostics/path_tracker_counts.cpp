@@ -1,4 +1,5 @@
 #include "xsd/internal/path_tracker.hpp"
+#include "xsd/internal/validation_budget.hpp"
 
 namespace beresta::xsd::detail
 {
@@ -101,6 +102,8 @@ namespace beresta::xsd::detail
 
         if (found != _nameIndex.end())
             return found->second;
+        chargeValidation(_retainedBytes, sizeof(std::string) + sizeof(decltype(_nameIndex)::value_type), "PathTracker");
+        chargeValidation(_retainedBytes, name.size(), "PathTracker");
         _names.emplace_back(name.data(), name.size());
         std::string_view stored = _names.back();
         _nameIndex.emplace(stored, stored);

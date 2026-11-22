@@ -60,15 +60,17 @@ namespace beresta::xsd::detail
     ** A type by name: the built-in XSD types, already built ones, or building
     ** from a registered definition (with memoization of the result).
     */
-    TypeRef SchemaBuilder::resolveType(const QualifiedKey& key)
+    TypeRef SchemaBuilder::resolveType(const QualifiedKey& key, const Element* where)
     {
+        if (where == nullptr)
+            where = _sources.front().root;
         if (key.first == XSD_NAMESPACE_URI)
         {
             if (key.second == "anyType")
                 return TypeRef();
             const SimpleType* builtin = builtinType(key.second);
             if (builtin == nullptr)
-                fail(*_sources.front().root, i18n::format(i18n::Message::SCHEMA_UNKNOWN_BUILTIN, {key.second}));
+                fail(*where, i18n::format(i18n::Message::SCHEMA_UNKNOWN_BUILTIN, {key.second}));
             return TypeRef{builtin, nullptr};
         }
         auto built = _builtTypes.find(key);
@@ -79,7 +81,7 @@ namespace beresta::xsd::detail
             return TypeRef{nullptr, buildComplexType(*complex->element, *complex->source, key)};
         const Definition* simple = findDefinition("simpleType", key);
         if (simple == nullptr)
-            fail(*_sources.front().root, i18n::format(i18n::Message::SCHEMA_TYPE_NOT_FOUND, {key.first, key.second}));
+            fail(*where, i18n::format(i18n::Message::SCHEMA_TYPE_NOT_FOUND, {key.first, key.second}));
         return TypeRef{buildSimpleType(*simple->element, *simple->source, key), nullptr};
     }
 

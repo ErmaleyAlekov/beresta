@@ -7,9 +7,9 @@
 - запрос XPath 1.0;
 - разбор с проверкой по XML Schema (с построением дерева);
 - потоковая проверка по XML Schema без дерева (SAX): «Берёста» — `SaxParser` со схемой, libxml2 — `xmlSchemaValidateStream`;
-- память под дерево. Её меряют в отдельном процессе, чтобы библиотеки не делили кучу.
+- память в отдельном процессе. После разбора измеряется прирост RSS при живом дереве и отдельно прирост пикового RSS относительно максимума перед разбором. Нулевой прирост пика означает, что прежний максимум сохранился.
 
-Данные генерируются детерминированно: каталог товаров (много мелких элементов с атрибутами и сущностями) и статья (длинный русский текст со смешанным содержимым). Для каждой операции берётся медиана из нескольких запусков, первый запуск считается прогревом. Таблица сверки показывает контрольные суммы обхода, размер вывода, число узлов XPath и число ошибок XSD. Если они совпадают у всех библиотек, значит, все построили одно и то же дерево.
+Данные генерируются детерминированно: каталог товаров (много мелких элементов с атрибутами и сущностями) и статья (длинный русский текст со смешанным содержимым). Для каждой операции берётся медиана из нескольких запусков, первый запуск считается прогревом. Таблица сверки показывает контрольные суммы обхода, размер вывода, число узлов XPath и число ошибок XSD для DOM и потока. Расхождение счётчиков между движками, поддерживающими операцию, завершает прогон с ошибкой. Размер сериализации выводится для справки.
 
 Сравниваемые библиотеки подключаются, только если их нашёл pkg-config (RapidXML — по заголовку). Без них программа меряет одну «Берёсту». Сама «Берёста» от них не зависит: это только инструмент сравнения.
 
@@ -57,6 +57,8 @@ PYTHONPATH=../../bindings/python python3 python/bench.py data
 php -d ffi.enable=1 php/bench.php data
 ```
 
+Замеры пропускной способности предназначены для корректного каталога. При нарушении XSD DOM-разбор «Берёсты» прекращается на первом нарушении и показывает 1 в столбце диагностики. Движки, которые продолжают разбор, выводят своё число нарушений. В таблицах потоковой проверки каждый движок выводит число обнаруженных нарушений. Столбец `XSD valid` показывает сопоставимый итог проверки: `yes` или `no`, либо `—` у движка без поддержки XSD. Число диагностик и объём работы у движков могут различаться.
+
 lxml необязательна (`pip install lxml`): без неё её строка пропускается. PHP-обёртка (`make PHP=1`) сравнивается с ext/dom (`DOMDocument` + `DOMXPath`, XSD — `schemaValidateSource`) и SimpleXML; память — `php php/bench.php data --memory N` (N — номер библиотеки, Linux).
 
 Потоковая проверка по XSD без дерева сравнивается отдельными программами на тех же данных: `bench.StreamBench` (Java: «Берёста» против `javax.xml.validation.Validator`), `WrapperBench` с ключом `--stream` (.NET: против проверяющего `XmlReader`), `python/stream_bench.py` (Python: против lxml `iterparse` со схемой) и `php/stream_bench.php` (PHP: против `XMLReader` с `setSchema`). Запуск — как у основных программ, например `java ... bench.StreamBench data` или `dotnet run -c Release --project csharp/WrapperBench.csproj -- data --stream`.
@@ -77,6 +79,8 @@ The `beresta_bench` program compares Beresta with other XML libraries on the sam
 - the tree memory, measured in a separate process so that the libraries do not share a heap.
 
 The compared libraries are included only if pkg-config found them (RapidXML — by its header). Beresta itself does not depend on them: this is only a comparison tool.
+
+Throughput measurements are intended for a valid catalog. For schema-invalid input, Beresta's DOM parser stops at the first violation and reports 1 in the diagnostics column. Engines that continue parsing report their own diagnostic totals. Each streaming validator reports the number of violations it detected. The `XSD valid` column gives the comparable outcome: `yes` or `no`, or `—` for an engine without XSD support. Diagnostic totals and the work performed may vary by engine.
 
 `wrappers/` compares the Java, .NET, Python and PHP wrappers with the XML libraries of their languages: the JDK DOM (`javax.xml`), `XmlDocument` and `XDocument`, lxml and `xml.etree`, ext/dom and SimpleXML. All programs read the same files from `wrappers/data` (`node make_data.js`), and the memory of every library is measured in a separate process (`--memory N`, Linux). The commands are given above. Streaming XSD validation without a tree is compared by separate programs on the same data: `bench.StreamBench` (Java: Beresta against `javax.xml.validation.Validator`), `WrapperBench` with the `--stream` switch (.NET: against a validating `XmlReader`), `python/stream_bench.py` (Python: against lxml `iterparse` with a schema) and `php/stream_bench.php` (PHP: against `XMLReader` with `setSchema`).
 

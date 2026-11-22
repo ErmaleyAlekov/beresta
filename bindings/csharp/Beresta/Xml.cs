@@ -28,24 +28,44 @@ namespace Beresta
         /// </summary>
         public static XmlDocument Parse(byte[] data, ParseFlags flags = ParseFlags.Default, XmlSchema? schema = null)
         {
-            int status = NativeMethods.beresta_document_parse(data, data.LongLength, (uint)flags,
-                SchemaPointer(schema), out IntPtr document);
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
+            bool retained = false;
+            try
+            {
+                schema?.Native.DangerousAddRef(ref retained);
+                int status = NativeMethods.beresta_document_parse(data, data.LongLength, (uint)flags,
+                    schema?.Native.DangerousGetHandle() ?? IntPtr.Zero, out IntPtr document);
 
-            GC.KeepAlive(schema);
-            NativeCalls.Check(status);
-            return new XmlDocument(document);
+                NativeCalls.Check(status);
+                return new XmlDocument(document);
+            }
+            finally
+            {
+                if (retained)
+                    schema!.Native.DangerousRelease();
+            }
         }
 
         /// <summary>Разбор файла; ParseFlags.FileResources разрешает внешние DTD из его каталога.
         /// Parses a file; ParseFlags.FileResources allows external DTDs from its directory.</summary>
         public static XmlDocument ParseFile(string path, ParseFlags flags = ParseFlags.Default, XmlSchema? schema = null)
         {
-            int status = NativeMethods.beresta_document_parse_file(Path.GetFullPath(path), (uint)flags,
-                SchemaPointer(schema), out IntPtr document);
+            bool retained = false;
+            try
+            {
+                schema?.Native.DangerousAddRef(ref retained);
+                int status = NativeMethods.beresta_document_parse_file(Path.GetFullPath(path), (uint)flags,
+                    schema?.Native.DangerousGetHandle() ?? IntPtr.Zero, out IntPtr document);
 
-            GC.KeepAlive(schema);
-            NativeCalls.Check(status);
-            return new XmlDocument(document);
+                NativeCalls.Check(status);
+                return new XmlDocument(document);
+            }
+            finally
+            {
+                if (retained)
+                    schema!.Native.DangerousRelease();
+            }
         }
 
         /// <summary>Новый документ; rootName == null — без корневого элемента.

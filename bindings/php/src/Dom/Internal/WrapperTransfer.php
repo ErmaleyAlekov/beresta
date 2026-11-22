@@ -35,8 +35,12 @@ final class WrapperTransfer
      */
     public static function transfer(Node $moved, Document $source, Document $target): void
     {
-        $deep = $source->wrappers()->count() > 1;
+        $registry = $source->wrappers();
+        $deep = $registry->count() > (int) ($registry->find($moved->address()) !== null);
         $moved->adopt($target);
+        if ($registry->find($moved->address()) === null) {
+            $target->wrappers()->remember($moved->address(), $moved);
+        }
         $pending = [$moved->handle()];
         while ($pending !== []) {
             $current = array_pop($pending);
@@ -65,7 +69,7 @@ final class WrapperTransfer
      *
      * @param list<CData> $pending
      */
-    private static function pushChildren(CData $parent, array &$pending): void
+    public static function pushChildren(CData $parent, array &$pending): void
     {
         $ffi = Library::ffi();
         $child = $ffi->beresta_node_first_child($parent);

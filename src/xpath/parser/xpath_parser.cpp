@@ -71,6 +71,10 @@ namespace beresta::xpath::detail
     XPathParser::XPathParser(std::vector<Token> tokens, XPathDialect dialect, const XPathContext* namespaces)
         : _tokens(std::move(tokens)), _index(0), _dialect(dialect), _namespaces(namespaces), _depth(0)
     {
+        // Даже вручную переданный список обязан иметь безопасный терминатор.
+        // Even a manually supplied list must have a safe terminator.
+        if (_tokens.empty() || _tokens.back().type != TokenType::END_OF_INPUT)
+            _tokens.push_back(Token{TokenType::END_OF_INPUT, "", 0.0});
     }
 
     // Всё выражение — одиночное выражение (в XPath 1.0 — бинарное самого низкого приоритета)

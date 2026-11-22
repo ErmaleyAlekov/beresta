@@ -67,7 +67,9 @@ namespace beresta::xsd::detail
             skipSpaces();
         bool self = _position < _text.size() && _text[_position] == '.';
         bool nameFollows = _position + 1 < _text.size() && _text[_position + 1] != '/'
-            && _text[_position + 1] != '|' && _text[_position + 1] != ' ';
+            && _text[_position + 1] != '|' && _text[_position + 1] != ' '
+            && _text[_position + 1] != '\t' && _text[_position + 1] != '\r'
+            && _text[_position + 1] != '\n';
         if (self && !nameFollows)
         {
             ++_position;

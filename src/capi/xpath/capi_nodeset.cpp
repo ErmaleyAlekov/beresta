@@ -53,5 +53,7 @@ extern "C" BERESTA_API char* beresta_nodeset_value(beresta_nodeset nodeset, int6
 
 extern "C" BERESTA_API void beresta_nodeset_free(beresta_nodeset nodeset)
 {
-    delete static_cast<beresta::capi::NodeSetHandle*>(nodeset);
+    try {
+        beresta::capi::freeHandle<beresta::capi::NodeSetHandle>(nodeset, "nodeset");
+    BERESTA_CAPI_CATCH_VOID
 }

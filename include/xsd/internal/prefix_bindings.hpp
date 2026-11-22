@@ -3,7 +3,6 @@
 
 #include "sax/sax_types.hpp"
 #include "xsd/internal/identity_values.hpp"
-#include "xsd/prefix_resolver.hpp"
 
 #include <cstddef>
 #include <optional>
@@ -36,7 +35,7 @@ namespace beresta::xsd::detail
     ** in a tree; xmlns:p="" cancels a declaration. Declaration objects
     ** are reused, and an element without xmlns costs one mark record.
     */
-    class PrefixBindings : public PrefixResolver, public NamespaceLookup
+    class PrefixBindings : public NamespaceLookup
     {
     public:
         PrefixBindings();

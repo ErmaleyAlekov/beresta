@@ -29,7 +29,7 @@ from ._node_content import NodeContentMixin
 from ._node_editing import NodeEditingMixin
 from ._node_navigation import NodeNavigationMixin
 from ._node_structure import NodeStructureMixin
-from .languages import DOCUMENT_CLOSED, message_text
+from .languages import DOCUMENT_CLOSED, NODE_REMOVED, message_text
 
 
 class Node(NodeContentMixin, NodeNavigationMixin, NodeChildrenMixin,
@@ -38,6 +38,7 @@ class Node(NodeContentMixin, NodeNavigationMixin, NodeChildrenMixin,
     A document node: the C interface handle and the owning document."""
 
     def __init__(self, pointer: int, document, kind: Optional[int] = None) -> None:
+        self._removed = False
         self._pointer = pointer
         # Документ-владелец; move_to меняет его (см. _wrapping.transfer_wrappers)
         # The owner document; move_to changes it (see _wrapping.transfer_wrappers)
@@ -52,6 +53,8 @@ class Node(NodeContentMixin, NodeNavigationMixin, NodeChildrenMixin,
     def handle(self) -> int:
         """Дескриптор для вызова Си-функций; проверяет, что документ жив.
         The handle for calling C functions; checks that the document is alive."""
+        if self._removed:
+            raise RuntimeError("Берёста / Beresta: " + message_text(NODE_REMOVED))
         if self._document.closed:
             raise RuntimeError("Берёста / Beresta: " + message_text(DOCUMENT_CLOSED))
         return self._pointer
@@ -64,7 +67,8 @@ class Node(NodeContentMixin, NodeNavigationMixin, NodeChildrenMixin,
     def __eq__(self, other: object) -> bool:
         """Два объекта-обёртки равны, если указывают на один узел.
         Two wrapper objects are equal if they point to the same node."""
-        return isinstance(other, Node) and other._pointer == self._pointer
+        return self is other or (isinstance(other, Node) and not self._removed
+                                 and not other._removed and other._pointer == self._pointer)
 
     def __hash__(self) -> int:
         return hash(self._pointer)

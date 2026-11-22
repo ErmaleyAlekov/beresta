@@ -17,6 +17,8 @@ namespace beresta::xsd::detail
     {
         for (const std::vector<std::shared_ptr<const Regex>>& group : type.facets.patterns)
         {
+            if (group.empty())
+                return i18n::format(i18n::Message::PATTERN_CLASS_EMPTY);
             bool matched = false;
             for (const std::shared_ptr<const Regex>& pattern : group)
                 matched = matched || pattern->matches(value);

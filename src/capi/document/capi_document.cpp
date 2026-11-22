@@ -33,10 +33,9 @@ namespace beresta::capi
 extern "C" BERESTA_API int beresta_document_create(const char* root_name, beresta_document* out)
 {
     BERESTA_CAPI_TRY
+        beresta::capi::clearOutput(out);
         beresta::Document document;
 
-        if (out == nullptr)
-            throw beresta::capi::InvalidArgumentException(beresta::i18n::format(beresta::i18n::Message::ARGUMENT_NULL, {"out"}));
         if (root_name != nullptr)
             document.setRoot(std::make_unique<beresta::Element>(root_name));
         *out = beresta::capi::releaseDocument(std::move(document));
@@ -69,10 +68,9 @@ extern "C" BERESTA_API void beresta_document_free(beresta_document document)
 extern "C" BERESTA_API int beresta_document_clone(beresta_document document, beresta_document* out)
 {
     BERESTA_CAPI_TRY
+        beresta::capi::clearOutput(out);
         const beresta::Document& source = beresta::capi::toDocument(document);
 
-        if (out == nullptr)
-            throw beresta::capi::InvalidArgumentException(beresta::i18n::format(beresta::i18n::Message::ARGUMENT_NULL, {"out"}));
         *out = beresta::capi::releaseDocument(beresta::Document(source));
         return BERESTA_OK;
     BERESTA_CAPI_CATCH_STATUS

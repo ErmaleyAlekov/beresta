@@ -38,6 +38,7 @@ namespace bench
     private:
         // Схема компилируется один раз и переиспользуется (libxml2_stream.cpp)
         // The schema is compiled once and reused (libxml2_stream.cpp)
+        static int bufferLength(std::size_t size);
         xmlSchemaPtr schemaFor(const std::string& xsd);
 
         xmlDocPtr _document;

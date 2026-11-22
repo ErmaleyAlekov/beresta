@@ -1,4 +1,5 @@
 #include "xsd/internal/path_tracker.hpp"
+#include "xsd/internal/validation_budget.hpp"
 
 #include <utility>
 
@@ -81,6 +82,7 @@ namespace beresta::xsd::detail
             std::size_t parent = NO_STEP;
             if (current > 1)
                 parent = _levels[current - 1].step;
+            chargeValidation(_retainedBytes, sizeof(PathStep) + sizeof(std::size_t), "PathTracker");
             _steps.push_back(PathStep{parent, intern(_levels[current].name), _levels[current].ordinal, false});
             _levels[current].step = _steps.size() - 1;
             _levels[current - 1].pinnedChildren.push_back(_levels[current].step);

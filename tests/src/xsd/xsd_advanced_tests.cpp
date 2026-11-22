@@ -88,7 +88,8 @@ namespace
     // xs:include through FileResourceResolver
     void testSchemaInclude()
     {
-        std::filesystem::path root = support::makeTestDirectory("xsd_include");
+        const support::TestDirectory temporary("xsd_include");
+        const auto& root = temporary.path;
         support::writeTestFile(root / "types.xsd", "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">"
             "<xs:simpleType name=\"Code\"><xs:restriction base=\"xs:string\"><xs:length value=\"3\"/>"
             "</xs:restriction></xs:simpleType></xs:schema>");

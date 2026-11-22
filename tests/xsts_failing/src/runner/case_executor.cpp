@@ -19,6 +19,8 @@ namespace failing
     {
         const xsts::TestCase& testCase = suite.catalog.cases[caseIndex];
 
+        if (!testCase.inputError.empty())
+            return Execution{false, "нет документа", testCase.inputError};
         if (testCase.kind == xsts::CaseKind::SCHEMA)
             return detail::executeSchema(testCase, suite.root);
         const xsts::TestGroup& group = suite.catalog.groups[suite.index.groupOf[caseIndex]];
@@ -53,6 +55,8 @@ namespace failing
             const std::vector<std::filesystem::path>* groupDocuments = &NO_DOCUMENTS;
             xsts::SchemaAttempt schema;
 
+            if (testCase.documents.empty())
+                return Execution{false, "нет документа", "отсутствует instanceDocument"};
             if (group.hasSchema)
             {
                 groupDocuments = &suite.catalog.cases[group.schemaCase].documents;

@@ -67,15 +67,18 @@ test('XSD поток: совпадает с деревом / XSD stream: matches
 test('XSD поток: файлы и ошибки / XSD stream: files and errors', function streamFile()
 {
     const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'beresta-stream-'));
-    const file = path.join(directory, 'выгрузка.xml');
-    const schema = beresta.Schema.fromString(ORDER_XSD);
+    try {
+        const file = path.join(directory, 'выгрузка.xml');
+        const schema = beresta.Schema.fromString(ORDER_XSD);
 
-    fs.writeFileSync(file, ORDER_XML, 'utf8');
-    assert.deepEqual(schema.validateFile(file), schema.validateBytes(ORDER_XML));
-    assert.equal(codeOf(schema, path.join(directory, 'нет.xml')), 'IO_ERROR');
-    assert.equal(codeOf(schema, null), 'PARSE_ERROR');
-    schema.close();
-    fs.rmSync(directory, { recursive: true });
+        fs.writeFileSync(file, ORDER_XML, 'utf8');
+        assert.deepEqual(schema.validateFile(file), schema.validateBytes(ORDER_XML));
+        assert.equal(codeOf(schema, path.join(directory, 'нет.xml')), 'IO_ERROR');
+        assert.equal(codeOf(schema, null), 'PARSE_ERROR');
+        schema.close();
+    } finally {
+        fs.rmSync(directory, { recursive: true, force: true });
+    }
 });
 
 // 50 000 переносов с конца: обёртки те же (реестр), A закрыт / 50,000 moves from the end: the same wrappers (registry), A is closed

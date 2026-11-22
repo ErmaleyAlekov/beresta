@@ -57,6 +57,7 @@ namespace xsts
         std::string version;                            // атрибут version (пусто — любая) / the version attribute (empty — any)
         std::vector<std::filesystem::path> documents;   // документы схемы или один экземпляр
                                                         // the schema documents or one instance
+        std::string inputError;                          // ошибка чтения / input error
         std::string location;                           // первый документ относительно корня набора
                                                         // the first document relative to the suite root
         std::string directory;                          // каталог данных: "msData/element" и т.п.
@@ -109,6 +110,7 @@ namespace xsts
         Verdict verdict = Verdict::SKIPPED;
         std::string reason;                 // причина провала, пропуска или ограничения
                                             // the reason of the failure, the skip or the limitation
+        const char* actual = "сбой";                    // факт при расхождении / observed result on failure
     };
 }
 

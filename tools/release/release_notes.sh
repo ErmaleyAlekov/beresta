@@ -21,9 +21,10 @@ set -euo pipefail
 section() {
     local version="$1" file="$2"
     awk -v head="## ${version}" '
-        index($0, head) == 1 { found = 1; next }
+        index($0, head) == 1 && substr($0, length(head)+1, 1) ~ /^([[:space:]]|$)$/ { found = 1; next }
         found && /^## / { exit }
         found { print }
+        END { if (!found) { print "Нет раздела / Missing section: " head > "/dev/stderr"; exit 1 } }
     ' "$file"
 }
 

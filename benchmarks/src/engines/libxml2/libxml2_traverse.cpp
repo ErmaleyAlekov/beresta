@@ -24,6 +24,8 @@ namespace bench
         std::vector<xmlNodePtr> stack;
         std::size_t sum = 0;
 
+        if (!_document)
+            return 0;
         for (xmlNodePtr child = _document->children; child != nullptr; child = child->next)
             stack.push_back(child);
         while (!stack.empty())

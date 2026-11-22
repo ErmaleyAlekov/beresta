@@ -123,7 +123,7 @@ export declare class XmlNode implements Iterable<XmlNode> {
     /** Удаление с потомками; обёртка становится недействительной. / Removal with the descendants; the wrapper becomes invalid. */
     remove(): void;
     /** Глубокая копия в конец детей parent. / A deep copy appended to the children of parent. */
-    copyTo<T extends XmlNode>(parent: XmlNode): T;
+    copyTo(parent: XmlNode): this;
     /** Перенос без копирования в конец детей parent (можно в другой документ); после него
      *  document — документ parent. Корень и сам документ переносить нельзя.
      *  A move without copying to the end of the children of parent (another document is allowed);
@@ -163,7 +163,7 @@ export interface XPathOptions {
     /** Префиксы для имён p:name. / Prefixes for p:name names. */
     namespaces?: Record<string, string>;
     /** Переменные $name. / The $name variables. */
-    variables?: Record<string, string | number>;
+    variables?: Record<string, string | number | boolean>;
 }
 
 /** Скомпилированное выражение XPath 1.0. / A compiled XPath 1.0 expression. */
@@ -211,9 +211,9 @@ export declare class Schema implements Disposable {
 }
 
 /** Разбор XML. / Parses XML. */
-export declare function parse(input: XmlInput, options?: ParseOptions): XmlDocument;
+export declare function parse(input: XmlInput, options?: ParseOptions | null): XmlDocument;
 /** Разбор файла. / Parses a file. */
-export declare function parseFile(path: string, options?: ParseOptions): XmlDocument;
+export declare function parseFile(path: string, options?: ParseOptions | null): XmlDocument;
 /** Новый документ (null — без корня). / A new document (null — without a root). */
 export declare function createDocument(rootName?: string | null): XmlDocument;
 /** Версия нативной библиотеки. / The native library version. */

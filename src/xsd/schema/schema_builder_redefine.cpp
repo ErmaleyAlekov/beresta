@@ -83,7 +83,8 @@ namespace beresta::xsd::detail
             fail(child, i18n::format(i18n::Message::SCHEMA_REDEFINE_MISSING, {kind, name}));
         const std::string& owner = found->second.source->baseUri;
         bool nested = owner == targetUri || (owner != source.baseUri && loadedWithin(owner, source.baseUri));
-        if (_redefinitions.count(found->second.element) != 0 && !nested)
+        if ((_redefinitions.count(found->second.element) != 0 && !nested) ||
+            !_redefinedByDocument[source.root].emplace(kind, key).second)
             fail(child, i18n::format(i18n::Message::SCHEMA_REDEFINE_TWICE, {kind, name}));
         checkSelfDerivation(child, key);
         checkSelfReferences(child, key);

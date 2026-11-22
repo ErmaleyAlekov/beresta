@@ -43,6 +43,7 @@ namespace beresta::i18n
 
         // ---- Си-интерфейс / C interface ----
         {Message::ARGUMENT_NULL, "{0}: передан NULL"},
+        {Message::HANDLE_WRONG_TYPE, "{0}: неверный тип дескриптора"},
         {Message::ARGUMENT_BAD_BUFFER, "{0}: неверный буфер"},
         {Message::UNEXPECTED_EXCEPTION, "непредвиденное исключение"},
         {Message::HANDLE_EXPECTED_NODE, "ожидался узел, передан NULL"},
@@ -384,6 +385,7 @@ namespace beresta::i18n
         {Message::BINDING_NATIVE_CALL_FAILED, "сбой нативного вызова"},
         {Message::BINDING_UNKNOWN_NODE_TYPE, "неизвестный тип узла {0}"},
         {Message::BINDING_INVALID_ARGUMENT, "неверный аргумент №{0} функции {1}: ожидается {2}"},
+        {Message::BINDING_NODE_REMOVED, "узел удалён"},
         {Message::BINDING_NO_FILE_SYSTEM, "в WebAssembly нет файловой системы: {0} недоступна, передайте строку или байты"},
         {Message::LANGUAGE_UNKNOWN, "неизвестный язык сообщений \"{0}\"; доступны: {1}"},
         {Message::SCHEMA_ANNOTATION_POSITION, "xs:annotation в xs:{0} должна быть первой и единственной"},
@@ -408,7 +410,7 @@ namespace beresta::i18n
         {Message::SCHEMA_FACET_WIDENS, "фасет xs:{0}=\"{1}\" ослабляет ограничение базового типа xs:{2}=\"{3}\""},
         {Message::SCHEMA_ELEMENT_PARTS_CONFLICT, "у xs:element \"{0}\" нельзя указывать {1} вместе с {2}"},
         {Message::SCHEMA_VALUE_CONSTRAINT_INVALID, "значение {0}=\"{1}\" у объявления \"{2}\" не подходит к его типу: {3}"},
-        {Message::SCHEMA_VALUE_CONSTRAINT_CONTENT, "у элемента \"{0}\" не может быть {1}: его составной тип не имеет ни простого, ни смешанного содержимого"},
+        {Message::SCHEMA_VALUE_CONSTRAINT_CONTENT, "у элемента \"{0}\" не может быть {1}: требуется простое или смешанное содержимое, допускающее пустую последовательность дочерних элементов"},
         {Message::SCHEMA_NOTATION_NO_IDENTIFIER, "у нотации \"{0}\" нет ни public, ни system"},
         {Message::XML_DECLARATION_MALFORMED, "XML-декларация записана неверно: нужно «<?xml» строчными буквами, пробел и version"},
         {Message::XINCLUDE_FALLBACK_MULTIPLE, "у xi:include может быть только один xi:fallback"},
@@ -417,6 +419,10 @@ namespace beresta::i18n
         {Message::XINCLUDE_LIMIT_SIZE, "превышен допустимый объём повторных включений xi:include ({0} байт)"},
         {Message::DOCTYPE_SUBSET_UNCLOSED, "внутреннее подмножество DOCTYPE должно состоять из целых объявлений: «]» вне литералов, комментариев и инструкций, незакрытый литерал или комментарий недопустимы"},
         {Message::SCHEMA_ALL_TOO_LARGE, "в xs:all поддерживается не больше 64 частиц, а здесь {0}"},
+        {Message::XPATH_INCOMPATIBLE_TYPES, "XPTY0004: типы операндов несовместимы для сравнения"},
+        {Message::SCHEMA_REQUIRED_ATTRIBUTE, "отсутствует обязательный атрибут схемы {0}"},
+        {Message::SCHEMA_INVALID_ATTRIBUTE, "недопустимый атрибут схемы {0}: {1}"},
+        {Message::XSD_RESOURCE_LIMIT, "превышен предел ресурсов проверки XML Schema: {0}"},
         {Message::XMLNS_ATTRIBUTE_NAMESPACE, "атрибуты xmlns и xmlns:* должны быть в пространстве имён xmlns, и только они"},
     };
 

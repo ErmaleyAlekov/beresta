@@ -13,7 +13,7 @@ namespace bench
     // Разбор буфера (load_buffer копирует вход) / Parsing a buffer (load_buffer copies the input)
     void PugixmlEngine::parse(const std::string& xml)
     {
-        if (!_document.load_buffer(xml.data(), xml.size()))
+        if (!_document.load_buffer(xml.data(), xml.size(), pugi::parse_default | pugi::parse_ws_pcdata))
             throw BenchError("pugixml: документ отвергнут / the document is rejected");
     }
 

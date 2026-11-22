@@ -13,6 +13,8 @@ namespace BerestaBench;
  */
 final class DomEngine extends Engine
 {
+    private ?\DOMXPath $xpath = null;
+    private ?object $xpathDocument = null;
     public function __construct(private readonly string $xsd, private readonly string $query)
     {
         parent::__construct('ext/dom (libxml2 ' . LIBXML_DOTTED_VERSION . ')');
@@ -21,7 +23,9 @@ final class DomEngine extends Engine
     public function parse(string $xml): object
     {
         $document = new \DOMDocument();
-        $document->loadXML($xml);
+        if (!$document->loadXML($xml)) {
+            throw new \RuntimeException(BenchInput::INVALID_XML);
+        }
         return $document;
     }
 
@@ -49,7 +53,11 @@ final class DomEngine extends Engine
 
     public function xpath(object $document): int
     {
-        return (new \DOMXPath($document))->query($this->query)->length;
+        if ($this->xpath === null || $this->xpathDocument !== $document) {
+            $this->xpath = new \DOMXPath($document);
+            $this->xpathDocument = $document;
+        }
+        return $this->xpath->query($this->query)->length;
     }
 
     /**
@@ -59,12 +67,16 @@ final class DomEngine extends Engine
     public function parseValidated(string $xml): ?int
     {
         $previous = libxml_use_internal_errors(true);
-        $document = new \DOMDocument();
-        $document->loadXML($xml);
-        $document->schemaValidateSource($this->xsd);
-        $errors = count(libxml_get_errors());
         libxml_clear_errors();
-        libxml_use_internal_errors($previous);
-        return $errors;
+        try {
+            $document = $this->parse($xml);
+            if ($document->schemaValidateSource($this->xsd)) {
+                return 0;
+            }
+            return max(1, XsdOutcome::libxmlErrors());
+        } finally {
+            libxml_clear_errors();
+            libxml_use_internal_errors($previous);
+        }
     }
 }

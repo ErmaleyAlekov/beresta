@@ -115,7 +115,9 @@ def main() -> int:
     # Вывод в UTF-8 на любой ОС: консоль Windows по умолчанию в кодовой странице 1251 или 866
     # Output in UTF-8 on any OS: the Windows console defaults to code page 1251 or 866
     for stream in (sys.stdout, sys.stderr):
-        stream.reconfigure(encoding="utf-8", errors="replace")
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure):
+            reconfigure(encoding="utf-8", errors="replace")
     args = parse_arguments()
     messages.set_language(args.lang)
     try:

@@ -1,5 +1,6 @@
 #include "xsd/internal/assertion_recorder.hpp"
 #include "core/text.hpp"
+#include "xsd/internal/validation_budget.hpp"
 
 #include <utility>
 
@@ -24,6 +25,14 @@ namespace beresta::xsd::detail
     void AssertionRecorder::elementStarted(const SaxElement& element, std::size_t level, const ComplexType* asserted,
         const PrefixBindings& prefixes)
     {
+        chargeValidation(_captureBytes, sizeof(Element), "xs:assert");
+        chargeValidation(_captureBytes, element.name.size(), "xs:assert");
+        for (const SaxAttribute& attribute : element.attributes)
+        {
+            chargeValidation(_captureBytes, sizeof(Attribute), "xs:assert");
+            chargeValidation(_captureBytes, attribute.name.size(), "xs:assert");
+            chargeValidation(_captureBytes, attribute.value.size(), "xs:assert");
+        }
         std::unique_ptr<Element> copy = copyElement(element);
 
         flushText();
@@ -40,6 +49,9 @@ namespace beresta::xsd::detail
     // Pieces of text accumulate in one string: the parser may deliver text in parts
     void AssertionRecorder::textAppended(std::string_view text)
     {
+        if (_pendingText.empty() && !text.empty())
+            chargeValidation(_captureBytes, sizeof(Text), "xs:assert");
+        chargeValidation(_captureBytes, text.size(), "xs:assert");
         _pendingText.append(text.data(), text.size());
     }
 

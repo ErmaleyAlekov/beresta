@@ -1,5 +1,6 @@
 package bench;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -24,6 +25,20 @@ public final class WrapperBench
     /** Точка входа: путь к данным — первый аргумент. / The entry point: the data path is the first argument. */
     public static void main(String[] args) throws Exception
     {
+        try
+        {
+            run(args);
+        }
+        catch (IOException failure)
+        {
+            System.err.println(BenchValues.READ_FAILED + failure.getMessage());
+            System.exit(2);
+        }
+    }
+
+    /** Читает данные и печатает результаты. / Reads input and prints results. */
+    private static void run(String[] args) throws Exception
+    {
         Path data = Path.of("data");
         if (args.length > 0)
             data = Path.of(args[0]);
@@ -34,14 +49,21 @@ public final class WrapperBench
 
         // Режим памяти: --memory N меряет одну библиотеку в этом процессе
         // The memory mode: --memory N measures one library in this process
-        if (args.length > 2 && args[1].equals("--memory"))
+        if (args.length > 1 && args[1].equals("--memory"))
         {
-            System.out.println(MemoryProbe.measure(engines[Integer.parseInt(args[2])], xml));
+            int index = BenchValues.memoryIndex(args, engines.length);
+            if (index < 0)
+            {
+                System.err.println(BenchValues.MEMORY_INDEX_ERROR);
+                System.exit(2);
+                return;
+            }
+            System.out.println(MemoryProbe.measure(engines[index], xml));
             return;
         }
         System.out.println("### Java " + System.getProperty("java.version") + ", " + (xml.length / 1_000_000) + " MB\n");
-        System.out.println("| Библиотека / Library | Разбор / Parse, MB/s | Обход / Walk, ms | XPath, ms | Разбор + XSD / Parse + XSD, MB/s | Элементы / Elements | XPath: узлы / nodes | Ошибки XSD / XSD errors |");
-        System.out.println("|---|---|---|---|---|---|---|---|");
+        System.out.println("| Библиотека / Library | Разбор / Parse, MB/s | Обход / Walk, ms | XPath, ms | Разбор + XSD / Parse + XSD, MB/s | Элементы / Elements | XPath: узлы / nodes | Ошибки XSD / XSD errors | XSD valid |");
+        System.out.println("|---|---|---|---|---|---|---|---|---|");
         for (Engine engine : engines)
             System.out.println(row(engine, xml));
     }
@@ -52,14 +74,23 @@ public final class WrapperBench
         double megabytes = xml.length / 1e6;
         double parse = median(engine, Operation.PARSE, xml, null);
         Object document = engine.parse(xml);
-        double walk = median(engine, Operation.WALK, xml, document);
-        double xpath = median(engine, Operation.XPATH, xml, document);
-        double validate = median(engine, Operation.VALIDATE, xml, null);
-        String counts = engine.walk(document) + " | " + engine.xpath(document) + " | " + engine.parseValidated(xml);
+        try
+        {
+            double walk = median(engine, Operation.WALK, xml, document);
+            double xpath = median(engine, Operation.XPATH, xml, document);
+            double validate = median(engine, Operation.VALIDATE, xml, null);
+            Engine.Validated validated = engine.parseValidated(xml);
+            BenchValues.closeDocument(validated.document());
+            String counts = engine.walk(document) + " | " + engine.xpath(document) + " | " + validated.errors();
 
-        close(document);
-        return String.format("| %s | %.0f | %.1f | %.1f | %.0f | %s |", engine.name(), megabytes / parse * 1000,
-            walk, xpath, megabytes / validate * 1000, counts);
+            return String.format("| %s | %s | %.1f | %.1f | %s | %s | %s |", engine.name(),
+                BenchValues.rate(megabytes, parse), walk, xpath, BenchValues.rate(megabytes, validate), counts,
+                BenchValues.validity(validated.errors()));
+        }
+        finally
+        {
+            BenchValues.closeDocument(document);
+        }
     }
 
     /** Медиана времени операции в миллисекундах. / The median operation time in milliseconds. */
@@ -73,7 +104,9 @@ public final class WrapperBench
             Object result = run(engine, operation, xml, document);
             long elapsed = System.nanoTime() - start;
             if (operation == Operation.PARSE)
-                close(result);
+                BenchValues.closeDocument(result);
+            if (result instanceof Engine.Validated validated)
+                BenchValues.closeDocument(validated.document());
             if (run >= 0)
                 times[run] = elapsed / 1e6;
         }
@@ -93,10 +126,4 @@ public final class WrapperBench
         return engine.parseValidated(xml);
     }
 
-    /** Документ «Берёсты» освобождается сразу, дерево JDK — сборщиком мусора. / A Beresta document is freed at once, a JDK tree — by the garbage collector. */
-    private static void close(Object document) throws Exception
-    {
-        if (document instanceof AutoCloseable closeable)
-            closeable.close();
-    }
 }

@@ -16,10 +16,11 @@ Schema — a loaded XML Schema (immutable, thread-safe).
 from __future__ import annotations
 
 import os
-import weakref
 from typing import List, Union
 
 from ._diagnostics import Diagnostic, take_diagnostics
+from ._owned_handle import OwnedHandle
+from .languages import SCHEMA_CLOSED
 from ._native import LIB, encode, out_handle
 from ._schema_streaming import SchemaStreaming
 from .errors import check
@@ -27,15 +28,14 @@ from .errors import check
 __all__ = ["Diagnostic", "Schema"]
 
 
-class Schema(SchemaStreaming):
+class Schema(SchemaStreaming, OwnedHandle):
     """Создаётся только фабричными методами from_string / from_file.
     Потоковая проверка без дерева — validate_bytes / validate_file (SchemaStreaming).
     Created only by the factory methods from_string / from_file.
     Streaming validation without a tree is validate_bytes / validate_file (SchemaStreaming)."""
 
     def __init__(self, pointer: int) -> None:
-        self.handle = pointer
-        self._finalizer = weakref.finalize(self, LIB.beresta_schema_free, pointer)
+        self._own(pointer, LIB.beresta_schema_free, SCHEMA_CLOSED)
 
     @classmethod
     def from_string(cls, source: Union[str, bytes]) -> "Schema":

@@ -33,6 +33,9 @@ namespace beresta::xsd::detail
             type.simpleContent = builtinType("anySimpleType");
         if (!extension)
         {
+            const Element* nested = firstSchemaChild(derivation, "simpleType");
+            if (nested != nullptr)
+                type.simpleContent = buildSimpleType(*nested, source, QualifiedKey());
             // Тип текста — ограничение прежнего: база запоминается для проверки наследования
             // The text type is a restriction of the former one: the base is remembered for derivation checks
             _schema._simpleTypes.push_back(*type.simpleContent);

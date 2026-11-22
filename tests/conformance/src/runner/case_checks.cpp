@@ -81,7 +81,7 @@ namespace conformance
         }
         catch (const beresta::DomException& problem)
         {
-            throw ConformanceError("не читается файл OUTPUT случая " + testCase.id + ": " + problem.what());
+            return "не читается файл OUTPUT случая " + testCase.id + ": " + problem.what();
         }
         std::string expected = detail::stripCanonicalDoctype(raw, false);
         std::string actual = writeCanonical(document);

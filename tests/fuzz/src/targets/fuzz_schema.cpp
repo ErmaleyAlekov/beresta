@@ -27,15 +27,26 @@ namespace
     // Схема или nullptr, если текст схемы некорректен
     // The schema or nullptr if the schema text is invalid
     std::shared_ptr<const beresta::xsd::Schema> loadSchema(std::string_view text,
-        beresta::ResourceResolver& resolver)
+        std::string_view resource)
     {
         beresta::xsd::SchemaLoadOptions options;
 
+        fuzz::MemoryResolver resolver(resource);
+        fuzz::MemoryResolver emptyResolver("");
         options.resolver = &resolver;
         options.baseUri = "memory:/schema.xsd";
         try
         {
-            return beresta::xsd::Schema::fromString(text, options);
+            auto parserOptions = fuzz::optionsFromFlags(0x41);
+            parserOptions.trackLocations = true;
+            beresta::XmlParser parser(parserOptions);
+            if (!resource.empty())
+            {
+                try { (void)parser.parse(resource); }
+                catch (const beresta::DomException&) { options.resolver = &emptyResolver; }
+            }
+            auto document = parser.parse(text);
+            return beresta::xsd::Schema::fromDocuments({&document}, options);
         }
         catch (const beresta::DomException&)
         {
@@ -48,7 +59,7 @@ namespace
     void validateSeparately(const std::shared_ptr<const beresta::xsd::Schema>& schema,
         std::string_view documentText, bool namespaceAware)
     {
-        beresta::ParserOptions options;
+        beresta::ParserOptions options = fuzz::optionsFromFlags(namespaceAware ? 1 : 0);
 
         options.namespaceAware = namespaceAware;
         try
@@ -65,10 +76,10 @@ namespace
     // Проверка схемой прямо во время разбора; ошибки собираются, а не бросаются
     // Schema validation right during parsing; errors are collected, not thrown
     void validateWhileParsing(const std::shared_ptr<const beresta::xsd::Schema>& schema,
-        std::string_view documentText)
+        std::string_view documentText, bool namespaceAware)
     {
         beresta::CollectingErrorHandler collector;
-        beresta::ParserOptions options;
+        beresta::ParserOptions options = fuzz::optionsFromFlags(namespaceAware ? 1 : 0);
 
         options.schema = schema;
         options.errorHandler = &collector;
@@ -95,7 +106,7 @@ namespace
     {
         beresta::CollectingErrorHandler collector;
         beresta::ContentHandler ignore;
-        beresta::ParserOptions options;
+        beresta::ParserOptions options = fuzz::optionsFromFlags(namespaceAware ? 1 : 0);
 
         options.schema = schema;
         options.errorHandler = &collector;
@@ -121,13 +132,12 @@ extern "C" int LLVMFuzzerTestOneInput(const std::uint8_t* data, std::size_t size
 
     while (parts.size() < 3)
         parts.push_back(std::string_view());
-    fuzz::MemoryResolver resolver(parts[2]);
-    std::shared_ptr<const beresta::xsd::Schema> schema = loadSchema(parts[0], resolver);
+    std::shared_ptr<const beresta::xsd::Schema> schema = loadSchema(parts[0], parts[2]);
 
     if (schema == nullptr)
         return 0;
     validateSeparately(schema, parts[1], (data[0] & 0x01) == 0);
-    validateWhileParsing(schema, parts[1]);
+    validateWhileParsing(schema, parts[1], (data[0] & 0x01) == 0);
     validateWithSax(schema, parts[1], (data[0] & 0x01) == 0);
     return 0;
 }

@@ -8,11 +8,13 @@
 extern "C" BERESTA_API int beresta_schema_load(const void* data, int64_t size, beresta_schema* out)
 {
     BERESTA_CAPI_TRY
-        if (out == nullptr || size < 0 || (data == nullptr && size != 0))
-            throw beresta::capi::InvalidArgumentException(beresta::i18n::format(beresta::i18n::Message::ARGUMENT_BAD_BUFFER, {"data/size/out"}));
+        beresta::capi::clearOutput(out);
+        if (size < 0 || (data == nullptr && size != 0))
+            throw beresta::capi::InvalidArgumentException(beresta::i18n::format(beresta::i18n::Message::ARGUMENT_BAD_BUFFER, {"data/size"}));
         std::string_view text(static_cast<const char*>(data), static_cast<std::size_t>(size));
 
-        *out = new beresta::capi::SchemaHandle{beresta::xsd::Schema::fromString(text)};
+        *out = beresta::capi::publishHandle(std::make_unique<beresta::capi::SchemaHandle>(
+            beresta::capi::SchemaHandle{beresta::xsd::Schema::fromString(text)}));
         return BERESTA_OK;
     BERESTA_CAPI_CATCH_STATUS
 }
@@ -29,14 +31,14 @@ extern "C" BERESTA_API int beresta_schema_load(const void* data, int64_t size, b
 extern "C" BERESTA_API int beresta_schema_load_file(const char* path, beresta_schema* out)
 {
     BERESTA_CAPI_TRY
-        if (out == nullptr)
-            throw beresta::capi::InvalidArgumentException(beresta::i18n::format(beresta::i18n::Message::ARGUMENT_NULL, {"out"}));
+        beresta::capi::clearOutput(out);
         std::filesystem::path file = std::filesystem::absolute(beresta::capi::pathFromUtf8(path));
         beresta::FileResourceResolver resolver(file.parent_path());
         beresta::xsd::SchemaLoadOptions options;
 
         options.resolver = &resolver;
-        *out = new beresta::capi::SchemaHandle{beresta::xsd::Schema::fromFile(file, options)};
+        *out = beresta::capi::publishHandle(std::make_unique<beresta::capi::SchemaHandle>(
+            beresta::capi::SchemaHandle{beresta::xsd::Schema::fromFile(file, options)}));
         return BERESTA_OK;
     BERESTA_CAPI_CATCH_STATUS
 }
@@ -45,7 +47,9 @@ extern "C" BERESTA_API int beresta_schema_load_file(const char* path, beresta_sc
 // shared_ptr inside: documents parsed with this schema do not depend on the handle
 extern "C" BERESTA_API void beresta_schema_free(beresta_schema schema)
 {
-    delete static_cast<beresta::capi::SchemaHandle*>(schema);
+    try {
+        beresta::capi::freeHandle<beresta::capi::SchemaHandle>(schema, "schema");
+    BERESTA_CAPI_CATCH_VOID
 }
 
 // Проверка: все нарушения собираются в список, документ не меняется
@@ -54,13 +58,13 @@ extern "C" BERESTA_API int beresta_schema_validate(beresta_schema schema, berest
     beresta_diagnostics* out)
 {
     BERESTA_CAPI_TRY
+        beresta::capi::clearOutput(out);
         const beresta::capi::SchemaHandle& handle = beresta::capi::requireHandle<beresta::capi::SchemaHandle>(schema, "schema");
         const beresta::Document& source = beresta::capi::toDocument(document);
 
-        if (out == nullptr)
-            throw beresta::capi::InvalidArgumentException(beresta::i18n::format(beresta::i18n::Message::ARGUMENT_NULL, {"out"}));
         beresta::xsd::SchemaValidator validator(handle.schema);
-        *out = new beresta::capi::DiagnosticsHandle{validator.validate(source)};
+        *out = beresta::capi::publishHandle(std::make_unique<beresta::capi::DiagnosticsHandle>(
+            beresta::capi::DiagnosticsHandle{validator.validate(source)}));
         return BERESTA_OK;
     BERESTA_CAPI_CATCH_STATUS
 }
@@ -69,5 +73,7 @@ extern "C" BERESTA_API int beresta_schema_validate(beresta_schema schema, berest
 // beresta_schema_validate creates the list of violations — it is freed nearby, in the same module
 extern "C" BERESTA_API void beresta_diagnostics_free(beresta_diagnostics diagnostics)
 {
-    delete static_cast<beresta::capi::DiagnosticsHandle*>(diagnostics);
+    try {
+        beresta::capi::freeHandle<beresta::capi::DiagnosticsHandle>(diagnostics, "diagnostics");
+    BERESTA_CAPI_CATCH_VOID
 }

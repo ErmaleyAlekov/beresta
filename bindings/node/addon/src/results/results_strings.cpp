@@ -9,8 +9,12 @@ namespace beresta::node
     {
         napi_value result = nullptr;
 
-        napi().createStringUtf8(env, text, NAPI_AUTO_LENGTH, &result);
-        return result;
+        const napi_status status = napi().createStringUtf8(env, text, NAPI_AUTO_LENGTH, &result);
+        if (status == NAPI_OK)
+            return result;
+        if (status != NAPI_PENDING_EXCEPTION)
+            napi().throwError(env, nullptr, beresta_message_text(BERESTA_MESSAGE_NATIVE_CALL_FAILED));
+        return nullptr;
     }
 
     /*

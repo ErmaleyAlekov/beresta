@@ -21,6 +21,7 @@ import glob
 import hashlib
 import os
 import sys
+import xml.etree.ElementTree as ET
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import cpp_literals  # noqa: E402  (путь добавлен строкой выше) / the path is added on the line above
@@ -69,6 +70,16 @@ def write_parser_corpus(root, folder):
     return len(documents)
 
 
+def schema_root(text):
+    """Полная схема с любым префиксом / A complete schema with any namespace prefix."""
+    if "<" not in text:
+        return False
+    try:
+        return ET.fromstring(text).tag == "{http://www.w3.org/2001/XMLSchema}schema"
+    except (ET.ParseError, ValueError):
+        return False
+
+
 def write_query_corpora(root, xpath_folder, schema_folder):
     """XPath-выражения и пары «схема + документ» из тестов XPath и XSD.
     XPath expressions and "schema + document" pairs from the XPath and XSD tests."""
@@ -77,10 +88,10 @@ def write_query_corpora(root, xpath_folder, schema_folder):
         write_seed(xpath_folder, b"\x00" + expression.encode("utf-8"))
         write_seed(xpath_folder, b"\x01" + expression.encode("utf-8"))
     xsd_literals = collect_literals(root, "xsd/*.cpp")
-    schemas = [text for text in xsd_literals if "<xs:schema" in text]
+    schemas = [text for text in xsd_literals if "<xs:schema" in text or schema_root(text)]
     schemas += [SCHEMA_HEAD + text + SCHEMA_TAIL for text in xsd_literals
                 if "<xs:" in text and "<xs:schema" not in text]
-    instances = [text for text in xsd_literals if "xs:" not in text and "<" in text]
+    instances = [text for text in xsd_literals if "xs:" not in text and "<" in text and not schema_root(text)]
     for schema in schemas:
         for instance in instances[:40]:
             write_seed(schema_folder, b"\x00" + schema.encode("utf-8") + SEPARATOR

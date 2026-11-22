@@ -2,7 +2,9 @@
 #include "xsd/internal/attribute_wildcards.hpp"
 #include "i18n/i18n.hpp"
 #include "utils/xml_tokens.hpp"
+#include "exception/dom_exception.hpp"
 
+#include <algorithm>
 #include <utility>
 
 namespace beresta::xsd::detail
@@ -30,12 +32,16 @@ namespace beresta::xsd::detail
             return;
         for (std::string_view token : utils::splitTokens(text))
         {
+            if (token.substr(0, 2) == "##" && token != "##targetNamespace" && token != "##local")
+                throw DomException(DomErrorCode::SCHEMA_ERROR,
+                    i18n::format(i18n::Message::SCHEMA_INVALID_ATTRIBUTE, {"namespace", text}));
             std::string uri(token);
             if (token == "##targetNamespace")
                 uri = targetNamespace;
             if (token == "##local")
                 uri.clear();
-            namespaces.push_back(uri);
+            if (std::find(namespaces.begin(), namespaces.end(), uri) == namespaces.end())
+                namespaces.push_back(uri);
         }
     }
 

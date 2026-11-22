@@ -5,15 +5,17 @@ namespace beresta::xsd::detail
 {
     // Глобальный элемент строится один раз; ссылки ref указывают на одно объявление
     // A global element is built once; ref references point to one declaration
-    const ElementDecl* SchemaBuilder::globalElement(const QualifiedKey& key)
+    const ElementDecl* SchemaBuilder::globalElement(const QualifiedKey& key, const Element* where)
     {
         auto built = _builtElements.find(key);
 
         if (built != _builtElements.end())
             return built->second;
         const Definition* definition = findDefinition("element", key);
+        if (where == nullptr)
+            where = _sources.front().root;
         if (definition == nullptr)
-            fail(*_sources.front().root, i18n::format(i18n::Message::SCHEMA_ELEMENT_UNDECLARED, {key.first, key.second}));
+            fail(*where, i18n::format(i18n::Message::SCHEMA_ELEMENT_UNDECLARED, {key.first, key.second}));
         checkElementAttributes(*definition->element, ElementPlace::GLOBAL_ELEMENT);
         return buildElement(*definition->element, *definition->source, true);
     }
@@ -59,7 +61,7 @@ namespace beresta::xsd::detail
         if (declaration.defaultValue.has_value() || declaration.fixedValue.has_value())
             _valueChecks.emplace_back(&definition, &declaration);
         if (global && head.has_value())
-            declaration.substitutionHead = globalElement(resolveQName(definition, head.value()));
+            declaration.substitutionHead = globalElement(resolveQName(definition, head.value()), &definition);
         declaration.type = elementType(definition, source, declaration);
         readIdentityConstraints(definition, source, declaration);
         return &declaration;
@@ -113,7 +115,7 @@ namespace beresta::xsd::detail
             fail(definition, i18n::format(i18n::Message::SCHEMA_ELEMENT_PARTS_CONFLICT,
                 {declaration.name, parts[0], parts[1]}));
         if (typeName.has_value())
-            return resolveType(resolveQName(definition, typeName.value()));
+            return resolveType(resolveQName(definition, typeName.value()), &definition);
         if (simple != nullptr)
             return TypeRef{buildSimpleType(*simple, source, QualifiedKey()), nullptr};
         if (complex != nullptr)

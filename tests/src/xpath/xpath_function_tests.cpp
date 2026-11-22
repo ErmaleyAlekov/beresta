@@ -28,6 +28,21 @@ namespace
         TEST_ASSERT_EQ(eval(xml, "contains(//s, 'мир') and starts-with('abc', 'ab')"), "true");
     }
 
+    // Границы substring из XPath 1.0, § 4.2.
+    // Substring boundaries from XPath 1.0, § 4.2.
+    void testSubstringBoundaries()
+    {
+        const char* xml = "<r/>";
+
+        TEST_ASSERT_EQ(eval(xml, "substring('12345', 0, 3)"), "12");
+        TEST_ASSERT_EQ(eval(xml, "substring('12345', -1, 4)"), "12");
+        TEST_ASSERT_EQ(eval(xml, "substring('12345', 0 div 0, 3)"), "");
+        TEST_ASSERT_EQ(eval(xml, "substring('12345', 1, 0 div 0)"), "");
+        TEST_ASSERT_EQ(eval(xml, "substring('12345', 1 div 0, 2)"), "");
+        TEST_ASSERT_EQ(eval(xml, "substring('12345', -42, 1 div 0)"), "12345");
+        TEST_ASSERT_EQ(eval(xml, "substring('12345', -1 div 0, 1 div 0)"), "");
+    }
+
     // Числа: арифметика, форматирование (кратчайшее точное, как требует XPath 4.2), NaN, Infinity
     // Numbers: arithmetic, formatting (the shortest exact one, as XPath 4.2 requires), NaN, Infinity
     void testNumberFunctions()
@@ -74,6 +89,7 @@ namespace suites
     void registerXPathFunctionTests(test::TestRunner& runner)
     {
         runner.add("XPath: строковые функции", testStringFunctions);
+        runner.add("XPath: границы substring", testSubstringBoundaries);
         runner.add("XPath: числа", testNumberFunctions);
         runner.add("XPath: логика, имена и переменные", testLogicAndNames);
     }

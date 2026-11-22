@@ -8,7 +8,7 @@
 #include "xpath/xpath.hpp"
 
 #include <cstddef>
-#include <set>
+#include "xsd/internal/identity_common.hpp"
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -137,7 +137,7 @@ namespace beresta::xsd::detail
     {
         const Element* scope;
         const IdentityConstraint* constraint;
-        std::set<std::vector<std::string>> keys;
+        IdentityKeys keys;
     };
 
     /*

@@ -20,20 +20,15 @@ namespace beresta::xsd::detail
     */
     void StreamIdentity::captureElement(const IdentityEnd& end)
     {
-        for (std::size_t index = 0; index < _targetCount; ++index)
+        for (const auto& selected : _selectedFields[end.level])
         {
-            for (FieldState& field : _targets[index].fields)
-            {
-                if (!field.fromElement || field.elementOrdinal != end.ordinal)
-                    continue;
-                const SimpleType* type = end.valueType;
-                if (type == nullptr)
-                    type = builtinType("string");
-                field.complex = end.hasChildElement || end.complexContent;
-                field.value.assign(end.text.data(), end.text.size());
-                field.canonical = identityValue(*type, end.text, end.namespaces);
-            }
+            FieldState& field = _targets[selected.first].fields[selected.second];
+            const SimpleType* type = end.valueType ? end.valueType : builtinType("string");
+            field.complex = end.hasChildElement || end.complexContent;
+            field.value.assign(end.text.data(), end.text.size());
+            field.canonical = identityValue(*type, end.text, end.namespaces);
         }
+        _selectedFields[end.level].clear();
     }
 
     /*

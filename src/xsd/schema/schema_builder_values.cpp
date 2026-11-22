@@ -1,5 +1,6 @@
 #include "xsd/internal/schema_builder.hpp"
 #include "i18n/i18n.hpp"
+#include "content/content_matcher.hpp"
 
 #include <string>
 
@@ -62,7 +63,11 @@ namespace beresta::xsd::detail
         if (type.complex != nullptr)
         {
             if (type.complex->content == ContentType::MIXED_CONTENT)
+            {
+                if (type.complex->hasParticle && !content::matchContent(type.complex->particle, {}).matched)
+                    fail(definition, i18n::format(i18n::Message::SCHEMA_VALUE_CONSTRAINT_CONTENT, {name, attribute}));
                 return;
+            }
             simple = type.complex->simpleContent;
             if (type.complex->content != ContentType::SIMPLE_CONTENT || simple == nullptr)
                 fail(definition, i18n::format(i18n::Message::SCHEMA_VALUE_CONSTRAINT_CONTENT, {name, attribute}));

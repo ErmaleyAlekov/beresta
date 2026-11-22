@@ -3,6 +3,7 @@
 #include "bench/options.hpp"
 #include "bench/report.hpp"
 
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -43,8 +44,20 @@ namespace
         if (static_cast<std::size_t>(options.memoryEngine) >= engines.size() || workloads.empty())
             return 1;
         double before = bench::residentBytes();
+        double peakBefore = bench::peakResidentBytes();
         engines[static_cast<std::size_t>(options.memoryEngine)]->parse(workloads[0].xml);
-        std::cout << static_cast<long long>(bench::residentBytes() - before) << '\n';
+        auto delta = static_cast<long long>(bench::residentBytes() - before);
+        auto peakDelta = static_cast<long long>(bench::peakResidentBytes() - peakBefore);
+        if (options.memoryOutput.empty())
+            std::cout << delta << '\n';
+        else
+        {
+            std::ofstream output;
+            output.exceptions(std::ios::badbit | std::ios::failbit);
+            output.open(std::filesystem::u8path(options.memoryOutput));
+            output << delta << ' ' << peakDelta;
+            output.close();
+        }
         return 0;
     }
 
@@ -52,7 +65,7 @@ namespace
     bench::EngineResult runEngine(bench::XmlEngine& engine, std::size_t index, const bench::Workload& workload,
         const bench::Options& options, const std::string& program)
     {
-        bench::EngineResult result{engine.name(), {}, 0.0};
+        bench::EngineResult result{engine.name(), {}, {}};
         std::string arguments = workload.name + " --items " + std::to_string(options.items)
             + " --paragraphs " + std::to_string(options.paragraphs);
 
@@ -60,7 +73,7 @@ namespace
             result.operations[operation] = bench::measure(engine, static_cast<bench::Operation>(operation),
                 workload, options.runs);
         engine.release();
-        result.memoryBytes = bench::measureMemoryInChild(program, std::to_string(index), arguments);
+        result.memory = bench::measureMemoryInChild(program, std::to_string(index), arguments);
         std::cerr << "  " << result.engine << ": готово / done\n";
         return result;
     }
@@ -94,9 +107,14 @@ int main(int argc, char** argv)
         std::vector<std::unique_ptr<bench::XmlEngine>> engines = bench::createEngines();
         std::ofstream report;
         if (!options.report.empty())
+        {
+            report.exceptions(std::ios::badbit | std::ios::failbit);
             report.open(options.report);
+        }
         for (const bench::Workload& workload : makeWorkloads(options, ""))
             runWorkload(engines, workload, options, argv[0], report);
+        if (report.is_open())
+            report.close();
         return 0;
     }
     catch (const std::exception& error)

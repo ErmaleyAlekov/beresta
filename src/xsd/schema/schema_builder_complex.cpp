@@ -4,20 +4,20 @@
 namespace beresta::xsd::detail
 {
     /*
-    ** xs:complexType. Объект регистрируется до построения содержимого
-    ** (рекурсивные модели) и помечается незавершённым. Если базовый тип ещё
-    ** строится (его модель ссылается на элемент этого типа — паттерн Composite),
-    ** содержимое откладывается до завершения базы (schema_builder_pending.cpp):
-    ** это рекурсивная структура данных, а не цикл наследования.
-    ** publish = false — прежнее определение, заменённое xs:redefine: оно
-    ** сохраняет имя, но под ним не регистрируется (имя занято новым).
+    ** xs:complexType. РћР±СЉРµРєС‚ СЂРµРіРёСЃС‚СЂРёСЂСѓРµС‚СЃСЏ РґРѕ РїРѕСЃС‚СЂРѕРµРЅРёСЏ СЃРѕРґРµСЂР¶РёРјРѕРіРѕ
+    ** (СЂРµРєСѓСЂСЃРёРІРЅС‹Рµ РјРѕРґРµР»Рё) Рё РїРѕРјРµС‡Р°РµС‚СЃСЏ РЅРµР·Р°РІРµСЂС€С‘РЅРЅС‹Рј. Р•СЃР»Рё Р±Р°Р·РѕРІС‹Р№ С‚РёРї РµС‰С‘
+    ** СЃС‚СЂРѕРёС‚СЃСЏ (РµРіРѕ РјРѕРґРµР»СЊ СЃСЃС‹Р»Р°РµС‚СЃСЏ РЅР° СЌР»РµРјРµРЅС‚ СЌС‚РѕРіРѕ С‚РёРїР° вЂ” РїР°С‚С‚РµСЂРЅ Composite),
+    ** СЃРѕРґРµСЂР¶РёРјРѕРµ РѕС‚РєР»Р°РґС‹РІР°РµС‚СЃСЏ РґРѕ Р·Р°РІРµСЂС€РµРЅРёСЏ Р±Р°Р·С‹ (schema_builder_pending.cpp):
+    ** СЌС‚Рѕ СЂРµРєСѓСЂСЃРёРІРЅР°СЏ СЃС‚СЂСѓРєС‚СѓСЂР° РґР°РЅРЅС‹С…, Р° РЅРµ С†РёРєР» РЅР°СЃР»РµРґРѕРІР°РЅРёСЏ.
+    ** publish = false вЂ” РїСЂРµР¶РЅРµРµ РѕРїСЂРµРґРµР»РµРЅРёРµ, Р·Р°РјРµРЅС‘РЅРЅРѕРµ xs:redefine: РѕРЅРѕ
+    ** СЃРѕС…СЂР°РЅСЏРµС‚ РёРјСЏ, РЅРѕ РїРѕРґ РЅРёРј РЅРµ СЂРµРіРёСЃС‚СЂРёСЂСѓРµС‚СЃСЏ (РёРјСЏ Р·Р°РЅСЏС‚Рѕ РЅРѕРІС‹Рј).
     **
     ** xs:complexType. The object is registered before its content is built
     ** (recursive models) and marked incomplete. If the base type is still being
-    ** built (its model refers to an element of this type — the Composite pattern),
+    ** built (its model refers to an element of this type вЂ” the Composite pattern),
     ** the content is deferred until the base is complete (schema_builder_pending.cpp):
     ** it is a recursive data structure, not a derivation cycle.
-    ** publish = false — the former definition replaced by xs:redefine: it keeps
+    ** publish = false вЂ” the former definition replaced by xs:redefine: it keeps
     ** its name but is not registered under it (the name belongs to the new one).
     */
     const ComplexType* SchemaBuilder::buildComplexType(const Element& definition,
@@ -45,9 +45,9 @@ namespace beresta::xsd::detail
     }
 
     /*
-    ** Тело типа: необязательная модель (sequence / choice / all / group),
-    ** атрибуты и утверждения xs:assert. Модель заменяет унаследованную только
-    ** если она есть; склейку при расширении выполняет buildComplexContent.
+    ** РўРµР»Рѕ С‚РёРїР°: РЅРµРѕР±СЏР·Р°С‚РµР»СЊРЅР°СЏ РјРѕРґРµР»СЊ (sequence / choice / all / group),
+    ** Р°С‚СЂРёР±СѓС‚С‹ Рё СѓС‚РІРµСЂР¶РґРµРЅРёСЏ xs:assert. РњРѕРґРµР»СЊ Р·Р°РјРµРЅСЏРµС‚ СѓРЅР°СЃР»РµРґРѕРІР°РЅРЅСѓСЋ С‚РѕР»СЊРєРѕ
+    ** РµСЃР»Рё РѕРЅР° РµСЃС‚СЊ; СЃРєР»РµР№РєСѓ РїСЂРё СЂР°СЃС€РёСЂРµРЅРёРё РІС‹РїРѕР»РЅСЏРµС‚ buildComplexContent.
     **
     ** The type body: an optional model (sequence / choice / all / group),
     ** attributes and xs:assert assertions. The model replaces the inherited one only
@@ -62,7 +62,11 @@ namespace beresta::xsd::detail
             if (kind != "sequence" && kind != "choice" && kind != "all" && kind != "group")
                 continue;
             type.particle = buildParticle(*child, source, type, 0);
-            type.hasParticle = true;
+            const auto particleKind = type.particle.kind;
+            const bool emptyGroup = (particleKind == content::ParticleKind::SEQUENCE
+                || particleKind == content::ParticleKind::ALL)
+                && type.particle.children.empty();
+            type.hasParticle = type.particle.maxOccurs != 0 && !emptyGroup;
             break;
         }
         if (type.hasParticle || mixed)
@@ -73,7 +77,7 @@ namespace beresta::xsd::detail
         readAssertions(body, source, type);
     }
 
-    // Наследование задаётся единственным xs:extension или xs:restriction
+    // РќР°СЃР»РµРґРѕРІР°РЅРёРµ Р·Р°РґР°С‘С‚СЃСЏ РµРґРёРЅСЃС‚РІРµРЅРЅС‹Рј xs:extension РёР»Рё xs:restriction
     // Derivation is defined by a single xs:extension or xs:restriction
     const Element& SchemaBuilder::derivationOf(const Element& content, bool& extension) const
     {
@@ -88,14 +92,14 @@ namespace beresta::xsd::detail
     }
 
     /*
-    ** Способ наследования запоминается в типе, базовый тип уже записан
-    ** (readDerivationBase, finishComplexType) — по ним проверяется xsi:type.
-    ** К этому моменту база завершена: циклы ловит checkPendingTypes. От типа
-    ** с этим способом в final наследоваться нельзя. Утверждения базового типа
-    ** наследуются и при расширении, и при ограничении.
+    ** РЎРїРѕСЃРѕР± РЅР°СЃР»РµРґРѕРІР°РЅРёСЏ Р·Р°РїРѕРјРёРЅР°РµС‚СЃСЏ РІ С‚РёРїРµ, Р±Р°Р·РѕРІС‹Р№ С‚РёРї СѓР¶Рµ Р·Р°РїРёСЃР°РЅ
+    ** (readDerivationBase, finishComplexType) вЂ” РїРѕ РЅРёРј РїСЂРѕРІРµСЂСЏРµС‚СЃСЏ xsi:type.
+    ** Рљ СЌС‚РѕРјСѓ РјРѕРјРµРЅС‚Сѓ Р±Р°Р·Р° Р·Р°РІРµСЂС€РµРЅР°: С†РёРєР»С‹ Р»РѕРІРёС‚ checkPendingTypes. РћС‚ С‚РёРїР°
+    ** СЃ СЌС‚РёРј СЃРїРѕСЃРѕР±РѕРј РІ final РЅР°СЃР»РµРґРѕРІР°С‚СЊСЃСЏ РЅРµР»СЊР·СЏ. РЈС‚РІРµСЂР¶РґРµРЅРёСЏ Р±Р°Р·РѕРІРѕРіРѕ С‚РёРїР°
+    ** РЅР°СЃР»РµРґСѓСЋС‚СЃСЏ Рё РїСЂРё СЂР°СЃС€РёСЂРµРЅРёРё, Рё РїСЂРё РѕРіСЂР°РЅРёС‡РµРЅРёРё.
     **
     ** The derivation method is remembered in the type, the base type is already set
-    ** (readDerivationBase, finishComplexType) — xsi:type is checked by them.
+    ** (readDerivationBase, finishComplexType) вЂ” xsi:type is checked by them.
     ** By this moment the base is complete: cycles are caught by checkPendingTypes.
     ** Deriving from a type with this method in final is not allowed. The assertions
     ** of the base type are inherited both on extension and on restriction.
@@ -114,8 +118,8 @@ namespace beresta::xsd::detail
         return base;
     }
 
-    // abstract и запреты block / final составного типа (по умолчанию — из xs:schema)
-    // abstract and the block / final prohibitions of a complex type (by default — from xs:schema)
+    // abstract Рё Р·Р°РїСЂРµС‚С‹ block / final СЃРѕСЃС‚Р°РІРЅРѕРіРѕ С‚РёРїР° (РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ вЂ” РёР· xs:schema)
+    // abstract and the block / final prohibitions of a complex type (by default вЂ” from xs:schema)
     void SchemaBuilder::readTypeFlags(const Element& definition, const SchemaSource& source,
         ComplexType& type) const
     {

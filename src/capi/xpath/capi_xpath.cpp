@@ -17,20 +17,21 @@
 extern "C" BERESTA_API int beresta_xpath_compile(const char* expression, beresta_xpath* out)
 {
     BERESTA_CAPI_TRY
+        beresta::capi::clearOutput(out);
         std::string_view source = beresta::capi::requireText(expression, "expression");
 
-        if (out == nullptr)
-            throw beresta::capi::InvalidArgumentException(beresta::i18n::format(beresta::i18n::Message::ARGUMENT_NULL, {"out"}));
         std::unique_ptr<beresta::capi::XPathHandle> handle(new beresta::capi::XPathHandle{
             beresta::xpath::XPathExpression(source), beresta::xpath::XPathContext()});
-        *out = handle.release();
+        *out = beresta::capi::publishHandle(std::move(handle));
         return BERESTA_OK;
     BERESTA_CAPI_CATCH_STATUS
 }
 
 extern "C" BERESTA_API void beresta_xpath_free(beresta_xpath xpath)
 {
-    delete static_cast<beresta::capi::XPathHandle*>(xpath);
+    try {
+        beresta::capi::freeHandle<beresta::capi::XPathHandle>(xpath, "xpath");
+    BERESTA_CAPI_CATCH_VOID
 }
 
 // Префикс для имён p:name в выражении (повторная привязка заменяет URI)

@@ -41,7 +41,10 @@ async function createApi(options)
 export function init(options)
 {
     if (ready === null)
-        ready = createApi(options || {});
+        ready = createApi(options || {}).catch(error => {
+            ready = null;
+            throw error;
+        });
     return ready;
 }
 

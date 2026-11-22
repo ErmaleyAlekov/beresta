@@ -25,7 +25,7 @@ const SCHEMA = "<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'>"
 
 test('Wasm: разбор, навигация и вывод / Wasm: parsing, navigation and output', function parsing()
 {
-    const document = beresta.parse("<shop><item code='A1'>Чай</item><item code='B2'>Кофе</item></shop>");
+    const document = beresta.parse("<shop><item code='A1'>Чай</item><item code='B2'>Кофе 🌲</item></shop>");
     const item = document.root.firstChild;
 
     assert.equal(beresta.platformName(), 'wasm32');
@@ -34,7 +34,7 @@ test('Wasm: разбор, навигация и вывод / Wasm: parsing, navi
     assert.equal(item.text, 'Чай');
     assert.equal(document.root.childCount, 2);
     item.setAttribute('code', 'A2');
-    assert.equal(document.toXml(), "<shop><item code=\"A2\">Чай</item><item code=\"B2\">Кофе</item></shop>");
+    assert.equal(document.toXml(), "<shop><item code=\"A2\">Чай</item><item code=\"B2\">Кофе 🌲</item></shop>");
     document.close();
 });
 
@@ -81,7 +81,9 @@ test('Wasm: перенос узла и ошибки / Wasm: moving a node and er
     let parseError = null;
     let argumentError = null;
 
-    source.root.firstChild.moveTo(target.root);
+    const moved = source.root.firstChild;
+
+    moved.moveTo(target.root);
     source.close();
     assert.equal(target.toXml(), '<c><b>1</b></c>');
     try { beresta.parse('<a><b></a>'); } catch (error) { parseError = error; }
@@ -90,4 +92,22 @@ test('Wasm: перенос узла и ошибки / Wasm: moving a node and er
     assert.equal(parseError.code, 'PARSE_ERROR');
     assert.equal(argumentError.name, 'TypeError');
     target.close();
+    target.close();
+    assert.throws(function movedText() { return moved.text; }, beresta.BerestaClosedError);
+});
+
+test('границы аргументов и удаление поддерева / argument bounds and subtree removal', () => {
+    const doc = beresta.parse('<r><a><b/></a></r>', null);
+    try {
+        const parent = doc.root.firstChild;
+        const child = parent.firstChild;
+        assert.throws(() => doc.root.child(NaN), { code: 'INVALID_ARGUMENT' });
+        assert.throws(() => beresta.parse('<r/>', { flags: -1 }), { code: 'INVALID_ARGUMENT' });
+        parent.remove();
+        assert.throws(() => parent.handle, beresta.BerestaClosedError);
+        assert.throws(() => child.handle, beresta.BerestaClosedError);
+        assert.equal(doc.root.childCount, 0);
+    } finally {
+        doc.close();
+    }
 });

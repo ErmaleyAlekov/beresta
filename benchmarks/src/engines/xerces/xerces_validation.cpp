@@ -19,12 +19,11 @@ namespace bench
             ++count;
         }
 
-        // Фатальная ошибка тоже считается, чтобы разбор не прерывался исключением
-        // A fatal error is counted too so that parsing is not interrupted by an exception
+        // Фатальная ошибка разбора / Fatal parse error
         void fatalError(const xercesc::SAXParseException& exception) override
         {
             (void)exception;
-            ++count;
+            throw BenchError("Xerces: документ отвергнут / document rejected");
         }
     };
 
@@ -43,7 +42,8 @@ namespace bench
         parser->setDoNamespaces(true);
         parser->setDoSchema(true);
         parser->setValidationScheme(xercesc::XercesDOMParser::Val_Always);
-        parser->loadGrammar(schema, xercesc::Grammar::SchemaGrammarType, true);
+        if (!parser->loadGrammar(schema, xercesc::Grammar::SchemaGrammarType, true) || parser->getErrorCount())
+            throw BenchError("Xerces: схема отвергнута / schema rejected");
         parser->useCachedGrammarInParse(true);
         return parser;
     }
@@ -57,7 +57,15 @@ namespace bench
         if (_validating == nullptr)
             _validating = makeValidatingParser(xsd);
         _validating->setErrorHandler(&counter);
-        _validating->parse(source);
+        try
+        {
+            _validating->parse(source);
+        }
+        catch (...)
+        {
+            _validating.reset();
+            throw;
+        }
         _validating->setErrorHandler(nullptr);
         _validating->resetDocumentPool();
         return counter.count;

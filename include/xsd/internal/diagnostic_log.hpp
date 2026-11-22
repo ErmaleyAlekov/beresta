@@ -137,6 +137,7 @@ namespace beresta::xsd::detail
 
     private:
         std::vector<PendingDiagnostic> _pending;
+        std::size_t _bytes = 0;
     };
 }
 

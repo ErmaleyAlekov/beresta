@@ -84,13 +84,25 @@ namespace beresta::xpath::detail
     // A string literal in single or double quotes (XPath 1.0 has no escaping)
     Token XPathLexer::readLiteral()
     {
-        char quote = _source[_position];
-        std::size_t end = _source.find(quote, _position + 1);
+        char quote = _source[_position++];
+        std::string text;
 
-        if (end == std::string_view::npos)
-            fail(i18n::format(i18n::Message::XPATH_UNCLOSED_LITERAL));
-        std::string text(_source.substr(_position + 1, end - _position - 1));
-        _position = end + 1;
-        return makeToken(TokenType::LITERAL, text);
+        while (_position < _source.size())
+        {
+            char symbol = _source[_position++];
+            if (symbol != quote)
+                text += symbol;
+            else if (_dialect == XPathDialect::XSD_ASSERTION
+                && _position < _source.size() && _source[_position] == quote)
+            {
+                // В XPath 2.0 удвоенная кавычка обозначает один символ.
+                // In XPath 2.0 a doubled quote denotes one character.
+                text += quote;
+                ++_position;
+            }
+            else
+                return makeToken(TokenType::LITERAL, text);
+        }
+        fail(i18n::format(i18n::Message::XPATH_UNCLOSED_LITERAL));
     }
 }

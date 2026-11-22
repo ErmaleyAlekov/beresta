@@ -29,9 +29,10 @@ extern "C" BERESTA_API int beresta_element_set_attribute(beresta_node element, c
 {
     BERESTA_CAPI_TRY
         beresta::Element& self = beresta::capi::toElement(element);
+        std::string_view key = beresta::capi::requireText(name, "name");
         std::string text(beresta::capi::requireText(value, "value"));
 
-        self.setAttribute(beresta::capi::requireText(name, "name"), std::move(text));
+        self.setAttribute(key, std::move(text));
         return BERESTA_OK;
     BERESTA_CAPI_CATCH_STATUS
 }

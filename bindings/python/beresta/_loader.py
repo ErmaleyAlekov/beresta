@@ -79,7 +79,7 @@ def _candidates() -> list:
     result = []
     explicit = os.environ.get("BERESTA_LIBRARY")
     if explicit:
-        result.append(explicit)
+        result.append(os.path.abspath(explicit))
     bundled = Path(__file__).resolve().parent / "_native" / platform_name() / library_file_name()
     result.append(str(bundled))
     system_wide = ctypes.util.find_library("beresta")

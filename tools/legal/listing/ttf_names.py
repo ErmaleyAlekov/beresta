@@ -6,20 +6,29 @@ from __future__ import annotations
 import re
 import struct
 
+from .errors import ListingError
+
 
 def postscript_name(data: bytes, tables: dict) -> str:
     """Имя PostScript (nameID 6) или «BerestaMono», если таблицы name нет или имя пустое.
     The PostScript name (nameID 6) or "BerestaMono" if there is no name table or the name is empty."""
     if "name" not in tables:
         return "BerestaMono"
-    base = tables["name"][0]
-    count, strings = struct.unpack_from(">HH", data, base + 2)
+    base, table_length = tables["name"]
+    table = data[base:base + table_length]
+    if len(table) < 6:
+        raise ListingError("font_invalid_table", "name")
+    count, strings = struct.unpack_from(">HH", table, 2)
+    if not 6 + 12 * count <= strings <= len(table):
+        raise ListingError("font_invalid_table", "name")
     found = ""
     for index in range(count):
-        platform, _encoding, _language, name_id, length, offset = struct.unpack_from(">6H", data, base + 6 + 12 * index)
+        platform, _encoding, _language, name_id, length, offset = struct.unpack_from(">6H", table, 6 + 12 * index)
+        if strings + offset + length > len(table):
+            raise ListingError("font_invalid_table", "name")
         if name_id != 6:
             continue
-        raw = data[base + strings + offset:base + strings + offset + length]
+        raw = table[strings + offset:strings + offset + length]
         # Платформа 3 (Windows) и 0 (Unicode) хранят имя в UTF-16BE, платформа 1 — в одном байте
         # Platform 3 (Windows) and 0 (Unicode) keep the name in UTF-16BE, platform 1 in single bytes
         if platform in (0, 3):

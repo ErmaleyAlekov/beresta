@@ -9,7 +9,7 @@ const { XmlDocument } = require('./nodes/document.js');
 // The schema handle from the options or null (no schema validation)
 function schemaHandle(options)
 {
-    if (options.schema === undefined || options.schema === null)
+    if (options?.schema === undefined || options.schema === null)
         return null;
     return options.schema.handle;
 }
@@ -26,7 +26,7 @@ function schemaHandle(options)
 function parse(input, options = {})
 {
     const bytes = toBytes(input, 'parse');
-    const flags = options.flags ?? ParseFlags.DEFAULT;
+    const flags = options?.flags ?? ParseFlags.DEFAULT;
 
     return new XmlDocument(native.document_parse(bytes, flags, schemaHandle(options)));
 }
@@ -35,7 +35,7 @@ function parse(input, options = {})
  *  Parses a file; ParseFlags.FILE_RESOURCES allows external DTDs next to it. */
 function parseFile(path, options = {})
 {
-    const flags = options.flags ?? ParseFlags.DEFAULT;
+    const flags = options?.flags ?? ParseFlags.DEFAULT;
 
     return new XmlDocument(native.document_parse_file(String(path), flags, schemaHandle(options)));
 }

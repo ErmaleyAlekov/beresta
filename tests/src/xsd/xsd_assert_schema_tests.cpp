@@ -1,5 +1,6 @@
 #include "suites/test_suites.hpp"
 #include "support/schema_helpers.hpp"
+#include "i18n/i18n.hpp"
 
 #include <string>
 
@@ -52,7 +53,7 @@ namespace
             "@a castable as xs:integer", "count(1 to 5) = 5", "@a idiv 2 = 1", "item except item[1]",
             "item[1] is item[2]", "(1, 2) = 1", "1e3 = 1000", "fn:matches(@a, 'x')", "matches(@a, 'x')",
             "string-join(item, ',') = 'x'", "xs:time('10:00:00') = xs:time('10:00:00')", "xs:decimal(1, 2) = 1",
-            "if (@a) then true()", "some $x in item", "every x in item satisfies true()", "@a = 'it''s'",
+            "if (@a) then true()", "some $x in item", "every x in item satisfies true()",
             "unknown:fn(@a)", "(: comment :) true()", "exists()", "/t/item", "count(//item) = 2"
         };
 
@@ -61,6 +62,7 @@ namespace
             std::string message = loadError(test);
             TEST_ASSERT(message.rfind("схема, строка 3: утверждение test=\"" + std::string(test) + "\"", 0) == 0);
         }
+        TEST_ASSERT(loadError("@a = 'it''s'").empty());
         TEST_ASSERT(loadError("count(item) ge 1 and (if (@a) then @a ne '' else true())").empty());
         TEST_ASSERT(loadError("every $i in item satisfies some $j in item satisfies $i = $j").empty());
         TEST_ASSERT(loadError("xs:date('2020-01-01') lt xs:date('2021-01-01') and exists(item)").empty());
@@ -118,9 +120,28 @@ namespace
             "$value * 100 = floor($value * 100)");
         TEST_ASSERT(errors[3].message.rfind("/v/recent: значение \"1999-12-31\"", 0) == 0);
         TEST_ASSERT(errors[4].message.rfind("/v/mixed: значение \"0\"", 0) == 0);
-        TEST_ASSERT_THROWS(beresta::xsd::Schema::fromString("<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">"
-            "<xs:simpleType name=\"L\"><xs:restriction><xs:simpleType><xs:list itemType=\"xs:int\"/></xs:simpleType>"
-            "<xs:assertion test=\"true()\"/></xs:restriction></xs:simpleType></xs:schema>"), beresta::DomException);
+    }
+
+    // XSD 1.1 допускает фасет у списка, но для него модели XPath «Берёсты» нужна последовательность атомов.
+    // XSD 1.1 allows the facet on a list, but Beresta's XPath model would need a sequence of atoms for it.
+    void testUnsupportedListAssertion()
+    {
+        const std::string head = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">"
+            "<xs:simpleType name=\"L\"><xs:restriction><xs:simpleType><xs:list itemType=\"xs:int\"/></xs:simpleType>";
+        const std::string tail = "</xs:restriction></xs:simpleType><xs:element name=\"list\" type=\"L\"/></xs:schema>";
+        TEST_ASSERT(support::agreedSchemaErrors(head + tail, "<list>1 2</list>").empty());
+
+        std::string errorMessage;
+        try
+        {
+            beresta::xsd::Schema::fromString(head + "<xs:assertion test=\"count($value) ge 1\"/>" + tail);
+        }
+        catch (const beresta::DomException& error)
+        {
+            errorMessage = error.getMessage();
+        }
+        TEST_ASSERT(errorMessage.find(beresta::i18n::format(beresta::i18n::Message::SCHEMA_ASSERTION_LIST))
+            != std::string::npos);
     }
 
     /*
@@ -166,6 +187,7 @@ namespace suites
     {
         runner.add("XSD 1.1: неподдерживаемый XPath 2.0 — ошибка загрузки", testUnsupportedXPath2);
         runner.add("XSD 1.1: фасет xs:assertion", testAssertionFacets);
+        runner.add("XSD 1.1: неподдерживаемый фасет xs:assertion у списка", testUnsupportedListAssertion);
         runner.add("XSD 1.1: vc:minVersion и vc:maxVersion", testVersioning);
     }
 }

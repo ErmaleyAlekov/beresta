@@ -37,11 +37,17 @@ namespace bench
     };
 
     // Все операции одной библиотеки над одним набором данных / All operations of one library on one data set
+    struct MemoryUsage
+    {
+        double residentGrowth = 0;
+        double peakGrowth = 0;
+    };
+
     struct EngineResult
     {
         std::string engine;
         Measurement operations[OPERATION_COUNT];
-        double memoryBytes;
+        MemoryUsage memory;
     };
 
     // ---- Время (measure.cpp) / Time ----
@@ -52,9 +58,10 @@ namespace bench
     // Резидентная память процесса в байтах (0 — неизвестно на этой ОС)
     // The resident memory of the process in bytes (0 — unknown on this OS)
     double residentBytes();
+    double peakResidentBytes();
 
     // Прирост памяти от дерева DOM в отдельном процессе / The memory growth from a DOM tree in a separate process
-    double measureMemoryInChild(const std::string& program, const std::string& engine, const std::string& workload);
+    MemoryUsage measureMemoryInChild(const std::string& program, const std::string& engine, const std::string& workload);
 }
 
 #endif

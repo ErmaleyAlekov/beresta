@@ -33,7 +33,7 @@ namespace conformance
         {
             beresta::Document document = beresta::XmlParser(options).parseFile(catalogFile);
             std::filesystem::path suiteRoot = catalogFile.parent_path().lexically_normal();
-            std::vector<detail::EntityFile> files = detail::entityFiles(document, suiteRoot);
+            std::vector<detail::EntityFile> files = detail::entityFiles(document, catalogFile);
             detail::WalkScope scope{suiteRoot, suiteRoot, "", &files};
 
             detail::walkCatalog(*document.getRoot(), scope, catalog);
@@ -59,19 +59,41 @@ namespace conformance
         ** declarations: the text shows in which of them a case is declared.
         */
         std::vector<EntityFile> entityFiles(const beresta::Document& document,
-            const std::filesystem::path& root)
+            const std::filesystem::path& catalogFile)
         {
             std::vector<EntityFile> files;
-            const beresta::DocumentType* doctype = document.getDocumentType();
-
-            if (doctype == nullptr || doctype->getModel() == nullptr)
+            const auto* doctype = document.getDocumentType();
+            if (!doctype || !doctype->getModel())
                 return files;
+            beresta::FileResourceResolver resolver(catalogFile.parent_path());
+            beresta::ParserOptions options;
+            options.namespaceAware = false;
+            options.loadExternalDtd = true;
+            options.resolver = &resolver;
+            options.baseUri = catalogFile.u8string();
+            options.maxEntityExpansions = 1000000;
+            options.maxExpandedSize = 256u * 1024u * 1024u;
+            auto prefix = doctype->toString() + "<catalog>";
             for (const auto& entry : doctype->getModel()->getEntities())
             {
-                std::filesystem::path path = root / std::filesystem::u8path(entry.second.systemId);
-
-                if (!entry.second.systemId.empty() && std::filesystem::is_regular_file(path))
-                    files.push_back(EntityFile{path.parent_path(), beresta::io::readFile(path)});
+                const auto& entity = entry.second;
+                if (!entity.isExternal || entity.isParameter || !entity.notation.empty())
+                    continue;
+                auto resource = resolver.resolve({beresta::ResourceKind::EXTERNAL_ENTITY, entity.publicId,
+                    entity.systemId, entity.baseUri.empty() ? options.baseUri : entity.baseUri});
+                if (!resource) continue;
+                try
+                {
+                    auto fragment = beresta::XmlParser(options).parse(prefix + "&" + entity.name + ";</catalog>");
+                    EntityFile file{std::filesystem::u8path(resource->uri).parent_path(), {}};
+                    for (auto* test : fragment.getElementsByTagName("TEST"))
+                        file.ids.insert(attributeOrEmpty(*test, "ID"));
+                    files.push_back(std::move(file));
+                }
+                catch (const beresta::DomException&)
+                {
+                    // Объявленная сущность может не использоваться в каталоге / A declared entity may be unused
+                }
             }
             return files;
         }

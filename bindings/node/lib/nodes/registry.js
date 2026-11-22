@@ -1,7 +1,7 @@
 'use strict';
 
 const { native } = require('../internal/native.js');
-const { OWNER, REGISTRY } = require('../internal/keys.js');
+const { HANDLE, OWNER, REGISTRY } = require('../internal/keys.js');
 
 // Минимальный размер, с которого начинается чистка / The minimal size the sweep starts from
 const MINIMAL_SWEEP_SIZE = 64;
@@ -99,6 +99,14 @@ class NodeRegistry
                 child = native.node_next_sibling(child);
             }
         }
+    }
+
+    invalidate(handle)
+    {
+        const node = this.wrappers.get(handle).ref.deref();
+        if (node !== undefined)
+            node[HANDLE] = null;
+        this.wrappers.delete(handle);
     }
 
     /** Передача одной обёртки (если она ещё жива) реестру документа target.

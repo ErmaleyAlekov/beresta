@@ -16,6 +16,7 @@ as clause 29 of the Requirements for application documents (Order No. 211) allow
 
 from __future__ import annotations
 
+from .errors import ListingError
 from .pdf_font import encode_text, text_width
 
 # Размеры A4 и поля в пунктах (1 мм = 2,8346 пт) / The A4 size and margins in points (1 mm = 2.8346 pt)
@@ -28,7 +29,10 @@ def page_geometry(font: dict, size: float, leading: float, lines: int) -> dict:
     geometry = dict(PAGE)
     geometry.update({"size": size, "leading": leading, "lines": lines})
     usable = geometry["width"] - geometry["left"] - geometry["right"]
-    geometry["columns"] = int(usable // text_width(font, "0", size))
+    width = text_width(font, "0", size)
+    if not 0 < width <= usable:
+        raise ListingError("font_column_width")
+    geometry["columns"] = int(usable // width)
     # Первая строка текста — под колонтитулом и линией / The first text line goes under the header and the rule
     geometry["first"] = geometry["height"] - geometry["top"] - 14 - leading
     return geometry

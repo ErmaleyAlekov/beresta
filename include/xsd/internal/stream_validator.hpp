@@ -53,6 +53,7 @@ namespace beresta::xsd::detail
         std::string_view nil;
         bool hasType = false;
         bool hasNil = false;
+        std::string_view duplicate;
     };
 
     // ---- Атрибуты xsi (stream_xsi.cpp) ----
@@ -184,7 +185,7 @@ namespace beresta::xsd::detail
 
         // ---- Начало проверки элемента (stream_begin.cpp) ----
         // ---- The start of an element check (stream_begin.cpp) ----
-        void beginValidation(const SaxElement& element, const ElementDecl& declaration);
+        void beginValidation(const SaxElement& element, const ElementDecl& declaration, const XsiValues& xsi);
         bool applyXsiType(const XsiValues& xsi, const ElementDecl& declaration, TypeRef& type);
         bool isNil(const XsiValues& xsi, const ElementDecl& declaration);
         void beginNil(const SaxElement& element, TypeRef type);
@@ -216,6 +217,7 @@ namespace beresta::xsd::detail
         // ---- Values and IDs (stream_values.cpp) ----
         const SimpleType* checkValue(const SimpleType& type, std::string_view text, CheckPhase phase);
         void recordIdentity(const SimpleType& type, std::string_view value, CheckPhase phase);
+        void recordReference(std::string_view value);
         void finishReferences();
         void checkMixedFixed(const ElementFrame& frame);
 
@@ -249,6 +251,7 @@ namespace beresta::xsd::detail
         IdRegistry _ids;
         std::string _normalized;
         std::vector<std::pair<std::string, std::size_t>> _references;
+        std::size_t _referenceBytes = 0;
         EventPosition _rootPosition;
         std::string _text;
         std::unordered_map<const content::Particle*, content::CursorPlan> _plans;

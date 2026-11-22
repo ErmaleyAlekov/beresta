@@ -1,3 +1,4 @@
+#include <cmath>
 #include "addon/call_frame.hpp"
 
 #include <cstdint>
@@ -58,10 +59,12 @@ namespace beresta::node
     // Целое число (индексы) / An integer (indexes)
     bool CallFrame::integer(std::size_t index, std::int64_t& out) noexcept
     {
-        if (typeAt(index) != ValueType::NUMBER)
-            return reject(index, "number");
-        if (napi().getInt64(_env, _arguments[index], &out) != NAPI_OK)
-            return reject(index, "number");
+        double value;
+        if (!number(index, value))
+            return false;
+        if (!(value >= -0x1p63 && value < 0x1p63) || std::trunc(value) != value)
+            return reject(index, "int64");
+        out = static_cast<std::int64_t>(value);
         return true;
     }
 
@@ -74,8 +77,12 @@ namespace beresta::node
         out = 0;
         if (type == ValueType::UNDEFINED)
             return true;
-        if (type != ValueType::NUMBER || napi().getUint32(_env, _arguments[index], &out) != NAPI_OK)
-            return reject(index, "number");
+        double value;
+        if (!number(index, value))
+            return false;
+        if (!(value >= 0 && value <= UINT32_MAX) || std::trunc(value) != value)
+            return reject(index, "uint32");
+        out = static_cast<std::uint32_t>(value);
         return true;
     }
 }

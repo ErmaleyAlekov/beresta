@@ -28,4 +28,10 @@ final class ClosedException extends \LogicException implements BerestaThrowable
     {
         return new self('Берёста / Beresta: ' . Language::message(Message::DocumentClosed));
     }
+
+    /** Узел удалён. / The node has been removed. */
+    public static function removed(): self
+    {
+        return new self('Берёста / Beresta: ' . Language::message(Message::NodeRemoved));
+    }
 }

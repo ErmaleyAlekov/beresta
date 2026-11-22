@@ -34,6 +34,9 @@ public abstract class Engine
     /** Запрос XPath; результат — число найденных узлов. / An XPath query; the result is the found node count. */
     public abstract int xpath(Object document) throws Exception;
 
-    /** Разбор в дерево с проверкой по схеме; результат — число ошибок. / Parsing into a tree with schema validation; the result is the error count. */
-    public abstract int parseValidated(byte[] xml) throws Exception;
+    /** Результат разбора с проверкой и документ для освобождения после замера. / Validation result and document to release after timing. */
+    public record Validated(Object document, int errors) {}
+
+    /** Разбор в дерево с проверкой по схеме. / Parsing into a tree with schema validation. */
+    public abstract Validated parseValidated(byte[] xml) throws Exception;
 }

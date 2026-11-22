@@ -38,12 +38,20 @@ final class Preloader
             throw LibraryException::ffiMissing();
         }
         $path = $library ?? LibraryLocator::firstExisting();
-        $file = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'beresta_ffi_' . md5($path) . '.h';
-        if (file_put_contents($file, self::scopedHeader($path)) === false) {
-            throw LibraryException::preloadFailed($file);
+        if (strpbrk($path, "\"\r\n\0") !== false) {
+            throw LibraryException::preloadFailed($path);
         }
-        if (FFI::load($file) === null) {
-            throw LibraryException::preloadFailed($file);
+        $header = self::scopedHeader($path);
+        $file = tempnam(sys_get_temp_dir(), 'beresta_ffi_');
+        if ($file === false) {
+            throw LibraryException::preloadFailed(sys_get_temp_dir());
+        }
+        try {
+            if (file_put_contents($file, $header) !== strlen($header) || FFI::load($file) === null) {
+                throw LibraryException::preloadFailed($file);
+            }
+        } finally {
+            unlink($file);
         }
     }
 

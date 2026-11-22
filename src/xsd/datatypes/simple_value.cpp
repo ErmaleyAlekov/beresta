@@ -54,6 +54,8 @@ namespace beresta::xsd
         const Facets& facets = type.facets;
         std::string count = std::to_string(items.size());
 
+        if (type.itemType == nullptr)
+            return i18n::format(i18n::Message::SCHEMA_NO_SIMPLE_TYPE);
         if (facets.length.has_value() && items.size() != facets.length.value())
             return i18n::format(i18n::Message::LIST_LENGTH_NOT_EQUAL, {count, std::to_string(*facets.length)});
         if (facets.minLength.has_value() && items.size() < facets.minLength.value())

@@ -24,7 +24,12 @@ namespace xsts
                 line += symbol;
             }
             if (line.size() > LIMIT)
-                line = line.substr(0, LIMIT) + "…";
+            {
+                std::size_t end = LIMIT;
+                while (end && (static_cast<unsigned char>(line[end]) & 0xc0) == 0x80)
+                    --end;
+                line = line.substr(0, end) + "…";
+            }
             return line;
         }
 

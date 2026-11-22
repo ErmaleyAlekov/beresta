@@ -33,8 +33,10 @@ namespace bench
     {
         char buffer[48];
 
-        if (bytes <= 0.0)
+        if (bytes < 0.0)
             return "—";
+        if (bytes == 0.0)
+            return "0";
         std::snprintf(buffer, sizeof(buffer), "%.0f (×%.1f)", bytes / 1e6, bytes / input);
         return buffer;
     }
@@ -56,15 +58,15 @@ namespace bench
 
         output << "\n### " << workload.name << " (" << static_cast<long>(input / 1e6) << " MB)\n\n"
                << "| Библиотека / Library | Разбор / Parse, MB/s | Обход / Walk, ms | Вывод / Serialize, MB/s"
-               << " | XPath, ms | Разбор + XSD / Parse + XSD, MB/s | SAX + XSD, MB/s | Память DOM / DOM memory, MB |\n"
-               << "|---|---|---|---|---|---|---|---|\n";
+               << " | XPath, ms | Разбор + XSD / Parse + XSD, MB/s | SAX + XSD, MB/s | Память DOM / DOM memory, MB | Прирост пика RSS / Peak RSS growth, MB |\n"
+               << "|---|---|---|---|---|---|---|---|---|\n";
         for (const EngineResult& result : results)
         {
             const Measurement* m = result.operations;
             output << "| " << result.engine << " | " << throughput(m[0], input) << " | " << milliseconds(m[1])
                    << " | " << throughput(m[2], static_cast<double>(m[2].result)) << " | " << milliseconds(m[3])
                    << " | " << throughput(m[4], input) << " | " << throughput(m[5], input)
-                   << " | " << memory(result.memoryBytes, input) << " |\n";
+                   << " | " << memory(result.memory.residentGrowth, input) << " | " << memory(result.memory.peakGrowth, input) << " |\n";
         }
     }
 }

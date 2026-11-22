@@ -26,31 +26,22 @@ report_line() {
 # Выполняет шаг, записывает его время выполнения и результат в отчёт
 # Runs a step, records its execution time and result in the report
 run_step() {
-    local name="$1"
-    local func="$2"
-    local title="$3"
-    local start_time
-    local end_time
-    local duration
-
-    start_time=$(date +%s)
-    "$func" > "$STAND_LOGS/$name.log" 2>&1
-    # Код шага запоминается сразу: следующие команды его перезапишут
-    # The step code is saved at once: the following commands would overwrite it
-    status=$?
-    end_time=$(date +%s)
-    duration=$((end_time - start_time))
-
-    if [ "$status" -eq 0 ]; then
-        printf '[OK] %s (%d %s)\n' "$(stand_text "$title")" "$duration" "$(stand_text seconds)" >> "$STAND_REPORT"
-        printf '[OK] %s (%d %s)\n' "$(stand_text "$title")" "$duration" "$(stand_text seconds)"
-    else
-        printf '[FAIL] %s (%d %s)\n' "$(stand_text "$title")" "$duration" "$(stand_text seconds)" >> "$STAND_REPORT"
-        printf '[FAIL] %s (%d %s)\n' "$(stand_text "$title")" "$duration" "$(stand_text seconds)"
+    # Префикс переменных отчёта отделяет их от переменных функций шагов в POSIX sh.
+    # The report variable prefix keeps these variables distinct from step variables in POSIX sh.
+    report_step_start=$(date +%s)
+    report_step_status=OK
+    if ! "$2" > "$STAND_LOGS/$1.log" 2>&1; then
+        report_step_status=FAIL
+    fi
+    report_step_end=$(date +%s)
+    report_step_duration=$((report_step_end - report_step_start))
+    printf '[%s] %s (%d %s)\n' "$report_step_status" "$(stand_text "$3")" "$report_step_duration" "$(stand_text seconds)" >> "$STAND_REPORT"
+    printf '[%s] %s (%d %s)\n' "$report_step_status" "$(stand_text "$3")" "$report_step_duration" "$(stand_text seconds)"
+    if [ "$report_step_status" = FAIL ]; then
         printf '%s:\n' "$(stand_text log_tail)" >> "$STAND_REPORT"
         printf '%s:\n' "$(stand_text log_tail)"
-        tail -n 20 "$STAND_LOGS/$name.log" >> "$STAND_REPORT"
-        tail -n 20 "$STAND_LOGS/$name.log"
+        tail -n 20 "$STAND_LOGS/$1.log" >> "$STAND_REPORT"
+        tail -n 20 "$STAND_LOGS/$1.log"
         STAND_FAILED=$((STAND_FAILED + 1))
         return 1
     fi

@@ -64,7 +64,7 @@ namespace Beresta
         /// Two wrappers are equal if they point to the same native node.</summary>
         public override bool Equals(object? other)
         {
-            return other is XmlNode node && node.pointer == pointer;
+            return other is XmlNode node && node.pointer == pointer && ReferenceEquals(Document, node.Document);
         }
 
         /// <inheritdoc />

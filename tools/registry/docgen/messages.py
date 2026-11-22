@@ -18,6 +18,18 @@ CATALOG = {
         "ru": "Браузер не напечатал {0} (код {1})",
         "en": "The browser did not print {0} (code {1})",
     },
+    "browser_start_failed": {
+        "ru": "Не удалось запустить браузер {0}: {1}",
+        "en": "Could not start browser {0}: {1}",
+    },
+    "browser_timeout": {
+        "ru": "Браузер не напечатал {0} за {1} с",
+        "en": "The browser did not print {0} within {1} s",
+    },
+    "unclosed_code_block": {
+        "ru": "Блок кода, открытый в строке {0}, не закрыт",
+        "en": "The code block opened on line {0} is not closed",
+    },
     "no_sources": {
         "ru": "В {0} нет документов *.md",
         "en": "There are no *.md documents in {0}",

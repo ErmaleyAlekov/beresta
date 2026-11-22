@@ -70,7 +70,7 @@ abstract class TestCase
                 return $error;
             }
             $this->fail('ожидалось / expected ' . $class . ', получено / got ' . get_class($error)
-                . ': ' . $error->getMessage());
+                . ': ' . $error->getMessage(), $error);
         }
         $this->fail('исключение не брошено / no exception thrown: ' . $class);
     }
@@ -78,8 +78,8 @@ abstract class TestCase
     /**
      * Провал теста с пояснением. / Fails the test with an explanation.
      */
-    protected function fail(string $message): never
+    protected function fail(string $message, ?\Throwable $previous = null): never
     {
-        throw new AssertionFailed($message);
+        throw new AssertionFailed($message, 0, $previous);
     }
 }

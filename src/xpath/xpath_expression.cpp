@@ -37,7 +37,7 @@ namespace beresta::xpath
             detail::failEvaluation(i18n::format(i18n::Message::XPATH_NOT_NODESET, {_source}));
         for (const XPathItem& item : value.getNodes())
         {
-            if (item.attribute == nullptr && item.node->getType() == NodeType::ELEMENT)
+            if (item.attribute == nullptr && item.node != nullptr && item.node->getType() == NodeType::ELEMENT)
                 elements.push_back(static_cast<const Element*>(item.node));
         }
         return elements;

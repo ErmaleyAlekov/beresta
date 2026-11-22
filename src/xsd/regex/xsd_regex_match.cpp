@@ -24,18 +24,18 @@ namespace beresta::xsd
     ** The ε-closure without recursion: an explicit stack and "generation" marks so that
     ** each state gets into the list at most once per step.
     */
-    void Regex::addReachable(long state, std::vector<long>& list, std::vector<std::size_t>& marks,
-        std::size_t generation) const
+    void Regex::addReachable(long state, std::vector<long>& list, MatchScratch& scratch) const
     {
-        std::vector<long> stack{state};
+        auto& stack = scratch.stack;
+        stack.push_back(state);
 
         while (!stack.empty())
         {
             long current = stack.back();
             stack.pop_back();
-            if (current < 0 || marks[static_cast<std::size_t>(current)] == generation)
+            if (current < 0 || scratch.marks[static_cast<std::size_t>(current)] == scratch.generation)
                 continue;
-            marks[static_cast<std::size_t>(current)] = generation;
+            scratch.marks[static_cast<std::size_t>(current)] = scratch.generation;
             const State& node = _states[static_cast<std::size_t>(current)];
             if (node.kind == StateKind::SPLIT)
                 stack.push_back(node.alternative);
@@ -57,19 +57,20 @@ namespace beresta::xsd
     */
     bool Regex::matches(std::string_view text) const
     {
-        std::vector<std::size_t> marks(_states.size(), 0);
+        MatchScratch scratch;
+        scratch.marks.resize(_states.size());
         std::vector<long> current;
         std::vector<long> next;
-        std::size_t generation = 1;
         std::size_t index = 0;
         std::uint32_t code = 0;
 
-        addReachable(_start, current, marks, generation);
+        addReachable(_start, current, scratch);
         while (index < text.size() && !current.empty())
         {
             if (!utils::decodeUtf8Char(text, index, code))
                 return false;
-            advanceStates(code, current, next, marks, ++generation);
+            ++scratch.generation;
+            advanceStates(code, current, next, scratch);
             current.swap(next);
         }
         return index >= text.size() && acceptsAny(current);

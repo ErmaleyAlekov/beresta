@@ -31,6 +31,9 @@ namespace beresta::xsd
 
         for (const Document* document : documents)
         {
+            if (document == nullptr)
+                throw DomException(DomErrorCode::SCHEMA_ERROR,
+                    i18n::format(i18n::Message::SCHEMA_ROOT_INVALID, {XSD_NAMESPACE_URI}));
             const Element* root = document->getRoot();
             if (root == nullptr || !detail::isSchemaElement(*root, "schema"))
                 throw DomException(DomErrorCode::SCHEMA_ERROR,

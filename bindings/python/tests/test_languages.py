@@ -9,6 +9,9 @@ from beresta import BerestaError
 class LanguageTests(unittest.TestCase):
     """Смена языка во время работы. / Switching the language at run time."""
 
+    def setUp(self):
+        beresta.set_language("ru")
+
     def tearDown(self):
         beresta.set_language("ru")
 

@@ -107,7 +107,7 @@ namespace beresta::xsd::detail
         if (reference.has_value())
         {
             checkElementAttributes(definition, ElementPlace::ELEMENT_REFERENCE);
-            declaration = globalElement(resolveQName(definition, reference.value()));
+            declaration = globalElement(resolveQName(definition, reference.value()), &definition);
             particle.substitutes = &declaration->substitutes;
         }
         else if (_builtLocals.count(&definition) != 0)

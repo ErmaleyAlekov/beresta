@@ -3,11 +3,11 @@ package bench;
 import java.util.ArrayDeque;
 
 import org.beresta.Beresta;
+import org.beresta.BerestaException;
 import org.beresta.NodeType;
 import org.beresta.ParseFlags;
 import org.beresta.XPath;
 import org.beresta.Xml;
-import org.beresta.XmlDocument;
 import org.beresta.XmlNode;
 import org.beresta.XmlSchema;
 
@@ -64,11 +64,17 @@ public final class BerestaEngine extends Engine
 
     /** Проверка идёт во время разбора; ошибка проверки — исключение. / Validation runs during parsing; a validation error is an exception. */
     @Override
-    public int parseValidated(byte[] xml)
+    public Validated parseValidated(byte[] xml)
     {
-        try (XmlDocument document = Xml.parse(xml, ParseFlags.DEFAULT, schema))
+        try
         {
-            return 0;
+            return new Validated(Xml.parse(xml, ParseFlags.DEFAULT, schema), 0);
+        }
+        catch (BerestaException failure)
+        {
+            if (!failure.codeName().equals("VALIDATION_ERROR"))
+                throw failure;
+            return new Validated(null, 1);
         }
     }
 }

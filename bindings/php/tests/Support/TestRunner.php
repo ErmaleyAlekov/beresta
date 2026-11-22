@@ -63,7 +63,12 @@ final class TestRunner
             $this->passed++;
             echo 'ok    ', $name, PHP_EOL;
         } catch (AssertionFailed $failure) {
-            $this->failures[] = 'FAIL  ' . $name . ': ' . $failure->getMessage();
+            $details = 'FAIL  ' . $name . ': ' . $failure->getMessage();
+            $cause = $failure->getPrevious();
+            if ($cause !== null) {
+                $details .= ' (' . $cause->getFile() . ':' . $cause->getLine() . ')';
+            }
+            $this->failures[] = $details;
         } catch (\Throwable $error) {
             $this->failures[] = 'ERROR ' . $name . ': ' . get_class($error) . ': ' . $error->getMessage()
                 . ' (' . $error->getFile() . ':' . $error->getLine() . ')';

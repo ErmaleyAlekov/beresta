@@ -16,7 +16,7 @@ import re
 
 # Литерал в двойных кавычках с экранированными символами внутри
 # A literal in double quotes with escaped characters inside
-LITERAL = re.compile(r'"((?:[^"\\\n]|\\.)*)"')
+LITERAL = re.compile(r"""//[^\n]*|/\*.*?\*/|'(?:[^'\\\n]|\\.)*'|"((?:[^"\\\n]|\\.)*)\"""", re.DOTALL)
 
 # Простые escape-последовательности C++ и их значения
 # Simple C++ escape sequences and their values
@@ -54,6 +54,8 @@ def read_literals(path):
     literals = []
     last_end = -1
     for match in LITERAL.finditer(text):
+        if match.group(1) is None:
+            continue
         value = decode_escapes(match.group(1))
         if literals and text[last_end:match.start()].strip() == "":
             literals[-1] += value

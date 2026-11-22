@@ -11,6 +11,13 @@ namespace beresta::xsd::detail
     {
     }
 
+    // Проверка члена объединения использует те же объявления, что и ключ.
+    // Union member validation uses the same namespace bindings as the key.
+    bool NamespaceLookup::isBound(std::string_view prefix) const
+    {
+        return namespaceOf(prefix).has_value();
+    }
+
     // Источник только запоминает элемент: поиск — при каждом запросе
     // The source only remembers the element: the lookup is done on each request
     ElementNamespaces::ElementNamespaces(const Element& element) noexcept
@@ -51,33 +58,38 @@ namespace beresta::xsd::detail
         return canonicalAtomic(type.primitive, expanded);
     }
 
-    /*
-    ** Разрешение префиксов нужно только атомарным QName / NOTATION и
-    ** спискам из них; у остальных типов (и объединений) — canonicalValue.
-    **
-    ** Resolving prefixes is needed only by atomic QName / NOTATION and
-    ** lists of them; for the other types (and unions) — canonicalValue.
-    */
-    std::string identityValue(const SimpleType& type, std::string_view value, const NamespaceLookup& namespaces)
+    // Каждый элемент списка получает ключ своего фактического типа.
+    // Each list item takes its key from its actual type.
+    static std::string listKey(const SimpleType& itemType, std::string_view value, const NamespaceLookup& namespaces)
     {
-        const SimpleType* atomic = &type;
-        bool list = type.variety == Variety::LIST && type.itemType != nullptr;
-
-        if (list)
-            atomic = type.itemType;
-        bool qualified = atomic->primitive == Primitive::QNAME || atomic->primitive == Primitive::NOTATION_TYPE;
-        if (atomic->variety != Variety::ATOMIC || !qualified)
-            return canonicalValue(type, value);
-        if (!list)
-            return qualifiedKey(type, value, namespaces);
         std::string normalized = normalizeWhiteSpace(value, WhiteSpace::COLLAPSE);
         std::string result;
         for (std::string_view item : utils::splitTokens(normalized))
         {
             if (!result.empty())
                 result += ' ';
-            result += qualifiedKey(*atomic, item, namespaces);
+            result += identityValue(itemType, item, namespaces);
         }
         return result;
+    }
+
+    // Объединение использует первый допустимый член в порядке объявления.
+    // A union uses the first valid member in declaration order.
+    std::string identityValue(const SimpleType& type, std::string_view value, const NamespaceLookup& namespaces)
+    {
+        if (type.variety == Variety::UNION)
+        {
+            for (const SimpleType* member : type.memberTypes)
+            {
+                if (!validateSimpleValue(*member, value, namespaces))
+                    return identityValue(*member, value, namespaces);
+            }
+            return normalizeWhiteSpace(value, type.facets.whiteSpace);
+        }
+        if (type.variety == Variety::LIST && type.itemType != nullptr)
+            return listKey(*type.itemType, value, namespaces);
+        if (type.primitive == Primitive::QNAME || type.primitive == Primitive::NOTATION_TYPE)
+            return qualifiedKey(type, value, namespaces);
+        return canonicalValue(type, value);
     }
 }

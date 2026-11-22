@@ -91,6 +91,12 @@ namespace
         options.errorHandler = nullptr;
         TEST_ASSERT_THROWS(beresta::SaxParser(options).parse(ORDER_XML, strict), beresta::ParseException);
         TEST_ASSERT_EQ(strict.getLog(), plain.getLog());
+        support::RecordingHandler recovered;
+        support::RecordingHandler expected;
+        const std::string valid = "<order><line kind='a'><sku>s1</sku><qty>1</qty></line></order>";
+        beresta::SaxParser(options).parse(valid, recovered);
+        beresta::SaxParser().parse(valid, expected);
+        TEST_ASSERT_EQ(recovered.getLog(), expected.getLog());
     }
 
     /*

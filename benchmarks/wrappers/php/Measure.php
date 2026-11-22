@@ -43,6 +43,9 @@ final class Measure
     {
         $milliseconds = self::medianMs($operation, $argument);
         if ($bytes > 0) {
+            if ($milliseconds <= 0) {
+                return '—';
+            }
             return sprintf('%.0f', $bytes / 1e6 / $milliseconds * 1000);
         }
         return sprintf('%.1f', $milliseconds);
@@ -75,7 +78,7 @@ final class Measure
         $document = $engine->parse($xml);
         gc_collect_cycles();
         $grown = self::residentBytes() - $before;
-        $line = sprintf('| %s | %d MB (×%.1f) |', $engine->name, intdiv($grown, 1000000), $grown / strlen($xml));
+        $line = sprintf('| %s | %d MB (×%.1f) |', $engine->name, intdiv($grown, 1000000), $grown / max(1, strlen($xml)));
         $engine->walk($document);
         return $line;
     }

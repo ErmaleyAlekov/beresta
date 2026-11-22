@@ -13,8 +13,6 @@ the glyph number itself (2 bytes), and the ToUnicode table makes the text search
 from __future__ import annotations
 
 from .pdf_writer import PdfWriter
-from .ttf_names import postscript_name
-from .ttf_reader import read_tables
 
 
 def encode_text(font: dict, text: str) -> str:
@@ -76,7 +74,7 @@ def write_font(writer: PdfWriter, font: dict, number: int) -> None:
     The font objects (the font file, the descriptor, the CID font, ToUnicode) and Type0 into the reserved number.
     It is written after the pages: only then all the used glyphs are known."""
     metrics = font["metrics"]
-    name = postscript_name(font["data"], read_tables(font["data"], font["path"]))
+    name = font["name"]
     program = writer.add(writer.stream("/Length1 %d" % len(font["data"]), font["data"]))
     box = " ".join(str(_scaled(font, value)) for value in metrics["bbox"])
     descriptor = writer.add((

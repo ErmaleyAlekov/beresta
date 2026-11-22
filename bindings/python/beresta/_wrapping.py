@@ -70,7 +70,7 @@ def wrap_node(pointer: Optional[int], document):
     check_handle(pointer)
     if pointer is None:
         return None
-    if pointer == document.raw_handle:
+    if pointer == document.handle:
         return document
     kind = LIB.beresta_node_type(pointer)
     known = document._wrappers.get(pointer)

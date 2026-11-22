@@ -43,10 +43,23 @@ file(GLOB_RECURSE RUNNER_HEADERS CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/
 
 add_executable(xsts_runner ${RUNNER_SOURCES} ${RUNNER_HEADERS})
 target_include_directories(xsts_runner PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_link_libraries(xsts_runner PRIVATE beresta_static)
+find_package(Threads REQUIRED)
+target_link_libraries(xsts_runner PRIVATE beresta_static Threads::Threads)
 # Функция объявлена корневым CMakeLists.txt (функции CMake видны глобально)
 # The function is declared by the root CMakeLists.txt (CMake functions are visible globally)
 beresta_apply_compile_options(xsts_runner)
+
+# Регрессия перезапуска рабочего процесса / Worker recovery regression
+if(BERESTA_BUILD_TESTS)
+    enable_testing()
+    add_executable(xsts_worker_recovery tests/worker_recovery.cpp src/runner/case_timeout.cpp
+        src/runner/supervisor.cpp src/common/xsts_error.cpp)
+    target_include_directories(xsts_worker_recovery PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
+    target_link_libraries(xsts_worker_recovery PRIVATE Threads::Threads)
+    beresta_apply_compile_options(xsts_worker_recovery)
+    add_test(NAME xsts_worker_recovery COMMAND xsts_worker_recovery)
+    set_tests_properties(xsts_worker_recovery PROPERTIES TIMEOUT 100)
+endif()
 
 # ---- Прогон всего набора с записью отчёта ------------------------------------------
 # ---- Running the whole suite and writing the report ------------------------------------------

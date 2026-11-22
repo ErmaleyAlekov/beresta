@@ -43,6 +43,8 @@ public final class XmlElement extends XmlNode implements ElementAttributes
         Map<String, String> result = new LinkedHashMap<>();
         long count = (long) NativeCalls.invoke(ElementFunctions.ATTRIBUTE_COUNT, handle());
 
+        if (count < 0)
+            throw NativeCalls.lastError();
         for (long index = 0; index < count; ++index)
         {
             String name = NativeStrings.take(NativeCalls.invoke(ElementFunctions.ATTRIBUTE_NAME, handle(), index));
