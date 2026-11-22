@@ -270,10 +270,12 @@ jobs:
         run: |
           if gh release view "${GITHUB_REF_NAME}" > /dev/null 2>&1; then
             gh release download "${GITHUB_REF_NAME}" --dir "${RUNNER_TEMP}/released"
-            (cd "${RUNNER_TEMP}/released" && sha256sum --check --strict SHA256SUMS.txt)
             (cd dist && printf '%s\n' * SHA256SUMS.txt | sort) > "${RUNNER_TEMP}/expected-assets"
             (cd "${RUNNER_TEMP}/released" && printf '%s\n' * | sort) > "${RUNNER_TEMP}/released-assets"
             diff "${RUNNER_TEMP}/expected-assets" "${RUNNER_TEMP}/released-assets"
+            assets=(dist/*)
+            (cd "${RUNNER_TEMP}/released" && sha256sum -- "${assets[@]#dist/}") > "${RUNNER_TEMP}/verified-sums"
+            cmp "${RUNNER_TEMP}/released/SHA256SUMS.txt" "${RUNNER_TEMP}/verified-sums"
             cp "${RUNNER_TEMP}/released/"* dist/
           else
             (cd dist && sha256sum -- * > "${RUNNER_TEMP}/SHA256SUMS.txt")
